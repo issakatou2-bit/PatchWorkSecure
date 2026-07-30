@@ -1,0 +1,419 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEditor;
+using TMPro;
+using System.IO;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem.UI;
+#endif
+
+namespace PatchWorkSecure.EditorTools
+{
+    /// <summary>
+    /// 仮組みUIを1メニュー操作で自動生成するエディタ拡張。
+    /// 白い四角＋テキストだけの「配線確認用」シーンを作り、GameManagerのInspector参照も自動で埋める。
+    /// 見た目(色・フォント・素材)は後で差し替える前提。目的はロジックが最初から最後まで通しで動くかの確認。
+    ///
+    /// 使い方: Unity上部メニュー「PatchWorkSecure」→「シーンを自動構築」
+    /// 実行前に一度空のシーンにしておくと、重複生成を避けられます（必須ではありません）。
+    /// </summary>
+    public static class SceneBuilder
+    {
+        private const string PrefabDir = "Assets/Prefabs";
+
+        [MenuItem("PatchWorkSecure/シーンを自動構築")]
+        public static void BuildScene()
+        {
+            if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var esGO = new GameObject("EventSystem", typeof(UnityEngine.EventSystems.EventSystem));
+#if ENABLE_INPUT_SYSTEM
+                esGO.AddComponent<InputSystemUIInputModule>();
+#else
+                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+#endif
+            }
+
+            var canvasGO = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var canvas = canvasGO.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasGO.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            var gmGO = new GameObject("GameManager", typeof(GameManager));
+            var gameManager = gmGO.GetComponent<GameManager>();
+            var so = new SerializedObject(gameManager);
+
+            if (!Directory.Exists(PrefabDir)) Directory.CreateDirectory(PrefabDir);
+
+            BuildStatusBar(canvasGO.transform, so);
+            BuildNavigator(canvasGO.transform, so);
+            BuildDayPanel(canvasGO.transform, so);
+            BuildChorePanel(canvasGO.transform, so);
+            BuildAttackPanel(canvasGO.transform, so);
+            BuildParryPanel(canvasGO.transform, so);
+            BuildResultPanel(canvasGO.transform, so);
+            BuildLogPanel(canvasGO.transform, so);
+
+            var choicePrefab = BuildButtonPrefab("ChoiceButtonPrefab");
+            var defensePrefab = BuildButtonPrefab("DefenseButtonPrefab");
+            SetRef(so, "choiceButtonPrefab", choicePrefab);
+            SetRef(so, "defenseButtonPrefab", defensePrefab);
+
+            so.ApplyModifiedProperties();
+
+            Selection.activeGameObject = gmGO;
+            EditorUtility.DisplayDialog(
+                "構築完了",
+                "仮組みシーンを生成しました。\n\nHierarchyの中身を確認してから、Playして「今日の業務を進める」で一連の流れが動くか見てください。\nConsoleにエラーが出たら、そのまま貼ってください。",
+                "OK");
+        }
+
+        // ================= 各パネル =================
+
+        private static void BuildStatusBar(Transform parent, SerializedObject so)
+        {
+            var rt = CreatePanelBase("StatusBarPanel", parent, new Color(0.15f, 0.15f, 0.18f, 0.9f));
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.sizeDelta = new Vector2(0, 100);
+            rt.anchoredPosition = Vector2.zero;
+
+            var layout = rt.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(40, 40, 10, 10);
+            layout.spacing = 36;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            var periodLabel = CreateLabel(rt, "PeriodLabel", "4月上旬（1/36）", 28, 260);
+            var budgetText = CreateLabel(rt, "BudgetText", "予算 100", 24, 150);
+            var budgetBar = CreateBar(rt, "BudgetBar", new Color(0.3f, 0.7f, 0.3f));
+            var trustText = CreateLabel(rt, "TrustText", "人望 30", 24, 150);
+            var trustBar = CreateBar(rt, "TrustBar", new Color(0.3f, 0.5f, 0.8f));
+            var stressText = CreateLabel(rt, "StressText", "ストレス 20", 24, 150);
+            var stressBar = CreateBar(rt, "StressBar", new Color(0.8f, 0.4f, 0.3f));
+
+            SetRef(so, "periodLabel", periodLabel);
+            SetRef(so, "budgetText", budgetText);
+            SetRef(so, "trustText", trustText);
+            SetRef(so, "stressText", stressText);
+            SetRef(so, "budgetBar", budgetBar);
+            SetRef(so, "trustBar", trustBar);
+            SetRef(so, "stressBar", stressBar);
+        }
+
+        private static void BuildNavigator(Transform parent, SerializedObject so)
+        {
+            var rt = CreatePanelBase("NavigatorPanel", parent, new Color(0, 0, 0, 0));
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(0, 1);
+            rt.pivot = new Vector2(0f, 0.5f);
+            rt.sizeDelta = new Vector2(320, -100); // 上のStatusBar分を差し引く
+            rt.anchoredPosition = new Vector2(0, -50);
+
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            layout.spacing = 12;
+            layout.childAlignment = TextAnchor.LowerCenter;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var portraitGO = new GameObject("NavigatorPortrait", typeof(Image));
+            portraitGO.transform.SetParent(rt, false);
+            var portraitImg = portraitGO.GetComponent<Image>();
+            portraitImg.color = new Color(0.85f, 0.85f, 0.9f);
+            var portraitLE = portraitGO.AddComponent<LayoutElement>();
+            portraitLE.preferredWidth = 240;
+            portraitLE.preferredHeight = 240;
+
+            var line = CreateLabel(rt, "NavigatorLine", "今日も平穏です。備えを進めましょうか。", 20, 0);
+            line.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
+
+            SetRef(so, "navigatorPortrait", portraitImg);
+            SetRef(so, "navigatorLine", line);
+
+            // 表情スプライト(faceNormal等)は素材ができてから手動で割り当てる。
+            // 現状は全表情ともnullのまま。Image.spriteがnullでも例外にはならず、単に白四角が表示され続けるだけ。
+        }
+
+        private static RectTransform CreateMainAreaPanel(string name, Transform parent, Color bg)
+        {
+            var rt = CreatePanelBase(name, parent, bg);
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.offsetMin = new Vector2(340, 20);   // 左:ナビゲーター分, 下:余白
+            rt.offsetMax = new Vector2(-20, -110); // 右:余白, 上:ステータスバー分
+            rt.gameObject.SetActive(false); // 表示切替はGameManager.Start()のShowDayPhase()に任せる
+            return rt;
+        }
+
+        private static void BuildDayPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateMainAreaPanel("DayPanel", parent, new Color(0.12f, 0.14f, 0.12f, 0.6f));
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.spacing = 20;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める");
+            proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+
+            CreateLabel(rt, "DefenseTitle", "セキュリティ対策", 20, 0);
+
+            var containerGO = new GameObject("DefenseButtonContainer", typeof(RectTransform));
+            containerGO.transform.SetParent(rt, false);
+            var containerRT = containerGO.GetComponent<RectTransform>();
+            var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
+            vlayout.spacing = 8;
+            vlayout.childControlHeight = false;
+            vlayout.childControlWidth = true;
+            containerGO.AddComponent<LayoutElement>().flexibleHeight = 1;
+
+            SetRef(so, "dayPanel", rt.gameObject);
+            SetRef(so, "proceedButton", proceedBtn);
+            SetRef(so, "defenseButtonContainer", containerRT);
+        }
+
+        private static void BuildChorePanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateMainAreaPanel("ChorePanel", parent, new Color(0.14f, 0.14f, 0.18f, 0.6f));
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.spacing = 24;
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var choreText = CreateLabel(rt, "ChoreText", "（雑務の内容がここに入る）", 26, 0);
+            var solveBtn = CreateButton(rt, "SolveButton", "誠実に対応する");
+            var postponeBtn = CreateButton(rt, "PostponeButton", "後回しにする");
+            solveBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+            postponeBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+
+            SetRef(so, "chorePanel", rt.gameObject);
+            SetRef(so, "choreText", choreText);
+            SetRef(so, "solveChoreButton", solveBtn);
+            SetRef(so, "postponeChoreButton", postponeBtn);
+        }
+
+        private static void BuildAttackPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateMainAreaPanel("AttackPanel", parent, new Color(0.2f, 0.1f, 0.1f, 0.6f));
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.spacing = 16;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 32, 0);
+            var gradeText = CreateLabel(rt, "AttackGradeText", "（グレード）", 20, 0);
+            var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 22, 0);
+            var scTerm = CreateLabel(rt, "ScTermText", "📘（SC用語）", 18, 0);
+
+            var containerGO = new GameObject("ChoiceButtonContainer", typeof(RectTransform));
+            containerGO.transform.SetParent(rt, false);
+            var containerRT = containerGO.GetComponent<RectTransform>();
+            var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
+            vlayout.spacing = 10;
+            vlayout.childControlHeight = false;
+            vlayout.childControlWidth = true;
+            containerGO.AddComponent<LayoutElement>().flexibleHeight = 1;
+
+            SetRef(so, "attackPanel", rt.gameObject);
+            SetRef(so, "attackNameText", nameText);
+            SetRef(so, "attackGradeText", gradeText);
+            SetRef(so, "attackIntroLine", introLine);
+            SetRef(so, "scTermText", scTerm);
+            SetRef(so, "choiceButtonContainer", containerRT);
+        }
+
+        private static void BuildParryPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateMainAreaPanel("ParryPanel", parent, new Color(0.18f, 0.16f, 0.08f, 0.6f));
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.spacing = 30;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlHeight = false;
+            layout.childControlWidth = false;
+
+            var trackGO = new GameObject("ParryTrack", typeof(Image));
+            trackGO.transform.SetParent(rt, false);
+            trackGO.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f);
+            var trackRT = trackGO.GetComponent<RectTransform>();
+            trackRT.sizeDelta = new Vector2(900, 50);
+            trackGO.AddComponent<LayoutElement>().preferredWidth = 900;
+
+            var markerGO = new GameObject("ParryMarker", typeof(Image));
+            markerGO.transform.SetParent(trackRT, false);
+            markerGO.GetComponent<Image>().color = new Color(0.9f, 0.8f, 0.2f);
+            var markerRT = markerGO.GetComponent<RectTransform>();
+            markerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            markerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            markerRT.pivot = new Vector2(0.5f, 0.5f);
+            markerRT.sizeDelta = new Vector2(20, 50);
+            markerRT.anchoredPosition = Vector2.zero;
+
+            var parryBtn = CreateButton(rt, "ParryButton", "ここだ！");
+            var parryLE = parryBtn.gameObject.AddComponent<LayoutElement>();
+            parryLE.preferredWidth = 300;
+            parryLE.preferredHeight = 80;
+
+            SetRef(so, "parryPanel", rt.gameObject);
+            SetRef(so, "parryTrack", trackRT);
+            SetRef(so, "parryMarker", markerRT);
+            SetRef(so, "parryButton", parryBtn);
+        }
+
+        private static void BuildResultPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateMainAreaPanel("ResultPanel", parent, new Color(0.12f, 0.12f, 0.14f, 0.6f));
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.spacing = 24;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 30, 0);
+            var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 22, 0);
+            var nextBtn = CreateButton(rt, "NextDayButton", "次の日へ");
+            nextBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+
+            SetRef(so, "resultPanel", rt.gameObject);
+            SetRef(so, "resultText", resultText);
+            SetRef(so, "resultCharacterLine", resultLine);
+            SetRef(so, "nextDayButton", nextBtn);
+        }
+
+        private static void BuildLogPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreatePanelBase("LogPanel", parent, new Color(0, 0, 0, 0.35f));
+            rt.anchorMin = new Vector2(1, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(1, 0);
+            rt.sizeDelta = new Vector2(420, 220);
+            rt.anchoredPosition = new Vector2(-20, 20);
+
+            var logText = CreateLabel(rt, "LogText", "", 16, 0);
+            var logRT = logText.GetComponent<RectTransform>();
+            logRT.anchorMin = Vector2.zero;
+            logRT.anchorMax = Vector2.one;
+            logRT.offsetMin = new Vector2(16, 16);
+            logRT.offsetMax = new Vector2(-16, -16);
+            logText.alignment = TextAlignmentOptions.TopLeft;
+
+            SetRef(so, "logText", logText);
+        }
+
+        // ================= プレハブ =================
+
+        private static GameObject BuildButtonPrefab(string name)
+        {
+            var go = new GameObject(name, typeof(Image), typeof(Button));
+            go.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.3f);
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(500, 64);
+
+            var label = CreateLabel(rt, "Label", "対策名 Lv.0", 20, 0);
+            var labelRT = label.GetComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(20, 6);
+            labelRT.offsetMax = new Vector2(-20, -6);
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+
+            string path = $"{PrefabDir}/{name}.prefab";
+            var prefabAsset = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            return prefabAsset;
+        }
+
+        // ================= 共通ヘルパー =================
+
+        private static RectTransform CreatePanelBase(string name, Transform parent, Color bg)
+        {
+            var go = new GameObject(name, typeof(Image));
+            go.transform.SetParent(parent, false);
+            go.GetComponent<Image>().color = bg;
+            return go.GetComponent<RectTransform>();
+        }
+
+        private static TextMeshProUGUI CreateLabel(Transform parent, string name, string text, int fontSize, float preferredWidth)
+        {
+            var go = new GameObject(name, typeof(TextMeshProUGUI));
+            go.transform.SetParent(parent, false);
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = fontSize;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.MidlineLeft;
+            if (preferredWidth > 0)
+                go.AddComponent<LayoutElement>().preferredWidth = preferredWidth;
+            return tmp;
+        }
+
+        private static Image CreateBar(Transform parent, string name, Color fillColor)
+        {
+            var bgGO = new GameObject(name, typeof(Image));
+            bgGO.transform.SetParent(parent, false);
+            bgGO.GetComponent<Image>().color = new Color(1, 1, 1, 0.12f);
+            bgGO.AddComponent<LayoutElement>().preferredWidth = 160;
+
+            var fillGO = new GameObject("Fill", typeof(Image));
+            fillGO.transform.SetParent(bgGO.transform, false);
+            var fillImg = fillGO.GetComponent<Image>();
+            fillImg.color = fillColor;
+            fillImg.type = Image.Type.Filled;
+            fillImg.fillMethod = Image.FillMethod.Horizontal;
+            fillImg.fillAmount = 0.5f;
+            var fillRT = fillGO.GetComponent<RectTransform>();
+            fillRT.anchorMin = Vector2.zero;
+            fillRT.anchorMax = Vector2.one;
+            fillRT.offsetMin = Vector2.zero;
+            fillRT.offsetMax = Vector2.zero;
+
+            return fillImg; // GameManager側はこの「Fill」のImageにfillAmountを入れる
+        }
+
+        private static Button CreateButton(Transform parent, string name, string labelText)
+        {
+            var go = new GameObject(name, typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            go.GetComponent<Image>().color = new Color(0.25f, 0.3f, 0.45f);
+
+            var textGO = new GameObject("Label", typeof(TextMeshProUGUI));
+            textGO.transform.SetParent(go.transform, false);
+            var tmp = textGO.GetComponent<TextMeshProUGUI>();
+            tmp.text = labelText;
+            tmp.fontSize = 24;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            var textRT = textGO.GetComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.offsetMin = Vector2.zero;
+            textRT.offsetMax = Vector2.zero;
+
+            return go.GetComponent<Button>();
+        }
+
+        private static void SetRef(SerializedObject so, string fieldName, Object value)
+        {
+            var prop = so.FindProperty(fieldName);
+            if (prop == null)
+            {
+                Debug.LogWarning($"[SceneBuilder] フィールド '{fieldName}' がGameManagerに見つかりませんでした。");
+                return;
+            }
+            prop.objectReferenceValue = value;
+        }
+    }
+}

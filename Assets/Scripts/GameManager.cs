@@ -35,12 +35,14 @@ namespace PatchWorkSecure
         [Header("ナビゲーター")]
         [SerializeField] private Image navigatorPortrait;
         [SerializeField] private TextMeshProUGUI navigatorLine;
-        [SerializeField] private Sprite faceNormal;
-        [SerializeField] private Sprite faceWorried;
-        [SerializeField] private Sprite faceAlert;
-        [SerializeField] private Sprite faceRelieved;
-        [SerializeField] private Sprite faceProud;
-        [SerializeField] private Sprite faceSad;
+        [SerializeField] private TextMeshProUGUI navigatorNameText; // 選択中のキャラ名(任意表示)
+
+        [Header("ナビゲーター候補（3人から1人を選ぶ想定。素材未着手でも名前だけで機能する）")]
+        [SerializeField] private NavigatorPersona[] personas;
+
+        [Header("キャラ選択（タイトル画面）")]
+        [SerializeField] private Transform personaSelectContainer;
+        [SerializeField] private GameObject personaSelectButtonPrefab;
 
         // ---- メインパネル ----
         [Header("メインパネル")]
@@ -148,10 +150,68 @@ namespace PatchWorkSecure
         };
         private (string text, int trustGain) _currentChore;
 
+        private const string PersonaPrefKey = "pws_selected_persona_index";
+        private NavigatorPersona _activePersona;
+
         private void Start()
         {
             WireButtons();
+            LoadActivePersona();
+            BuildPersonaSelectButtons();
             ShowTitle();
+        }
+
+        // ---- ナビゲーター選択 ----
+
+        private void LoadActivePersona()
+        {
+            if (personas == null || personas.Length == 0) { _activePersona = null; return; }
+            int idx = Mathf.Clamp(PlayerPrefs.GetInt(PersonaPrefKey, 0), 0, personas.Length - 1);
+            _activePersona = personas[idx];
+            RefreshNavigatorName();
+        }
+
+        /// <summary>タイトル画面のキャラ選択ボタンを動的に生成する（BuildChoiceButtonsと同じパターン）。</summary>
+        private void BuildPersonaSelectButtons()
+        {
+            if (personaSelectContainer == null || personaSelectButtonPrefab == null || personas == null) return;
+
+            foreach (Transform child in personaSelectContainer)
+                Destroy(child.gameObject);
+
+            for (int i = 0; i < personas.Length; i++)
+            {
+                int idx = i; // クロージャ対策
+                var go = Instantiate(personaSelectButtonPrefab, personaSelectContainer);
+                var label = go.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null) label.text = personas[idx] != null ? personas[idx].DisplayName : "（未設定）";
+
+                var button = go.GetComponent<Button>();
+                if (button != null)
+                {
+                    button.onClick.AddListener(() =>
+                    {
+                        AudioManager.Instance?.PlayClick();
+                        SelectPersona(idx);
+                    });
+                }
+            }
+        }
+
+        private void SelectPersona(int index)
+        {
+            if (personas == null || index < 0 || index >= personas.Length) return;
+            _activePersona = personas[index];
+            PlayerPrefs.SetInt(PersonaPrefKey, index);
+            PlayerPrefs.Save();
+            RefreshNavigatorName();
+            UpdateNavigator();
+        }
+
+        private void RefreshNavigatorName()
+        {
+            if (navigatorNameText != null)
+                navigatorNameText.text = _activePersona != null ? _activePersona.DisplayName : "";
         }
 
         /// <summary>
@@ -707,43 +767,51 @@ namespace PatchWorkSecure
         {
             if (navigatorPortrait == null || navigatorLine == null) return;
 
-            Sprite face = faceNormal;
+            Sprite face = _activePersona?.FaceNormal;
             string line = "今日も平穏です。備えを進めましょうか。";
+
+            // タイトル画面（キャラ選択時点）ではまだ_stateが存在しないため、以降の状態参照は行わない。
+            if (_state == null)
+            {
+                navigatorPortrait.sprite = face;
+                navigatorLine.text = line;
+                return;
+            }
 
             if (attackPanel != null && attackPanel.activeSelf)
             {
                 var grade = GameData.Attacks[_currentAttackKey].Grade;
-                if (grade == AttackGrade.S) { face = faceAlert; line = "これ、一番まずいやつです……対策、足りてますか？"; }
-                else if (grade == AttackGrade.Rookie || grade == AttackGrade.Rising) { face = faceWorried; line = "見たことない手口です。慎重にいきましょう。"; }
-                else { face = faceWorried; line = "来ましたね。落ち着いて対応しましょう。"; }
+                if (grade == AttackGrade.S) { face = _activePersona?.FaceAlert; line = "これ、一番まずいやつです……対策、足りてますか？"; }
+                else if (grade == AttackGrade.Rookie || grade == AttackGrade.Rising) { face = _activePersona?.FaceWorried; line = "見たことない手口です。慎重にいきましょう。"; }
+                else { face = _activePersona?.FaceWorried; line = "来ましたね。落ち着いて対応しましょう。"; }
             }
             else if (parryPanel != null && parryPanel.activeSelf)
             {
-                face = faceAlert; line = "タイミング、いきますよ……！";
+                face = _activePersona?.FaceAlert; line = "タイミング、いきますよ……！";
             }
             else if (_state.Stress > 65)
             {
-                face = faceWorried; line = "みんな疲れてます。締めすぎも危険ですよ。";
+                face = _activePersona?.FaceWorried; line = "みんな疲れてます。締めすぎも危険ですよ。";
             }
             else if (_state.Trust < 20)
             {
-                face = faceWorried; line = "社内での信頼が薄いです。雑務対応、大事ですよ。";
+                face = _activePersona?.FaceWorried; line = "社内での信頼が薄いです。雑務対応、大事ですよ。";
             }
             else if (_state.Budget < 30)
             {
-                face = faceWorried; line = "予算が心もとないですね。慎重に使いましょう。";
+                face = _activePersona?.FaceWorried; line = "予算が心もとないですね。慎重に使いましょう。";
             }
             else if (_state.DefenseLevels.Count == 0)
             {
-                face = faceWorried; line = "まだ何も対策がありません。何か入れませんか？";
+                face = _activePersona?.FaceWorried; line = "まだ何も対策がありません。何か入れませんか？";
             }
             else if (_state.Day > GameState.TotalPeriods * 0.7f)
             {
-                face = faceAlert; line = "年度末が近いです。攻撃も激しくなってきました。";
+                face = _activePersona?.FaceAlert; line = "年度末が近いです。攻撃も激しくなってきました。";
             }
             else if (_state.Trust > 60)
             {
-                face = faceProud; line = "社内の空気、いい感じですね。";
+                face = _activePersona?.FaceProud; line = "社内の空気、いい感じですね。";
             }
 
             navigatorPortrait.sprite = face;
@@ -757,14 +825,14 @@ namespace PatchWorkSecure
             if (result.Defended)
             {
                 bool narrow = result.Flavor != null && result.Flavor.Contains("紙一重");
-                navigatorPortrait.sprite = narrow ? faceRelieved : faceProud;
+                navigatorPortrait.sprite = narrow ? _activePersona?.FaceRelieved : _activePersona?.FaceProud;
                 navigatorLine.text = narrow
                     ? "あぶなかった……！ でも、守りきりました。"
                     : "危なげなかったですね。備えの成果です。";
             }
             else
             {
-                navigatorPortrait.sprite = faceSad;
+                navigatorPortrait.sprite = _activePersona?.FaceSad;
                 navigatorLine.text = "……やられました。次はもっと備えましょう。";
             }
         }
@@ -897,7 +965,7 @@ namespace PatchWorkSecure
             if (endingCharacterLine != null) endingCharacterLine.text = "";
             if (navigatorPortrait != null)
             {
-                navigatorPortrait.sprite = faceSad;
+                navigatorPortrait.sprite = _activePersona?.FaceSad;
                 navigatorLine.text = "……力になれませんでした。";
             }
         }
@@ -914,7 +982,7 @@ namespace PatchWorkSecure
             if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";
             if (navigatorPortrait != null)
             {
-                navigatorPortrait.sprite = faceProud;
+                navigatorPortrait.sprite = _activePersona?.FaceProud;
                 navigatorLine.text = "お疲れさまでした。立派な情シスです。";
             }
         }

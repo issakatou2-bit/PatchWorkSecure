@@ -72,6 +72,7 @@ namespace PatchWorkSecure.EditorTools
 
             BuildBackdrop(canvasGO.transform);
             BuildAudioManager();
+            BuildNavigatorPersonas(so);
 
             BuildStatusBar(canvasGO.transform, so);
             BuildNavigator(canvasGO.transform, so);
@@ -91,9 +92,11 @@ namespace PatchWorkSecure.EditorTools
             var choicePrefab = BuildButtonPrefab("ChoiceButtonPrefab");
             var defensePrefab = BuildButtonPrefab("DefenseButtonPrefab");
             var quizOptionPrefab = BuildButtonPrefab("QuizOptionButtonPrefab");
+            var personaSelectPrefab = BuildButtonPrefab("PersonaSelectButtonPrefab");
             SetRef(so, "choiceButtonPrefab", choicePrefab);
             SetRef(so, "defenseButtonPrefab", defensePrefab);
             SetRef(so, "quizOptionButtonPrefab", quizOptionPrefab);
+            SetRef(so, "personaSelectButtonPrefab", personaSelectPrefab);
 
             so.ApplyModifiedProperties();
 
@@ -211,10 +214,15 @@ namespace PatchWorkSecure.EditorTools
             portraitRT.offsetMin = Vector2.zero;
             portraitRT.offsetMax = Vector2.zero;
 
+            var nameText = CreateLabel(rt, "NavigatorNameText", "", 18, 0, bold: true);
+            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.color = new Color(0.8f, 0.85f, 0.95f);
+
             var line = CreateLabel(rt, "NavigatorLine", "今日も平穏です。備えを進めましょうか。", 20, 0);
             line.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
 
             SetRef(so, "navigatorPortrait", portraitImg);
+            SetRef(so, "navigatorNameText", nameText);
             SetRef(so, "navigatorLine", line);
         }
 
@@ -498,6 +506,20 @@ namespace PatchWorkSecure.EditorTools
             taglineLE.preferredWidth = 800;
             taglineLE.preferredHeight = 70;
 
+            var personaLabel = CreateLabel(rt, "PersonaSelectLabel", "ナビゲーターを選ぶ", 16, 0);
+            personaLabel.alignment = TextAlignmentOptions.Center;
+            personaLabel.color = new Color(0.65f, 0.65f, 0.72f);
+
+            var personaContainerGO = new GameObject("PersonaSelectContainer", typeof(RectTransform));
+            personaContainerGO.transform.SetParent(rt, false);
+            var personaContainerRT = personaContainerGO.GetComponent<RectTransform>();
+            var personaLayout = personaContainerGO.AddComponent<HorizontalLayoutGroup>();
+            personaLayout.spacing = 16;
+            personaLayout.childAlignment = TextAnchor.MiddleCenter;
+            personaLayout.childControlHeight = false;
+            personaLayout.childControlWidth = false;
+            personaContainerGO.AddComponent<LayoutElement>().preferredHeight = 60;
+
             var startBtn = CreateButton(rt, "StartButton", "はじめる");
             var startLE = startBtn.gameObject.AddComponent<LayoutElement>();
             startLE.preferredWidth = 260;
@@ -505,6 +527,7 @@ namespace PatchWorkSecure.EditorTools
 
             SetRef(so, "titlePanel", rt.gameObject);
             SetRef(so, "startButton", startBtn);
+            SetRef(so, "personaSelectContainer", personaContainerRT);
         }
 
         private static void BuildQuizPanel(Transform parent, SerializedObject so)
@@ -618,6 +641,37 @@ namespace PatchWorkSecure.EditorTools
             SetRef(soAudio, "bgmSource", bgmSource);
             SetRef(soAudio, "seSource", seSource);
             soAudio.ApplyModifiedProperties();
+        }
+
+        // ================= ナビゲーター候補 =================
+
+        private const string PersonaDir = "Assets/Personas";
+
+        /// <summary>
+        /// 「3人から1人選べる」の土台として、3体分のNavigatorPersonaアセットを用意する。
+        /// 既に存在する場合は上書きしない(手動で立ち絵を割り当てた後の再構築で消えないようにするため)。
+        /// </summary>
+        private static void BuildNavigatorPersonas(SerializedObject so)
+        {
+            var aya = GetOrCreatePersona("Persona_Aya", "アヤ", "生真面目な情シス3年目。石橋を叩いて渡る慎重派。");
+            var persona2 = GetOrCreatePersona("Persona_2", "（キャラ2・未定）", "素材未着手のプレースホルダー。");
+            var persona3 = GetOrCreatePersona("Persona_3", "（キャラ3・未定）", "素材未着手のプレースホルダー。");
+            SetRefArray(so, "personas", new Object[] { aya, persona2, persona3 });
+        }
+
+        private static NavigatorPersona GetOrCreatePersona(string assetName, string displayName, string description)
+        {
+            string path = $"{PersonaDir}/{assetName}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<NavigatorPersona>(path);
+            if (existing != null) return existing;
+
+            if (!Directory.Exists(PersonaDir)) Directory.CreateDirectory(PersonaDir);
+
+            var persona = ScriptableObject.CreateInstance<NavigatorPersona>();
+            persona.DisplayName = displayName;
+            persona.Description = description;
+            AssetDatabase.CreateAsset(persona, path);
+            return persona;
         }
 
         // ================= 設定オーバーレイ =================
@@ -922,6 +976,19 @@ namespace PatchWorkSecure.EditorTools
                 return;
             }
             prop.objectReferenceValue = value;
+        }
+
+        private static void SetRefArray(SerializedObject so, string fieldName, Object[] values)
+        {
+            var prop = so.FindProperty(fieldName);
+            if (prop == null || !prop.isArray)
+            {
+                Debug.LogWarning($"[SceneBuilder] 配列フィールド '{fieldName}' がGameManagerに見つかりませんでした。");
+                return;
+            }
+            prop.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+                prop.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
         }
     }
 }

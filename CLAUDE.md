@@ -33,9 +33,12 @@ Claude Codeは起動時にこれを自動で読み込むので、毎回コピペ
 ## 2. アーキテクチャ（ここが一番重要）
 
 ```
-GameData.cs        ← マスターデータ(攻撃10種・防御8種・SC用語)。static、MonoBehaviour非依存
-GameState.cs        ← コアロジック(防御率計算・攻撃判定・資源管理)。MonoBehaviour非依存の純粋C#
+GameData.cs          ← マスターデータ(攻撃10種・防御8種・SC用語)。static、MonoBehaviour非依存
+GameState.cs         ← コアロジック(防御率計算・攻撃判定・資源管理)。MonoBehaviour非依存の純粋C#
 GameManager.cs       ← MonoBehaviour。GameStateの状態をUIに反映し、フェーズ進行を管理する
+AudioManager.cs      ← BGM/SEの一括管理。AudioClip未設定でも無音で動く(素材が無くても全アクションにフックを仕込める)
+NavigatorPersona.cs  ← ナビゲーターキャラ1人分のデータ(ScriptableObject)。「3人から1人選べる」の土台
+UIButtonPunch.cs     ← ボタン押下時のスケール演出(IPointerDown/Up)
 EducationTracker.cs  ← 教育クイズ(事前/事後)・PlayerPrefsへの永続化・CSV出力
 Assets/Editor/SceneBuilder.cs ← エディタ拡張。UnityメニューからUIシーン全体を自動生成する
 ```
@@ -76,6 +79,25 @@ Start() → ShowTitle()
    Canvas/GameManagerを一括生成し、Inspector参照も全部自動で埋める。UIレイアウトを変えたら、
    Inspector手作業ではなくこのスクリプト側を直すのが正しい直し方（車輪の再発明を防ぐため）。
 
+5. **絵文字はUI文字列に絶対に使わない。** `Assets/Fonts/Meiryo SDF`はCustom Charactersで
+   生成された日本語専用SDFフォントで、絵文字グリフを一切持たない（Meiryo自体も色付き絵文字は
+   非対応）。使うと表示が空白になり、Consoleに大量の警告が出る(実際に発生した不具合)。
+   アイコンが欲しい場合は`SceneBuilder.CreateIconChip()`のような色付き角丸チップ(Image)を使うこと。
+   全角スペース(`　`/U+3000)も同フォントの文字セットに含まれていないため使わない(半角スペースで代替)。
+
+6. **角丸・影は独自テクスチャ生成をせず、Unity組み込みアセットで実現する。**
+   `SceneBuilder.ApplyRounded()`がUnity標準の`UI/Skin/Background.psd`(パネル用)・
+   `UI/Skin/UISprite.psd`(ボタン用)を使い、`AddShadow()`が`UnityEngine.UI.Shadow`コンポーネントで
+   ドロップシャドウを付ける。Claude Codeは見た目をエディタ上で目視確認できないため、
+   実績のある標準機能だけで組むという方針（独自シェーダー/生成テクスチャは避ける）。
+
+7. **ナビゲーターキャラは`NavigatorPersona`(ScriptableObject)経由にする。**
+   `GameManager`に`faceNormal`等を直接持たせる方式は廃止済み。`Assets/Personas/`配下に
+   `Persona_Aya.asset`等がある想定で、`GameManager.personas[]`から選ばれた1体が`_activePersona`に
+   入る。タイトル画面の「ナビゲーターを選ぶ」ボタン列(`BuildPersonaSelectButtons`)から選択でき、
+   `PlayerPrefs`(`pws_selected_persona_index`)に永続化される。新しいキャラを増やすときは
+   `SceneBuilder.BuildNavigatorPersonas()`に`GetOrCreatePersona(...)`を追加するだけでよい。
+
 ---
 
 ## 3. 制約（Claude Codeでも変わらないこと）
@@ -112,25 +134,31 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 - 攻撃10種フル実装（IPA情報セキュリティ10大脅威2026準拠、グレード別キャラ付け・台詞付き）
 - 防御8種フル実装（Lv1〜3、基礎防御率70%上限あり）
 - モンテカルロ・バランス検証済み（`balance_sim.js`、放置プレイ5.6% vs 熟練78%）
-- ナビゲーターキャラ「アヤ」のロジック実装済み（表情スプライトは未着手、6種すべてnull）
+- タイトル→事前クイズ→本編→エンディング→事後クイズ→結果サマリーの一連のフロー実装済み
+- `NavigatorPersona`によるキャラ選択の土台実装済み（`Persona_Aya`/`Persona_2`/`Persona_3`の
+  3体分の器はあるが、2・3はキャラ未定のプレースホルダー。表情スプライトは3体とも全種null）
+- パリィ演出（スイートゾーン可視化、PERFECT!!/GOOD!/MISS...判定、攻撃グレード別の速度スケーリング）
+- `AudioManager`によるBGM/SEフック実装済み（クリップは全て未設定＝無音、素材が届けば差すだけでよい）
+- フローティング数値演出・被弾シェイク・設定オーバーレイ（ミュート切替）実装済み
+- UIは角丸カード+ドロップシャドウ主体（Unity組み込みスプライトのみ、独自テクスチャなし）
 - 教育クイズ（事前/事後、8問プール）実装済み、`EducationTracker`でPlayerPrefs永続化・CSV出力対応
-- Unity上での通しプレイ確認済み（タイトル→クイズ→本編→エンディング→クイズ→サマリー）
-- 対策強化パネル・攻撃選択パネルの動的UI生成、フェード演出、バーのアニメーション実装済み
+- 対策強化パネル・攻撃選択パネルの動的UI生成
 - Git/GitHub連携済み
 
 ## 5. 未完了・次にやってほしいこと（優先順位順）
 
-1. **素材の実装**：加藤さんが学校のComfyUI環境（`/mnt/skills`ではなく別PC）でアヤの立ち絵（6表情）・
-   背景を生成後、`pixelate.py`でドット化してGitHub経由で受け取る想定。届いたら
-   `Assets/Sprites/`に配置し、`GameManager`の`faceNormal`等6フィールドへの割当を、
-   `SceneBuilder`と同様の`SerializedObject`自動割当スクリプトを書いて省力化すること
-   （ファイル名を`aya_normal.png`のように固定してもらえば、`AssetDatabase.LoadAssetAtPath`で
-   自動検出できる）。
-2. **パリィ演出の強化**：現状は単純な往復移動のみ。Papers Please／勇者のくせに生意気だ／
-   パチンコ演出を参照軸に、もう少し緊張感のある見せ方を検討（画面シェイク、色変化等）。
-3. **サウンド（BGM/SE）のフック追加**：`AudioSource`をGameManagerに持たせ、攻撃発生時・
-   防御成功/失敗時などにSEを鳴らす仕組みを用意（音源自体は別途調達）。
-4. **攻撃アイコン10種の作成**（現在は絵文字で代用、優先度低）。
+1. **素材の実装**：加藤さんが学校のComfyUI環境（`/mnt/skills`ではなく別PC）で立ち絵（6表情）を
+   生成後、`pixelate.py`でドット化してGitHub経由で受け取る想定。届いたら`Persona_Aya.asset`等の
+   `NavigatorPersona`アセット(`Assets/Personas/`)の各Sprite欄に直接ドラッグするだけでよい
+   （旧方式のようなGameManagerフィールドへの自動割当スクリプトは不要になった）。
+   キャラ2・3を正式に作る場合は、名前・性格が決まり次第`Persona_2`/`Persona_3`アセットの
+   `DisplayName`/`Description`を更新すること。
+2. **ドット絵・見下ろし視点のオフィス背景ビジュアル**（将来的な検討事項、加藤さんが参考UIを提示済み）：
+   部屋レイアウト・社員ドット絵・什器アイコンなど専用素材が必要な大きめの機能。素材が揃うまでは
+   現行のパネル/カードUIで進行し、揃った時点で背景として組み込む2段階の計画。
+3. **サウンド素材の調達**：`AudioManager`のフックは全て仕込み済みなので、BGM4種・SE13種の
+   音源ファイルをInspectorの各AudioClip欄に割り当てるだけで鳴るようになる。
+4. **攻撃アイコン10種の作成**（現在はアイコンなし、テキストのみ。優先度低）。
 5. **ビルド設定の整備**：Steam配信を視野に、アイコン・製品名・バージョン管理などの
    Player Settings整備（実際のビルド確認は加藤さんの手作業）。
 6. 攻撃・防御データを変更した場合は、必ず`balance_sim.js`と`verify_csharp_logic.py`で

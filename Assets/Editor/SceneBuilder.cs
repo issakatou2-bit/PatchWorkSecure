@@ -11,15 +11,26 @@ namespace PatchWorkSecure.EditorTools
 {
     /// <summary>
     /// 仮組みUIを1メニュー操作で自動生成するエディタ拡張。
-    /// 白い四角＋テキストだけの「配線確認用」シーンを作り、GameManagerのInspector参照も自動で埋める。
-    /// 見た目(色・フォント・素材)は後で差し替える前提。目的はロジックが最初から最後まで通しで動くかの確認。
+    /// 見た目(色・フォント・素材)は後で差し替える前提だが、レイアウト・配色・ボタンの反応など
+    /// 「ちゃんとデザインされた感」は素材無しでも作れる範囲でここに寄せている。
     ///
     /// 使い方: Unity上部メニュー「PatchWorkSecure」→「シーンを自動構築」
-    /// 実行前に一度空のシーンにしておくと、重複生成を避けられます（必須ではありません）。
+    /// 実行前に一度Canvas/GameManagerを削除しておくと、重複生成を避けられます。
     /// </summary>
     public static class SceneBuilder
     {
         private const string PrefabDir = "Assets/Prefabs";
+
+        // ---- 配色パレット(画面カテゴリごとに上端の帯で見分けをつける) ----
+        private static readonly Color AccentDay = new Color(0.35f, 0.65f, 0.55f);
+        private static readonly Color AccentChore = new Color(0.40f, 0.55f, 0.75f);
+        private static readonly Color AccentAttack = new Color(0.80f, 0.40f, 0.35f);
+        private static readonly Color AccentParry = new Color(0.85f, 0.65f, 0.25f);
+        private static readonly Color AccentResult = new Color(0.55f, 0.50f, 0.65f);
+        private static readonly Color AccentTitle = new Color(0.55f, 0.45f, 0.80f);
+        private static readonly Color AccentQuiz = new Color(0.40f, 0.70f, 0.50f);
+        private static readonly Color AccentEnding = new Color(0.60f, 0.35f, 0.35f);
+        private static readonly Color AccentSummary = new Color(0.50f, 0.45f, 0.75f);
 
         [MenuItem("PatchWorkSecure/シーンを自動構築")]
         public static void BuildScene()
@@ -57,25 +68,32 @@ namespace PatchWorkSecure.EditorTools
             BuildResultPanel(canvasGO.transform, so);
             BuildLogPanel(canvasGO.transform, so);
 
+            BuildTitlePanel(canvasGO.transform, so);
+            BuildQuizPanel(canvasGO.transform, so);
+            BuildEndingPanel(canvasGO.transform, so);
+            BuildSummaryPanel(canvasGO.transform, so);
+
             var choicePrefab = BuildButtonPrefab("ChoiceButtonPrefab");
             var defensePrefab = BuildButtonPrefab("DefenseButtonPrefab");
+            var quizOptionPrefab = BuildButtonPrefab("QuizOptionButtonPrefab");
             SetRef(so, "choiceButtonPrefab", choicePrefab);
             SetRef(so, "defenseButtonPrefab", defensePrefab);
+            SetRef(so, "quizOptionButtonPrefab", quizOptionPrefab);
 
             so.ApplyModifiedProperties();
 
             Selection.activeGameObject = gmGO;
             EditorUtility.DisplayDialog(
                 "構築完了",
-                "仮組みシーンを生成しました。\n\nHierarchyの中身を確認してから、Playして「今日の業務を進める」で一連の流れが動くか見てください。\nConsoleにエラーが出たら、そのまま貼ってください。",
+                "シーンを生成しました。\n\nPlayして、タイトル画面→事前クイズ→本編→エンディング→事後クイズ→結果サマリー、の一連の流れを確認してください。\nConsoleにエラーが出たら、そのまま貼ってください。",
                 "OK");
         }
 
-        // ================= 各パネル =================
+        // ================= 常時表示パネル =================
 
         private static void BuildStatusBar(Transform parent, SerializedObject so)
         {
-            var rt = CreatePanelBase("StatusBarPanel", parent, new Color(0.15f, 0.15f, 0.18f, 0.9f));
+            var rt = CreatePanelBase("StatusBarPanel", parent, new Color(0.13f, 0.13f, 0.16f, 0.95f));
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1f);
@@ -91,13 +109,13 @@ namespace PatchWorkSecure.EditorTools
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            var periodLabel = CreateLabel(rt, "PeriodLabel", "4月上旬（1/36）", 28, 260);
+            var periodLabel = CreateLabel(rt, "PeriodLabel", "4月上旬（1/36）", 28, 260, bold: true);
             var budgetText = CreateLabel(rt, "BudgetText", "予算 100", 24, 150);
-            var budgetBar = CreateBar(rt, "BudgetBar", new Color(0.3f, 0.7f, 0.3f));
+            var budgetBar = CreateBar(rt, "BudgetBar", new Color(0.35f, 0.75f, 0.35f));
             var trustText = CreateLabel(rt, "TrustText", "人望 30", 24, 150);
-            var trustBar = CreateBar(rt, "TrustBar", new Color(0.3f, 0.5f, 0.8f));
+            var trustBar = CreateBar(rt, "TrustBar", new Color(0.35f, 0.55f, 0.85f));
             var stressText = CreateLabel(rt, "StressText", "ストレス 20", 24, 150);
-            var stressBar = CreateBar(rt, "StressBar", new Color(0.8f, 0.4f, 0.3f));
+            var stressBar = CreateBar(rt, "StressBar", new Color(0.85f, 0.45f, 0.35f));
 
             SetRef(so, "periodLabel", periodLabel);
             SetRef(so, "budgetText", budgetText);
@@ -114,7 +132,7 @@ namespace PatchWorkSecure.EditorTools
             rt.anchorMin = new Vector2(0, 0);
             rt.anchorMax = new Vector2(0, 1);
             rt.pivot = new Vector2(0f, 0.5f);
-            rt.sizeDelta = new Vector2(320, -100); // 上のStatusBar分を差し引く
+            rt.sizeDelta = new Vector2(320, -100);
             rt.anchoredPosition = new Vector2(0, -50);
 
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -137,27 +155,27 @@ namespace PatchWorkSecure.EditorTools
 
             SetRef(so, "navigatorPortrait", portraitImg);
             SetRef(so, "navigatorLine", line);
-
-            // 表情スプライト(faceNormal等)は素材ができてから手動で割り当てる。
-            // 現状は全表情ともnullのまま。Image.spriteがnullでも例外にはならず、単に白四角が表示され続けるだけ。
         }
 
-        private static RectTransform CreateMainAreaPanel(string name, Transform parent, Color bg)
+        // ================= メインフェーズパネル =================
+
+        private static RectTransform CreateMainAreaPanel(string name, Transform parent, Color bg, Color accent)
         {
             var rt = CreatePanelBase(name, parent, bg);
             rt.anchorMin = new Vector2(0, 0);
             rt.anchorMax = new Vector2(1, 1);
-            rt.offsetMin = new Vector2(340, 20);   // 左:ナビゲーター分, 下:余白
-            rt.offsetMax = new Vector2(-20, -110); // 右:余白, 上:ステータスバー分
-            rt.gameObject.SetActive(false); // 表示切替はGameManager.Start()のShowDayPhase()に任せる
+            rt.offsetMin = new Vector2(340, 20);
+            rt.offsetMax = new Vector2(-20, -110);
+            AddAccentStrip(rt, accent);
+            rt.gameObject.SetActive(false);
             return rt;
         }
 
         private static void BuildDayPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel("DayPanel", parent, new Color(0.12f, 0.14f, 0.12f, 0.6f));
+            var rt = CreateMainAreaPanel("DayPanel", parent, new Color(0.11f, 0.13f, 0.12f, 0.92f), AccentDay);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.padding = new RectOffset(30, 30, 40, 30);
             layout.spacing = 20;
             layout.childControlHeight = false;
             layout.childControlWidth = true;
@@ -165,7 +183,8 @@ namespace PatchWorkSecure.EditorTools
             var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める");
             proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
 
-            CreateLabel(rt, "DefenseTitle", "セキュリティ対策", 20, 0);
+            var defenseTitle = CreateLabel(rt, "DefenseTitle", "セキュリティ対策", 20, 0, bold: true);
+            defenseTitle.color = new Color(0.85f, 0.9f, 0.88f);
 
             var containerGO = new GameObject("DefenseButtonContainer", typeof(RectTransform));
             containerGO.transform.SetParent(rt, false);
@@ -183,15 +202,16 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildChorePanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel("ChorePanel", parent, new Color(0.14f, 0.14f, 0.18f, 0.6f));
+            var rt = CreateMainAreaPanel("ChorePanel", parent, new Color(0.12f, 0.13f, 0.17f, 0.92f), AccentChore);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.padding = new RectOffset(30, 30, 40, 30);
             layout.spacing = 24;
             layout.childAlignment = TextAnchor.UpperCenter;
             layout.childControlHeight = false;
             layout.childControlWidth = true;
 
             var choreText = CreateLabel(rt, "ChoreText", "（雑務の内容がここに入る）", 26, 0);
+            choreText.alignment = TextAlignmentOptions.Center;
             var solveBtn = CreateButton(rt, "SolveButton", "誠実に対応する");
             var postponeBtn = CreateButton(rt, "PostponeButton", "後回しにする");
             solveBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
@@ -205,17 +225,19 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildAttackPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel("AttackPanel", parent, new Color(0.2f, 0.1f, 0.1f, 0.6f));
+            var rt = CreateMainAreaPanel("AttackPanel", parent, new Color(0.17f, 0.10f, 0.10f, 0.92f), AccentAttack);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.padding = new RectOffset(30, 30, 40, 30);
             layout.spacing = 16;
             layout.childControlHeight = false;
             layout.childControlWidth = true;
 
-            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 32, 0);
+            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 32, 0, bold: true);
             var gradeText = CreateLabel(rt, "AttackGradeText", "（グレード）", 20, 0);
+            gradeText.color = new Color(0.9f, 0.7f, 0.65f);
             var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 22, 0);
             var scTerm = CreateLabel(rt, "ScTermText", "📘（SC用語）", 18, 0);
+            scTerm.color = new Color(0.75f, 0.8f, 0.85f);
 
             var containerGO = new GameObject("ChoiceButtonContainer", typeof(RectTransform));
             containerGO.transform.SetParent(rt, false);
@@ -236,13 +258,18 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildParryPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel("ParryPanel", parent, new Color(0.18f, 0.16f, 0.08f, 0.6f));
+            var rt = CreateMainAreaPanel("ParryPanel", parent, new Color(0.16f, 0.14f, 0.08f, 0.92f), AccentParry);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.padding = new RectOffset(30, 30, 40, 30);
             layout.spacing = 30;
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlHeight = false;
             layout.childControlWidth = false;
+
+            var hint = CreateLabel(rt, "ParryHint", "タイミングよく「ここだ！」を押そう", 20, 0);
+            hint.alignment = TextAlignmentOptions.Center;
+            hint.color = new Color(0.85f, 0.8f, 0.7f);
+            hint.gameObject.AddComponent<LayoutElement>().preferredWidth = 700;
 
             var trackGO = new GameObject("ParryTrack", typeof(Image));
             trackGO.transform.SetParent(rt, false);
@@ -253,7 +280,7 @@ namespace PatchWorkSecure.EditorTools
 
             var markerGO = new GameObject("ParryMarker", typeof(Image));
             markerGO.transform.SetParent(trackRT, false);
-            markerGO.GetComponent<Image>().color = new Color(0.9f, 0.8f, 0.2f);
+            markerGO.GetComponent<Image>().color = new Color(0.95f, 0.85f, 0.25f);
             var markerRT = markerGO.GetComponent<RectTransform>();
             markerRT.anchorMin = new Vector2(0.5f, 0.5f);
             markerRT.anchorMax = new Vector2(0.5f, 0.5f);
@@ -274,16 +301,18 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildResultPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel("ResultPanel", parent, new Color(0.12f, 0.12f, 0.14f, 0.6f));
+            var rt = CreateMainAreaPanel("ResultPanel", parent, new Color(0.12f, 0.12f, 0.15f, 0.92f), AccentResult);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 30, 30);
+            layout.padding = new RectOffset(30, 30, 40, 30);
             layout.spacing = 24;
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlHeight = false;
             layout.childControlWidth = true;
 
-            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 30, 0);
+            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 30, 0, bold: true);
+            resultText.alignment = TextAlignmentOptions.Center;
             var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 22, 0);
+            resultLine.alignment = TextAlignmentOptions.Center;
             var nextBtn = CreateButton(rt, "NextDayButton", "次の日へ");
             nextBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
 
@@ -295,7 +324,7 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildLogPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreatePanelBase("LogPanel", parent, new Color(0, 0, 0, 0.35f));
+            var rt = CreatePanelBase("LogPanel", parent, new Color(0, 0, 0, 0.4f));
             rt.anchorMin = new Vector2(1, 0);
             rt.anchorMax = new Vector2(1, 0);
             rt.pivot = new Vector2(1, 0);
@@ -313,12 +342,146 @@ namespace PatchWorkSecure.EditorTools
             SetRef(so, "logText", logText);
         }
 
+        // ================= フルスクリーン画面 =================
+
+        private static RectTransform CreateFullScreenPanel(string name, Transform parent, Color bg, Color accent)
+        {
+            var rt = CreatePanelBase(name, parent, bg);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            AddAccentStrip(rt, accent);
+            rt.gameObject.SetActive(false);
+            return rt;
+        }
+
+        private static void BuildTitlePanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateFullScreenPanel("TitlePanel", parent, new Color(0.07f, 0.07f, 0.10f, 0.98f), AccentTitle);
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 26;
+            layout.childControlHeight = false;
+            layout.childControlWidth = false;
+
+            var title = CreateLabel(rt, "GameTitle", "PatchWorkSecure", 64, 0, bold: true);
+            title.alignment = TextAlignmentOptions.Center;
+            title.gameObject.AddComponent<LayoutElement>().preferredWidth = 900;
+
+            var tagline = CreateLabel(
+                rt, "Tagline",
+                "なにごともない、いつもの平穏なオフィスの日常を\nツギハギ（PatchWork）しながら守り抜け",
+                20, 0);
+            tagline.alignment = TextAlignmentOptions.Center;
+            tagline.color = new Color(0.75f, 0.75f, 0.82f);
+            var taglineLE = tagline.gameObject.AddComponent<LayoutElement>();
+            taglineLE.preferredWidth = 800;
+            taglineLE.preferredHeight = 70;
+
+            var startBtn = CreateButton(rt, "StartButton", "はじめる");
+            var startLE = startBtn.gameObject.AddComponent<LayoutElement>();
+            startLE.preferredWidth = 260;
+            startLE.preferredHeight = 72;
+
+            SetRef(so, "titlePanel", rt.gameObject);
+            SetRef(so, "startButton", startBtn);
+        }
+
+        private static void BuildQuizPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateFullScreenPanel("QuizPanel", parent, new Color(0.08f, 0.11f, 0.09f, 0.98f), AccentQuiz);
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(260, 260, 120, 80);
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.spacing = 26;
+            layout.childControlHeight = false;
+            layout.childControlWidth = true;
+
+            var progress = CreateLabel(rt, "QuizProgressText", "事前クイズ　1/3", 18, 0);
+            progress.alignment = TextAlignmentOptions.Center;
+            progress.color = new Color(0.6f, 0.78f, 0.66f);
+
+            var question = CreateLabel(rt, "QuizQuestionText", "（設問がここに入る）", 26, 0, bold: true);
+            question.alignment = TextAlignmentOptions.Center;
+            question.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
+
+            var containerGO = new GameObject("QuizOptionContainer", typeof(RectTransform));
+            containerGO.transform.SetParent(rt, false);
+            var containerRT = containerGO.GetComponent<RectTransform>();
+            var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
+            vlayout.spacing = 14;
+            vlayout.childAlignment = TextAnchor.UpperCenter;
+            vlayout.childControlHeight = false;
+            vlayout.childControlWidth = true;
+
+            SetRef(so, "quizPanel", rt.gameObject);
+            SetRef(so, "quizProgressText", progress);
+            SetRef(so, "quizQuestionText", question);
+            SetRef(so, "quizOptionContainer", containerRT);
+        }
+
+        private static void BuildEndingPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateFullScreenPanel("EndingPanel", parent, new Color(0.10f, 0.07f, 0.08f, 0.98f), AccentEnding);
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 20;
+            layout.childControlHeight = false;
+            layout.childControlWidth = false;
+
+            var text = CreateLabel(rt, "EndingText", "（結果メッセージ）", 34, 0, bold: true);
+            text.alignment = TextAlignmentOptions.Center;
+            text.gameObject.AddComponent<LayoutElement>().preferredWidth = 900;
+
+            var line = CreateLabel(rt, "EndingCharacterLine", "「（台詞）」", 22, 0);
+            line.alignment = TextAlignmentOptions.Center;
+            line.color = new Color(0.8f, 0.8f, 0.85f);
+            line.gameObject.AddComponent<LayoutElement>().preferredWidth = 800;
+
+            var btn = CreateButton(rt, "EndingContinueButton", "結果を振り返る");
+            var le = btn.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = 280;
+            le.preferredHeight = 70;
+
+            SetRef(so, "endingPanel", rt.gameObject);
+            SetRef(so, "endingText", text);
+            SetRef(so, "endingCharacterLine", line);
+            SetRef(so, "endingContinueButton", btn);
+        }
+
+        private static void BuildSummaryPanel(Transform parent, SerializedObject so)
+        {
+            var rt = CreateFullScreenPanel("SummaryPanel", parent, new Color(0.09f, 0.08f, 0.12f, 0.98f), AccentSummary);
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 30;
+            layout.childControlHeight = false;
+            layout.childControlWidth = false;
+
+            var text = CreateLabel(rt, "SummaryText", "（結果サマリーがここに入る）", 22, 0);
+            text.alignment = TextAlignmentOptions.Center;
+            var textLE = text.gameObject.AddComponent<LayoutElement>();
+            textLE.preferredWidth = 700;
+            textLE.preferredHeight = 220;
+
+            var btn = CreateButton(rt, "SummaryCloseButton", "タイトルへ戻る");
+            var btnLE = btn.gameObject.AddComponent<LayoutElement>();
+            btnLE.preferredWidth = 260;
+            btnLE.preferredHeight = 70;
+
+            SetRef(so, "summaryPanel", rt.gameObject);
+            SetRef(so, "summaryText", text);
+            SetRef(so, "summaryCloseButton", btn);
+        }
+
         // ================= プレハブ =================
 
         private static GameObject BuildButtonPrefab(string name)
         {
             var go = new GameObject(name, typeof(Image), typeof(Button));
-            go.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.3f);
+            var bgImage = go.GetComponent<Image>();
+            bgImage.color = new Color(0.22f, 0.24f, 0.30f);
             var rt = go.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(500, 64);
 
@@ -329,6 +492,10 @@ namespace PatchWorkSecure.EditorTools
             labelRT.offsetMin = new Vector2(20, 6);
             labelRT.offsetMax = new Vector2(-20, -6);
             label.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = bgImage;
+            ApplyButtonColors(button);
 
             string path = $"{PrefabDir}/{name}.prefab";
             var prefabAsset = PrefabUtility.SaveAsPrefabAsset(go, path);
@@ -346,13 +513,32 @@ namespace PatchWorkSecure.EditorTools
             return go.GetComponent<RectTransform>();
         }
 
-        private static TextMeshProUGUI CreateLabel(Transform parent, string name, string text, int fontSize, float preferredWidth)
+        private static void AddAccentStrip(RectTransform panelRT, Color accent)
+        {
+            var stripGO = new GameObject("AccentStrip", typeof(Image));
+            stripGO.transform.SetParent(panelRT, false);
+            stripGO.GetComponent<Image>().color = accent;
+
+            var stripRT = stripGO.GetComponent<RectTransform>();
+            stripRT.anchorMin = new Vector2(0, 1);
+            stripRT.anchorMax = new Vector2(1, 1);
+            stripRT.pivot = new Vector2(0.5f, 1f);
+            stripRT.sizeDelta = new Vector2(0, 6);
+            stripRT.anchoredPosition = Vector2.zero;
+
+            var le = stripGO.AddComponent<LayoutElement>();
+            le.ignoreLayout = true;
+        }
+
+        private static TextMeshProUGUI CreateLabel(
+            Transform parent, string name, string text, int fontSize, float preferredWidth, bool bold = false)
         {
             var go = new GameObject(name, typeof(TextMeshProUGUI));
             go.transform.SetParent(parent, false);
             var tmp = go.GetComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
             if (preferredWidth > 0)
@@ -380,14 +566,15 @@ namespace PatchWorkSecure.EditorTools
             fillRT.offsetMin = Vector2.zero;
             fillRT.offsetMax = Vector2.zero;
 
-            return fillImg; // GameManager側はこの「Fill」のImageにfillAmountを入れる
+            return fillImg;
         }
 
         private static Button CreateButton(Transform parent, string name, string labelText)
         {
             var go = new GameObject(name, typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
-            go.GetComponent<Image>().color = new Color(0.25f, 0.3f, 0.45f);
+            var bgImage = go.GetComponent<Image>();
+            bgImage.color = new Color(0.24f, 0.30f, 0.42f);
 
             var textGO = new GameObject("Label", typeof(TextMeshProUGUI));
             textGO.transform.SetParent(go.transform, false);
@@ -402,7 +589,23 @@ namespace PatchWorkSecure.EditorTools
             textRT.offsetMin = Vector2.zero;
             textRT.offsetMax = Vector2.zero;
 
-            return go.GetComponent<Button>();
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = bgImage;
+            ApplyButtonColors(button);
+
+            return button;
+        }
+
+        private static void ApplyButtonColors(Button button)
+        {
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.88f, 0.90f, 0.96f);
+            colors.pressedColor = new Color(0.65f, 0.65f, 0.72f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
         }
 
         private static void SetRef(SerializedObject so, string fieldName, Object value)

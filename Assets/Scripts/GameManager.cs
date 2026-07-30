@@ -46,6 +46,28 @@ namespace PatchWorkSecure
         [SerializeField] private GameObject parryPanel;
         [SerializeField] private GameObject resultPanel;
 
+        [Header("タイトル画面")]
+        [SerializeField] private GameObject titlePanel;
+        [SerializeField] private Button startButton;
+
+        [Header("クイズ画面（事前・事後クイズ共通で使い回す）")]
+        [SerializeField] private GameObject quizPanel;
+        [SerializeField] private TextMeshProUGUI quizProgressText;
+        [SerializeField] private TextMeshProUGUI quizQuestionText;
+        [SerializeField] private Transform quizOptionContainer;
+        [SerializeField] private GameObject quizOptionButtonPrefab;
+
+        [Header("エンディング画面（ゲームオーバー/クリア共通）")]
+        [SerializeField] private GameObject endingPanel;
+        [SerializeField] private TextMeshProUGUI endingText;
+        [SerializeField] private TextMeshProUGUI endingCharacterLine;
+        [SerializeField] private Button endingContinueButton; // 事後クイズへ進む
+
+        [Header("結果サマリー画面（事後クイズ後）")]
+        [SerializeField] private GameObject summaryPanel;
+        [SerializeField] private TextMeshProUGUI summaryText;
+        [SerializeField] private Button summaryCloseButton; // タイトルに戻る
+
         [Header("操作ボタン（未割当でも動作するが、割り当てると自動配線される）")]
         [SerializeField] private Button proceedButton;       // 「今日の業務を進める」
         [SerializeField] private Button solveChoreButton;     // 雑務：誠実に対応する
@@ -88,6 +110,14 @@ namespace PatchWorkSecure
         private int _parryDirection = 1;
         private bool _parryActive;
 
+        // クイズ進行状態（事前/事後で使い回す）
+        private List<QuizQuestion> _quizQueue;
+        private int _quizIndex;
+        private int _quizCorrectCount;
+        private int _quizTotalCount;
+        private bool _isPreQuiz;
+        private int _preCorrect, _preTotal, _postCorrect, _postTotal;
+
         // 雑務のマスターデータ（後でScriptableObject化しても良い）
         private readonly (string text, int trustGain)[] _chores =
         {
@@ -100,10 +130,8 @@ namespace PatchWorkSecure
 
         private void Start()
         {
-            _state = new GameState();
             WireButtons();
-            ShowDayPhase();
-            RefreshUI();
+            ShowTitle();
         }
 
         /// <summary>
@@ -118,6 +146,9 @@ namespace PatchWorkSecure
             if (postponeChoreButton != null) postponeChoreButton.onClick.AddListener(() => OnClickResolveChore(false));
             if (parryButton != null) parryButton.onClick.AddListener(OnClickParry);
             if (nextDayButton != null) nextDayButton.onClick.AddListener(OnClickNextDay);
+            if (startButton != null) startButton.onClick.AddListener(OnClickStartGame);
+            if (endingContinueButton != null) endingContinueButton.onClick.AddListener(() => BeginQuiz(false));
+            if (summaryCloseButton != null) summaryCloseButton.onClick.AddListener(ShowTitle);
         }
 
         private void Update()
@@ -129,17 +160,56 @@ namespace PatchWorkSecure
 
         private void HideAllPanels()
         {
+            if (titlePanel != null) titlePanel.SetActive(false);
             dayPanel.SetActive(false);
             chorePanel.SetActive(false);
             attackPanel.SetActive(false);
             parryPanel.SetActive(false);
             resultPanel.SetActive(false);
+            if (quizPanel != null) quizPanel.SetActive(false);
+            if (endingPanel != null) endingPanel.SetActive(false);
+            if (summaryPanel != null) summaryPanel.SetActive(false);
+        }
+
+        /// <summary>
+        /// パネルをフェードインさせる（演出用）。CanvasGroupが無ければ自動で付ける。
+        /// 「切り替わった瞬間にパッと出る」冷たさを減らすための最小限の演出。
+        /// </summary>
+        private IEnumerator FadeInPanel(GameObject panel, float duration = 0.25f)
+        {
+            if (panel == null) yield break;
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+
+            cg.alpha = 0f;
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                cg.alpha = Mathf.Clamp01(t / duration);
+                yield return null;
+            }
+            cg.alpha = 1f;
+        }
+
+        private void ShowTitle()
+        {
+            HideAllPanels();
+            titlePanel.SetActive(true);
+            StartCoroutine(FadeInPanel(titlePanel));
+        }
+
+        /// <summary>タイトル画面の「はじめる」ボタンから呼ぶ。事前クイズへ進む。</summary>
+        public void OnClickStartGame()
+        {
+            BeginQuiz(isPre: true);
         }
 
         private void ShowDayPhase()
         {
             HideAllPanels();
             dayPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(dayPanel));
             BuildDefensePanel();
             UpdateNavigator();
         }
@@ -150,6 +220,7 @@ namespace PatchWorkSecure
             _currentChore = _chores[Random.Range(0, _chores.Length)];
             HideAllPanels();
             chorePanel.SetActive(true);
+            StartCoroutine(FadeInPanel(chorePanel));
             choreText.text = _currentChore.text;
             UpdateNavigator();
         }
@@ -190,6 +261,7 @@ namespace PatchWorkSecure
         {
             HideAllPanels();
             attackPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(attackPanel));
 
             var attack = GameData.Attacks[_currentAttackKey];
             attackNameText.text = attack.DisplayName;
@@ -294,6 +366,7 @@ namespace PatchWorkSecure
             _pendingChoice = choice;
             HideAllPanels();
             parryPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(parryPanel));
             _parryPosition = 0f;
             _parryDirection = 1;
             _parryActive = true;
@@ -345,6 +418,7 @@ namespace PatchWorkSecure
             }
 
             resultPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(resultPanel));
             resultText.text = result.Defended
                 ? $"🛡️ {result.Flavor}（防御率{Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
                 : $"💥 {result.Flavor}（予算-{result.BudgetDamage}, 人望-{result.TrustDamage}）";
@@ -383,14 +457,36 @@ namespace PatchWorkSecure
             trustText.text = _state.Trust.ToString();
             stressText.text = _state.Stress.ToString();
 
-            if (budgetBar != null) budgetBar.fillAmount = Mathf.Clamp01(_state.Budget / 100f);
-            if (trustBar != null) trustBar.fillAmount = Mathf.Clamp01(_state.Trust / 100f);
-            if (stressBar != null) stressBar.fillAmount = Mathf.Clamp01(_state.Stress / 100f);
+            if (budgetBar != null) SetBarAnimated(budgetBar, Mathf.Clamp01(_state.Budget / 100f));
+            if (trustBar != null) SetBarAnimated(trustBar, Mathf.Clamp01(_state.Trust / 100f));
+            if (stressBar != null) SetBarAnimated(stressBar, Mathf.Clamp01(_state.Stress / 100f));
 
             if (logText != null)
                 logText.text = string.Join("\n", _state.Log);
 
             UpdateNavigator();
+        }
+
+        /// <summary>
+        /// バーの数値変化を滑らかにアニメーションさせる。
+        /// 予算・人望・ストレスがカクッと変わる冷たさを減らすための演出。
+        /// </summary>
+        private void SetBarAnimated(Image bar, float target)
+        {
+            StartCoroutine(AnimateBarFill(bar, target));
+        }
+
+        private IEnumerator AnimateBarFill(Image bar, float target, float duration = 0.4f)
+        {
+            float start = bar.fillAmount;
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                bar.fillAmount = Mathf.Lerp(start, target, t / duration);
+                yield return null;
+            }
+            bar.fillAmount = target;
         }
 
         /// <summary>状況に応じてナビゲーターの表情とセリフを変える。</summary>
@@ -460,14 +556,117 @@ namespace PatchWorkSecure
             }
         }
 
+        // ---- クイズ（事前・事後共通） ----
+
+        /// <summary>
+        /// クイズを開始する。isPre=trueなら事前クイズ（この後ゲーム本編を開始）、
+        /// falseなら事後クイズ（この後結果サマリーを表示）。
+        /// </summary>
+        private void BeginQuiz(bool isPre)
+        {
+            _isPreQuiz = isPre;
+            _quizQueue = EducationTracker.SampleQuestions(3);
+            _quizIndex = 0;
+            _quizCorrectCount = 0;
+            _quizTotalCount = 0;
+            ShowQuizQuestion();
+        }
+
+        private void ShowQuizQuestion()
+        {
+            HideAllPanels();
+            quizPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(quizPanel));
+
+            var q = _quizQueue[_quizIndex];
+            if (quizProgressText != null)
+                quizProgressText.text = $"{(_isPreQuiz ? "事前クイズ" : "事後クイズ")}　{_quizIndex + 1}/{_quizQueue.Count}";
+            if (quizQuestionText != null)
+                quizQuestionText.text = q.Question;
+
+            BuildQuizOptions(q);
+        }
+
+        /// <summary>選択肢ボタンを動的に生成する（BuildChoiceButtonsと同じパターン）。</summary>
+        private void BuildQuizOptions(QuizQuestion q)
+        {
+            if (quizOptionContainer == null || quizOptionButtonPrefab == null) return;
+
+            foreach (Transform child in quizOptionContainer)
+                Destroy(child.gameObject);
+
+            for (int i = 0; i < q.Options.Length; i++)
+            {
+                int optionIndex = i; // クロージャ対策
+                var go = Instantiate(quizOptionButtonPrefab, quizOptionContainer);
+                var label = go.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null) label.text = q.Options[i];
+
+                var button = go.GetComponent<Button>();
+                if (button != null)
+                    button.onClick.AddListener(() => OnAnswerQuiz(optionIndex == q.AnswerIndex));
+            }
+        }
+
+        private void OnAnswerQuiz(bool correct)
+        {
+            _quizTotalCount++;
+            if (correct) _quizCorrectCount++;
+            _quizIndex++;
+
+            if (_quizIndex < _quizQueue.Count)
+                ShowQuizQuestion();
+            else
+                FinishQuiz();
+        }
+
+        private void FinishQuiz()
+        {
+            if (_isPreQuiz)
+            {
+                _preCorrect = _quizCorrectCount;
+                _preTotal = _quizTotalCount;
+                _state = new GameState();
+                ShowDayPhase();
+                RefreshUI();
+            }
+            else
+            {
+                _postCorrect = _quizCorrectCount;
+                _postTotal = _quizTotalCount;
+                var stats = EducationTracker.RecordSession(_preCorrect, _preTotal, _postCorrect, _postTotal);
+                ShowSummary(stats);
+            }
+        }
+
+        private void ShowSummary(EduStats stats)
+        {
+            HideAllPanels();
+            summaryPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(summaryPanel));
+
+            if (summaryText != null)
+            {
+                int improvementPt = Mathf.RoundToInt(stats.Improvement * 100);
+                string sign = improvementPt >= 0 ? "+" : "";
+                summaryText.text =
+                    "今回のセッション\n" +
+                    $"事前 {_preCorrect}/{_preTotal} → 事後 {_postCorrect}/{_postTotal}\n\n" +
+                    $"累計（全{stats.Sessions}回プレイ）\n" +
+                    $"正答率 {Mathf.RoundToInt(stats.PreRate * 100)}% → {Mathf.RoundToInt(stats.PostRate * 100)}%（{sign}{improvementPt}pt）";
+            }
+        }
+
         // ---- 終了処理 ----
 
         private void ShowGameOver()
         {
             HideAllPanels();
-            resultPanel.SetActive(true);
-            resultText.text = $"📉 {_state.GameOverReason}";
-            resultCharacterLine.text = "";
+            endingPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(endingPanel));
+
+            if (endingText != null) endingText.text = $"📉 {_state.GameOverReason}";
+            if (endingCharacterLine != null) endingCharacterLine.text = "";
             if (navigatorPortrait != null)
             {
                 navigatorPortrait.sprite = faceSad;
@@ -478,9 +677,11 @@ namespace PatchWorkSecure
         private void ShowClear()
         {
             HideAllPanels();
-            resultPanel.SetActive(true);
-            resultText.text = "🏢✨ 1年間、無事に会社を守り抜いた";
-            resultCharacterLine.text = "気づけば1年が経っていた。";
+            endingPanel.SetActive(true);
+            StartCoroutine(FadeInPanel(endingPanel));
+
+            if (endingText != null) endingText.text = "🏢✨ 1年間、無事に会社を守り抜いた";
+            if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";
             if (navigatorPortrait != null)
             {
                 navigatorPortrait.sprite = faceProud;

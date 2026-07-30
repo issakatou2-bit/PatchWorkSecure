@@ -17,6 +17,10 @@ namespace PatchWorkSecure
     /// </summary>
     public class GameManager : MonoBehaviour
     {
+        // パリィ判定のしきい値。SceneBuilder側のスイートゾーン表示もこの値を参照する。
+        public const float ParryPerfectThreshold = 0.85f;
+        public const float ParryGoodThreshold = 0.5f;
+
         // ---- ステータス表示 ----
         [Header("ステータス表示")]
         [SerializeField] private TextMeshProUGUI periodLabel;   // 「4月上旬」
@@ -68,6 +72,17 @@ namespace PatchWorkSecure
         [SerializeField] private TextMeshProUGUI summaryText;
         [SerializeField] private Button summaryCloseButton; // タイトルに戻る
 
+        [Header("設定オーバーレイ（常時表示の歯車ボタンから開く）")]
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Button settingsOpenButton;
+        [SerializeField] private Button settingsCloseButton;
+        [SerializeField] private Button settingsMuteButton;
+        [SerializeField] private TextMeshProUGUI settingsMuteButtonLabel;
+        [SerializeField] private Button settingsBackToTitleButton;
+
+        [Header("演出（被弾シェイクの対象。未割当ならシェイクなし）")]
+        [SerializeField] private RectTransform shakeRoot;
+
         [Header("操作ボタン（未割当でも動作するが、割り当てると自動配線される）")]
         [SerializeField] private Button proceedButton;       // 「今日の業務を進める」
         [SerializeField] private Button solveChoreButton;     // 雑務：誠実に対応する
@@ -94,6 +109,7 @@ namespace PatchWorkSecure
         [SerializeField] private RectTransform parryMarker;
         [SerializeField] private RectTransform parryTrack;
         [SerializeField] private float parrySpeed = 250f;
+        [SerializeField] private TextMeshProUGUI parryFeedbackText; // PERFECT!!/GOOD!/MISS...の表示
 
         [Header("結果パネル")]
         [SerializeField] private TextMeshProUGUI resultText;
@@ -109,6 +125,10 @@ namespace PatchWorkSecure
         private float _parryPosition;   // 0〜1
         private int _parryDirection = 1;
         private bool _parryActive;
+        private float _currentParrySpeed;
+
+        // 前回表示時の数値（フローティング増減表示の差分計算に使う）
+        private int _prevBudget, _prevTrust, _prevStress;
 
         // クイズ進行状態（事前/事後で使い回す）
         private List<QuizQuestion> _quizQueue;
@@ -141,14 +161,29 @@ namespace PatchWorkSecure
         /// </summary>
         private void WireButtons()
         {
-            if (proceedButton != null) proceedButton.onClick.AddListener(OnClickProceedDay);
-            if (solveChoreButton != null) solveChoreButton.onClick.AddListener(() => OnClickResolveChore(true));
-            if (postponeChoreButton != null) postponeChoreButton.onClick.AddListener(() => OnClickResolveChore(false));
-            if (parryButton != null) parryButton.onClick.AddListener(OnClickParry);
-            if (nextDayButton != null) nextDayButton.onClick.AddListener(OnClickNextDay);
-            if (startButton != null) startButton.onClick.AddListener(OnClickStartGame);
-            if (endingContinueButton != null) endingContinueButton.onClick.AddListener(() => BeginQuiz(false));
-            if (summaryCloseButton != null) summaryCloseButton.onClick.AddListener(ShowTitle);
+            AddClickListener(proceedButton, OnClickProceedDay);
+            AddClickListener(solveChoreButton, () => OnClickResolveChore(true));
+            AddClickListener(postponeChoreButton, () => OnClickResolveChore(false));
+            AddClickListener(parryButton, OnClickParry);
+            AddClickListener(nextDayButton, OnClickNextDay);
+            AddClickListener(startButton, OnClickStartGame);
+            AddClickListener(endingContinueButton, () => BeginQuiz(false));
+            AddClickListener(summaryCloseButton, ShowTitle);
+            AddClickListener(settingsOpenButton, () => ToggleSettingsPanel(true));
+            AddClickListener(settingsCloseButton, () => ToggleSettingsPanel(false));
+            AddClickListener(settingsMuteButton, OnClickToggleMute);
+            AddClickListener(settingsBackToTitleButton, () => { ToggleSettingsPanel(false); ShowTitle(); });
+        }
+
+        /// <summary>クリックSEを鳴らしてからactionを実行するリスナーを登録する。buttonがnullなら何もしない。</summary>
+        private void AddClickListener(Button button, UnityEngine.Events.UnityAction action)
+        {
+            if (button == null) return;
+            button.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayClick();
+                action();
+            });
         }
 
         private void Update()
@@ -197,6 +232,7 @@ namespace PatchWorkSecure
             HideAllPanels();
             titlePanel.SetActive(true);
             StartCoroutine(FadeInPanel(titlePanel));
+            AudioManager.Instance?.PlayBgmTitle();
         }
 
         /// <summary>タイトル画面の「はじめる」ボタンから呼ぶ。事前クイズへ進む。</summary>
@@ -212,6 +248,7 @@ namespace PatchWorkSecure
             StartCoroutine(FadeInPanel(dayPanel));
             BuildDefensePanel();
             UpdateNavigator();
+            AudioManager.Instance?.PlayBgmDay();
         }
 
         /// <summary>「今日の業務を進める」ボタンから呼ぶ。</summary>
@@ -229,6 +266,7 @@ namespace PatchWorkSecure
         public void OnClickResolveChore(bool solved)
         {
             _state.ResolveChore(solved, _currentChore.trustGain);
+            AudioManager.Instance?.PlayChoreSolve();
             RefreshUI();
 
             if (_state.IsGameOver)
@@ -262,6 +300,8 @@ namespace PatchWorkSecure
             HideAllPanels();
             attackPanel.SetActive(true);
             StartCoroutine(FadeInPanel(attackPanel));
+            AudioManager.Instance?.PlayBgmTension();
+            AudioManager.Instance?.PlayAttackAppear();
 
             var attack = GameData.Attacks[_currentAttackKey];
             attackNameText.text = attack.DisplayName;
@@ -306,7 +346,11 @@ namespace PatchWorkSecure
                 var button = go.GetComponent<Button>();
                 var captured = choice; // クロージャ対策
                 button.interactable = _state.Budget >= choice.BudgetCost;
-                button.onClick.AddListener(() => OnSelectChoice(captured));
+                button.onClick.AddListener(() =>
+                {
+                    AudioManager.Instance?.PlayClick();
+                    OnSelectChoice(captured);
+                });
             }
         }
 
@@ -356,7 +400,11 @@ namespace PatchWorkSecure
                 {
                     button.interactable = !maxed && affordable;
                     string capturedKey = key; // クロージャ対策
-                    button.onClick.AddListener(() => OnClickUpgradeDefense(capturedKey));
+                    button.onClick.AddListener(() =>
+                    {
+                        AudioManager.Instance?.PlayClick();
+                        OnClickUpgradeDefense(capturedKey);
+                    });
                 }
             }
         }
@@ -369,15 +417,30 @@ namespace PatchWorkSecure
             StartCoroutine(FadeInPanel(parryPanel));
             _parryPosition = 0f;
             _parryDirection = 1;
+            _currentParrySpeed = parrySpeed * ParrySpeedMultiplier(GameData.Attacks[_currentAttackKey].Grade);
             _parryActive = true;
+            if (parryFeedbackText != null) parryFeedbackText.text = "";
             UpdateNavigator();
         }
 
         // ---- パリィ ----
 
+        /// <summary>攻撃の格が高いほどマーカーを速くし、パリィの難度を上げる。</summary>
+        private static float ParrySpeedMultiplier(AttackGrade grade)
+        {
+            switch (grade)
+            {
+                case AttackGrade.S: return 1.4f;
+                case AttackGrade.Veteran: return 1.2f;
+                case AttackGrade.Rising: return 1.1f;
+                case AttackGrade.Rookie: return 0.9f;
+                default: return 1.0f;
+            }
+        }
+
         private void UpdateParryMarker()
         {
-            _parryPosition += _parryDirection * (parrySpeed / 1000f) * Time.deltaTime * 60f / 60f;
+            _parryPosition += _parryDirection * (_currentParrySpeed / 1000f) * Time.deltaTime * 60f / 60f;
             if (_parryPosition >= 1f) { _parryPosition = 1f; _parryDirection = -1; }
             if (_parryPosition <= 0f) { _parryPosition = 0f; _parryDirection = 1; }
 
@@ -399,17 +462,68 @@ namespace PatchWorkSecure
             float quality = Mathf.Clamp01(1f - distanceFromCenter / 0.5f);
             float parryBonus = quality * 0.15f;
 
+            ShowParryFeedback(quality);
+            StartCoroutine(PunchMarker());
             StartCoroutine(ResolveWithSuspense(parryBonus));
+        }
+
+        /// <summary>判定の質に応じてPERFECT!!/GOOD!/MISS...を表示し、対応するSEを鳴らす。</summary>
+        private void ShowParryFeedback(float quality)
+        {
+            if (parryFeedbackText == null) return;
+
+            if (quality >= ParryPerfectThreshold)
+            {
+                parryFeedbackText.text = "PERFECT!!";
+                parryFeedbackText.color = new Color(0.95f, 0.8f, 0.25f);
+                AudioManager.Instance?.PlayParryPerfect();
+            }
+            else if (quality >= ParryGoodThreshold)
+            {
+                parryFeedbackText.text = "GOOD!";
+                parryFeedbackText.color = new Color(0.55f, 0.85f, 0.5f);
+                AudioManager.Instance?.PlayParryGood();
+            }
+            else
+            {
+                parryFeedbackText.text = "MISS...";
+                parryFeedbackText.color = new Color(0.78f, 0.78f, 0.8f);
+                AudioManager.Instance?.PlayParryMiss();
+            }
+        }
+
+        /// <summary>マーカーを一瞬だけ拡大させて、パリィ入力の手応えを出す。</summary>
+        private IEnumerator PunchMarker()
+        {
+            if (parryMarker == null) yield break;
+            const float duration = 0.25f;
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                float scale = Mathf.Lerp(1.6f, 1f, t / duration);
+                parryMarker.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
+            parryMarker.localScale = Vector3.one;
         }
 
         /// <summary>結果をすぐ出さず、一瞬の「溜め」を挟んでから開示する。</summary>
         private IEnumerator ResolveWithSuspense(float parryBonus)
         {
+            yield return new WaitForSeconds(0.5f); // パリィ判定(PERFECT!等)を見せる間
             HideAllPanels();
-            yield return new WaitForSeconds(0.9f);
+            yield return new WaitForSeconds(0.6f); // 結果発表前の溜め
 
             var result = _state.ResolveAttack(_currentAttackKey, _pendingChoice, parryBonus);
             RefreshUI();
+
+            if (result.Defended) AudioManager.Instance?.PlayDefendSuccess();
+            else
+            {
+                AudioManager.Instance?.PlayDefendFail();
+                StartCoroutine(ShakeRoutine(shakeRoot));
+            }
 
             if (_state.IsGameOver)
             {
@@ -425,6 +539,22 @@ namespace PatchWorkSecure
             resultCharacterLine.text = $"「{result.CharacterLine}」";
 
             UpdateNavigatorForResult(result);
+        }
+
+        /// <summary>対象のRectTransformを短時間ランダムに揺らす。被弾時の手応え用。</summary>
+        private IEnumerator ShakeRoutine(RectTransform target, float duration = 0.35f, float magnitude = 14f)
+        {
+            if (target == null) yield break;
+            Vector2 original = target.anchoredPosition;
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                float damper = 1f - (t / duration);
+                target.anchoredPosition = original + Random.insideUnitCircle * magnitude * damper;
+                yield return null;
+            }
+            target.anchoredPosition = original;
         }
 
         /// <summary>「次の日へ」ボタンから呼ぶ。</summary>
@@ -443,6 +573,7 @@ namespace PatchWorkSecure
         {
             if (_state.UpgradeDefense(defenseKey))
             {
+                AudioManager.Instance?.PlayUpgrade();
                 RefreshUI();
                 BuildDefensePanel(); // Lv・コスト表示・購入可否を更新
             }
@@ -457,6 +588,13 @@ namespace PatchWorkSecure
             trustText.text = _state.Trust.ToString();
             stressText.text = _state.Stress.ToString();
 
+            SpawnFloatingDelta(budgetText, _state.Budget - _prevBudget);
+            SpawnFloatingDelta(trustText, _state.Trust - _prevTrust);
+            SpawnFloatingDelta(stressText, _state.Stress - _prevStress, invert: true); // ストレスは増加が悪化
+            _prevBudget = _state.Budget;
+            _prevTrust = _state.Trust;
+            _prevStress = _state.Stress;
+
             if (budgetBar != null) SetBarAnimated(budgetBar, Mathf.Clamp01(_state.Budget / 100f));
             if (trustBar != null) SetBarAnimated(trustBar, Mathf.Clamp01(_state.Trust / 100f));
             if (stressBar != null) SetBarAnimated(stressBar, Mathf.Clamp01(_state.Stress / 100f));
@@ -465,6 +603,58 @@ namespace PatchWorkSecure
                 logText.text = string.Join("\n", _state.Log);
 
             UpdateNavigator();
+        }
+
+        /// <summary>
+        /// 数値の増減を、該当ラベルの上にふわっと浮かぶ+/-テキストとして一瞬表示する。
+        /// プレハブを使わずCanvas直下に生成するので、SceneBuilder側の追加対応は不要。
+        /// </summary>
+        private void SpawnFloatingDelta(TextMeshProUGUI referenceLabel, int delta, bool invert = false)
+        {
+            if (delta == 0 || referenceLabel == null) return;
+            var canvas = referenceLabel.GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            bool good = invert ? delta < 0 : delta > 0;
+
+            var go = new GameObject("FloatingDelta", typeof(TextMeshProUGUI));
+            go.transform.SetParent(canvas.transform, false);
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            tmp.fontSize = 26;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = good ? new Color(0.45f, 0.85f, 0.45f) : new Color(0.9f, 0.4f, 0.4f);
+            tmp.text = delta > 0 ? $"+{delta}" : delta.ToString();
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(140, 40);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(null, referenceLabel.transform.position);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform, screenPoint, null, out Vector2 localPoint);
+            rt.anchoredPosition = localPoint + new Vector2(0, 26);
+
+            StartCoroutine(FloatAndFade(rt, tmp));
+        }
+
+        private IEnumerator FloatAndFade(RectTransform rt, TextMeshProUGUI tmp)
+        {
+            const float duration = 0.9f;
+            Vector2 start = rt.anchoredPosition;
+            Vector2 end = start + new Vector2(0, 50);
+            Color startColor = tmp.color;
+
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                float p = t / duration;
+                rt.anchoredPosition = Vector2.Lerp(start, end, p);
+                tmp.color = new Color(startColor.r, startColor.g, startColor.b, 1f - p);
+                yield return null;
+            }
+            Destroy(rt.gameObject);
         }
 
         /// <summary>
@@ -487,6 +677,29 @@ namespace PatchWorkSecure
                 yield return null;
             }
             bar.fillAmount = target;
+        }
+
+        // ---- 設定オーバーレイ ----
+
+        /// <summary>右上の歯車ボタンから呼ぶ。現在のフェーズを問わず開閉できる独立オーバーレイ。</summary>
+        private void ToggleSettingsPanel(bool show)
+        {
+            if (settingsPanel == null) return;
+            settingsPanel.SetActive(show);
+            if (show) RefreshMuteButtonLabel();
+        }
+
+        private void OnClickToggleMute()
+        {
+            AudioManager.Instance?.ToggleMute();
+            RefreshMuteButtonLabel();
+        }
+
+        private void RefreshMuteButtonLabel()
+        {
+            if (settingsMuteButtonLabel == null) return;
+            bool muted = AudioManager.Instance != null && AudioManager.Instance.IsMuted;
+            settingsMuteButtonLabel.text = muted ? "🔇 音声：オフ" : "🔊 音声：オン";
         }
 
         /// <summary>状況に応じてナビゲーターの表情とセリフを変える。</summary>
@@ -604,7 +817,13 @@ namespace PatchWorkSecure
 
                 var button = go.GetComponent<Button>();
                 if (button != null)
-                    button.onClick.AddListener(() => OnAnswerQuiz(optionIndex == q.AnswerIndex));
+                {
+                    button.onClick.AddListener(() =>
+                    {
+                        AudioManager.Instance?.PlayClick();
+                        OnAnswerQuiz(optionIndex == q.AnswerIndex);
+                    });
+                }
             }
         }
 
@@ -613,6 +832,9 @@ namespace PatchWorkSecure
             _quizTotalCount++;
             if (correct) _quizCorrectCount++;
             _quizIndex++;
+
+            if (correct) AudioManager.Instance?.PlayQuizCorrect();
+            else AudioManager.Instance?.PlayQuizWrong();
 
             if (_quizIndex < _quizQueue.Count)
                 ShowQuizQuestion();
@@ -627,6 +849,10 @@ namespace PatchWorkSecure
                 _preCorrect = _quizCorrectCount;
                 _preTotal = _quizTotalCount;
                 _state = new GameState();
+                // 初期値を基準にしておき、初回RefreshUI()で無意味な+100等のフローティング表示が出ないようにする
+                _prevBudget = _state.Budget;
+                _prevTrust = _state.Trust;
+                _prevStress = _state.Stress;
                 ShowDayPhase();
                 RefreshUI();
             }
@@ -664,6 +890,8 @@ namespace PatchWorkSecure
             HideAllPanels();
             endingPanel.SetActive(true);
             StartCoroutine(FadeInPanel(endingPanel));
+            AudioManager.Instance?.PlayBgmEnding();
+            AudioManager.Instance?.PlayGameOver();
 
             if (endingText != null) endingText.text = $"📉 {_state.GameOverReason}";
             if (endingCharacterLine != null) endingCharacterLine.text = "";
@@ -679,6 +907,8 @@ namespace PatchWorkSecure
             HideAllPanels();
             endingPanel.SetActive(true);
             StartCoroutine(FadeInPanel(endingPanel));
+            AudioManager.Instance?.PlayBgmEnding();
+            AudioManager.Instance?.PlayClear();
 
             if (endingText != null) endingText.text = "🏢✨ 1年間、無事に会社を守り抜いた";
             if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";

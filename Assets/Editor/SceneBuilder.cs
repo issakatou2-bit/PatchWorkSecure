@@ -56,8 +56,11 @@ namespace PatchWorkSecure.EditorTools
             var gmGO = new GameObject("GameManager", typeof(GameManager));
             var gameManager = gmGO.GetComponent<GameManager>();
             var so = new SerializedObject(gameManager);
+            SetRef(so, "shakeRoot", canvasGO.GetComponent<RectTransform>());
 
             if (!Directory.Exists(PrefabDir)) Directory.CreateDirectory(PrefabDir);
+
+            BuildAudioManager();
 
             BuildStatusBar(canvasGO.transform, so);
             BuildNavigator(canvasGO.transform, so);
@@ -72,6 +75,7 @@ namespace PatchWorkSecure.EditorTools
             BuildQuizPanel(canvasGO.transform, so);
             BuildEndingPanel(canvasGO.transform, so);
             BuildSummaryPanel(canvasGO.transform, so);
+            BuildSettingsOverlay(canvasGO.transform, so); // 常時最前面に来るよう最後に生成する
 
             var choicePrefab = BuildButtonPrefab("ChoiceButtonPrefab");
             var defensePrefab = BuildButtonPrefab("DefenseButtonPrefab");
@@ -278,6 +282,12 @@ namespace PatchWorkSecure.EditorTools
             trackRT.sizeDelta = new Vector2(900, 50);
             trackGO.AddComponent<LayoutElement>().preferredWidth = 900;
 
+            // スイートゾーン（GameManagerの判定しきい値と対応する帯を可視化する）
+            float goodHalf = (1f - GameManager.ParryGoodThreshold) * 0.5f;
+            float perfectHalf = (1f - GameManager.ParryPerfectThreshold) * 0.5f;
+            AddParryZone(trackRT, "GoodZone", 0.5f - goodHalf, 0.5f + goodHalf, new Color(0.55f, 0.75f, 0.4f, 0.55f));
+            AddParryZone(trackRT, "PerfectZone", 0.5f - perfectHalf, 0.5f + perfectHalf, new Color(0.95f, 0.8f, 0.25f, 0.8f));
+
             var markerGO = new GameObject("ParryMarker", typeof(Image));
             markerGO.transform.SetParent(trackRT, false);
             markerGO.GetComponent<Image>().color = new Color(0.95f, 0.85f, 0.25f);
@@ -288,6 +298,10 @@ namespace PatchWorkSecure.EditorTools
             markerRT.sizeDelta = new Vector2(20, 50);
             markerRT.anchoredPosition = Vector2.zero;
 
+            var feedbackText = CreateLabel(rt, "ParryFeedbackText", "", 32, 0, bold: true);
+            feedbackText.alignment = TextAlignmentOptions.Center;
+            feedbackText.gameObject.AddComponent<LayoutElement>().preferredHeight = 50;
+
             var parryBtn = CreateButton(rt, "ParryButton", "ここだ！");
             var parryLE = parryBtn.gameObject.AddComponent<LayoutElement>();
             parryLE.preferredWidth = 300;
@@ -297,6 +311,20 @@ namespace PatchWorkSecure.EditorTools
             SetRef(so, "parryTrack", trackRT);
             SetRef(so, "parryMarker", markerRT);
             SetRef(so, "parryButton", parryBtn);
+            SetRef(so, "parryFeedbackText", feedbackText);
+        }
+
+        /// <summary>パリィトラック上に判定帯を描く。マーカーより先に生成し、常にマーカーが手前に来るようにする。</summary>
+        private static void AddParryZone(RectTransform trackRT, string name, float xMin, float xMax, Color color)
+        {
+            var go = new GameObject(name, typeof(Image));
+            go.transform.SetParent(trackRT, false);
+            go.GetComponent<Image>().color = color;
+            var zoneRT = go.GetComponent<RectTransform>();
+            zoneRT.anchorMin = new Vector2(xMin, 0f);
+            zoneRT.anchorMax = new Vector2(xMax, 1f);
+            zoneRT.offsetMin = Vector2.zero;
+            zoneRT.offsetMax = Vector2.zero;
         }
 
         private static void BuildResultPanel(Transform parent, SerializedObject so)
@@ -473,6 +501,92 @@ namespace PatchWorkSecure.EditorTools
             SetRef(so, "summaryPanel", rt.gameObject);
             SetRef(so, "summaryText", text);
             SetRef(so, "summaryCloseButton", btn);
+        }
+
+        // ================= オーディオ =================
+
+        /// <summary>BGM用/SE用のAudioSourceを1体のGameObjectにまとめて持たせる。</summary>
+        private static void BuildAudioManager()
+        {
+            var go = new GameObject("AudioManager", typeof(AudioManager));
+
+            var bgmSource = go.AddComponent<AudioSource>();
+            bgmSource.loop = true;
+            bgmSource.playOnAwake = false;
+
+            var seSource = go.AddComponent<AudioSource>();
+            seSource.loop = false;
+            seSource.playOnAwake = false;
+
+            var soAudio = new SerializedObject(go.GetComponent<AudioManager>());
+            SetRef(soAudio, "bgmSource", bgmSource);
+            SetRef(soAudio, "seSource", seSource);
+            soAudio.ApplyModifiedProperties();
+        }
+
+        // ================= 設定オーバーレイ =================
+
+        /// <summary>右上に常時表示する歯車ボタンと、ミュート切替・タイトルへ戻る導線を持つ設定オーバーレイ。</summary>
+        private static void BuildSettingsOverlay(Transform parent, SerializedObject so)
+        {
+            var btnGO = new GameObject("SettingsOpenButton", typeof(Image), typeof(Button));
+            btnGO.transform.SetParent(parent, false);
+            var btnBg = btnGO.GetComponent<Image>();
+            btnBg.color = new Color(0.2f, 0.2f, 0.24f, 0.85f);
+            var btnRT = btnGO.GetComponent<RectTransform>();
+            btnRT.anchorMin = new Vector2(1, 1);
+            btnRT.anchorMax = new Vector2(1, 1);
+            btnRT.pivot = new Vector2(1, 1);
+            btnRT.sizeDelta = new Vector2(56, 56);
+            btnRT.anchoredPosition = new Vector2(-16, -16);
+
+            var icon = CreateLabel(btnGO.transform, "Icon", "⚙", 30, 0);
+            icon.alignment = TextAlignmentOptions.Center;
+            var iconRT = icon.GetComponent<RectTransform>();
+            iconRT.anchorMin = Vector2.zero;
+            iconRT.anchorMax = Vector2.one;
+            iconRT.offsetMin = Vector2.zero;
+            iconRT.offsetMax = Vector2.zero;
+
+            var openBtn = btnGO.GetComponent<Button>();
+            openBtn.targetGraphic = btnBg;
+            ApplyButtonColors(openBtn);
+
+            var overlayRT = CreateFullScreenPanel(
+                "SettingsPanel", parent, new Color(0.05f, 0.05f, 0.07f, 0.92f), new Color(0.5f, 0.5f, 0.55f));
+            var layout = overlayRT.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 24;
+            layout.childControlHeight = false;
+            layout.childControlWidth = false;
+
+            var title = CreateLabel(overlayRT, "SettingsTitle", "設定", 36, 0, bold: true);
+            title.alignment = TextAlignmentOptions.Center;
+
+            var muteBtn = CreateButton(overlayRT, "MuteButton", "🔊 音声：オン");
+            var muteLE = muteBtn.gameObject.AddComponent<LayoutElement>();
+            muteLE.preferredWidth = 320;
+            muteLE.preferredHeight = 64;
+            var muteLabel = muteBtn.GetComponentInChildren<TextMeshProUGUI>();
+
+            var backToTitleBtn = CreateButton(overlayRT, "BackToTitleButton", "タイトルへ戻る");
+            var backLE = backToTitleBtn.gameObject.AddComponent<LayoutElement>();
+            backLE.preferredWidth = 320;
+            backLE.preferredHeight = 64;
+
+            var closeBtn = CreateButton(overlayRT, "CloseButton", "閉じる");
+            var closeLE = closeBtn.gameObject.AddComponent<LayoutElement>();
+            closeLE.preferredWidth = 320;
+            closeLE.preferredHeight = 64;
+
+            SetRef(so, "settingsPanel", overlayRT.gameObject);
+            SetRef(so, "settingsOpenButton", openBtn);
+            SetRef(so, "settingsCloseButton", closeBtn);
+            SetRef(so, "settingsMuteButton", muteBtn);
+            SetRef(so, "settingsMuteButtonLabel", muteLabel);
+            SetRef(so, "settingsBackToTitleButton", backToTitleBtn);
+            // BuildSettingsOverlayはBuildScene()内で最後に呼ばれるため、
+            // btnGO/overlayRTは他の全画面パネルより自然に手前へ来る（overlayRTが最後尾＝最前面）。
         }
 
         // ================= プレハブ =================

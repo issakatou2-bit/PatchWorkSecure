@@ -142,12 +142,18 @@ namespace PatchWorkSecure.EditorTools
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            var periodLabel = CreateLabel(rt, "PeriodLabel", "📅 4月上旬（1/36）", 26, 250, bold: true);
-            var budgetText = CreateLabel(rt, "BudgetText", "💰 予算 100", 22, 150);
+            var periodLabel = CreateLabel(rt, "PeriodLabel", "4月上旬（1/36）", 26, 250, bold: true);
+
+            CreateIconChip(rt, new Color(0.35f, 0.75f, 0.35f));
+            var budgetText = CreateLabel(rt, "BudgetText", "予算 100", 22, 150);
             var budgetBar = CreateBar(rt, "BudgetBar", new Color(0.35f, 0.75f, 0.35f));
-            var trustText = CreateLabel(rt, "TrustText", "🤝 人望 30", 22, 150);
+
+            CreateIconChip(rt, new Color(0.35f, 0.55f, 0.85f));
+            var trustText = CreateLabel(rt, "TrustText", "人望 30", 22, 150);
             var trustBar = CreateBar(rt, "TrustBar", new Color(0.35f, 0.55f, 0.85f));
-            var stressText = CreateLabel(rt, "StressText", "😣 ストレス 20", 22, 160);
+
+            CreateIconChip(rt, new Color(0.85f, 0.45f, 0.35f));
+            var stressText = CreateLabel(rt, "StressText", "ストレス 20", 22, 160);
             var stressBar = CreateBar(rt, "StressBar", new Color(0.85f, 0.45f, 0.35f));
 
             SetRef(so, "periodLabel", periodLabel);
@@ -232,7 +238,7 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildDayPanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel(
-                "DayPanel", parent, new Color(0.11f, 0.13f, 0.12f, 0.95f), AccentDay, "📅 本日の業務");
+                "DayPanel", parent, new Color(0.11f, 0.13f, 0.12f, 0.95f), AccentDay, "本日の業務");
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(30, 30, 70, 30);
             layout.spacing = 20;
@@ -242,7 +248,7 @@ namespace PatchWorkSecure.EditorTools
             var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める");
             proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
 
-            var defenseTitle = CreateLabel(rt, "DefenseTitle", "🛡️ セキュリティ対策", 20, 0, bold: true);
+            var defenseTitle = CreateLabel(rt, "DefenseTitle", "セキュリティ対策", 20, 0, bold: true);
             defenseTitle.color = new Color(0.85f, 0.9f, 0.88f);
 
             var containerGO = new GameObject("DefenseButtonContainer", typeof(RectTransform));
@@ -262,7 +268,7 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildChorePanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel(
-                "ChorePanel", parent, new Color(0.12f, 0.13f, 0.17f, 0.95f), AccentChore, "📨 雑務対応");
+                "ChorePanel", parent, new Color(0.12f, 0.13f, 0.17f, 0.95f), AccentChore, "雑務対応");
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(30, 30, 70, 30);
             layout.spacing = 24;
@@ -286,7 +292,7 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildAttackPanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel(
-                "AttackPanel", parent, new Color(0.17f, 0.10f, 0.10f, 0.95f), AccentAttack, "🚨 インシデント対応");
+                "AttackPanel", parent, new Color(0.17f, 0.10f, 0.10f, 0.95f), AccentAttack, "インシデント対応");
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(30, 30, 70, 30);
             layout.spacing = 16;
@@ -297,7 +303,7 @@ namespace PatchWorkSecure.EditorTools
             var gradeText = CreateLabel(rt, "AttackGradeText", "（グレード）", 20, 0);
             gradeText.color = new Color(0.9f, 0.7f, 0.65f);
             var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 22, 0);
-            var scTerm = CreateLabel(rt, "ScTermText", "📘（SC用語）", 18, 0);
+            var scTerm = CreateLabel(rt, "ScTermText", "（SC用語）", 18, 0);
             scTerm.color = new Color(0.75f, 0.8f, 0.85f);
 
             var containerGO = new GameObject("ChoiceButtonContainer", typeof(RectTransform));
@@ -320,7 +326,7 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildParryPanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel(
-                "ParryPanel", parent, new Color(0.16f, 0.14f, 0.08f, 0.95f), AccentParry, "⚡ 意思決定");
+                "ParryPanel", parent, new Color(0.16f, 0.14f, 0.08f, 0.95f), AccentParry, "意思決定");
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(30, 30, 70, 30);
             layout.spacing = 30;
@@ -393,7 +399,7 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildResultPanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel(
-                "ResultPanel", parent, new Color(0.12f, 0.12f, 0.15f, 0.95f), AccentResult, "📋 対応結果");
+                "ResultPanel", parent, new Color(0.12f, 0.12f, 0.15f, 0.95f), AccentResult, "対応結果");
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(30, 30, 70, 30);
             layout.spacing = 24;
@@ -513,7 +519,7 @@ namespace PatchWorkSecure.EditorTools
             layout.childControlHeight = false;
             layout.childControlWidth = true;
 
-            var progress = CreateLabel(card, "QuizProgressText", "事前クイズ　1/3", 18, 0);
+            var progress = CreateLabel(card, "QuizProgressText", "事前クイズ 1/3", 18, 0);
             progress.alignment = TextAlignmentOptions.Center;
             progress.color = new Color(0.6f, 0.78f, 0.66f);
 
@@ -632,7 +638,7 @@ namespace PatchWorkSecure.EditorTools
             btnRT.sizeDelta = new Vector2(56, 56);
             btnRT.anchoredPosition = new Vector2(-16, -16);
 
-            var icon = CreateLabel(btnGO.transform, "Icon", "⚙", 30, 0);
+            var icon = CreateLabel(btnGO.transform, "Icon", "設定", 16, 0, bold: true);
             icon.alignment = TextAlignmentOptions.Center;
             var iconRT = icon.GetComponent<RectTransform>();
             iconRT.anchorMin = Vector2.zero;
@@ -657,10 +663,10 @@ namespace PatchWorkSecure.EditorTools
             layout.childControlHeight = false;
             layout.childControlWidth = false;
 
-            var title = CreateLabel(card, "SettingsTitle", "⚙ 設定", 36, 0, bold: true);
+            var title = CreateLabel(card, "SettingsTitle", "設定", 36, 0, bold: true);
             title.alignment = TextAlignmentOptions.Center;
 
-            var muteBtn = CreateButton(card, "MuteButton", "🔊 音声：オン");
+            var muteBtn = CreateButton(card, "MuteButton", "音声：オン");
             var muteLE = muteBtn.gameObject.AddComponent<LayoutElement>();
             muteLE.preferredWidth = 320;
             muteLE.preferredHeight = 64;
@@ -754,6 +760,27 @@ namespace PatchWorkSecure.EditorTools
             var shadow = go.AddComponent<Shadow>();
             shadow.effectColor = new Color(0f, 0f, 0f, alpha);
             shadow.effectDistance = new Vector2(distance, -distance);
+        }
+
+        /// <summary>
+        /// 絵文字の代わりに使う小さな色付き角丸チップ。フォントのグリフに依存しないアイコン代用。
+        /// (Meiryo SDFはCustom Charactersで生成されており絵文字グリフを持たないため、
+        /// アイコンが必要な箇所は文字ではなく色チップで表現する)
+        /// </summary>
+        private static void CreateIconChip(Transform parent, Color color)
+        {
+            var go = new GameObject("IconChip", typeof(Image));
+            go.transform.SetParent(parent, false);
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            img.raycastTarget = false;
+            ApplyRounded(go, PanelSprite);
+
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = 26;
+            le.preferredHeight = 26;
+            le.flexibleWidth = 0;
+            le.flexibleHeight = 0;
         }
 
         /// <summary>パネル左上に、フェーズ名を示す角丸バッジを載せる（旧・全幅アクセント帯の置き換え）。</summary>

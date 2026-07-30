@@ -307,7 +307,7 @@ namespace PatchWorkSecure
             attackNameText.text = attack.DisplayName;
             attackGradeText.text = attack.Grade == AttackGrade.None ? "" : GradeLabel(attack.Grade);
             attackIntroLine.text = $"「{attack.LineIntro}」";
-            scTermText.text = $"📘 {attack.ScTerm} — {attack.ScNote}";
+            scTermText.text = $"{attack.ScTerm} — {attack.ScNote}";
 
             BuildChoiceButtons();
             UpdateNavigator();
@@ -393,7 +393,7 @@ namespace PatchWorkSecure
                 if (label != null)
                 {
                     string lvText = currentLvl > 0 ? $" Lv.{currentLvl}" : "";
-                    label.text = $"{def.DisplayName}{lvText}\n<size=65%>📘{def.ScTerm}　{rightText}</size>";
+                    label.text = $"{def.DisplayName}{lvText}\n<size=65%>{def.ScTerm} {rightText}</size>";
                 }
 
                 if (button != null)
@@ -534,8 +534,8 @@ namespace PatchWorkSecure
             resultPanel.SetActive(true);
             StartCoroutine(FadeInPanel(resultPanel));
             resultText.text = result.Defended
-                ? $"🛡️ {result.Flavor}（防御率{Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
-                : $"💥 {result.Flavor}（予算-{result.BudgetDamage}, 人望-{result.TrustDamage}）";
+                ? $"{result.Flavor}（防御率{Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
+                : $"{result.Flavor}（予算-{result.BudgetDamage}, 人望-{result.TrustDamage}）";
             resultCharacterLine.text = $"「{result.CharacterLine}」";
 
             UpdateNavigatorForResult(result);
@@ -699,7 +699,7 @@ namespace PatchWorkSecure
         {
             if (settingsMuteButtonLabel == null) return;
             bool muted = AudioManager.Instance != null && AudioManager.Instance.IsMuted;
-            settingsMuteButtonLabel.text = muted ? "🔇 音声：オフ" : "🔊 音声：オン";
+            settingsMuteButtonLabel.text = muted ? "音声：オフ" : "音声：オン";
         }
 
         /// <summary>状況に応じてナビゲーターの表情とセリフを変える。</summary>
@@ -793,7 +793,7 @@ namespace PatchWorkSecure
 
             var q = _quizQueue[_quizIndex];
             if (quizProgressText != null)
-                quizProgressText.text = $"{(_isPreQuiz ? "事前クイズ" : "事後クイズ")}　{_quizIndex + 1}/{_quizQueue.Count}";
+                quizProgressText.text = $"{(_isPreQuiz ? "事前クイズ" : "事後クイズ")} {_quizIndex + 1}/{_quizQueue.Count}";
             if (quizQuestionText != null)
                 quizQuestionText.text = q.Question;
 
@@ -893,7 +893,7 @@ namespace PatchWorkSecure
             AudioManager.Instance?.PlayBgmEnding();
             AudioManager.Instance?.PlayGameOver();
 
-            if (endingText != null) endingText.text = $"📉 {_state.GameOverReason}";
+            if (endingText != null) endingText.text = _state.GameOverReason;
             if (endingCharacterLine != null) endingCharacterLine.text = "";
             if (navigatorPortrait != null)
             {
@@ -910,7 +910,7 @@ namespace PatchWorkSecure
             AudioManager.Instance?.PlayBgmEnding();
             AudioManager.Instance?.PlayClear();
 
-            if (endingText != null) endingText.text = "🏢✨ 1年間、無事に会社を守り抜いた";
+            if (endingText != null) endingText.text = "1年間、無事に会社を守り抜いた";
             if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";
             if (navigatorPortrait != null)
             {

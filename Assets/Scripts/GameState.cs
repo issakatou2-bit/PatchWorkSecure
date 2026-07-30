@@ -110,8 +110,8 @@ namespace PatchWorkSecure
         {
             Trust = Clamp(Trust + (solved ? trustGain : -2), 0, 100);
             Budget = Clamp(Budget + DailyIncome, 0, 999);
-            AddLog(solved ? $"✅ 雑務を解決した（人望+{trustGain}）" : "⚠️ 対応を後回しにした（人望-2）");
-            AddLog($"💰 本日の売上 +¥{DailyIncome}");
+            AddLog(solved ? $"雑務を解決した（人望+{trustGain}）" : "対応を後回しにした（人望-2）");
+            AddLog($"本日の売上 +¥{DailyIncome}");
 
             if (Trust <= 0)
             {
@@ -133,7 +133,7 @@ namespace PatchWorkSecure
             Budget -= next.Cost;
             Stress = Clamp(Stress + next.StressCost, 0, 100);
             DefenseLevels[key] = currentLvl + 1;
-            AddLog($"🔧 {def.DisplayName} を Lv.{currentLvl + 1} に強化した（予算-{next.Cost}）");
+            AddLog($"{def.DisplayName} を Lv.{currentLvl + 1} に強化した（予算-{next.Cost}）");
             return true;
         }
 
@@ -199,7 +199,7 @@ namespace PatchWorkSecure
             if (defended)
             {
                 result.Flavor = margin < 0.08 ? "紙一重で防いだ！" : "危なげなく防いだ。";
-                AddLog($"🛡️ {attack.DisplayName}を{result.Flavor}（防御率{Math.Round(finalRate * 100)}%）");
+                AddLog($"{attack.DisplayName}を{result.Flavor}（防御率{Math.Round(finalRate * 100)}%）");
             }
             else
             {
@@ -213,7 +213,7 @@ namespace PatchWorkSecure
                 result.Flavor = margin < 0.08 ? "僅かの差で防げなかった…" : "呆気なく突破された…";
                 result.BudgetDamage = damage;
                 result.TrustDamage = attack.DamageTrust;
-                AddLog($"💥 {attack.DisplayName}に{result.Flavor}（予算-{damage}, 人望-{attack.DamageTrust}）");
+                AddLog($"{attack.DisplayName}に{result.Flavor}（予算-{damage}, 人望-{attack.DamageTrust}）");
             }
 
             if (Budget <= 0)

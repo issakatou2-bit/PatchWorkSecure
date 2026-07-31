@@ -37,7 +37,8 @@ GameData.cs          ← マスターデータ(攻撃10種・防御8種・SC用�
 GameState.cs         ← コアロジック(防御率計算・攻撃判定・資源管理)。MonoBehaviour非依存の純粋C#
 GameManager.cs       ← MonoBehaviour。GameStateの状態をUIに反映し、フェーズ進行を管理する
 AudioManager.cs      ← BGM/SEの一括管理。AudioClip未設定でも無音で動く(素材が無くても全アクションにフックを仕込める)
-NavigatorPersona.cs  ← ナビゲーターキャラ1人分のデータ(ScriptableObject)。「3人から1人選べる」の土台
+UIEffects.cs         ← 演出専用。フラッシュ/シェイク/中央バナー/浮遊テキスト/バースト/スケールパンチ
+NavigatorPersona.cs  ← ナビゲーターキャラ1人分のデータ(ScriptableObject)。名前・イメージカラー・表情・セリフ
 UIButtonPunch.cs     ← ボタン押下時のスケール演出(IPointerDown/Up)
 EducationTracker.cs  ← 教育クイズ(事前/事後)・PlayerPrefsへの永続化・CSV出力
 Assets/Editor/SceneBuilder.cs ← エディタ拡張。UnityメニューからUIシーン全体を自動生成する
@@ -92,11 +93,28 @@ Start() → ShowTitle()
    実績のある標準機能だけで組むという方針（独自シェーダー/生成テクスチャは避ける）。
 
 7. **ナビゲーターキャラは`NavigatorPersona`(ScriptableObject)経由にする。**
-   `GameManager`に`faceNormal`等を直接持たせる方式は廃止済み。`Assets/Personas/`配下に
-   `Persona_Aya.asset`等がある想定で、`GameManager.personas[]`から選ばれた1体が`_activePersona`に
-   入る。タイトル画面の「ナビゲーターを選ぶ」ボタン列(`BuildPersonaSelectButtons`)から選択でき、
-   `PlayerPrefs`(`pws_selected_persona_index`)に永続化される。新しいキャラを増やすときは
+   `GameManager`に`faceNormal`等を直接持たせる方式は廃止済み。`Assets/Personas/`配下の
+   `Persona_Hinata.asset`等から、`GameManager.personas[]`で選ばれた1体が`_activePersona`に入る。
+   表情スプライトだけでなく**セリフもキャラごとにアセット側が持つ**（空欄なら`GameManager`の
+   共通セリフに自動フォールバックする`Pick()`）。タイトル画面の「ナビゲーターを選ぶ」ボタン列から
+   選択でき、`PlayerPrefs`(`pws_selected_persona_index`)に永続化される。新しいキャラを増やすときは
    `SceneBuilder.BuildNavigatorPersonas()`に`GetOrCreatePersona(...)`を追加するだけでよい。
+
+8. **ステータス表示は必ず「項目名＋数値」をひとつの文字列で更新する。**
+   `RefreshUI()`が数値だけを書き込むと、SceneBuilderが置いた「予算 100」というラベルが
+   「100」に上書きされ、何のゲージか分からなくなる(実際に発生した不具合)。
+   `GameManager.ApplyStat()`に`v => $"予算　¥{v}"`のような書式デリゲートを渡す方式を守ること。
+
+9. **LayoutGroupの`childControlWidth/Height`をfalseにするなら、子のサイズは自分で設定する。**
+   falseのとき`LayoutElement.preferredWidth/Height`は無視され、子は自身の`sizeDelta`のままになる
+   （動的生成した子は0サイズになって見えなくなる）。`BuildPersonaSelectButtons()`が
+   `rect.sizeDelta`を明示しているのはこのため。逆にtrueにした場合は、子に必ず`LayoutElement`で
+   サイズを与えること。
+
+10. **画面シェイクはCanvasではなく`ShakeRoot`を動かす。**
+    Screen Space - OverlayのCanvasはRectTransformがUnity側に固定されていて動かせない。
+    `SceneBuilder`がCanvas直下に`ShakeRoot`を作り、ゲームUIを全てその配下に入れている。
+    演出レイヤー(`EffectLayer`)だけは`ShakeRoot`の外に置き、揺れの影響を受けないようにしてある。
 
 ---
 
@@ -135,11 +153,18 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 - 防御8種フル実装（Lv1〜3、基礎防御率70%上限あり）
 - モンテカルロ・バランス検証済み（`balance_sim.js`、放置プレイ5.6% vs 熟練78%）
 - タイトル→事前クイズ→本編→エンディング→事後クイズ→結果サマリーの一連のフロー実装済み
-- `NavigatorPersona`によるキャラ選択の土台実装済み（`Persona_Aya`/`Persona_2`/`Persona_3`の
-  3体分の器はあるが、2・3はキャラ未定のプレースホルダー。表情スプライトは3体とも全種null）
+- 画面レイアウトはダッシュボード型（上=ステータスバー / 左=対策リスト・リスク・ログ /
+  中央=フェーズパネル / 下=キャラ立ち絵と吹き出し / 最前面=演出レイヤー）
+- ナビゲーター「ひなた」実装済み（明るく元気な口調のセリフ16種、イメージカラー=ピンク）。
+  `Persona_Aria`/`Persona_Chloe`は器だけのプレースホルダー（セリフ未入力＝共通セリフで動く）。
+  表情スプライトは3体とも全種null（イメージカラーで塗った枠が代わりに出る）
+- セリフは吹き出し内に1文字ずつ表示（タイプライター演出）
 - パリィ演出（スイートゾーン可視化、PERFECT!!/GOOD!/MISS...判定、攻撃グレード別の速度スケーリング）
 - `AudioManager`によるBGM/SEフック実装済み（クリップは全て未設定＝無音、素材が届けば差すだけでよい）
-- フローティング数値演出・被弾シェイク・設定オーバーレイ（ミュート切替）実装済み
+- `UIEffects`による手応え演出（被弾＝赤フラッシュ+シェイク+「被弾！」バナー、防御成功＝金フラッシュ+
+  バナー、数値増減＝カウントアップ+浮遊テキスト+バースト、クイズ正誤＝フラッシュ+バナー）
+- リスク表示（`GameState.EstimateExpectedDamage()`）。対策を買うと被害予測がその場で下がるので、
+  投資の意味が数字で伝わる
 - UIは角丸カード+ドロップシャドウ主体（Unity組み込みスプライトのみ、独自テクスチャなし）
 - 教育クイズ（事前/事後、8問プール）実装済み、`EducationTracker`でPlayerPrefs永続化・CSV出力対応
 - 対策強化パネル・攻撃選択パネルの動的UI生成
@@ -148,11 +173,12 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 ## 5. 未完了・次にやってほしいこと（優先順位順）
 
 1. **素材の実装**：加藤さんが学校のComfyUI環境（`/mnt/skills`ではなく別PC）で立ち絵（6表情）を
-   生成後、`pixelate.py`でドット化してGitHub経由で受け取る想定。届いたら`Persona_Aya.asset`等の
-   `NavigatorPersona`アセット(`Assets/Personas/`)の各Sprite欄に直接ドラッグするだけでよい
+   生成後、`pixelate.py`でドット化してGitHub経由で受け取る想定。届いたら
+   `Assets/Personas/Persona_Hinata.asset`の各Sprite欄に直接ドラッグするだけでよい
    （旧方式のようなGameManagerフィールドへの自動割当スクリプトは不要になった）。
-   キャラ2・3を正式に作る場合は、名前・性格が決まり次第`Persona_2`/`Persona_3`アセットの
-   `DisplayName`/`Description`を更新すること。
+   まずは「ひなた」1人分（6表情）があれば成立する。キャラ2・3を正式に作る場合は、
+   名前・性格が決まり次第`Persona_Aria`/`Persona_Chloe`の`DisplayName`/`Description`/セリフ欄を
+   更新すること（セリフ欄が空のままでも共通セリフで動く）。
 2. **ドット絵・見下ろし視点のオフィス背景ビジュアル**（将来的な検討事項、加藤さんが参考UIを提示済み）：
    部屋レイアウト・社員ドット絵・什器アイコンなど専用素材が必要な大きめの機能。素材が揃うまでは
    現行のパネル/カードUIで進行し、揃った時点で背景として組み込む2段階の計画。

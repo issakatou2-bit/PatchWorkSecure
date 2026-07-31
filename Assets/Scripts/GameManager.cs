@@ -10,10 +10,8 @@ namespace PatchWorkSecure
     /// ゲーム全体の進行を管理し、GameStateの状態をUIに反映するクラス。
     /// GameState（純粋C#）がルールを持ち、このクラスは「見せ方」だけを担当する。
     ///
-    /// 【Unityエディタでの設定手順】
-    /// 1. 空のGameObjectを作り、名前を "GameManager" にする
-    /// 2. このスクリプトをアタッチする
-    /// 3. インスペクタに表示される各項目に、対応するUI要素をドラッグして割り当てる
+    /// UI要素の生成とInspector参照の割当は Assets/Editor/SceneBuilder.cs が自動で行うため、
+    /// 新しいフィールドを足したら必ずSceneBuilder側にも生成＋SetRef()を追加すること。
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -21,28 +19,52 @@ namespace PatchWorkSecure
         public const float ParryPerfectThreshold = 0.85f;
         public const float ParryGoodThreshold = 0.5f;
 
+        // 被害予測バーの上限。これを超えると「危険」表示になる（EstimateExpectedDamageの実測レンジに合わせた値）。
+        private const float RiskBarMax = 18f;
+
         // ---- ステータス表示 ----
-        [Header("ステータス表示")]
+        [Header("ステータスバー")]
         [SerializeField] private TextMeshProUGUI periodLabel;   // 「4月上旬」
+        [SerializeField] private TextMeshProUGUI turnLabel;     // 「ターン 1 / 36」
         [SerializeField] private TextMeshProUGUI budgetText;
         [SerializeField] private TextMeshProUGUI trustText;
         [SerializeField] private TextMeshProUGUI stressText;
         [SerializeField] private Image budgetBar;
         [SerializeField] private Image trustBar;
         [SerializeField] private Image stressBar;
+        [SerializeField] private RectTransform budgetChip;      // 増減演出の発生位置
+        [SerializeField] private RectTransform trustChip;
+        [SerializeField] private RectTransform stressChip;
 
         // ---- ナビゲーターキャラ ----
         [Header("ナビゲーター")]
         [SerializeField] private Image navigatorPortrait;
+        [SerializeField] private Image portraitFrame;             // 立ち絵の背後の枠（イメージカラーで着色）
+        [SerializeField] private GameObject speechBubble;
         [SerializeField] private TextMeshProUGUI navigatorLine;
-        [SerializeField] private TextMeshProUGUI navigatorNameText; // 選択中のキャラ名(任意表示)
+        [SerializeField] private TextMeshProUGUI navigatorNameText;
+        [SerializeField] private Image navigatorNameChip;         // 名前チップ（イメージカラーで着色）
+        [SerializeField] private Image speechBubbleAccent;        // 吹き出しの縁（イメージカラーで着色）
 
-        [Header("ナビゲーター候補（3人から1人を選ぶ想定。素材未着手でも名前だけで機能する）")]
+        [Header("ナビゲーター候補（3人から1人を選ぶ想定）")]
         [SerializeField] private NavigatorPersona[] personas;
 
         [Header("キャラ選択（タイトル画面）")]
         [SerializeField] private Transform personaSelectContainer;
         [SerializeField] private GameObject personaSelectButtonPrefab;
+
+        // ---- サイドバー（常時表示） ----
+        [Header("サイドバー：対策リスト")]
+        [SerializeField] private Transform defenseButtonContainer;
+        [SerializeField] private GameObject defenseButtonPrefab;
+
+        [Header("サイドバー：リスク表示")]
+        [SerializeField] private TextMeshProUGUI riskLevelText;
+        [SerializeField] private TextMeshProUGUI riskDamageText;
+        [SerializeField] private Image riskBar;
+
+        [Header("サイドバー：ログ")]
+        [SerializeField] private TextMeshProUGUI logText;
 
         // ---- メインパネル ----
         [Header("メインパネル")]
@@ -74,7 +96,7 @@ namespace PatchWorkSecure
         [SerializeField] private TextMeshProUGUI summaryText;
         [SerializeField] private Button summaryCloseButton; // タイトルに戻る
 
-        [Header("設定オーバーレイ（常時表示の歯車ボタンから開く）")]
+        [Header("設定オーバーレイ")]
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private Button settingsOpenButton;
         [SerializeField] private Button settingsCloseButton;
@@ -82,10 +104,10 @@ namespace PatchWorkSecure
         [SerializeField] private TextMeshProUGUI settingsMuteButtonLabel;
         [SerializeField] private Button settingsBackToTitleButton;
 
-        [Header("演出（被弾シェイクの対象。未割当ならシェイクなし）")]
-        [SerializeField] private RectTransform shakeRoot;
+        [Header("演出")]
+        [SerializeField] private UIEffects effects;
 
-        [Header("操作ボタン（未割当でも動作するが、割り当てると自動配線される）")]
+        [Header("操作ボタン")]
         [SerializeField] private Button proceedButton;       // 「今日の業務を進める」
         [SerializeField] private Button solveChoreButton;     // 雑務：誠実に対応する
         [SerializeField] private Button postponeChoreButton;  // 雑務：後回しにする
@@ -98,14 +120,11 @@ namespace PatchWorkSecure
         [Header("攻撃パネル")]
         [SerializeField] private TextMeshProUGUI attackNameText;
         [SerializeField] private TextMeshProUGUI attackGradeText;
+        [SerializeField] private Image attackGradeChip;
         [SerializeField] private TextMeshProUGUI attackIntroLine;
         [SerializeField] private TextMeshProUGUI scTermText;
         [SerializeField] private Transform choiceButtonContainer;
         [SerializeField] private GameObject choiceButtonPrefab;
-
-        [Header("対策強化パネル（dayPanelの子として配置想定）")]
-        [SerializeField] private Transform defenseButtonContainer;
-        [SerializeField] private GameObject defenseButtonPrefab;
 
         [Header("パリィパネル")]
         [SerializeField] private RectTransform parryMarker;
@@ -117,9 +136,6 @@ namespace PatchWorkSecure
         [SerializeField] private TextMeshProUGUI resultText;
         [SerializeField] private TextMeshProUGUI resultCharacterLine;
 
-        [Header("ログ")]
-        [SerializeField] private TextMeshProUGUI logText;
-
         // ---- 内部状態 ----
         private GameState _state;
         private string _currentAttackKey;
@@ -128,8 +144,9 @@ namespace PatchWorkSecure
         private int _parryDirection = 1;
         private bool _parryActive;
         private float _currentParrySpeed;
+        private bool _isDayPhase;       // 対策強化を受け付けてよいフェーズか
 
-        // 前回表示時の数値（フローティング増減表示の差分計算に使う）
+        // 前回表示時の数値（増減演出の差分計算に使う）
         private int _prevBudget, _prevTrust, _prevStress;
 
         // クイズ進行状態（事前/事後で使い回す）
@@ -138,7 +155,17 @@ namespace PatchWorkSecure
         private int _quizCorrectCount;
         private int _quizTotalCount;
         private bool _isPreQuiz;
+        private bool _quizAnswering;    // 正誤演出中の二重回答を防ぐ
         private int _preCorrect, _preTotal, _postCorrect, _postTotal;
+
+        // 同じ対象に複数のアニメーションが重ならないよう、実行中のコルーチンを覚えておく
+        private readonly Dictionary<TextMeshProUGUI, Coroutine> _numberRoutines = new Dictionary<TextMeshProUGUI, Coroutine>();
+        private readonly Dictionary<Image, Coroutine> _barRoutines = new Dictionary<Image, Coroutine>();
+        private Coroutine _typeRoutine;
+        private string _currentSpokenLine;
+
+        private const string PersonaPrefKey = "pws_selected_persona_index";
+        private NavigatorPersona _activePersona;
 
         // 雑務のマスターデータ（後でScriptableObject化しても良い）
         private readonly (string text, int trustGain)[] _chores =
@@ -150,9 +177,6 @@ namespace PatchWorkSecure
         };
         private (string text, int trustGain) _currentChore;
 
-        private const string PersonaPrefKey = "pws_selected_persona_index";
-        private NavigatorPersona _activePersona;
-
         private void Start()
         {
             WireButtons();
@@ -161,14 +185,19 @@ namespace PatchWorkSecure
             ShowTitle();
         }
 
-        // ---- ナビゲーター選択 ----
+        private void Update()
+        {
+            if (_parryActive) UpdateParryMarker();
+        }
+
+        // ================= ナビゲーター =================
 
         private void LoadActivePersona()
         {
             if (personas == null || personas.Length == 0) { _activePersona = null; return; }
             int idx = Mathf.Clamp(PlayerPrefs.GetInt(PersonaPrefKey, 0), 0, personas.Length - 1);
             _activePersona = personas[idx];
-            RefreshNavigatorName();
+            ApplyPersonaTheme();
         }
 
         /// <summary>タイトル画面のキャラ選択ボタンを動的に生成する（BuildChoiceButtonsと同じパターン）。</summary>
@@ -183,8 +212,19 @@ namespace PatchWorkSecure
             {
                 int idx = i; // クロージャ対策
                 var go = Instantiate(personaSelectButtonPrefab, personaSelectContainer);
+                var persona = personas[idx];
+
+                // 横並びのコンテナは子のサイズを制御しない設定なので、ここで明示的に整える
+                var rect = go.GetComponent<RectTransform>();
+                if (rect != null) rect.sizeDelta = new Vector2(240f, 54f);
+
                 var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null) label.text = personas[idx] != null ? personas[idx].DisplayName : "（未設定）";
+                if (label != null) label.text = persona != null ? persona.DisplayName : "（未設定）";
+
+                // 選択中のキャラだけイメージカラーで塗り、どれを選んでいるか一目で分かるようにする。
+                var image = go.GetComponent<Image>();
+                if (image != null && persona != null)
+                    image.color = persona == _activePersona ? persona.ThemeColor : new Color(0.22f, 0.24f, 0.30f);
 
                 var button = go.GetComponent<Button>();
                 if (button != null)
@@ -204,20 +244,144 @@ namespace PatchWorkSecure
             _activePersona = personas[index];
             PlayerPrefs.SetInt(PersonaPrefKey, index);
             PlayerPrefs.Save();
-            RefreshNavigatorName();
-            UpdateNavigator();
+
+            ApplyPersonaTheme();
+            BuildPersonaSelectButtons(); // 選択中の強調表示を更新
+            UpdateNavigator(force: true);
+            if (effects != null && navigatorNameChip != null)
+                effects.Punch(navigatorNameChip.rectTransform, 1.3f);
         }
 
-        private void RefreshNavigatorName()
+        /// <summary>選択中キャラのイメージカラーを、名前チップ・吹き出しの縁・立ち絵枠に反映する。</summary>
+        private void ApplyPersonaTheme()
         {
+            Color theme = _activePersona != null ? _activePersona.ThemeColor : new Color(0.5f, 0.5f, 0.6f);
+
             if (navigatorNameText != null)
                 navigatorNameText.text = _activePersona != null ? _activePersona.DisplayName : "";
+            if (navigatorNameChip != null) navigatorNameChip.color = theme;
+            if (speechBubbleAccent != null) speechBubbleAccent.color = theme;
+            if (portraitFrame != null) portraitFrame.color = new Color(theme.r * 0.35f, theme.g * 0.35f, theme.b * 0.35f, 1f);
         }
+
+        /// <summary>
+        /// 表情とセリフを差し替える。セリフは1文字ずつ表示して「しゃべっている」感を出す。
+        /// 同じセリフのままなら打ち直さない（RefreshUIから頻繁に呼ばれるため）。
+        /// </summary>
+        private void Speak(Sprite face, string line, bool force = false)
+        {
+            ApplyFace(face);
+            if (speechBubble != null && !speechBubble.activeSelf) speechBubble.SetActive(true);
+            if (navigatorLine == null) return;
+            if (!force && line == _currentSpokenLine) return;
+
+            _currentSpokenLine = line;
+            if (_typeRoutine != null) StopCoroutine(_typeRoutine);
+            _typeRoutine = StartCoroutine(Typewriter(navigatorLine, line));
+        }
+
+        private IEnumerator Typewriter(TextMeshProUGUI label, string text, float charsPerSecond = 42f)
+        {
+            label.text = text;
+            label.ForceMeshUpdate();
+            int total = label.textInfo.characterCount;
+
+            label.maxVisibleCharacters = 0;
+            float shown = 0f;
+            while (shown < total)
+            {
+                shown += Time.deltaTime * charsPerSecond;
+                label.maxVisibleCharacters = Mathf.Min(total, Mathf.FloorToInt(shown));
+                yield return null;
+            }
+            label.maxVisibleCharacters = total;
+            _typeRoutine = null;
+        }
+
+        /// <summary>
+        /// 立ち絵を差し替える。素材が未実装（スプライトがnull）の間は、
+        /// キャラのイメージカラーで塗った矩形をプレースホルダーとして表示する。
+        /// </summary>
+        private void ApplyFace(Sprite face)
+        {
+            if (navigatorPortrait == null) return;
+            navigatorPortrait.sprite = face;
+            navigatorPortrait.color = face != null
+                ? Color.white
+                : (_activePersona != null ? _activePersona.ThemeColor : new Color(0.6f, 0.6f, 0.7f));
+        }
+
+        /// <summary>キャラ固有のセリフを使う。未入力なら共通のセリフにフォールバックする。</summary>
+        private static string Pick(string personaLine, string fallback)
+            => string.IsNullOrWhiteSpace(personaLine) ? fallback : personaLine;
+
+        /// <summary>状況に応じてナビゲーターの表情とセリフを変える。</summary>
+        private void UpdateNavigator(bool force = false)
+        {
+            if (navigatorPortrait == null || navigatorLine == null) return;
+            var p = _activePersona;
+
+            // タイトル画面（キャラ選択時点）ではまだ_stateが無いため、状態を見ないセリフだけを使う。
+            if (_state == null)
+            {
+                Speak(p?.FaceNormal, Pick(p?.LineNormal, "よろしくお願いします。一緒に会社を守りましょう。"), force);
+                return;
+            }
+
+            if (attackPanel != null && attackPanel.activeSelf)
+            {
+                var grade = GameData.Attacks[_currentAttackKey].Grade;
+                if (grade == AttackGrade.S)
+                    Speak(p?.FaceAlert, Pick(p?.LineAttackSevere, "これ、一番まずいやつです……対策、足りてますか？"), force);
+                else if (grade == AttackGrade.Rookie || grade == AttackGrade.Rising)
+                    Speak(p?.FaceWorried, Pick(p?.LineAttackNew, "見たことない手口です。慎重にいきましょう。"), force);
+                else
+                    Speak(p?.FaceWorried, Pick(p?.LineAttackNormal, "来ましたね。落ち着いて対応しましょう。"), force);
+                return;
+            }
+
+            if (parryPanel != null && parryPanel.activeSelf)
+            {
+                Speak(p?.FaceAlert, Pick(p?.LineParry, "タイミング、いきますよ……！"), force);
+                return;
+            }
+
+            if (_state.Stress > 65)
+                Speak(p?.FaceWorried, Pick(p?.LineHighStress, "みんな疲れてます。締めすぎも危険ですよ。"), force);
+            else if (_state.Trust < 20)
+                Speak(p?.FaceWorried, Pick(p?.LineLowTrust, "社内での信頼が薄いです。雑務対応、大事ですよ。"), force);
+            else if (_state.Budget < 30)
+                Speak(p?.FaceWorried, Pick(p?.LineLowBudget, "予算が心もとないですね。慎重に使いましょう。"), force);
+            else if (_state.DefenseLevels.Count == 0)
+                Speak(p?.FaceWorried, Pick(p?.LineNoDefense, "まだ何も対策がありません。何か入れませんか？"), force);
+            else if (_state.Day > GameState.TotalPeriods * 0.7f)
+                Speak(p?.FaceAlert, Pick(p?.LineEndgame, "年度末が近いです。攻撃も激しくなってきました。"), force);
+            else if (_state.Trust > 60)
+                Speak(p?.FaceProud, Pick(p?.LineGood, "社内の空気、いい感じですね。"), force);
+            else
+                Speak(p?.FaceNormal, Pick(p?.LineNormal, "今日も平穏です。備えを進めましょうか。"), force);
+        }
+
+        private void UpdateNavigatorForResult(AttackResult result)
+        {
+            var p = _activePersona;
+            if (result.Defended)
+            {
+                bool narrow = result.Flavor != null && result.Flavor.Contains("紙一重");
+                if (narrow) Speak(p?.FaceRelieved, Pick(p?.LineWinNarrow, "あぶなかった……！ でも、守りきりました。"), force: true);
+                else Speak(p?.FaceProud, Pick(p?.LineWin, "危なげなかったですね。備えの成果です。"), force: true);
+            }
+            else
+            {
+                Speak(p?.FaceSad, Pick(p?.LineLose, "……やられました。次はもっと備えましょう。"), force: true);
+            }
+        }
+
+        // ================= ボタン配線 =================
 
         /// <summary>
         /// ボタンのクリックイベントをコードから配線する。
         /// InspectorのOnClick()を手動設定する代わりに、ここでまとめて済ませる。
-        /// 各Buttonフィールドが未割当(null)の場合は何もしない（Inspector側で個別に設定していても問題ない）。
         /// </summary>
         private void WireButtons()
         {
@@ -246,45 +410,46 @@ namespace PatchWorkSecure
             });
         }
 
-        private void Update()
-        {
-            if (_parryActive) UpdateParryMarker();
-        }
-
-        // ---- フェーズ制御 ----
+        // ================= フェーズ制御 =================
 
         private void HideAllPanels()
         {
+            _isDayPhase = false;
             if (titlePanel != null) titlePanel.SetActive(false);
-            dayPanel.SetActive(false);
-            chorePanel.SetActive(false);
-            attackPanel.SetActive(false);
-            parryPanel.SetActive(false);
-            resultPanel.SetActive(false);
+            if (dayPanel != null) dayPanel.SetActive(false);
+            if (chorePanel != null) chorePanel.SetActive(false);
+            if (attackPanel != null) attackPanel.SetActive(false);
+            if (parryPanel != null) parryPanel.SetActive(false);
+            if (resultPanel != null) resultPanel.SetActive(false);
             if (quizPanel != null) quizPanel.SetActive(false);
             if (endingPanel != null) endingPanel.SetActive(false);
             if (summaryPanel != null) summaryPanel.SetActive(false);
         }
 
         /// <summary>
-        /// パネルをフェードインさせる（演出用）。CanvasGroupが無ければ自動で付ける。
-        /// 「切り替わった瞬間にパッと出る」冷たさを減らすための最小限の演出。
+        /// パネルを下からせり上げつつフェードインさせる。
+        /// 「切り替わった瞬間にパッと出る」冷たさを減らすための演出。
         /// </summary>
         private IEnumerator FadeInPanel(GameObject panel, float duration = 0.25f)
         {
             if (panel == null) yield break;
             var cg = panel.GetComponent<CanvasGroup>();
             if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            var rt = panel.GetComponent<RectTransform>();
+            Vector2 home = rt != null ? rt.anchoredPosition : Vector2.zero;
 
             cg.alpha = 0f;
             float t = 0f;
             while (t < duration)
             {
                 t += Time.deltaTime;
-                cg.alpha = Mathf.Clamp01(t / duration);
+                float p = Mathf.Clamp01(t / duration);
+                cg.alpha = p;
+                if (rt != null) rt.anchoredPosition = home + new Vector2(0, Mathf.Lerp(24f, 0f, p * p));
                 yield return null;
             }
             cg.alpha = 1f;
+            if (rt != null) rt.anchoredPosition = home;
         }
 
         private void ShowTitle()
@@ -293,6 +458,7 @@ namespace PatchWorkSecure
             titlePanel.SetActive(true);
             StartCoroutine(FadeInPanel(titlePanel));
             AudioManager.Instance?.PlayBgmTitle();
+            UpdateNavigator(force: true);
         }
 
         /// <summary>タイトル画面の「はじめる」ボタンから呼ぶ。事前クイズへ進む。</summary>
@@ -304,6 +470,7 @@ namespace PatchWorkSecure
         private void ShowDayPhase()
         {
             HideAllPanels();
+            _isDayPhase = true;
             dayPanel.SetActive(true);
             StartCoroutine(FadeInPanel(dayPanel));
             BuildDefensePanel();
@@ -319,6 +486,7 @@ namespace PatchWorkSecure
             chorePanel.SetActive(true);
             StartCoroutine(FadeInPanel(chorePanel));
             choreText.text = _currentChore.text;
+            BuildDefensePanel(); // 日常フェーズを抜けたので購入不可の見た目に更新する
             UpdateNavigator();
         }
 
@@ -340,7 +508,7 @@ namespace PatchWorkSecure
         private IEnumerator TransitionToAttackCheck()
         {
             HideAllPanels();
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(0.45f); // 増減演出を見せてから次へ
 
             if (_state.RollAttackOccurrence())
             {
@@ -365,9 +533,25 @@ namespace PatchWorkSecure
 
             var attack = GameData.Attacks[_currentAttackKey];
             attackNameText.text = attack.DisplayName;
-            attackGradeText.text = attack.Grade == AttackGrade.None ? "" : GradeLabel(attack.Grade);
+
+            bool hasGrade = attack.Grade != AttackGrade.None;
+            attackGradeText.text = hasGrade ? GradeLabel(attack.Grade) : "";
+            if (attackGradeChip != null)
+            {
+                attackGradeChip.gameObject.SetActive(hasGrade);
+                attackGradeChip.color = GradeColor(attack.Grade);
+            }
+
             attackIntroLine.text = $"「{attack.LineIntro}」";
             scTermText.text = $"{attack.ScTerm} — {attack.ScNote}";
+
+            // 攻撃の登場は毎回「来た」と分かるように、赤い明滅と軽い揺れで知らせる。
+            if (effects != null)
+            {
+                effects.Flash(UIEffects.Bad, attack.Grade == AttackGrade.S ? 0.34f : 0.20f, 0.45f);
+                effects.Shake(0.3f, attack.Grade == AttackGrade.S ? 16f : 9f);
+                if (attackNameText != null) effects.Punch(attackNameText.rectTransform, 1.5f, 0.35f);
+            }
 
             BuildChoiceButtons();
             UpdateNavigator();
@@ -386,6 +570,20 @@ namespace PatchWorkSecure
             }
         }
 
+        /// <summary>格付けごとの色。危険なほど赤に寄せる。</summary>
+        private static Color GradeColor(AttackGrade grade)
+        {
+            switch (grade)
+            {
+                case AttackGrade.S: return new Color(0.85f, 0.20f, 0.25f);
+                case AttackGrade.Veteran: return new Color(0.75f, 0.40f, 0.25f);
+                case AttackGrade.MidTier: return new Color(0.70f, 0.55f, 0.25f);
+                case AttackGrade.Rising: return new Color(0.45f, 0.55f, 0.70f);
+                case AttackGrade.Rookie: return new Color(0.45f, 0.65f, 0.55f);
+                default: return new Color(0.45f, 0.45f, 0.50f);
+            }
+        }
+
         /// <summary>対応選択肢のボタンを動的に生成する。</summary>
         private void BuildChoiceButtons()
         {
@@ -398,9 +596,11 @@ namespace PatchWorkSecure
                 var label = go.GetComponentInChildren<TextMeshProUGUI>();
                 if (label != null)
                 {
-                    string costText = choice.BudgetCost > 0 ? $"¥{choice.BudgetCost}" : "無料";
-                    string stressText = choice.StressCost >= 0 ? $"+{choice.StressCost}" : choice.StressCost.ToString();
-                    label.text = $"{choice.Label}\n<size=70%>{choice.Description}  {costText} / ストレス{stressText}</size>";
+                    string costText = choice.BudgetCost > 0 ? $"予算 -{choice.BudgetCost}" : "予算 0";
+                    string stressText = choice.StressCost >= 0
+                        ? $"ストレス +{choice.StressCost}"
+                        : $"ストレス {choice.StressCost}";
+                    label.text = $"{choice.Label}\n<size=68%><color=#9AA3B0>{choice.Description}　{costText} / {stressText}</color></size>";
                 }
 
                 var button = go.GetComponent<Button>();
@@ -415,13 +615,12 @@ namespace PatchWorkSecure
         }
 
         /// <summary>
-        /// 対策強化ボタンを動的に生成する（Reactプロトタイプの「セキュリティ対策」パネルと同じ設計）。
-        /// 攻撃対応ボタン(BuildChoiceButtons)と同じパターンで、GameData.Defensesの内容をそのまま反映する。
-        /// dayPanel配下に置く想定なので、攻撃/パリィ/結果フェーズ中は自動的に非表示になる。
+        /// 対策強化ボタンを動的に生成する。サイドバーに常時表示され、
+        /// 日常フェーズ以外では「見えるが押せない」状態になる（今の備えは常に確認できる）。
         /// </summary>
         private void BuildDefensePanel()
         {
-            if (defenseButtonContainer == null || defenseButtonPrefab == null) return;
+            if (defenseButtonContainer == null || defenseButtonPrefab == null || _state == null) return;
 
             foreach (Transform child in defenseButtonContainer)
                 Destroy(child.gameObject);
@@ -431,7 +630,8 @@ namespace PatchWorkSecure
                 string key = kv.Key;
                 var def = kv.Value;
                 int currentLvl = _state.DefenseLevels.TryGetValue(key, out int lv) ? lv : 0;
-                bool maxed = currentLvl >= def.Levels.Count;
+                int maxLvl = def.Levels.Count;
+                bool maxed = currentLvl >= maxLvl;
 
                 var go = Instantiate(defenseButtonPrefab, defenseButtonContainer);
                 var label = go.GetComponentInChildren<TextMeshProUGUI>();
@@ -452,18 +652,27 @@ namespace PatchWorkSecure
 
                 if (label != null)
                 {
-                    string lvText = currentLvl > 0 ? $" Lv.{currentLvl}" : "";
-                    label.text = $"{def.DisplayName}{lvText}\n<size=65%>{def.ScTerm} {rightText}</size>";
+                    // Lv.1/3 のように到達度が一目で分かる形にする
+                    string costColor = maxed ? "#7FB88A" : (affordable ? "#E7D08A" : "#8A8A93");
+                    label.text =
+                        $"{def.DisplayName}  <size=80%><color=#9AA3B0>Lv.{currentLvl}/{maxLvl}</color></size>\n" +
+                        $"<size=68%><color={costColor}>{rightText}</color>　<color=#7F8894>{def.ScTerm}</color></size>";
                 }
+
+                // 導入済みのものは左端を緑に光らせて、入っていないものと区別する
+                var image = go.GetComponent<Image>();
+                if (image != null)
+                    image.color = currentLvl > 0 ? new Color(0.19f, 0.27f, 0.23f) : new Color(0.18f, 0.19f, 0.24f);
 
                 if (button != null)
                 {
-                    button.interactable = !maxed && affordable;
-                    string capturedKey = key; // クロージャ対策
+                    button.interactable = _isDayPhase && !maxed && affordable;
+                    string capturedKey = key;
+                    var capturedRect = go.GetComponent<RectTransform>();
                     button.onClick.AddListener(() =>
                     {
                         AudioManager.Instance?.PlayClick();
-                        OnClickUpgradeDefense(capturedKey);
+                        OnClickUpgradeDefense(capturedKey, capturedRect);
                     });
                 }
             }
@@ -483,7 +692,7 @@ namespace PatchWorkSecure
             UpdateNavigator();
         }
 
-        // ---- パリィ ----
+        // ================= パリィ =================
 
         /// <summary>攻撃の格が高いほどマーカーを速くし、パリィの難度を上げる。</summary>
         private static float ParrySpeedMultiplier(AttackGrade grade)
@@ -500,7 +709,7 @@ namespace PatchWorkSecure
 
         private void UpdateParryMarker()
         {
-            _parryPosition += _parryDirection * (_currentParrySpeed / 1000f) * Time.deltaTime * 60f / 60f;
+            _parryPosition += _parryDirection * (_currentParrySpeed / 1000f) * Time.deltaTime;
             if (_parryPosition >= 1f) { _parryPosition = 1f; _parryDirection = -1; }
             if (_parryPosition <= 0f) { _parryPosition = 0f; _parryDirection = 1; }
 
@@ -527,7 +736,7 @@ namespace PatchWorkSecure
             StartCoroutine(ResolveWithSuspense(parryBonus));
         }
 
-        /// <summary>判定の質に応じてPERFECT!!/GOOD!/MISS...を表示し、対応するSEを鳴らす。</summary>
+        /// <summary>判定の質に応じてPERFECT!!/GOOD!/MISS...を表示し、SEと演出を合わせる。</summary>
         private void ShowParryFeedback(float quality)
         {
             if (parryFeedbackText == null) return;
@@ -535,20 +744,32 @@ namespace PatchWorkSecure
             if (quality >= ParryPerfectThreshold)
             {
                 parryFeedbackText.text = "PERFECT!!";
-                parryFeedbackText.color = new Color(0.95f, 0.8f, 0.25f);
+                parryFeedbackText.color = UIEffects.Gold;
                 AudioManager.Instance?.PlayParryPerfect();
+                if (effects != null)
+                {
+                    effects.Flash(UIEffects.Gold, 0.22f, 0.3f);
+                    effects.Burst(parryMarker, UIEffects.Gold, 380f);
+                    effects.Punch(parryFeedbackText.rectTransform, 1.9f, 0.35f);
+                }
             }
             else if (quality >= ParryGoodThreshold)
             {
                 parryFeedbackText.text = "GOOD!";
-                parryFeedbackText.color = new Color(0.55f, 0.85f, 0.5f);
+                parryFeedbackText.color = UIEffects.Good;
                 AudioManager.Instance?.PlayParryGood();
+                if (effects != null)
+                {
+                    effects.Burst(parryMarker, UIEffects.Good, 260f);
+                    effects.Punch(parryFeedbackText.rectTransform, 1.5f, 0.3f);
+                }
             }
             else
             {
                 parryFeedbackText.text = "MISS...";
                 parryFeedbackText.color = new Color(0.78f, 0.78f, 0.8f);
                 AudioManager.Instance?.PlayParryMiss();
+                if (effects != null) effects.Shake(0.2f, 7f);
             }
         }
 
@@ -561,7 +782,7 @@ namespace PatchWorkSecure
             while (t < duration)
             {
                 t += Time.deltaTime;
-                float scale = Mathf.Lerp(1.6f, 1f, t / duration);
+                float scale = Mathf.Lerp(1.8f, 1f, t / duration);
                 parryMarker.localScale = new Vector3(scale, scale, 1f);
                 yield return null;
             }
@@ -571,50 +792,53 @@ namespace PatchWorkSecure
         /// <summary>結果をすぐ出さず、一瞬の「溜め」を挟んでから開示する。</summary>
         private IEnumerator ResolveWithSuspense(float parryBonus)
         {
-            yield return new WaitForSeconds(0.5f); // パリィ判定(PERFECT!等)を見せる間
+            yield return new WaitForSeconds(0.55f); // パリィ判定(PERFECT!等)を見せる間
             HideAllPanels();
-            yield return new WaitForSeconds(0.6f); // 結果発表前の溜め
+            yield return new WaitForSeconds(0.6f);  // 結果発表前の溜め
 
             var result = _state.ResolveAttack(_currentAttackKey, _pendingChoice, parryBonus);
-            RefreshUI();
 
-            if (result.Defended) AudioManager.Instance?.PlayDefendSuccess();
+            if (result.Defended)
+            {
+                AudioManager.Instance?.PlayDefendSuccess();
+                bool narrow = result.Flavor != null && result.Flavor.Contains("紙一重");
+                if (effects != null)
+                {
+                    effects.Flash(narrow ? UIEffects.Good : UIEffects.Gold, 0.24f, 0.45f);
+                    effects.Banner(narrow ? "ぎりぎり防御！" : "防御成功！", narrow ? UIEffects.Good : UIEffects.Gold);
+                }
+            }
             else
             {
                 AudioManager.Instance?.PlayDefendFail();
-                StartCoroutine(ShakeRoutine(shakeRoot));
+                if (effects != null)
+                {
+                    effects.Flash(UIEffects.Bad, 0.45f, 0.55f);
+                    effects.Shake(0.5f, 26f);
+                    effects.Banner("被弾！", UIEffects.Bad);
+                }
             }
+
+            yield return new WaitForSeconds(0.35f); // バナーを一瞬見せてから数値を動かす
+            RefreshUI();
 
             if (_state.IsGameOver)
             {
+                yield return new WaitForSeconds(0.6f);
                 ShowGameOver();
                 yield break;
             }
 
             resultPanel.SetActive(true);
             StartCoroutine(FadeInPanel(resultPanel));
+            resultText.color = result.Defended ? UIEffects.Good : UIEffects.Bad;
             resultText.text = result.Defended
-                ? $"{result.Flavor}（防御率{Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
-                : $"{result.Flavor}（予算-{result.BudgetDamage}, 人望-{result.TrustDamage}）";
+                ? $"{result.Flavor}（防御率 {Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
+                : $"{result.Flavor}（予算 -{result.BudgetDamage} / 人望 -{result.TrustDamage}）";
             resultCharacterLine.text = $"「{result.CharacterLine}」";
+            if (effects != null) effects.Punch(resultText.rectTransform, 1.25f);
 
             UpdateNavigatorForResult(result);
-        }
-
-        /// <summary>対象のRectTransformを短時間ランダムに揺らす。被弾時の手応え用。</summary>
-        private IEnumerator ShakeRoutine(RectTransform target, float duration = 0.35f, float magnitude = 14f)
-        {
-            if (target == null) yield break;
-            Vector2 original = target.anchoredPosition;
-            float t = 0f;
-            while (t < duration)
-            {
-                t += Time.deltaTime;
-                float damper = 1f - (t / duration);
-                target.anchoredPosition = original + Random.insideUnitCircle * magnitude * damper;
-                yield return null;
-            }
-            target.anchoredPosition = original;
         }
 
         /// <summary>「次の日へ」ボタンから呼ぶ。</summary>
@@ -626,104 +850,110 @@ namespace PatchWorkSecure
             RefreshUI();
         }
 
-        // ---- 対策の強化 ----
+        // ================= 対策の強化 =================
 
         /// <summary>対策強化ボタンから呼ぶ。引数には "mfa" などのキーを指定する。</summary>
         public void OnClickUpgradeDefense(string defenseKey)
         {
-            if (_state.UpgradeDefense(defenseKey))
-            {
-                AudioManager.Instance?.PlayUpgrade();
-                RefreshUI();
-                BuildDefensePanel(); // Lv・コスト表示・購入可否を更新
-            }
+            OnClickUpgradeDefense(defenseKey, null);
         }
 
-        // ---- UI更新 ----
+        private void OnClickUpgradeDefense(string defenseKey, RectTransform sourceButton)
+        {
+            if (!_isDayPhase) return;
+            if (!_state.UpgradeDefense(defenseKey)) return;
+
+            AudioManager.Instance?.PlayUpgrade();
+
+            // 「買えた」手応え：押したボタンから緑の波紋を出し、リスクが下がったことを直後の表示で見せる。
+            if (effects != null && sourceButton != null)
+            {
+                effects.Burst(sourceButton, UIEffects.Good, 260f);
+                effects.FloatingText(sourceButton, "強化！", UIEffects.Good, 26);
+            }
+
+            RefreshUI();
+            BuildDefensePanel(); // Lv・コスト表示・購入可否を更新
+        }
+
+        // ================= UI更新 =================
 
         private void RefreshUI()
         {
-            periodLabel.text = $"{_state.PeriodLabel()}（{_state.Day}/{GameState.TotalPeriods}）";
-            budgetText.text = _state.Budget.ToString();
-            trustText.text = _state.Trust.ToString();
-            stressText.text = _state.Stress.ToString();
+            if (_state == null) return;
 
-            SpawnFloatingDelta(budgetText, _state.Budget - _prevBudget);
-            SpawnFloatingDelta(trustText, _state.Trust - _prevTrust);
-            SpawnFloatingDelta(stressText, _state.Stress - _prevStress, invert: true); // ストレスは増加が悪化
+            if (periodLabel != null) periodLabel.text = _state.PeriodLabel();
+            if (turnLabel != null) turnLabel.text = $"ターン {_state.Day} / {GameState.TotalPeriods}";
+
+            ApplyStat(budgetText, budgetChip, budgetBar,
+                v => $"予算　¥{v}", _prevBudget, _state.Budget,
+                Mathf.Clamp01(_state.Budget / 100f), higherIsBetter: true);
+            ApplyStat(trustText, trustChip, trustBar,
+                v => $"人望　{v} / 100", _prevTrust, _state.Trust,
+                Mathf.Clamp01(_state.Trust / 100f), higherIsBetter: true);
+            ApplyStat(stressText, stressChip, stressBar,
+                v => $"ストレス　{v} / 100", _prevStress, _state.Stress,
+                Mathf.Clamp01(_state.Stress / 100f), higherIsBetter: false);
+
             _prevBudget = _state.Budget;
             _prevTrust = _state.Trust;
             _prevStress = _state.Stress;
 
-            if (budgetBar != null) SetBarAnimated(budgetBar, Mathf.Clamp01(_state.Budget / 100f));
-            if (trustBar != null) SetBarAnimated(trustBar, Mathf.Clamp01(_state.Trust / 100f));
-            if (stressBar != null) SetBarAnimated(stressBar, Mathf.Clamp01(_state.Stress / 100f));
+            RefreshRisk();
 
-            if (logText != null)
-                logText.text = string.Join("\n", _state.Log);
+            if (logText != null) logText.text = string.Join("\n", _state.Log);
 
             UpdateNavigator();
         }
 
         /// <summary>
-        /// 数値の増減を、該当ラベルの上にふわっと浮かぶ+/-テキストとして一瞬表示する。
-        /// プレハブを使わずCanvas直下に生成するので、SceneBuilder側の追加対応は不要。
+        /// ステータス1項目分の表示を更新する。
+        /// 数字はカウントアップし、増減があればチップを弾ませて浮遊テキストを出す
+        /// （どこが動いたのか一目で分かるようにするため）。
         /// </summary>
-        private void SpawnFloatingDelta(TextMeshProUGUI referenceLabel, int delta, bool invert = false)
+        private void ApplyStat(TextMeshProUGUI label, RectTransform chip, Image bar,
+                               System.Func<int, string> format, int prev, int value,
+                               float barTarget, bool higherIsBetter)
         {
-            if (delta == 0 || referenceLabel == null) return;
-            var canvas = referenceLabel.GetComponentInParent<Canvas>();
-            if (canvas == null) return;
-
-            bool good = invert ? delta < 0 : delta > 0;
-
-            var go = new GameObject("FloatingDelta", typeof(TextMeshProUGUI));
-            go.transform.SetParent(canvas.transform, false);
-            var tmp = go.GetComponent<TextMeshProUGUI>();
-            tmp.fontSize = 26;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = good ? new Color(0.45f, 0.85f, 0.45f) : new Color(0.9f, 0.4f, 0.4f);
-            tmp.text = delta > 0 ? $"+{delta}" : delta.ToString();
-
-            var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(140, 40);
-            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-
-            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(null, referenceLabel.transform.position);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvas.transform as RectTransform, screenPoint, null, out Vector2 localPoint);
-            rt.anchoredPosition = localPoint + new Vector2(0, 26);
-
-            StartCoroutine(FloatAndFade(rt, tmp));
-        }
-
-        private IEnumerator FloatAndFade(RectTransform rt, TextMeshProUGUI tmp)
-        {
-            const float duration = 0.9f;
-            Vector2 start = rt.anchoredPosition;
-            Vector2 end = start + new Vector2(0, 50);
-            Color startColor = tmp.color;
-
-            float t = 0f;
-            while (t < duration)
+            if (label != null)
             {
-                t += Time.deltaTime;
-                float p = t / duration;
-                rt.anchoredPosition = Vector2.Lerp(start, end, p);
-                tmp.color = new Color(startColor.r, startColor.g, startColor.b, 1f - p);
-                yield return null;
+                if (_numberRoutines.TryGetValue(label, out var running) && running != null) StopCoroutine(running);
+                _numberRoutines[label] = StartCoroutine(CountNumber(label, format, prev, value));
             }
-            Destroy(rt.gameObject);
+            if (bar != null) SetBarAnimated(bar, barTarget);
+
+            int delta = value - prev;
+            if (delta == 0 || effects == null || chip == null) return;
+
+            bool good = higherIsBetter ? delta > 0 : delta < 0;
+            Color color = good ? UIEffects.Good : UIEffects.Bad;
+            effects.FloatingText(chip, delta > 0 ? $"+{delta}" : delta.ToString(), color, 34);
+            effects.Punch(chip, good ? 1.16f : 1.22f);
+            if (good) effects.Burst(chip, color, 190f);
         }
 
-        /// <summary>
-        /// バーの数値変化を滑らかにアニメーションさせる。
-        /// 予算・人望・ストレスがカクッと変わる冷たさを減らすための演出。
-        /// </summary>
+        private IEnumerator CountNumber(TextMeshProUGUI label, System.Func<int, string> format,
+                                        int from, int to, float duration = 0.45f)
+        {
+            if (from != to)
+            {
+                float t = 0f;
+                while (t < duration)
+                {
+                    t += Time.deltaTime;
+                    label.text = format(Mathf.RoundToInt(Mathf.Lerp(from, to, t / duration)));
+                    yield return null;
+                }
+            }
+            label.text = format(to);
+            _numberRoutines[label] = null;
+        }
+
+        /// <summary>バーの数値変化を滑らかにアニメーションさせる。</summary>
         private void SetBarAnimated(Image bar, float target)
         {
-            StartCoroutine(AnimateBarFill(bar, target));
+            if (_barRoutines.TryGetValue(bar, out var running) && running != null) StopCoroutine(running);
+            _barRoutines[bar] = StartCoroutine(AnimateBarFill(bar, target));
         }
 
         private IEnumerator AnimateBarFill(Image bar, float target, float duration = 0.4f)
@@ -737,9 +967,40 @@ namespace PatchWorkSecure
                 yield return null;
             }
             bar.fillAmount = target;
+            _barRoutines[bar] = null;
         }
 
-        // ---- 設定オーバーレイ ----
+        /// <summary>
+        /// 今の備えで見込まれる被害額を表示する。
+        /// 対策を買った直後にこの数字が下がるので、投資した意味がその場で伝わる。
+        /// </summary>
+        private void RefreshRisk()
+        {
+            if (_state == null) return;
+            float expected = _state.EstimateExpectedDamage();
+
+            string level;
+            Color color;
+            if (expected < 6f) { level = "低"; color = UIEffects.Good; }
+            else if (expected < 10f) { level = "中"; color = new Color(0.85f, 0.78f, 0.35f); }
+            else if (expected < 14f) { level = "高"; color = new Color(0.92f, 0.55f, 0.25f); }
+            else { level = "危険"; color = UIEffects.Bad; }
+
+            if (riskLevelText != null)
+            {
+                riskLevelText.text = $"リスクレベル　{level}";
+                riskLevelText.color = color;
+            }
+            if (riskDamageText != null)
+                riskDamageText.text = $"被害予測　¥{Mathf.RoundToInt(expected)}";
+            if (riskBar != null)
+            {
+                riskBar.color = color;
+                SetBarAnimated(riskBar, Mathf.Clamp01(expected / RiskBarMax));
+            }
+        }
+
+        // ================= 設定オーバーレイ =================
 
         /// <summary>右上の歯車ボタンから呼ぶ。現在のフェーズを問わず開閉できる独立オーバーレイ。</summary>
         private void ToggleSettingsPanel(bool show)
@@ -762,82 +1023,7 @@ namespace PatchWorkSecure
             settingsMuteButtonLabel.text = muted ? "音声：オフ" : "音声：オン";
         }
 
-        /// <summary>状況に応じてナビゲーターの表情とセリフを変える。</summary>
-        private void UpdateNavigator()
-        {
-            if (navigatorPortrait == null || navigatorLine == null) return;
-
-            Sprite face = _activePersona?.FaceNormal;
-            string line = "今日も平穏です。備えを進めましょうか。";
-
-            // タイトル画面（キャラ選択時点）ではまだ_stateが存在しないため、以降の状態参照は行わない。
-            if (_state == null)
-            {
-                navigatorPortrait.sprite = face;
-                navigatorLine.text = line;
-                return;
-            }
-
-            if (attackPanel != null && attackPanel.activeSelf)
-            {
-                var grade = GameData.Attacks[_currentAttackKey].Grade;
-                if (grade == AttackGrade.S) { face = _activePersona?.FaceAlert; line = "これ、一番まずいやつです……対策、足りてますか？"; }
-                else if (grade == AttackGrade.Rookie || grade == AttackGrade.Rising) { face = _activePersona?.FaceWorried; line = "見たことない手口です。慎重にいきましょう。"; }
-                else { face = _activePersona?.FaceWorried; line = "来ましたね。落ち着いて対応しましょう。"; }
-            }
-            else if (parryPanel != null && parryPanel.activeSelf)
-            {
-                face = _activePersona?.FaceAlert; line = "タイミング、いきますよ……！";
-            }
-            else if (_state.Stress > 65)
-            {
-                face = _activePersona?.FaceWorried; line = "みんな疲れてます。締めすぎも危険ですよ。";
-            }
-            else if (_state.Trust < 20)
-            {
-                face = _activePersona?.FaceWorried; line = "社内での信頼が薄いです。雑務対応、大事ですよ。";
-            }
-            else if (_state.Budget < 30)
-            {
-                face = _activePersona?.FaceWorried; line = "予算が心もとないですね。慎重に使いましょう。";
-            }
-            else if (_state.DefenseLevels.Count == 0)
-            {
-                face = _activePersona?.FaceWorried; line = "まだ何も対策がありません。何か入れませんか？";
-            }
-            else if (_state.Day > GameState.TotalPeriods * 0.7f)
-            {
-                face = _activePersona?.FaceAlert; line = "年度末が近いです。攻撃も激しくなってきました。";
-            }
-            else if (_state.Trust > 60)
-            {
-                face = _activePersona?.FaceProud; line = "社内の空気、いい感じですね。";
-            }
-
-            navigatorPortrait.sprite = face;
-            navigatorLine.text = line;
-        }
-
-        private void UpdateNavigatorForResult(AttackResult result)
-        {
-            if (navigatorPortrait == null) return;
-
-            if (result.Defended)
-            {
-                bool narrow = result.Flavor != null && result.Flavor.Contains("紙一重");
-                navigatorPortrait.sprite = narrow ? _activePersona?.FaceRelieved : _activePersona?.FaceProud;
-                navigatorLine.text = narrow
-                    ? "あぶなかった……！ でも、守りきりました。"
-                    : "危なげなかったですね。備えの成果です。";
-            }
-            else
-            {
-                navigatorPortrait.sprite = _activePersona?.FaceSad;
-                navigatorLine.text = "……やられました。次はもっと備えましょう。";
-            }
-        }
-
-        // ---- クイズ（事前・事後共通） ----
+        // ================= クイズ（事前・事後共通） =================
 
         /// <summary>
         /// クイズを開始する。isPre=trueなら事前クイズ（この後ゲーム本編を開始）、
@@ -850,6 +1036,7 @@ namespace PatchWorkSecure
             _quizIndex = 0;
             _quizCorrectCount = 0;
             _quizTotalCount = 0;
+            _quizAnswering = false;
             ShowQuizQuestion();
         }
 
@@ -861,7 +1048,7 @@ namespace PatchWorkSecure
 
             var q = _quizQueue[_quizIndex];
             if (quizProgressText != null)
-                quizProgressText.text = $"{(_isPreQuiz ? "事前クイズ" : "事後クイズ")} {_quizIndex + 1}/{_quizQueue.Count}";
+                quizProgressText.text = $"{(_isPreQuiz ? "事前クイズ" : "事後クイズ")} {_quizIndex + 1} / {_quizQueue.Count}";
             if (quizQuestionText != null)
                 quizQuestionText.text = q.Question;
 
@@ -886,28 +1073,67 @@ namespace PatchWorkSecure
                 var button = go.GetComponent<Button>();
                 if (button != null)
                 {
+                    var capturedRect = go.GetComponent<RectTransform>();
                     button.onClick.AddListener(() =>
                     {
                         AudioManager.Instance?.PlayClick();
-                        OnAnswerQuiz(optionIndex == q.AnswerIndex);
+                        OnAnswerQuiz(optionIndex == q.AnswerIndex, capturedRect);
                     });
                 }
             }
         }
 
-        private void OnAnswerQuiz(bool correct)
+        private void OnAnswerQuiz(bool correct, RectTransform sourceButton)
         {
+            if (_quizAnswering) return; // 演出中の連打で2問飛ばさないようにする
+            _quizAnswering = true;
+
             _quizTotalCount++;
             if (correct) _quizCorrectCount++;
             _quizIndex++;
 
-            if (correct) AudioManager.Instance?.PlayQuizCorrect();
-            else AudioManager.Instance?.PlayQuizWrong();
-
-            if (_quizIndex < _quizQueue.Count)
-                ShowQuizQuestion();
+            if (correct)
+            {
+                AudioManager.Instance?.PlayQuizCorrect();
+                if (effects != null)
+                {
+                    effects.Flash(UIEffects.Good, 0.18f, 0.3f);
+                    effects.Banner("正解！", UIEffects.Good, 0.35f);
+                    effects.Burst(sourceButton, UIEffects.Good, 300f);
+                }
+            }
             else
-                FinishQuiz();
+            {
+                AudioManager.Instance?.PlayQuizWrong();
+                if (effects != null)
+                {
+                    effects.Flash(UIEffects.Bad, 0.22f, 0.35f);
+                    effects.Banner("不正解…", UIEffects.Bad, 0.35f);
+                    effects.Shake(0.25f, 10f);
+                }
+            }
+
+            StartCoroutine(AdvanceQuizAfterFeedback());
+        }
+
+        /// <summary>正誤の演出を見せてから次の設問へ進む。</summary>
+        private IEnumerator AdvanceQuizAfterFeedback()
+        {
+            // 回答直後に選択肢が押せたままだと二重回答になるので、先に無効化する
+            if (quizOptionContainer != null)
+            {
+                foreach (Transform child in quizOptionContainer)
+                {
+                    var b = child.GetComponent<Button>();
+                    if (b != null) b.interactable = false;
+                }
+            }
+
+            yield return new WaitForSeconds(0.8f);
+            _quizAnswering = false;
+
+            if (_quizIndex < _quizQueue.Count) ShowQuizQuestion();
+            else FinishQuiz();
         }
 
         private void FinishQuiz()
@@ -917,7 +1143,7 @@ namespace PatchWorkSecure
                 _preCorrect = _quizCorrectCount;
                 _preTotal = _quizTotalCount;
                 _state = new GameState();
-                // 初期値を基準にしておき、初回RefreshUI()で無意味な+100等のフローティング表示が出ないようにする
+                // 初期値を基準にしておき、初回RefreshUI()で無意味な+100等の増減演出が出ないようにする
                 _prevBudget = _state.Budget;
                 _prevTrust = _state.Trust;
                 _prevStress = _state.Stress;
@@ -949,9 +1175,16 @@ namespace PatchWorkSecure
                     $"累計（全{stats.Sessions}回プレイ）\n" +
                     $"正答率 {Mathf.RoundToInt(stats.PreRate * 100)}% → {Mathf.RoundToInt(stats.PostRate * 100)}%（{sign}{improvementPt}pt）";
             }
+
+            // 伸びていれば祝う。落ちていたら静かに出す（責めない）。
+            if (effects != null && stats.Improvement > 0f)
+            {
+                effects.Flash(UIEffects.Gold, 0.22f, 0.6f);
+                effects.Banner("成長！", UIEffects.Gold, 0.8f);
+            }
         }
 
-        // ---- 終了処理 ----
+        // ================= 終了処理 =================
 
         private void ShowGameOver()
         {
@@ -961,13 +1194,15 @@ namespace PatchWorkSecure
             AudioManager.Instance?.PlayBgmEnding();
             AudioManager.Instance?.PlayGameOver();
 
-            if (endingText != null) endingText.text = _state.GameOverReason;
-            if (endingCharacterLine != null) endingCharacterLine.text = "";
-            if (navigatorPortrait != null)
+            if (endingText != null)
             {
-                navigatorPortrait.sprite = _activePersona?.FaceSad;
-                navigatorLine.text = "……力になれませんでした。";
+                endingText.text = _state.GameOverReason;
+                endingText.color = UIEffects.Bad;
             }
+            if (endingCharacterLine != null) endingCharacterLine.text = "";
+
+            var p = _activePersona;
+            Speak(p?.FaceSad, Pick(p?.LineGameOver, "……力になれませんでした。"), force: true);
         }
 
         private void ShowClear()
@@ -978,13 +1213,21 @@ namespace PatchWorkSecure
             AudioManager.Instance?.PlayBgmEnding();
             AudioManager.Instance?.PlayClear();
 
-            if (endingText != null) endingText.text = "1年間、無事に会社を守り抜いた";
-            if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";
-            if (navigatorPortrait != null)
+            if (endingText != null)
             {
-                navigatorPortrait.sprite = _activePersona?.FaceProud;
-                navigatorLine.text = "お疲れさまでした。立派な情シスです。";
+                endingText.text = "1年間、無事に会社を守り抜いた";
+                endingText.color = UIEffects.Gold;
             }
+            if (endingCharacterLine != null) endingCharacterLine.text = "気づけば1年が経っていた。";
+
+            if (effects != null)
+            {
+                effects.Flash(UIEffects.Gold, 0.3f, 0.9f);
+                effects.Banner("CLEAR！", UIEffects.Gold, 1.2f);
+            }
+
+            var p = _activePersona;
+            Speak(p?.FaceProud, Pick(p?.LineClear, "お疲れさまでした。立派な情シスです。"), force: true);
         }
     }
 }

@@ -10,37 +10,69 @@ using UnityEngine.InputSystem.UI;
 namespace PatchWorkSecure.EditorTools
 {
     /// <summary>
-    /// 仮組みUIを1メニュー操作で自動生成するエディタ拡張。
-    /// 見た目(色・フォント・素材)は後で差し替える前提だが、レイアウト・配色・ボタンの反応など
-    /// 「ちゃんとデザインされた感」は素材無しでも作れる範囲でここに寄せている。
+    /// UIシーン全体を1メニュー操作で自動生成するエディタ拡張。
+    ///
+    /// 画面構成（参考にした情シス系ゲームのダッシュボード風レイアウト）:
+    ///   上部    … ステータスバー（期間 / 予算 / 人望 / ストレス。各ゲージに項目名を必ず付ける）
+    ///   左サイド … 導入済み対策・リスク表示・ログ（常時表示。今の備えがいつでも見える）
+    ///   中央    … フェーズごとのメインパネル
+    ///   下部    … ナビゲーターの立ち絵と吹き出し
+    ///   最前面  … 演出レイヤー（フラッシュ・バナー・浮遊テキスト）
+    ///
     /// 角丸・影はUnity標準の"UI/Skin/*.psd"組み込みスプライトとUI.Shadowコンポーネントのみで実現し、
     /// 独自テクスチャ生成は行わない（見た目の検証がエディタ上でしかできないため、実績のある標準機能に寄せている）。
+    /// 絵文字はフォント(meiryo SDF)がグリフを持たないため一切使わない。アイコンは色チップで表現する。
     ///
     /// 使い方: Unity上部メニュー「PatchWorkSecure」→「シーンを自動構築」
-    /// 実行前に一度Canvas/GameManagerを削除しておくと、重複生成を避けられます。
+    /// 実行前にCanvas/GameManager/AudioManagerを削除しておくと、重複生成を避けられます。
     /// </summary>
     public static class SceneBuilder
     {
         private const string PrefabDir = "Assets/Prefabs";
+        private const string PersonaDir = "Assets/Personas";
 
-        // ---- 配色パレット(画面カテゴリごとにフェーズタグの色で見分けをつける) ----
-        private static readonly Color AccentDay = new Color(0.35f, 0.65f, 0.55f);
-        private static readonly Color AccentChore = new Color(0.40f, 0.55f, 0.75f);
-        private static readonly Color AccentAttack = new Color(0.80f, 0.40f, 0.35f);
-        private static readonly Color AccentParry = new Color(0.85f, 0.65f, 0.25f);
-        private static readonly Color AccentResult = new Color(0.55f, 0.50f, 0.65f);
-        private static readonly Color AccentTitle = new Color(0.55f, 0.45f, 0.80f);
-        private static readonly Color AccentQuiz = new Color(0.40f, 0.70f, 0.50f);
-        private static readonly Color AccentEnding = new Color(0.60f, 0.35f, 0.35f);
-        private static readonly Color AccentSummary = new Color(0.50f, 0.45f, 0.75f);
+        // ---- 配色パレット ----
+        private static readonly Color BgDeep = new Color(0.055f, 0.060f, 0.085f, 1f);
+        private static readonly Color CardBg = new Color(0.105f, 0.115f, 0.150f, 0.98f);
+        private static readonly Color CardBgSoft = new Color(0.135f, 0.145f, 0.185f, 0.98f);
+        private static readonly Color TextMain = new Color(0.92f, 0.94f, 0.97f);
+        private static readonly Color TextSub = new Color(0.58f, 0.62f, 0.70f);
 
-        // ---- Unity組み込みの角丸スプライト(誰の環境にも必ず存在する標準アセット) ----
-        private static Sprite _panelSprite;
-        private static Sprite _buttonSprite;
+        private static readonly Color ColBudget = new Color(0.45f, 0.80f, 0.50f);
+        private static readonly Color ColTrust = new Color(0.40f, 0.62f, 0.92f);
+        private static readonly Color ColStress = new Color(0.90f, 0.50f, 0.38f);
+        private static readonly Color ColRisk = new Color(0.90f, 0.62f, 0.30f);
+
+        private static readonly Color AccentDay = new Color(0.35f, 0.70f, 0.58f);
+        private static readonly Color AccentChore = new Color(0.42f, 0.58f, 0.80f);
+        private static readonly Color AccentAttack = new Color(0.85f, 0.35f, 0.33f);
+        private static readonly Color AccentParry = new Color(0.90f, 0.68f, 0.25f);
+        private static readonly Color AccentResult = new Color(0.58f, 0.52f, 0.72f);
+        private static readonly Color AccentTitle = new Color(0.58f, 0.46f, 0.85f);
+        private static readonly Color AccentQuiz = new Color(0.40f, 0.74f, 0.52f);
+        private static readonly Color AccentEnding = new Color(0.62f, 0.35f, 0.38f);
+        private static readonly Color AccentSummary = new Color(0.52f, 0.46f, 0.78f);
+
+        // ---- レイアウト定数（1920x1080基準） ----
+        private const float TopBarHeight = 100f;
+        private const float SidebarWidth = 340f;
+        private const float CharacterStripHeight = 220f;
+        private const float Margin = 20f;
+
+        // ---- Unity組み込みスプライト（どの環境にも必ず存在する標準アセット） ----
+        private static Sprite _panelSprite, _buttonSprite, _circleSprite;
+        private static TMP_FontAsset _uiFont;
+
         private static Sprite PanelSprite => _panelSprite != null ? _panelSprite
             : (_panelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd"));
         private static Sprite ButtonSprite => _buttonSprite != null ? _buttonSprite
             : (_buttonSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd"));
+        private static Sprite CircleSprite => _circleSprite != null ? _circleSprite
+            : (_circleSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd"));
+
+        /// <summary>日本語グリフを持つフォント。全ラベルに明示的に割り当て、既定フォント任せにしない。</summary>
+        private static TMP_FontAsset UiFont => _uiFont != null ? _uiFont
+            : (_uiFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/meiryo SDF.asset"));
 
         [MenuItem("PatchWorkSecure/シーンを自動構築")]
         public static void BuildScene()
@@ -63,233 +95,436 @@ namespace PatchWorkSecure.EditorTools
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
 
+            // Screen Space - OverlayのCanvasはRectTransformがUnity側に固定されて動かせないため、
+            // 画面シェイクは「Canvas直下の入れ物」を揺らして実現する。
+            var shakeRoot = CreateStretched("ShakeRoot", canvasGO.transform);
+
             var gmGO = new GameObject("GameManager", typeof(GameManager));
-            var gameManager = gmGO.GetComponent<GameManager>();
-            var so = new SerializedObject(gameManager);
-            SetRef(so, "shakeRoot", canvasGO.GetComponent<RectTransform>());
+            var so = new SerializedObject(gmGO.GetComponent<GameManager>());
 
             if (!Directory.Exists(PrefabDir)) Directory.CreateDirectory(PrefabDir);
 
-            BuildBackdrop(canvasGO.transform);
             BuildAudioManager();
             BuildNavigatorPersonas(so);
 
-            BuildStatusBar(canvasGO.transform, so);
-            BuildNavigator(canvasGO.transform, so);
-            BuildDayPanel(canvasGO.transform, so);
-            BuildChorePanel(canvasGO.transform, so);
-            BuildAttackPanel(canvasGO.transform, so);
-            BuildParryPanel(canvasGO.transform, so);
-            BuildResultPanel(canvasGO.transform, so);
-            BuildLogPanel(canvasGO.transform, so);
+            BuildBackdrop(shakeRoot);
+            BuildStatusBar(shakeRoot, so);
+            BuildSidebar(shakeRoot, so);
+            BuildCharacterStrip(shakeRoot, so);
 
-            BuildTitlePanel(canvasGO.transform, so);
-            BuildQuizPanel(canvasGO.transform, so);
-            BuildEndingPanel(canvasGO.transform, so);
-            BuildSummaryPanel(canvasGO.transform, so);
-            BuildSettingsOverlay(canvasGO.transform, so); // 常時最前面に来るよう最後に生成する
+            BuildDayPanel(shakeRoot, so);
+            BuildChorePanel(shakeRoot, so);
+            BuildAttackPanel(shakeRoot, so);
+            BuildParryPanel(shakeRoot, so);
+            BuildResultPanel(shakeRoot, so);
 
-            var choicePrefab = BuildButtonPrefab("ChoiceButtonPrefab");
-            var defensePrefab = BuildButtonPrefab("DefenseButtonPrefab");
-            var quizOptionPrefab = BuildButtonPrefab("QuizOptionButtonPrefab");
-            var personaSelectPrefab = BuildButtonPrefab("PersonaSelectButtonPrefab");
-            SetRef(so, "choiceButtonPrefab", choicePrefab);
-            SetRef(so, "defenseButtonPrefab", defensePrefab);
-            SetRef(so, "quizOptionButtonPrefab", quizOptionPrefab);
-            SetRef(so, "personaSelectButtonPrefab", personaSelectPrefab);
+            BuildTitlePanel(shakeRoot, so);
+            BuildQuizPanel(shakeRoot, so);
+            BuildEndingPanel(shakeRoot, so);
+            BuildSummaryPanel(shakeRoot, so);
+            BuildSettingsOverlay(shakeRoot, so);
+
+            // 演出レイヤーはShakeRootの外（Canvas直下の最後）に置き、
+            // 画面が揺れてもフラッシュとバナーだけは揺れないようにする。
+            BuildEffectLayer(canvasGO.transform, shakeRoot, so);
+
+            SetRef(so, "choiceButtonPrefab", BuildButtonPrefab("ChoiceButtonPrefab", 82f, 22, TextAlignmentOptions.MidlineLeft));
+            SetRef(so, "defenseButtonPrefab", BuildButtonPrefab("DefenseButtonPrefab", 54f, 18, TextAlignmentOptions.MidlineLeft));
+            SetRef(so, "quizOptionButtonPrefab", BuildButtonPrefab("QuizOptionButtonPrefab", 64f, 22, TextAlignmentOptions.Center));
+            SetRef(so, "personaSelectButtonPrefab", BuildButtonPrefab("PersonaSelectButtonPrefab", 54f, 20, TextAlignmentOptions.Center));
 
             so.ApplyModifiedProperties();
+            AssetDatabase.SaveAssets();
 
             Selection.activeGameObject = gmGO;
             EditorUtility.DisplayDialog(
                 "構築完了",
-                "シーンを生成しました。\n\nPlayして、タイトル画面→事前クイズ→本編→エンディング→事後クイズ→結果サマリー、の一連の流れを確認してください。\nConsoleにエラーが出たら、そのまま貼ってください。",
+                "シーンを生成しました。\n\nPlayして、タイトル→事前クイズ→本編→エンディング→事後クイズ→サマリー、の流れを確認してください。\nConsoleにエラーが出たら、そのまま貼ってください。",
                 "OK");
         }
 
         // ================= 背景 =================
 
-        /// <summary>画面全体を覆う単色の背景。何も無い部分にUnityのデフォルト背景が透けて見えるのを防ぐ。</summary>
         private static void BuildBackdrop(Transform parent)
         {
-            var go = new GameObject("Backdrop", typeof(Image));
-            go.transform.SetParent(parent, false);
-            var img = go.GetComponent<Image>();
-            img.color = new Color(0.045f, 0.045f, 0.06f, 1f);
+            var rt = CreateStretched("Backdrop", parent);
+            var img = rt.gameObject.AddComponent<Image>();
+            img.color = BgDeep;
             img.raycastTarget = false;
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
         }
 
-        // ================= 常時表示パネル =================
+        // ================= ステータスバー =================
 
         private static void BuildStatusBar(Transform parent, SerializedObject so)
         {
-            var rt = CreatePanelBase("StatusBarPanel", parent, new Color(0.12f, 0.12f, 0.15f, 0.96f));
+            var rt = CreatePanelBase("StatusBarPanel", parent, CardBg);
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
-            rt.offsetMin = new Vector2(20, -110);
-            rt.offsetMax = new Vector2(-20, -20);
+            rt.offsetMin = new Vector2(Margin, -(TopBarHeight + Margin));
+            rt.offsetMax = new Vector2(-Margin, -Margin);
             ApplyRounded(rt.gameObject, PanelSprite);
-            AddShadow(rt.gameObject, 5f, 0.4f);
+            AddShadow(rt.gameObject, 5f, 0.45f);
 
             var layout = rt.gameObject.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 10, 10);
-            layout.spacing = 32;
+            layout.padding = new RectOffset(14, 14, 10, 10);
+            layout.spacing = 14;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            var periodLabel = CreateLabel(rt, "PeriodLabel", "4月上旬（1/36）", 26, 250, bold: true);
+            // 期間チップ（大きく期間、小さくターン数）
+            var periodChip = CreatePanelBase("PeriodChip", rt, CardBgSoft);
+            ApplyRounded(periodChip.gameObject, PanelSprite);
+            var periodLE = periodChip.gameObject.AddComponent<LayoutElement>();
+            periodLE.preferredWidth = 300f;
+            periodLE.flexibleWidth = 0f;
+            AddAccentBar(periodChip, AccentTitle);
 
-            CreateIconChip(rt, new Color(0.35f, 0.75f, 0.35f));
-            var budgetText = CreateLabel(rt, "BudgetText", "予算 100", 22, 150);
-            var budgetBar = CreateBar(rt, "BudgetBar", new Color(0.35f, 0.75f, 0.35f));
+            var periodLabel = CreateLabel(periodChip, "PeriodLabel", "4月上旬", 28, 0, bold: true);
+            StretchTo(periodLabel.rectTransform, new Vector2(0, 0.42f), new Vector2(1, 1), new Vector2(26, 0), new Vector2(-14, -4));
+            periodLabel.alignment = TextAlignmentOptions.MidlineLeft;
 
-            CreateIconChip(rt, new Color(0.35f, 0.55f, 0.85f));
-            var trustText = CreateLabel(rt, "TrustText", "人望 30", 22, 150);
-            var trustBar = CreateBar(rt, "TrustBar", new Color(0.35f, 0.55f, 0.85f));
+            var turnLabel = CreateLabel(periodChip, "TurnLabel", "ターン 1 / 36", 17, 0);
+            turnLabel.color = TextSub;
+            StretchTo(turnLabel.rectTransform, new Vector2(0, 0), new Vector2(1, 0.44f), new Vector2(26, 6), new Vector2(-14, 0));
+            turnLabel.alignment = TextAlignmentOptions.MidlineLeft;
 
-            CreateIconChip(rt, new Color(0.85f, 0.45f, 0.35f));
-            var stressText = CreateLabel(rt, "StressText", "ストレス 20", 22, 160);
-            var stressBar = CreateBar(rt, "StressBar", new Color(0.85f, 0.45f, 0.35f));
+            // ステータスチップ（項目名 + 数値 + ゲージ）
+            var budgetChip = CreateStatChip(rt, "予算　¥100", ColBudget, 300f, out var budgetText, out var budgetBar);
+            var trustChip = CreateStatChip(rt, "人望　30 / 100", ColTrust, 300f, out var trustText, out var trustBar);
+            var stressChip = CreateStatChip(rt, "ストレス　20 / 100", ColStress, 300f, out var stressText, out var stressBar);
 
             SetRef(so, "periodLabel", periodLabel);
+            SetRef(so, "turnLabel", turnLabel);
             SetRef(so, "budgetText", budgetText);
             SetRef(so, "trustText", trustText);
             SetRef(so, "stressText", stressText);
             SetRef(so, "budgetBar", budgetBar);
             SetRef(so, "trustBar", trustBar);
             SetRef(so, "stressBar", stressBar);
+            SetRef(so, "budgetChip", budgetChip);
+            SetRef(so, "trustChip", trustChip);
+            SetRef(so, "stressChip", stressChip);
         }
 
-        private static void BuildNavigator(Transform parent, SerializedObject so)
+        /// <summary>
+        /// 「項目名 + 数値」と、その下のゲージをひとまとめにしたチップ。
+        /// 数値だけだと何のゲージか分からないので、ラベルは必ず項目名込みの文字列を入れる
+        /// （GameManager.ApplyStat側も "予算　¥100" のような書式で更新する）。
+        /// </summary>
+        private static RectTransform CreateStatChip(Transform parent, string initialText, Color accent, float width,
+                                                    out TextMeshProUGUI valueText, out Image barFill)
         {
-            var rt = CreatePanelBase("NavigatorPanel", parent, new Color(0, 0, 0, 0));
+            var chip = CreatePanelBase("StatChip", parent, CardBgSoft);
+            ApplyRounded(chip.gameObject, PanelSprite);
+            var le = chip.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = width;
+            le.flexibleWidth = 0f;
+
+            AddAccentBar(chip, accent);
+
+            valueText = CreateLabel(chip, "ValueText", initialText, 21, 0, bold: true);
+            StretchTo(valueText.rectTransform, new Vector2(0, 0.40f), new Vector2(1, 1), new Vector2(26, 0), new Vector2(-14, -4));
+            valueText.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var barBg = new GameObject("BarBg", typeof(Image));
+            barBg.transform.SetParent(chip, false);
+            var barBgImg = barBg.GetComponent<Image>();
+            barBgImg.color = new Color(1f, 1f, 1f, 0.10f);
+            barBgImg.raycastTarget = false;
+            ApplyRounded(barBg, PanelSprite);
+            StretchTo(barBg.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(1, 0), new Vector2(26, 14), new Vector2(-14, 28));
+
+            var fillGO = new GameObject("Fill", typeof(Image));
+            fillGO.transform.SetParent(barBg.transform, false);
+            barFill = fillGO.GetComponent<Image>();
+            barFill.color = accent;
+            barFill.raycastTarget = false;
+            barFill.type = Image.Type.Filled;
+            barFill.fillMethod = Image.FillMethod.Horizontal;
+            barFill.fillAmount = 0.5f;
+            StretchTo(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(2, 2), new Vector2(-2, -2));
+
+            return chip;
+        }
+
+        // ================= 左サイドバー =================
+
+        private static void BuildSidebar(Transform parent, SerializedObject so)
+        {
+            var root = new GameObject("Sidebar", typeof(RectTransform));
+            root.transform.SetParent(parent, false);
+            var rt = root.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0);
             rt.anchorMax = new Vector2(0, 1);
-            rt.pivot = new Vector2(0f, 0.5f);
-            rt.sizeDelta = new Vector2(320, -110);
-            rt.anchoredPosition = new Vector2(0, -55);
+            rt.offsetMin = new Vector2(Margin, Margin);
+            rt.offsetMax = new Vector2(Margin + SidebarWidth, -(TopBarHeight + Margin * 2));
 
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(20, 20, 20, 20);
+            var layout = root.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 12;
-            layout.childAlignment = TextAnchor.LowerCenter;
-            layout.childControlHeight = false;
             layout.childControlWidth = true;
+            layout.childForceExpandWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandHeight = false;
 
-            // ポートレート用の枠(角丸+影)と、実際の顔スプライトを表示するImageを分離しておく。
-            // GameManagerはportraitImgの.spriteだけを書き換えるので、枠側は独立させないと上書きで消えてしまう。
-            var slotGO = new GameObject("PortraitSlot", typeof(RectTransform));
-            slotGO.transform.SetParent(rt, false);
-            var slotLE = slotGO.AddComponent<LayoutElement>();
-            slotLE.preferredWidth = 240;
-            slotLE.preferredHeight = 240;
+            // 導入済み対策（残りの高さを全部使う）
+            var defenseCard = CreateSidebarCard(rt, "DefenseCard", "導入済み対策", AccentDay, 0f, 1f, out var defenseContent);
+            var defenseContainer = new GameObject("DefenseButtonContainer", typeof(RectTransform));
+            defenseContainer.transform.SetParent(defenseContent, false);
+            StretchTo(defenseContainer.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            var dLayout = defenseContainer.AddComponent<VerticalLayoutGroup>();
+            dLayout.spacing = 4;
+            dLayout.childAlignment = TextAnchor.UpperCenter;
+            dLayout.childControlWidth = true;
+            dLayout.childForceExpandWidth = true;
+            dLayout.childControlHeight = false;
+            dLayout.childForceExpandHeight = false;
 
+            // リスク表示（対策を買うと下がるので、投資の効果がその場で分かる）
+            CreateSidebarCard(rt, "RiskCard", "リスク", ColRisk, 132f, 0f, out var riskContent);
+            var riskLevel = CreateLabel(riskContent, "RiskLevelText", "リスクレベル　—", 20, 0, bold: true);
+            riskLevel.color = ColRisk;
+            StretchTo(riskLevel.rectTransform, new Vector2(0, 0.54f), new Vector2(1, 1), Vector2.zero, Vector2.zero);
+            riskLevel.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var riskDamage = CreateLabel(riskContent, "RiskDamageText", "被害予測　¥0", 17, 0);
+            riskDamage.color = TextSub;
+            StretchTo(riskDamage.rectTransform, new Vector2(0, 0.22f), new Vector2(1, 0.56f), Vector2.zero, Vector2.zero);
+            riskDamage.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var riskBarBg = new GameObject("RiskBarBg", typeof(Image));
+            riskBarBg.transform.SetParent(riskContent, false);
+            var riskBgImg = riskBarBg.GetComponent<Image>();
+            riskBgImg.color = new Color(1f, 1f, 1f, 0.10f);
+            riskBgImg.raycastTarget = false;
+            ApplyRounded(riskBarBg, PanelSprite);
+            StretchTo(riskBarBg.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 12));
+
+            var riskFillGO = new GameObject("Fill", typeof(Image));
+            riskFillGO.transform.SetParent(riskBarBg.transform, false);
+            var riskFill = riskFillGO.GetComponent<Image>();
+            riskFill.color = ColRisk;
+            riskFill.raycastTarget = false;
+            riskFill.type = Image.Type.Filled;
+            riskFill.fillMethod = Image.FillMethod.Horizontal;
+            riskFill.fillAmount = 0f;
+            StretchTo(riskFillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(2, 2), new Vector2(-2, -2));
+
+            // ログ
+            CreateSidebarCard(rt, "LogCard", "ログ", AccentResult, 210f, 0f, out var logContent);
+            var logText = CreateLabel(logContent, "LogText", "", 15, 0);
+            logText.color = TextSub;
+            logText.alignment = TextAlignmentOptions.TopLeft;
+            StretchTo(logText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            SetRef(so, "defenseButtonContainer", defenseContainer.GetComponent<RectTransform>());
+            SetRef(so, "riskLevelText", riskLevel);
+            SetRef(so, "riskDamageText", riskDamage);
+            SetRef(so, "riskBar", riskFill);
+            SetRef(so, "logText", logText);
+        }
+
+        /// <summary>見出し付きのサイドバーカードを作り、中身を置くための領域を返す。</summary>
+        private static RectTransform CreateSidebarCard(Transform parent, string name, string title, Color accent,
+                                                       float preferredHeight, float flexibleHeight,
+                                                       out RectTransform content)
+        {
+            var card = CreatePanelBase(name, parent, CardBg);
+            ApplyRounded(card.gameObject, PanelSprite);
+            AddShadow(card.gameObject, 4f, 0.4f);
+
+            var le = card.gameObject.AddComponent<LayoutElement>();
+            if (preferredHeight > 0f) le.preferredHeight = preferredHeight;
+            le.flexibleHeight = flexibleHeight;
+
+            var dot = new GameObject("TitleAccent", typeof(Image));
+            dot.transform.SetParent(card, false);
+            var dotImg = dot.GetComponent<Image>();
+            dotImg.color = accent;
+            dotImg.raycastTarget = false;
+            ApplyRounded(dot, PanelSprite);
+            var dotRT = dot.GetComponent<RectTransform>();
+            dotRT.anchorMin = new Vector2(0, 1);
+            dotRT.anchorMax = new Vector2(0, 1);
+            dotRT.pivot = new Vector2(0, 1);
+            dotRT.sizeDelta = new Vector2(5, 18);
+            dotRT.anchoredPosition = new Vector2(14, -14);
+
+            var titleLabel = CreateLabel(card, "Title", title, 17, 0, bold: true);
+            titleLabel.color = TextMain;
+            titleLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            var titleRT = titleLabel.rectTransform;
+            titleRT.anchorMin = new Vector2(0, 1);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.pivot = new Vector2(0.5f, 1);
+            titleRT.offsetMin = new Vector2(26, -34);
+            titleRT.offsetMax = new Vector2(-14, -10);
+
+            var contentGO = new GameObject("Content", typeof(RectTransform));
+            contentGO.transform.SetParent(card, false);
+            content = contentGO.GetComponent<RectTransform>();
+            StretchTo(content, Vector2.zero, Vector2.one, new Vector2(12, 12), new Vector2(-12, -40));
+
+            return card;
+        }
+
+        // ================= ナビゲーター（立ち絵 + 吹き出し） =================
+
+        private static void BuildCharacterStrip(Transform parent, SerializedObject so)
+        {
+            var strip = new GameObject("CharacterStrip", typeof(RectTransform));
+            strip.transform.SetParent(parent, false);
+            var rt = strip.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.offsetMin = new Vector2(Margin * 2 + SidebarWidth, Margin);
+            rt.offsetMax = new Vector2(-Margin, Margin + CharacterStripHeight);
+
+            // 立ち絵の枠（イメージカラーで着色。素材が入るまではここが額縁になる）
             var frameGO = new GameObject("PortraitFrame", typeof(Image));
-            frameGO.transform.SetParent(slotGO.transform, false);
+            frameGO.transform.SetParent(rt, false);
             var frameImg = frameGO.GetComponent<Image>();
-            frameImg.color = new Color(0.16f, 0.16f, 0.20f, 1f);
+            frameImg.color = new Color(0.20f, 0.14f, 0.18f, 1f);
             ApplyRounded(frameGO, PanelSprite);
-            AddShadow(frameGO, 5f, 0.4f);
+            AddShadow(frameGO, 6f, 0.5f);
             var frameRT = frameGO.GetComponent<RectTransform>();
-            frameRT.anchorMin = Vector2.zero;
-            frameRT.anchorMax = Vector2.one;
-            frameRT.offsetMin = new Vector2(-8, -8);
-            frameRT.offsetMax = new Vector2(8, 8);
+            frameRT.anchorMin = new Vector2(0, 0.5f);
+            frameRT.anchorMax = new Vector2(0, 0.5f);
+            frameRT.pivot = new Vector2(0, 0.5f);
+            frameRT.sizeDelta = new Vector2(196, 196);
+            frameRT.anchoredPosition = new Vector2(0, 0);
 
+            // 実際に表情スプライトを差し替えるImage。素材が無い間はイメージカラーで塗られる。
             var portraitGO = new GameObject("NavigatorPortrait", typeof(Image));
-            portraitGO.transform.SetParent(slotGO.transform, false);
+            portraitGO.transform.SetParent(frameRT, false);
             var portraitImg = portraitGO.GetComponent<Image>();
-            portraitImg.color = new Color(0.85f, 0.85f, 0.9f);
-            var portraitRT = portraitGO.GetComponent<RectTransform>();
-            portraitRT.anchorMin = Vector2.zero;
-            portraitRT.anchorMax = Vector2.one;
-            portraitRT.offsetMin = Vector2.zero;
-            portraitRT.offsetMax = Vector2.zero;
+            portraitImg.color = new Color(0.96f, 0.55f, 0.70f);
+            portraitImg.preserveAspect = true;
+            portraitImg.raycastTarget = false;
+            StretchTo(portraitGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(8, 8), new Vector2(-8, -8));
 
-            var nameText = CreateLabel(rt, "NavigatorNameText", "", 18, 0, bold: true);
+            // 吹き出し
+            var bubble = CreatePanelBase("SpeechBubble", rt, new Color(0.145f, 0.155f, 0.200f, 0.98f));
+            ApplyRounded(bubble.gameObject, PanelSprite);
+            AddShadow(bubble.gameObject, 6f, 0.45f);
+            StretchTo(bubble, Vector2.zero, Vector2.one, new Vector2(220, 34), new Vector2(0, -10));
+
+            var accentGO = new GameObject("BubbleAccent", typeof(Image));
+            accentGO.transform.SetParent(bubble, false);
+            var accentImg = accentGO.GetComponent<Image>();
+            accentImg.color = new Color(0.96f, 0.55f, 0.70f);
+            accentImg.raycastTarget = false;
+            ApplyRounded(accentGO, PanelSprite);
+            StretchTo(accentGO.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(0, 1), new Vector2(10, 12), new Vector2(17, -12));
+
+            var line = CreateLabel(bubble, "NavigatorLine", "", 23, 0);
+            line.color = TextMain;
+            line.alignment = TextAlignmentOptions.TopLeft;
+            StretchTo(line.rectTransform, Vector2.zero, Vector2.one, new Vector2(34, 30), new Vector2(-26, -20));
+
+            // 名前チップ（吹き出しの下端に半分かかるように出す）
+            var nameChipGO = new GameObject("NameChip", typeof(Image));
+            nameChipGO.transform.SetParent(bubble, false);
+            var nameChipImg = nameChipGO.GetComponent<Image>();
+            nameChipImg.color = new Color(0.96f, 0.55f, 0.70f);
+            nameChipImg.raycastTarget = false;
+            ApplyRounded(nameChipGO, ButtonSprite);
+            AddShadow(nameChipGO, 3f, 0.4f);
+            var nameChipRT = nameChipGO.GetComponent<RectTransform>();
+            nameChipRT.anchorMin = new Vector2(0, 0);
+            nameChipRT.anchorMax = new Vector2(0, 0);
+            nameChipRT.pivot = new Vector2(0, 0.5f);
+            nameChipRT.sizeDelta = new Vector2(150, 36);
+            nameChipRT.anchoredPosition = new Vector2(28, 0);
+
+            var nameText = CreateLabel(nameChipGO.transform, "NameText", "", 18, 0, bold: true);
+            nameText.color = new Color(0.12f, 0.10f, 0.14f);
             nameText.alignment = TextAlignmentOptions.Center;
-            nameText.color = new Color(0.8f, 0.85f, 0.95f);
-
-            var line = CreateLabel(rt, "NavigatorLine", "今日も平穏です。備えを進めましょうか。", 20, 0);
-            line.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
+            StretchTo(nameText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             SetRef(so, "navigatorPortrait", portraitImg);
-            SetRef(so, "navigatorNameText", nameText);
+            SetRef(so, "portraitFrame", frameImg);
+            SetRef(so, "speechBubble", bubble.gameObject);
+            SetRef(so, "speechBubbleAccent", accentImg);
             SetRef(so, "navigatorLine", line);
+            SetRef(so, "navigatorNameChip", nameChipImg);
+            SetRef(so, "navigatorNameText", nameText);
         }
 
         // ================= メインフェーズパネル =================
 
-        private static RectTransform CreateMainAreaPanel(
-            string name, Transform parent, Color bg, Color accent, string phaseTitle)
+        /// <summary>サイドバー・ステータスバー・キャラ帯を避けた中央の作業領域にパネルを作る。</summary>
+        private static RectTransform CreateMainAreaPanel(string name, Transform parent, Color bg, Color accent, string phaseTitle)
         {
             var rt = CreatePanelBase(name, parent, bg);
-            rt.anchorMin = new Vector2(0, 0);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.offsetMin = new Vector2(340, 20);
-            rt.offsetMax = new Vector2(-20, -110);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(Margin * 2 + SidebarWidth, Margin * 2 + CharacterStripHeight);
+            rt.offsetMax = new Vector2(-Margin, -(TopBarHeight + Margin * 2));
             ApplyRounded(rt.gameObject, PanelSprite);
-            AddShadow(rt.gameObject, 6f, 0.4f);
+            AddShadow(rt.gameObject, 6f, 0.45f);
             AddPhaseTag(rt, phaseTitle, accent);
             rt.gameObject.SetActive(false);
             return rt;
         }
 
+        /// <summary>
+        /// メインパネル共通の縦積みレイアウト。
+        /// childControlHeightをtrueにしてあるので、子には必ずLayoutElementで高さを与えること
+        /// （与えないと高さ0になって見えなくなる）。
+        /// </summary>
+        private static VerticalLayoutGroup AddPanelLayout(RectTransform rt, int spacing, TextAnchor align)
+        {
+            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(40, 40, 78, 34);
+            layout.spacing = spacing;
+            layout.childAlignment = align;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = true;
+            return layout;
+        }
+
         private static void BuildDayPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel(
-                "DayPanel", parent, new Color(0.11f, 0.13f, 0.12f, 0.95f), AccentDay, "本日の業務");
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 70, 30);
-            layout.spacing = 20;
-            layout.childControlHeight = false;
-            layout.childControlWidth = true;
+            var rt = CreateMainAreaPanel("DayPanel", parent, new Color(0.09f, 0.13f, 0.12f, 0.96f), AccentDay, "本日の業務");
+            AddPanelLayout(rt, 22, TextAnchor.UpperCenter);
 
-            var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める");
-            proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+            var heading = CreateLabel(rt, "DayHeading", "今日をどう過ごす？", 34, 0, bold: true);
+            heading.alignment = TextAlignmentOptions.Center;
+            heading.gameObject.AddComponent<LayoutElement>().preferredHeight = 52;
 
-            var defenseTitle = CreateLabel(rt, "DefenseTitle", "セキュリティ対策", 20, 0, bold: true);
-            defenseTitle.color = new Color(0.85f, 0.9f, 0.88f);
+            var guide = CreateLabel(
+                rt, "DayGuide",
+                "左の「導入済み対策」から備えを強化できる。\n強化するほど、左下の被害予測が下がっていく。",
+                21, 0);
+            guide.color = TextSub;
+            guide.alignment = TextAlignmentOptions.Center;
+            guide.gameObject.AddComponent<LayoutElement>().preferredHeight = 76;
 
-            var containerGO = new GameObject("DefenseButtonContainer", typeof(RectTransform));
-            containerGO.transform.SetParent(rt, false);
-            var containerRT = containerGO.GetComponent<RectTransform>();
-            var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
-            vlayout.spacing = 8;
-            vlayout.childControlHeight = false;
-            vlayout.childControlWidth = true;
-            containerGO.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める", AccentDay);
+            proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 86;
 
             SetRef(so, "dayPanel", rt.gameObject);
             SetRef(so, "proceedButton", proceedBtn);
-            SetRef(so, "defenseButtonContainer", containerRT);
         }
 
         private static void BuildChorePanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel(
-                "ChorePanel", parent, new Color(0.12f, 0.13f, 0.17f, 0.95f), AccentChore, "雑務対応");
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 70, 30);
-            layout.spacing = 24;
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.childControlHeight = false;
-            layout.childControlWidth = true;
+            var rt = CreateMainAreaPanel("ChorePanel", parent, new Color(0.10f, 0.11f, 0.16f, 0.96f), AccentChore, "雑務対応");
+            AddPanelLayout(rt, 24, TextAnchor.UpperCenter);
 
-            var choreText = CreateLabel(rt, "ChoreText", "（雑務の内容がここに入る）", 26, 0);
+            var choreText = CreateLabel(rt, "ChoreText", "（雑務の内容がここに入る）", 28, 0);
             choreText.alignment = TextAlignmentOptions.Center;
-            var solveBtn = CreateButton(rt, "SolveButton", "誠実に対応する");
-            var postponeBtn = CreateButton(rt, "PostponeButton", "後回しにする");
-            solveBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
-            postponeBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+            choreText.gameObject.AddComponent<LayoutElement>().preferredHeight = 110;
+
+            var solveBtn = CreateButton(rt, "SolveButton", "誠実に対応する", AccentDay);
+            var postponeBtn = CreateButton(rt, "PostponeButton", "後回しにする", new Color(0.45f, 0.45f, 0.52f));
+            solveBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 78;
+            postponeBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 78;
 
             SetRef(so, "chorePanel", rt.gameObject);
             SetRef(so, "choreText", choreText);
@@ -299,33 +534,57 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildAttackPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel(
-                "AttackPanel", parent, new Color(0.17f, 0.10f, 0.10f, 0.95f), AccentAttack, "インシデント対応");
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 70, 30);
-            layout.spacing = 16;
-            layout.childControlHeight = false;
-            layout.childControlWidth = true;
+            var rt = CreateMainAreaPanel("AttackPanel", parent, new Color(0.16f, 0.085f, 0.09f, 0.96f), AccentAttack, "インシデント対応");
+            AddPanelLayout(rt, 12, TextAnchor.UpperLeft);
 
-            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 32, 0, bold: true);
-            var gradeText = CreateLabel(rt, "AttackGradeText", "（グレード）", 20, 0);
-            gradeText.color = new Color(0.9f, 0.7f, 0.65f);
-            var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 22, 0);
+            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 38, 0, bold: true);
+            nameText.gameObject.AddComponent<LayoutElement>().preferredHeight = 54;
+
+            // 格付けバッジは横並びの行に入れて、幅がテキストに引きずられないようにする
+            var gradeRow = new GameObject("GradeRow", typeof(RectTransform));
+            gradeRow.transform.SetParent(rt, false);
+            var gradeRowLayout = gradeRow.AddComponent<HorizontalLayoutGroup>();
+            gradeRowLayout.childAlignment = TextAnchor.MiddleLeft;
+            gradeRowLayout.childControlWidth = false;
+            gradeRowLayout.childForceExpandWidth = false;
+            gradeRowLayout.childControlHeight = false;
+            gradeRowLayout.childForceExpandHeight = false;
+            gradeRow.AddComponent<LayoutElement>().preferredHeight = 38;
+
+            var gradeChipGO = new GameObject("GradeChip", typeof(Image));
+            gradeChipGO.transform.SetParent(gradeRow.transform, false);
+            var gradeChip = gradeChipGO.GetComponent<Image>();
+            gradeChip.color = AccentAttack;
+            gradeChip.raycastTarget = false;
+            ApplyRounded(gradeChipGO, ButtonSprite);
+            gradeChipGO.GetComponent<RectTransform>().sizeDelta = new Vector2(120, 34);
+
+            var gradeText = CreateLabel(gradeChipGO.transform, "AttackGradeText", "", 18, 0, bold: true);
+            gradeText.alignment = TextAlignmentOptions.Center;
+            StretchTo(gradeText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 24, 0);
+            introLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 44;
+
             var scTerm = CreateLabel(rt, "ScTermText", "（SC用語）", 18, 0);
-            scTerm.color = new Color(0.75f, 0.8f, 0.85f);
+            scTerm.color = new Color(0.70f, 0.78f, 0.86f);
+            scTerm.gameObject.AddComponent<LayoutElement>().preferredHeight = 52;
 
             var containerGO = new GameObject("ChoiceButtonContainer", typeof(RectTransform));
             containerGO.transform.SetParent(rt, false);
             var containerRT = containerGO.GetComponent<RectTransform>();
             var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
             vlayout.spacing = 10;
-            vlayout.childControlHeight = false;
             vlayout.childControlWidth = true;
+            vlayout.childForceExpandWidth = true;
+            vlayout.childControlHeight = false;
+            vlayout.childForceExpandHeight = false;
             containerGO.AddComponent<LayoutElement>().flexibleHeight = 1;
 
             SetRef(so, "attackPanel", rt.gameObject);
             SetRef(so, "attackNameText", nameText);
             SetRef(so, "attackGradeText", gradeText);
+            SetRef(so, "attackGradeChip", gradeChip);
             SetRef(so, "attackIntroLine", introLine);
             SetRef(so, "scTermText", scTerm);
             SetRef(so, "choiceButtonContainer", containerRT);
@@ -333,56 +592,59 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildParryPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel(
-                "ParryPanel", parent, new Color(0.16f, 0.14f, 0.08f, 0.95f), AccentParry, "意思決定");
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 70, 30);
-            layout.spacing = 30;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlHeight = false;
-            layout.childControlWidth = false;
+            var rt = CreateMainAreaPanel("ParryPanel", parent, new Color(0.15f, 0.13f, 0.07f, 0.96f), AccentParry, "意思決定");
+            var layout = AddPanelLayout(rt, 26, TextAnchor.MiddleCenter);
+            // このパネルだけは幅を引き伸ばさず、トラックやボタンの指定幅をそのまま使う
+            layout.childForceExpandWidth = false;
 
-            var hint = CreateLabel(rt, "ParryHint", "タイミングよく「ここだ！」を押そう", 20, 0);
+            var hint = CreateLabel(rt, "ParryHint", "黄色いゾーンで「ここだ！」を押すと防御率が上がる", 21, 0);
             hint.alignment = TextAlignmentOptions.Center;
-            hint.color = new Color(0.85f, 0.8f, 0.7f);
-            hint.gameObject.AddComponent<LayoutElement>().preferredWidth = 700;
+            hint.color = new Color(0.88f, 0.82f, 0.70f);
+            var hintLE = hint.gameObject.AddComponent<LayoutElement>();
+            hintLE.preferredWidth = 900;
+            hintLE.preferredHeight = 34;
 
             var trackGO = new GameObject("ParryTrack", typeof(Image));
             trackGO.transform.SetParent(rt, false);
             var trackImg = trackGO.GetComponent<Image>();
-            trackImg.color = new Color(0.22f, 0.22f, 0.24f);
+            trackImg.color = new Color(0.20f, 0.20f, 0.23f);
             ApplyRounded(trackGO, PanelSprite);
             var trackRT = trackGO.GetComponent<RectTransform>();
-            trackRT.sizeDelta = new Vector2(900, 50);
-            trackGO.AddComponent<LayoutElement>().preferredWidth = 900;
+            trackRT.sizeDelta = new Vector2(900, 54);
+            var trackLE = trackGO.AddComponent<LayoutElement>();
+            trackLE.preferredWidth = 900;
+            trackLE.preferredHeight = 54;
 
             // スイートゾーン（GameManagerの判定しきい値と対応する帯を可視化する）
             float goodHalf = (1f - GameManager.ParryGoodThreshold) * 0.5f;
             float perfectHalf = (1f - GameManager.ParryPerfectThreshold) * 0.5f;
-            AddParryZone(trackRT, "GoodZone", 0.5f - goodHalf, 0.5f + goodHalf, new Color(0.55f, 0.75f, 0.4f, 0.55f));
-            AddParryZone(trackRT, "PerfectZone", 0.5f - perfectHalf, 0.5f + perfectHalf, new Color(0.95f, 0.8f, 0.25f, 0.8f));
+            AddParryZone(trackRT, "GoodZone", 0.5f - goodHalf, 0.5f + goodHalf, new Color(0.45f, 0.72f, 0.38f, 0.5f));
+            AddParryZone(trackRT, "PerfectZone", 0.5f - perfectHalf, 0.5f + perfectHalf, new Color(0.95f, 0.80f, 0.25f, 0.85f));
 
             var markerGO = new GameObject("ParryMarker", typeof(Image));
             markerGO.transform.SetParent(trackRT, false);
             var markerImg = markerGO.GetComponent<Image>();
-            markerImg.color = new Color(0.95f, 0.85f, 0.25f);
+            markerImg.color = Color.white;
+            markerImg.raycastTarget = false;
             ApplyRounded(markerGO, ButtonSprite);
-            AddShadow(markerGO, 2f, 0.5f);
+            AddShadow(markerGO, 2f, 0.6f);
             var markerRT = markerGO.GetComponent<RectTransform>();
             markerRT.anchorMin = new Vector2(0.5f, 0.5f);
             markerRT.anchorMax = new Vector2(0.5f, 0.5f);
             markerRT.pivot = new Vector2(0.5f, 0.5f);
-            markerRT.sizeDelta = new Vector2(20, 50);
+            markerRT.sizeDelta = new Vector2(16, 62);
             markerRT.anchoredPosition = Vector2.zero;
 
-            var feedbackText = CreateLabel(rt, "ParryFeedbackText", "", 32, 0, bold: true);
+            var feedbackText = CreateLabel(rt, "ParryFeedbackText", "", 40, 0, bold: true);
             feedbackText.alignment = TextAlignmentOptions.Center;
-            feedbackText.gameObject.AddComponent<LayoutElement>().preferredHeight = 50;
+            var fbLE = feedbackText.gameObject.AddComponent<LayoutElement>();
+            fbLE.preferredWidth = 600;
+            fbLE.preferredHeight = 58;
 
-            var parryBtn = CreateButton(rt, "ParryButton", "ここだ！");
+            var parryBtn = CreateButton(rt, "ParryButton", "ここだ！", AccentParry);
             var parryLE = parryBtn.gameObject.AddComponent<LayoutElement>();
-            parryLE.preferredWidth = 300;
-            parryLE.preferredHeight = 80;
+            parryLE.preferredWidth = 340;
+            parryLE.preferredHeight = 92;
 
             SetRef(so, "parryPanel", rt.gameObject);
             SetRef(so, "parryTrack", trackRT);
@@ -396,7 +658,9 @@ namespace PatchWorkSecure.EditorTools
         {
             var go = new GameObject(name, typeof(Image));
             go.transform.SetParent(trackRT, false);
-            go.GetComponent<Image>().color = color;
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            img.raycastTarget = false;
             var zoneRT = go.GetComponent<RectTransform>();
             zoneRT.anchorMin = new Vector2(xMin, 0f);
             zoneRT.anchorMax = new Vector2(xMax, 1f);
@@ -406,21 +670,20 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildResultPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateMainAreaPanel(
-                "ResultPanel", parent, new Color(0.12f, 0.12f, 0.15f, 0.95f), AccentResult, "対応結果");
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 70, 30);
-            layout.spacing = 24;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlHeight = false;
-            layout.childControlWidth = true;
+            var rt = CreateMainAreaPanel("ResultPanel", parent, new Color(0.10f, 0.10f, 0.14f, 0.96f), AccentResult, "対応結果");
+            AddPanelLayout(rt, 26, TextAnchor.MiddleCenter);
 
-            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 30, 0, bold: true);
+            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 34, 0, bold: true);
             resultText.alignment = TextAlignmentOptions.Center;
-            var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 22, 0);
+            resultText.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
+
+            var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 23, 0);
             resultLine.alignment = TextAlignmentOptions.Center;
-            var nextBtn = CreateButton(rt, "NextDayButton", "次の日へ");
-            nextBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+            resultLine.color = TextSub;
+            resultLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
+
+            var nextBtn = CreateButton(rt, "NextDayButton", "次の日へ", AccentResult);
+            nextBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 82;
 
             SetRef(so, "resultPanel", rt.gameObject);
             SetRef(so, "resultText", resultText);
@@ -428,43 +691,18 @@ namespace PatchWorkSecure.EditorTools
             SetRef(so, "nextDayButton", nextBtn);
         }
 
-        private static void BuildLogPanel(Transform parent, SerializedObject so)
-        {
-            var rt = CreatePanelBase("LogPanel", parent, new Color(0.05f, 0.05f, 0.08f, 0.88f));
-            rt.anchorMin = new Vector2(1, 0);
-            rt.anchorMax = new Vector2(1, 0);
-            rt.pivot = new Vector2(1, 0);
-            rt.sizeDelta = new Vector2(420, 220);
-            rt.anchoredPosition = new Vector2(-20, 20);
-            ApplyRounded(rt.gameObject, PanelSprite);
-            AddShadow(rt.gameObject, 4f, 0.35f);
-
-            var logText = CreateLabel(rt, "LogText", "", 16, 0);
-            var logRT = logText.GetComponent<RectTransform>();
-            logRT.anchorMin = Vector2.zero;
-            logRT.anchorMax = Vector2.one;
-            logRT.offsetMin = new Vector2(16, 16);
-            logRT.offsetMax = new Vector2(-16, -16);
-            logText.alignment = TextAlignmentOptions.TopLeft;
-
-            SetRef(so, "logText", logText);
-        }
-
         // ================= フルスクリーン画面 =================
 
         private static RectTransform CreateFullScreenPanel(string name, Transform parent, Color bg, Color accent)
         {
             var rt = CreatePanelBase(name, parent, bg);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-            AddAccentStrip(rt, accent);
+            StretchTo(rt, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            if (accent.a > 0f) AddAccentStrip(rt, accent);
             rt.gameObject.SetActive(false);
             return rt;
         }
 
-        /// <summary>フルスクリーン画面の中央に浮かべる、角丸+影付きのダイアログ/コンテンツカード。</summary>
+        /// <summary>フルスクリーン画面の中央に浮かべる、角丸+影付きのカード。</summary>
         private static RectTransform CreateCenterCard(Transform parent, string name, Vector2 size, Color bg)
         {
             var go = new GameObject(name, typeof(Image));
@@ -472,12 +710,10 @@ namespace PatchWorkSecure.EditorTools
             var img = go.GetComponent<Image>();
             img.color = bg;
             ApplyRounded(go, PanelSprite);
-            AddShadow(go, 8f, 0.5f);
+            AddShadow(go, 10f, 0.55f);
 
             var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = size;
             rt.anchoredPosition = Vector2.zero;
             return rt;
@@ -485,45 +721,57 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildTitlePanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateFullScreenPanel("TitlePanel", parent, new Color(0.07f, 0.07f, 0.10f, 0.98f), AccentTitle);
+            var rt = CreateFullScreenPanel("TitlePanel", parent, new Color(0.055f, 0.055f, 0.085f, 1f), AccentTitle);
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 26;
-            layout.childControlHeight = false;
-            layout.childControlWidth = false;
+            layout.spacing = 22;
+            // 子はそれぞれLayoutElementで幅・高さを指定してあるので、引き伸ばさずその値を使う
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = false;
 
-            var title = CreateLabel(rt, "GameTitle", "PatchWorkSecure", 64, 0, bold: true);
+            var title = CreateLabel(rt, "GameTitle", "PatchWorkSecure", 76, 0, bold: true);
             title.alignment = TextAlignmentOptions.Center;
-            title.gameObject.AddComponent<LayoutElement>().preferredWidth = 900;
+            var titleLE = title.gameObject.AddComponent<LayoutElement>();
+            titleLE.preferredWidth = 1000;
+            titleLE.preferredHeight = 96;
 
             var tagline = CreateLabel(
                 rt, "Tagline",
                 "なにごともない、いつもの平穏なオフィスの日常を\nツギハギ（PatchWork）しながら守り抜け",
-                20, 0);
+                21, 0);
             tagline.alignment = TextAlignmentOptions.Center;
-            tagline.color = new Color(0.75f, 0.75f, 0.82f);
+            tagline.color = TextSub;
             var taglineLE = tagline.gameObject.AddComponent<LayoutElement>();
-            taglineLE.preferredWidth = 800;
-            taglineLE.preferredHeight = 70;
+            taglineLE.preferredWidth = 900;
+            taglineLE.preferredHeight = 76;
 
-            var personaLabel = CreateLabel(rt, "PersonaSelectLabel", "ナビゲーターを選ぶ", 16, 0);
+            var personaLabel = CreateLabel(rt, "PersonaSelectLabel", "ナビゲーターを選ぶ", 17, 0);
             personaLabel.alignment = TextAlignmentOptions.Center;
-            personaLabel.color = new Color(0.65f, 0.65f, 0.72f);
+            personaLabel.color = TextSub;
+            var personaLabelLE = personaLabel.gameObject.AddComponent<LayoutElement>();
+            personaLabelLE.preferredWidth = 900;
+            personaLabelLE.preferredHeight = 28;
 
             var personaContainerGO = new GameObject("PersonaSelectContainer", typeof(RectTransform));
             personaContainerGO.transform.SetParent(rt, false);
             var personaContainerRT = personaContainerGO.GetComponent<RectTransform>();
             var personaLayout = personaContainerGO.AddComponent<HorizontalLayoutGroup>();
-            personaLayout.spacing = 16;
+            personaLayout.spacing = 14;
             personaLayout.childAlignment = TextAnchor.MiddleCenter;
-            personaLayout.childControlHeight = false;
             personaLayout.childControlWidth = false;
-            personaContainerGO.AddComponent<LayoutElement>().preferredHeight = 60;
+            personaLayout.childForceExpandWidth = false;
+            personaLayout.childControlHeight = false;
+            personaLayout.childForceExpandHeight = false;
+            var personaContainerLE = personaContainerGO.AddComponent<LayoutElement>();
+            personaContainerLE.preferredWidth = 900;
+            personaContainerLE.preferredHeight = 60;
 
-            var startBtn = CreateButton(rt, "StartButton", "はじめる");
+            var startBtn = CreateButton(rt, "StartButton", "はじめる", AccentTitle);
             var startLE = startBtn.gameObject.AddComponent<LayoutElement>();
-            startLE.preferredWidth = 260;
-            startLE.preferredHeight = 72;
+            startLE.preferredWidth = 300;
+            startLE.preferredHeight = 82;
 
             SetRef(so, "titlePanel", rt.gameObject);
             SetRef(so, "startButton", startBtn);
@@ -532,23 +780,25 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildQuizPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateFullScreenPanel("QuizPanel", parent, new Color(0.08f, 0.11f, 0.09f, 0.98f), AccentQuiz);
+            var rt = CreateFullScreenPanel("QuizPanel", parent, new Color(0.06f, 0.095f, 0.075f, 1f), AccentQuiz);
 
-            var card = CreateCenterCard(rt, "QuizCard", new Vector2(900, 560), new Color(0.10f, 0.14f, 0.11f, 0.98f));
+            var card = CreateCenterCard(rt, "QuizCard", new Vector2(980, 600), new Color(0.09f, 0.13f, 0.10f, 0.99f));
             var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(60, 60, 50, 50);
+            layout.padding = new RectOffset(64, 64, 54, 54);
             layout.childAlignment = TextAnchor.UpperCenter;
-            layout.spacing = 26;
-            layout.childControlHeight = false;
+            layout.spacing = 24;
+            layout.childControlHeight = true;
             layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
 
-            var progress = CreateLabel(card, "QuizProgressText", "事前クイズ 1/3", 18, 0);
+            var progress = CreateLabel(card, "QuizProgressText", "事前クイズ 1 / 3", 19, 0);
             progress.alignment = TextAlignmentOptions.Center;
-            progress.color = new Color(0.6f, 0.78f, 0.66f);
+            progress.color = new Color(0.58f, 0.80f, 0.65f);
+            progress.gameObject.AddComponent<LayoutElement>().preferredHeight = 30;
 
-            var question = CreateLabel(card, "QuizQuestionText", "（設問がここに入る）", 26, 0, bold: true);
+            var question = CreateLabel(card, "QuizQuestionText", "（設問がここに入る）", 28, 0, bold: true);
             question.alignment = TextAlignmentOptions.Center;
-            question.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
+            question.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
 
             var containerGO = new GameObject("QuizOptionContainer", typeof(RectTransform));
             containerGO.transform.SetParent(card, false);
@@ -556,8 +806,11 @@ namespace PatchWorkSecure.EditorTools
             var vlayout = containerGO.AddComponent<VerticalLayoutGroup>();
             vlayout.spacing = 14;
             vlayout.childAlignment = TextAnchor.UpperCenter;
-            vlayout.childControlHeight = false;
             vlayout.childControlWidth = true;
+            vlayout.childForceExpandWidth = true;
+            vlayout.childControlHeight = false;
+            vlayout.childForceExpandHeight = false;
+            containerGO.AddComponent<LayoutElement>().flexibleHeight = 1;
 
             SetRef(so, "quizPanel", rt.gameObject);
             SetRef(so, "quizProgressText", progress);
@@ -567,26 +820,28 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildEndingPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateFullScreenPanel("EndingPanel", parent, new Color(0.10f, 0.07f, 0.08f, 0.98f), AccentEnding);
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
+            var rt = CreateFullScreenPanel("EndingPanel", parent, new Color(0.08f, 0.055f, 0.065f, 1f), AccentEnding);
+
+            var card = CreateCenterCard(rt, "EndingCard", new Vector2(1000, 460), new Color(0.115f, 0.085f, 0.100f, 0.99f));
+            var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(60, 60, 56, 48);
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 20;
-            layout.childControlHeight = false;
-            layout.childControlWidth = false;
+            layout.spacing = 26;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
 
-            var text = CreateLabel(rt, "EndingText", "（結果メッセージ）", 34, 0, bold: true);
+            var text = CreateLabel(card, "EndingText", "（結果メッセージ）", 38, 0, bold: true);
             text.alignment = TextAlignmentOptions.Center;
-            text.gameObject.AddComponent<LayoutElement>().preferredWidth = 900;
+            text.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
 
-            var line = CreateLabel(rt, "EndingCharacterLine", "「（台詞）」", 22, 0);
+            var line = CreateLabel(card, "EndingCharacterLine", "", 22, 0);
             line.alignment = TextAlignmentOptions.Center;
-            line.color = new Color(0.8f, 0.8f, 0.85f);
-            line.gameObject.AddComponent<LayoutElement>().preferredWidth = 800;
+            line.color = TextSub;
+            line.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
 
-            var btn = CreateButton(rt, "EndingContinueButton", "結果を振り返る");
-            var le = btn.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = 280;
-            le.preferredHeight = 70;
+            var btn = CreateButton(card, "EndingContinueButton", "結果を振り返る", AccentEnding);
+            btn.gameObject.AddComponent<LayoutElement>().preferredHeight = 80;
 
             SetRef(so, "endingPanel", rt.gameObject);
             SetRef(so, "endingText", text);
@@ -596,30 +851,128 @@ namespace PatchWorkSecure.EditorTools
 
         private static void BuildSummaryPanel(Transform parent, SerializedObject so)
         {
-            var rt = CreateFullScreenPanel("SummaryPanel", parent, new Color(0.09f, 0.08f, 0.12f, 0.98f), AccentSummary);
+            var rt = CreateFullScreenPanel("SummaryPanel", parent, new Color(0.070f, 0.065f, 0.100f, 1f), AccentSummary);
 
-            var card = CreateCenterCard(rt, "SummaryCard", new Vector2(720, 460), new Color(0.12f, 0.11f, 0.16f, 0.98f));
+            var card = CreateCenterCard(rt, "SummaryCard", new Vector2(800, 500), new Color(0.110f, 0.100f, 0.150f, 0.99f));
             var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(50, 50, 50, 50);
+            layout.padding = new RectOffset(56, 56, 50, 46);
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 30;
-            layout.childControlHeight = false;
-            layout.childControlWidth = false;
+            layout.spacing = 26;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+
+            var heading = CreateLabel(card, "SummaryHeading", "学習の記録", 30, 0, bold: true);
+            heading.alignment = TextAlignmentOptions.Center;
+            heading.gameObject.AddComponent<LayoutElement>().preferredHeight = 44;
 
             var text = CreateLabel(card, "SummaryText", "（結果サマリーがここに入る）", 22, 0);
             text.alignment = TextAlignmentOptions.Center;
-            var textLE = text.gameObject.AddComponent<LayoutElement>();
-            textLE.preferredWidth = 600;
-            textLE.preferredHeight = 220;
+            text.gameObject.AddComponent<LayoutElement>().preferredHeight = 220;
 
-            var btn = CreateButton(card, "SummaryCloseButton", "タイトルへ戻る");
-            var btnLE = btn.gameObject.AddComponent<LayoutElement>();
-            btnLE.preferredWidth = 260;
-            btnLE.preferredHeight = 70;
+            var btn = CreateButton(card, "SummaryCloseButton", "タイトルへ戻る", AccentSummary);
+            btn.gameObject.AddComponent<LayoutElement>().preferredHeight = 78;
 
             SetRef(so, "summaryPanel", rt.gameObject);
             SetRef(so, "summaryText", text);
             SetRef(so, "summaryCloseButton", btn);
+        }
+
+        // ================= 設定オーバーレイ =================
+
+        private static void BuildSettingsOverlay(Transform parent, SerializedObject so)
+        {
+            var btnGO = new GameObject("SettingsOpenButton", typeof(Image), typeof(Button));
+            btnGO.transform.SetParent(parent, false);
+            var btnBg = btnGO.GetComponent<Image>();
+            btnBg.color = new Color(0.20f, 0.21f, 0.26f, 0.95f);
+            ApplyRounded(btnGO, ButtonSprite);
+            AddShadow(btnGO, 3f, 0.4f);
+            var btnRT = btnGO.GetComponent<RectTransform>();
+            btnRT.anchorMin = btnRT.anchorMax = btnRT.pivot = new Vector2(1, 1);
+            btnRT.sizeDelta = new Vector2(84, 40);
+            btnRT.anchoredPosition = new Vector2(-(Margin + 14), -(TopBarHeight + Margin + 12));
+
+            var icon = CreateLabel(btnGO.transform, "Label", "設定", 17, 0, bold: true);
+            icon.alignment = TextAlignmentOptions.Center;
+            StretchTo(icon.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            var openBtn = btnGO.GetComponent<Button>();
+            openBtn.targetGraphic = btnBg;
+            ApplyButtonColors(openBtn);
+            btnGO.AddComponent<UIButtonPunch>();
+
+            // 背景は画面全体を薄暗く覆うだけ。中身は中央のダイアログカードにまとめる。
+            var overlayRT = CreateFullScreenPanel("SettingsPanel", parent, new Color(0.02f, 0.02f, 0.04f, 0.80f), new Color(0, 0, 0, 0));
+
+            var card = CreateCenterCard(overlayRT, "SettingsCard", new Vector2(520, 470), CardBg);
+            var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(44, 44, 44, 40);
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 22;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+
+            var title = CreateLabel(card, "SettingsTitle", "設定", 34, 0, bold: true);
+            title.alignment = TextAlignmentOptions.Center;
+            title.gameObject.AddComponent<LayoutElement>().preferredHeight = 52;
+
+            var muteBtn = CreateButton(card, "MuteButton", "音声：オン", AccentDay);
+            muteBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+            var muteLabel = muteBtn.GetComponentInChildren<TextMeshProUGUI>();
+
+            var backToTitleBtn = CreateButton(card, "BackToTitleButton", "タイトルへ戻る", new Color(0.50f, 0.45f, 0.62f));
+            backToTitleBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+
+            var closeBtn = CreateButton(card, "CloseButton", "閉じる", new Color(0.40f, 0.42f, 0.50f));
+            closeBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 70;
+
+            SetRef(so, "settingsPanel", overlayRT.gameObject);
+            SetRef(so, "settingsOpenButton", openBtn);
+            SetRef(so, "settingsCloseButton", closeBtn);
+            SetRef(so, "settingsMuteButton", muteBtn);
+            SetRef(so, "settingsMuteButtonLabel", muteLabel);
+            SetRef(so, "settingsBackToTitleButton", backToTitleBtn);
+        }
+
+        // ================= 演出レイヤー =================
+
+        /// <summary>
+        /// フラッシュ・バナー・浮遊テキストの置き場。ShakeRootの外側に置くので、
+        /// 画面が揺れている間もフラッシュとバナーだけは画面に固定されて読める。
+        /// </summary>
+        private static void BuildEffectLayer(Transform canvas, RectTransform shakeRoot, SerializedObject so)
+        {
+            var layerRT = CreateStretched("EffectLayer", canvas);
+            var effects = layerRT.gameObject.AddComponent<UIEffects>();
+
+            var flashGO = new GameObject("FlashOverlay", typeof(Image));
+            flashGO.transform.SetParent(layerRT, false);
+            var flashImg = flashGO.GetComponent<Image>();
+            flashImg.color = new Color(1f, 1f, 1f, 0f);
+            flashImg.raycastTarget = false;
+            StretchTo(flashGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            var banner = CreateLabel(layerRT, "BannerText", "", 84, 0, bold: true);
+            banner.alignment = TextAlignmentOptions.Center;
+            banner.raycastTarget = false;
+            var bannerRT = banner.rectTransform;
+            bannerRT.anchorMin = bannerRT.anchorMax = bannerRT.pivot = new Vector2(0.5f, 0.5f);
+            bannerRT.sizeDelta = new Vector2(1200, 160);
+            bannerRT.anchoredPosition = new Vector2(0, 120);
+            banner.gameObject.SetActive(false);
+
+            var soEffects = new SerializedObject(effects);
+            SetRef(soEffects, "shakeRoot", shakeRoot);
+            SetRef(soEffects, "flashOverlay", flashImg);
+            SetRef(soEffects, "effectLayer", layerRT);
+            SetRef(soEffects, "bannerText", banner);
+            SetRef(soEffects, "circleSprite", CircleSprite);
+            SetRef(soEffects, "font", UiFont);
+            soEffects.ApplyModifiedProperties();
+
+            SetRef(so, "effects", effects);
         }
 
         // ================= オーディオ =================
@@ -645,21 +998,58 @@ namespace PatchWorkSecure.EditorTools
 
         // ================= ナビゲーター候補 =================
 
-        private const string PersonaDir = "Assets/Personas";
-
         /// <summary>
-        /// 「3人から1人選べる」の土台として、3体分のNavigatorPersonaアセットを用意する。
-        /// 既に存在する場合は上書きしない(手動で立ち絵を割り当てた後の再構築で消えないようにするため)。
+        /// 「3人から1人選べる」の器を用意する。今のところ中身が固まっているのは「ひなた」だけで、
+        /// 残り2人はイメージカラーと枠だけのプレースホルダー（セリフ未入力＝共通セリフで動く）。
+        /// 既にアセットがある場合は上書きしない（立ち絵を割り当てた後の再構築で消えないようにするため）。
         /// </summary>
         private static void BuildNavigatorPersonas(SerializedObject so)
         {
-            var aya = GetOrCreatePersona("Persona_Aya", "アヤ", "生真面目な情シス3年目。石橋を叩いて渡る慎重派。");
-            var persona2 = GetOrCreatePersona("Persona_2", "（キャラ2・未定）", "素材未着手のプレースホルダー。");
-            var persona3 = GetOrCreatePersona("Persona_3", "（キャラ3・未定）", "素材未着手のプレースホルダー。");
-            SetRefArray(so, "personas", new Object[] { aya, persona2, persona3 });
+            var hinata = GetOrCreatePersona("Persona_Hinata", p =>
+            {
+                p.DisplayName = "ひなた";
+                p.Description = "明るく元気なナビゲーター。難しい話も勢いよく噛み砕いて、背中を押してくれる。";
+                p.ThemeColor = new Color(0.96f, 0.55f, 0.70f);
+
+                p.LineNormal = "今日も平和だね！ 今のうちに備えちゃお！";
+                p.LineNoDefense = "まだ対策ゼロだよ！？ 何かひとつ入れよ、ね？";
+                p.LineLowBudget = "お財布ピンチ……！ ここは我慢のしどころだね";
+                p.LineLowTrust = "みんなの信頼、下がっちゃってる……雑務もちゃんとやろ！";
+                p.LineHighStress = "みんな疲れてるみたい。締めつけすぎは逆に危ないよ？";
+                p.LineEndgame = "年度末が近いよ！ ここが踏ん張りどころっ！";
+                p.LineGood = "いい感じ！ この調子でいこー！";
+
+                p.LineAttackSevere = "うわっ、これヤバいやつ……！ 落ち着いて、ね！";
+                p.LineAttackNew = "見たことない手口だよ！ 慎重にいこ！";
+                p.LineAttackNormal = "来た来た！ 大丈夫、いつもの手口だよ！";
+                p.LineParry = "タイミング合わせて……いっけー！";
+
+                p.LineWin = "やったー！ さすがだね！";
+                p.LineWinNarrow = "あぶなー……！ ギリギリセーフだよ〜";
+                p.LineLose = "うぅ……守りきれなかった……ごめん";
+                p.LineGameOver = "ごめん……力になれなかったよ……";
+                p.LineClear = "1年間おつかれさま！ ほんとに立派だったよ！";
+            });
+
+            var aria = GetOrCreatePersona("Persona_Aria", p =>
+            {
+                p.DisplayName = "アリア";
+                p.Description = "（キャラ未確定のプレースホルダー）冷静に数字で語る分析役を想定。セリフ未入力のため共通セリフで話す。";
+                p.ThemeColor = new Color(0.45f, 0.72f, 0.95f);
+            });
+
+            var chloe = GetOrCreatePersona("Persona_Chloe", p =>
+            {
+                p.DisplayName = "クロエ";
+                p.Description = "（キャラ未確定のプレースホルダー）攻撃者目線で弱点を突く役を想定。セリフ未入力のため共通セリフで話す。";
+                p.ThemeColor = new Color(0.64f, 0.46f, 0.88f);
+            });
+
+            SetRefArray(so, "personas", new Object[] { hinata, aria, chloe });
         }
 
-        private static NavigatorPersona GetOrCreatePersona(string assetName, string displayName, string description)
+        /// <summary>アセットが無ければ作って初期設定を流し込む。既にあればそのまま返す。</summary>
+        private static NavigatorPersona GetOrCreatePersona(string assetName, System.Action<NavigatorPersona> configure)
         {
             string path = $"{PersonaDir}/{assetName}.asset";
             var existing = AssetDatabase.LoadAssetAtPath<NavigatorPersona>(path);
@@ -668,115 +1058,26 @@ namespace PatchWorkSecure.EditorTools
             if (!Directory.Exists(PersonaDir)) Directory.CreateDirectory(PersonaDir);
 
             var persona = ScriptableObject.CreateInstance<NavigatorPersona>();
-            persona.DisplayName = displayName;
-            persona.Description = description;
+            configure(persona);
             AssetDatabase.CreateAsset(persona, path);
             return persona;
         }
 
-        // ================= 設定オーバーレイ =================
-
-        /// <summary>右上に常時表示する歯車ボタンと、ミュート切替・タイトルへ戻る導線を持つ設定ダイアログ。</summary>
-        private static void BuildSettingsOverlay(Transform parent, SerializedObject so)
-        {
-            var btnGO = new GameObject("SettingsOpenButton", typeof(Image), typeof(Button));
-            btnGO.transform.SetParent(parent, false);
-            var btnBg = btnGO.GetComponent<Image>();
-            btnBg.color = new Color(0.2f, 0.2f, 0.24f, 0.9f);
-            ApplyRounded(btnGO, ButtonSprite);
-            AddShadow(btnGO, 3f, 0.35f);
-            var btnRT = btnGO.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(1, 1);
-            btnRT.anchorMax = new Vector2(1, 1);
-            btnRT.pivot = new Vector2(1, 1);
-            btnRT.sizeDelta = new Vector2(56, 56);
-            btnRT.anchoredPosition = new Vector2(-16, -16);
-
-            var icon = CreateLabel(btnGO.transform, "Icon", "設定", 16, 0, bold: true);
-            icon.alignment = TextAlignmentOptions.Center;
-            var iconRT = icon.GetComponent<RectTransform>();
-            iconRT.anchorMin = Vector2.zero;
-            iconRT.anchorMax = Vector2.one;
-            iconRT.offsetMin = Vector2.zero;
-            iconRT.offsetMax = Vector2.zero;
-
-            var openBtn = btnGO.GetComponent<Button>();
-            openBtn.targetGraphic = btnBg;
-            ApplyButtonColors(openBtn);
-            btnGO.AddComponent<UIButtonPunch>();
-
-            // 背景は画面全体を薄暗く覆うだけ(角丸なし)。中身は中央のダイアログカードにまとめる。
-            var overlayRT = CreateFullScreenPanelNoAccent(
-                "SettingsPanel", parent, new Color(0.03f, 0.03f, 0.05f, 0.75f));
-
-            var card = CreateCenterCard(overlayRT, "SettingsCard", new Vector2(480, 460), new Color(0.13f, 0.13f, 0.17f, 0.98f));
-            var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(30, 30, 40, 30);
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 24;
-            layout.childControlHeight = false;
-            layout.childControlWidth = false;
-
-            var title = CreateLabel(card, "SettingsTitle", "設定", 36, 0, bold: true);
-            title.alignment = TextAlignmentOptions.Center;
-
-            var muteBtn = CreateButton(card, "MuteButton", "音声：オン");
-            var muteLE = muteBtn.gameObject.AddComponent<LayoutElement>();
-            muteLE.preferredWidth = 320;
-            muteLE.preferredHeight = 64;
-            var muteLabel = muteBtn.GetComponentInChildren<TextMeshProUGUI>();
-
-            var backToTitleBtn = CreateButton(card, "BackToTitleButton", "タイトルへ戻る");
-            var backLE = backToTitleBtn.gameObject.AddComponent<LayoutElement>();
-            backLE.preferredWidth = 320;
-            backLE.preferredHeight = 64;
-
-            var closeBtn = CreateButton(card, "CloseButton", "閉じる");
-            var closeLE = closeBtn.gameObject.AddComponent<LayoutElement>();
-            closeLE.preferredWidth = 320;
-            closeLE.preferredHeight = 64;
-
-            SetRef(so, "settingsPanel", overlayRT.gameObject);
-            SetRef(so, "settingsOpenButton", openBtn);
-            SetRef(so, "settingsCloseButton", closeBtn);
-            SetRef(so, "settingsMuteButton", muteBtn);
-            SetRef(so, "settingsMuteButtonLabel", muteLabel);
-            SetRef(so, "settingsBackToTitleButton", backToTitleBtn);
-            // BuildSettingsOverlayはBuildScene()内で最後に呼ばれるため、
-            // btnGO/overlayRTは他の全画面パネルより自然に手前へ来る（overlayRTが最後尾＝最前面）。
-        }
-
-        /// <summary>CreateFullScreenPanelからフェーズ帯(AddAccentStrip)を省いた版。設定ダイアログの薄暗い背景用。</summary>
-        private static RectTransform CreateFullScreenPanelNoAccent(string name, Transform parent, Color bg)
-        {
-            var rt = CreatePanelBase(name, parent, bg);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-            rt.gameObject.SetActive(false);
-            return rt;
-        }
-
         // ================= プレハブ =================
 
-        private static GameObject BuildButtonPrefab(string name)
+        private static GameObject BuildButtonPrefab(string name, float height, int fontSize, TextAlignmentOptions align)
         {
             var go = new GameObject(name, typeof(Image), typeof(Button));
             var bgImage = go.GetComponent<Image>();
-            bgImage.color = new Color(0.22f, 0.24f, 0.30f);
+            bgImage.color = new Color(0.18f, 0.19f, 0.24f);
             ApplyRounded(go, ButtonSprite);
-            AddShadow(go, 3f, 0.3f);
+            AddShadow(go, 3f, 0.35f);
             var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(500, 64);
+            rt.sizeDelta = new Vector2(500, height);
 
-            var label = CreateLabel(rt, "Label", "対策名 Lv.0", 20, 0);
-            var labelRT = label.GetComponent<RectTransform>();
-            labelRT.anchorMin = Vector2.zero;
-            labelRT.anchorMax = Vector2.one;
-            labelRT.offsetMin = new Vector2(20, 6);
-            labelRT.offsetMax = new Vector2(-20, -6);
-            label.alignment = TextAlignmentOptions.MidlineLeft;
+            var label = CreateLabel(rt, "Label", "ラベル", fontSize, 0);
+            label.alignment = align;
+            StretchTo(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(20, 6), new Vector2(-20, -6));
 
             var button = go.GetComponent<Button>();
             button.targetGraphic = bgImage;
@@ -790,6 +1091,24 @@ namespace PatchWorkSecure.EditorTools
         }
 
         // ================= 共通ヘルパー =================
+
+        /// <summary>親いっぱいに広がるRectTransformだけのGameObjectを作る。</summary>
+        private static RectTransform CreateStretched(string name, Transform parent)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var rt = go.GetComponent<RectTransform>();
+            StretchTo(rt, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            return rt;
+        }
+
+        private static void StretchTo(RectTransform rt, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+        {
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.offsetMin = offsetMin;
+            rt.offsetMax = offsetMax;
+        }
 
         private static RectTransform CreatePanelBase(string name, Transform parent, Color bg)
         {
@@ -808,7 +1127,7 @@ namespace PatchWorkSecure.EditorTools
             img.type = Image.Type.Sliced;
         }
 
-        /// <summary>UI標準のShadowコンポーネントでドロップシャドウを付ける。同一GameObjectのGraphicに自動追従する。</summary>
+        /// <summary>UI標準のShadowコンポーネントでドロップシャドウを付ける。</summary>
         private static void AddShadow(GameObject go, float distance = 4f, float alpha = 0.4f)
         {
             var shadow = go.AddComponent<Shadow>();
@@ -817,27 +1136,21 @@ namespace PatchWorkSecure.EditorTools
         }
 
         /// <summary>
-        /// 絵文字の代わりに使う小さな色付き角丸チップ。フォントのグリフに依存しないアイコン代用。
-        /// (Meiryo SDFはCustom Charactersで生成されており絵文字グリフを持たないため、
-        /// アイコンが必要な箇所は文字ではなく色チップで表現する)
+        /// カード左端に立てる細い色帯。絵文字を使わずに項目の種類を色で示すための手段
+        /// （meiryo SDFは絵文字グリフを持たないため、アイコンは常に図形で表現する）。
         /// </summary>
-        private static void CreateIconChip(Transform parent, Color color)
+        private static void AddAccentBar(RectTransform parent, Color color)
         {
-            var go = new GameObject("IconChip", typeof(Image));
+            var go = new GameObject("Accent", typeof(Image));
             go.transform.SetParent(parent, false);
             var img = go.GetComponent<Image>();
             img.color = color;
             img.raycastTarget = false;
             ApplyRounded(go, PanelSprite);
-
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredWidth = 26;
-            le.preferredHeight = 26;
-            le.flexibleWidth = 0;
-            le.flexibleHeight = 0;
+            StretchTo(go.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(0, 1), new Vector2(10, 12), new Vector2(16, -12));
         }
 
-        /// <summary>パネル左上に、フェーズ名を示す角丸バッジを載せる（旧・全幅アクセント帯の置き換え）。</summary>
+        /// <summary>パネル左上に、フェーズ名を示す角丸バッジを載せる。</summary>
         private static void AddPhaseTag(RectTransform panelRT, string text, Color accent)
         {
             var go = new GameObject("PhaseTag", typeof(Image));
@@ -848,40 +1161,34 @@ namespace PatchWorkSecure.EditorTools
             ApplyRounded(go, ButtonSprite);
 
             var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(0, 1);
+            rt.anchorMin = rt.anchorMax = new Vector2(0, 1);
             rt.pivot = new Vector2(0, 1);
-            rt.sizeDelta = new Vector2(text.Length * 15f + 40f, 40f);
-            rt.anchoredPosition = new Vector2(20, -16);
-            var le = go.AddComponent<LayoutElement>();
-            le.ignoreLayout = true;
+            rt.sizeDelta = new Vector2(text.Length * 17f + 40f, 40f);
+            rt.anchoredPosition = new Vector2(24, -20);
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
 
             var label = CreateLabel(go.transform, "Label", text, 18, 0, bold: true);
-            label.color = Color.white;
+            label.color = new Color(0.10f, 0.10f, 0.13f);
             label.alignment = TextAlignmentOptions.Center;
-            var labelRT = label.GetComponent<RectTransform>();
-            labelRT.anchorMin = Vector2.zero;
-            labelRT.anchorMax = Vector2.one;
-            labelRT.offsetMin = Vector2.zero;
-            labelRT.offsetMax = Vector2.zero;
+            StretchTo(label.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         }
 
-        /// <summary>フルスクリーン画面専用の、画面上端を横断する色帯（画面の「カテゴリ色」を示す）。</summary>
+        /// <summary>フルスクリーン画面の上端を横断する色帯。</summary>
         private static void AddAccentStrip(RectTransform panelRT, Color accent)
         {
-            var stripGO = new GameObject("AccentStrip", typeof(Image));
-            stripGO.transform.SetParent(panelRT, false);
-            stripGO.GetComponent<Image>().color = accent;
+            var go = new GameObject("AccentStrip", typeof(Image));
+            go.transform.SetParent(panelRT, false);
+            var img = go.GetComponent<Image>();
+            img.color = accent;
+            img.raycastTarget = false;
 
-            var stripRT = stripGO.GetComponent<RectTransform>();
-            stripRT.anchorMin = new Vector2(0, 1);
-            stripRT.anchorMax = new Vector2(1, 1);
-            stripRT.pivot = new Vector2(0.5f, 1f);
-            stripRT.sizeDelta = new Vector2(0, 6);
-            stripRT.anchoredPosition = Vector2.zero;
-
-            var le = stripGO.AddComponent<LayoutElement>();
-            le.ignoreLayout = true;
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.sizeDelta = new Vector2(0, 6);
+            rt.anchoredPosition = Vector2.zero;
+            go.AddComponent<LayoutElement>().ignoreLayout = true;
         }
 
         private static TextMeshProUGUI CreateLabel(
@@ -890,62 +1197,39 @@ namespace PatchWorkSecure.EditorTools
             var go = new GameObject(name, typeof(TextMeshProUGUI));
             go.transform.SetParent(parent, false);
             var tmp = go.GetComponent<TextMeshProUGUI>();
+            if (UiFont != null) tmp.font = UiFont; // 日本語グリフを持つフォントを明示的に使う
             tmp.text = text;
             tmp.fontSize = fontSize;
             tmp.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
-            tmp.color = Color.white;
+            tmp.color = TextMain;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
+            tmp.raycastTarget = false;
             if (preferredWidth > 0)
                 go.AddComponent<LayoutElement>().preferredWidth = preferredWidth;
             return tmp;
         }
 
-        private static Image CreateBar(Transform parent, string name, Color fillColor)
-        {
-            var bgGO = new GameObject(name, typeof(Image));
-            bgGO.transform.SetParent(parent, false);
-            var bgImg = bgGO.GetComponent<Image>();
-            bgImg.color = new Color(1, 1, 1, 0.14f);
-            ApplyRounded(bgGO, PanelSprite);
-            bgGO.AddComponent<LayoutElement>().preferredWidth = 160;
-
-            var fillGO = new GameObject("Fill", typeof(Image));
-            fillGO.transform.SetParent(bgGO.transform, false);
-            var fillImg = fillGO.GetComponent<Image>();
-            fillImg.color = fillColor;
-            fillImg.type = Image.Type.Filled;
-            fillImg.fillMethod = Image.FillMethod.Horizontal;
-            fillImg.fillAmount = 0.5f;
-            var fillRT = fillGO.GetComponent<RectTransform>();
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = Vector2.one;
-            fillRT.offsetMin = new Vector2(3, 3);
-            fillRT.offsetMax = new Vector2(-3, -3);
-
-            return fillImg;
-        }
-
-        private static Button CreateButton(Transform parent, string name, string labelText)
+        private static Button CreateButton(Transform parent, string name, string labelText, Color accent)
         {
             var go = new GameObject(name, typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var bgImage = go.GetComponent<Image>();
-            bgImage.color = new Color(0.24f, 0.30f, 0.42f);
+            bgImage.color = new Color(accent.r * 0.42f, accent.g * 0.42f, accent.b * 0.42f, 1f);
             ApplyRounded(go, ButtonSprite);
-            AddShadow(go, 3f, 0.3f);
+            AddShadow(go, 4f, 0.4f);
 
-            var textGO = new GameObject("Label", typeof(TextMeshProUGUI));
-            textGO.transform.SetParent(go.transform, false);
-            var tmp = textGO.GetComponent<TextMeshProUGUI>();
-            tmp.text = labelText;
-            tmp.fontSize = 24;
-            tmp.color = Color.white;
+            // 左端にアクセント色の帯を入れて、ボタンの役割を色でも伝える
+            var bar = new GameObject("Accent", typeof(Image));
+            bar.transform.SetParent(go.transform, false);
+            var barImg = bar.GetComponent<Image>();
+            barImg.color = accent;
+            barImg.raycastTarget = false;
+            ApplyRounded(bar, PanelSprite);
+            StretchTo(bar.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(0, 1), new Vector2(10, 10), new Vector2(16, -10));
+
+            var tmp = CreateLabel(go.transform, "Label", labelText, 24, 0, bold: true);
             tmp.alignment = TextAlignmentOptions.Center;
-            var textRT = textGO.GetComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = Vector2.zero;
-            textRT.offsetMax = Vector2.zero;
+            StretchTo(tmp.rectTransform, Vector2.zero, Vector2.one, new Vector2(24, 0), new Vector2(-16, 0));
 
             var button = go.GetComponent<Button>();
             button.targetGraphic = bgImage;
@@ -955,14 +1239,19 @@ namespace PatchWorkSecure.EditorTools
             return button;
         }
 
+        /// <summary>
+        /// ボタンの状態色。ColorTintは元のImage色に乗算されるため、
+        /// 通常時をやや暗めにしておき、ホバーで白（＝元色そのまま）まで明るくなるようにしている
+        /// （1を超える色は結局クランプされるので、明るくする余地は通常時側で確保する）。
+        /// </summary>
         private static void ApplyButtonColors(Button button)
         {
             var colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.88f, 0.90f, 0.96f);
-            colors.pressedColor = new Color(0.65f, 0.65f, 0.72f);
-            colors.selectedColor = Color.white;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
+            colors.normalColor = new Color(0.86f, 0.87f, 0.90f);
+            colors.highlightedColor = Color.white;
+            colors.pressedColor = new Color(0.62f, 0.63f, 0.68f);
+            colors.selectedColor = new Color(0.86f, 0.87f, 0.90f);
+            colors.disabledColor = new Color(0.40f, 0.40f, 0.44f, 0.5f);
             colors.fadeDuration = 0.08f;
             button.colors = colors;
         }
@@ -972,7 +1261,7 @@ namespace PatchWorkSecure.EditorTools
             var prop = so.FindProperty(fieldName);
             if (prop == null)
             {
-                Debug.LogWarning($"[SceneBuilder] フィールド '{fieldName}' がGameManagerに見つかりませんでした。");
+                Debug.LogWarning($"[SceneBuilder] フィールド '{fieldName}' が見つかりませんでした。");
                 return;
             }
             prop.objectReferenceValue = value;
@@ -983,7 +1272,7 @@ namespace PatchWorkSecure.EditorTools
             var prop = so.FindProperty(fieldName);
             if (prop == null || !prop.isArray)
             {
-                Debug.LogWarning($"[SceneBuilder] 配列フィールド '{fieldName}' がGameManagerに見つかりませんでした。");
+                Debug.LogWarning($"[SceneBuilder] 配列フィールド '{fieldName}' が見つかりませんでした。");
                 return;
             }
             prop.arraySize = values.Length;

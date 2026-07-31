@@ -139,32 +139,41 @@ namespace PatchWorkSecure
 
         // ---- 攻撃フェーズ ----
 
+        /// <summary>その日に攻撃が発生する確率。年度末に向けて上昇していく。</summary>
+        public float AttackOccurrenceChance()
+        {
+            return Clamp01(0.35f + Day * (0.4f / TotalPeriods), 0.35f, 0.75f);
+        }
+
         /// <summary>
-        /// その日に攻撃が発生するか判定する。年度末に向けて発生率が上昇していく。
+        /// その日に攻撃が発生するか判定する。
         /// </summary>
         public bool RollAttackOccurrence()
         {
-            float chance = Clamp01(0.35f + Day * (0.4f / TotalPeriods), 0.35f, 0.75f);
-            return _rng.NextDouble() < chance;
+            return _rng.NextDouble() < AttackOccurrenceChance();
+        }
+
+        /// <summary>
+        /// 攻撃種別の抽選ウェイト。
+        /// ストレスが高いほど内部不正が、終盤ほどランサム・AI悪用型の比率が上がる。
+        /// 抽選(RollAttackType)とリスク試算(EstimateExpectedDamage)で同じ分布を使うために切り出してある。
+        /// </summary>
+        private float AttackWeight(string key)
+        {
+            float escalation = (float)Day / TotalPeriods;
+            float w = GameData.Attacks[key].BaseChance;
+            if (key == "insider") w += Stress / 300f;
+            if (key == "ransomware" || key == "aiRisk") w *= (1f + escalation * 1.5f);
+            return w;
         }
 
         /// <summary>
         /// 発生する攻撃の種類を抽選する。
-        /// ストレスが高いほど内部不正が、終盤ほどランサム・AI悪用型の比率が上がる。
         /// </summary>
         public string RollAttackType()
         {
-            float escalation = (float)Day / TotalPeriods;
             var keys = GameData.Attacks.Keys.ToList();
-            var weights = new List<float>();
-
-            foreach (var k in keys)
-            {
-                float w = GameData.Attacks[k].BaseChance;
-                if (k == "insider") w += Stress / 300f;
-                if (k == "ransomware" || k == "aiRisk") w *= (1f + escalation * 1.5f);
-                weights.Add(w);
-            }
+            var weights = keys.Select(AttackWeight).ToList();
 
             float total = weights.Sum();
             double r = _rng.NextDouble() * total;
@@ -174,6 +183,32 @@ namespace PatchWorkSecure
                 r -= weights[i];
             }
             return keys[0];
+        }
+
+        /// <summary>
+        /// 今の備えのまま次の期間を迎えた場合に、攻撃で失うと見込まれる予算の期待値。
+        /// 「対策に投資すると被害予測が下がる」のを数字で見せ、投資の意味を実感させるための指標。
+        ///
+        /// 対応選択・パリィのボーナスは含めない（プレイヤーの操作次第で変わるため）。
+        /// あくまで「設備の備えだけで受け止めた場合」の目安として扱う。
+        /// </summary>
+        public float EstimateExpectedDamage()
+        {
+            int backupLvl = DefenseLevels.TryGetValue("backup", out int bl) ? bl : 0;
+            float mitigation = backupLvl * 0.15f;
+
+            float weighted = 0f;
+            float weightSum = 0f;
+            foreach (var key in GameData.Attacks.Keys)
+            {
+                float w = AttackWeight(key);
+                float breachRate = 1f - CalcDefenseRate(key);
+                weighted += w * GameData.Attacks[key].DamageBudget * (1f - mitigation) * breachRate;
+                weightSum += w;
+            }
+
+            if (weightSum <= 0f) return 0f;
+            return AttackOccurrenceChance() * weighted / weightSum;
         }
 
         /// <summary>攻撃への対応を確定し、被害または防御成功を反映する。</summary>

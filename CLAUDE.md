@@ -79,6 +79,10 @@ Start() → ShowTitle()
 4. **`SceneBuilder.cs`はUnityメニュー「PatchWorkSecure → シーンを自動構築」から実行する。**
    Canvas/GameManagerを一括生成し、Inspector参照も全部自動で埋める。UIレイアウトを変えたら、
    Inspector手作業ではなくこのスクリプト側を直すのが正しい直し方（車輪の再発明を防ぐため）。
+   実行前の手動削除は不要（`ClearGeneratedObjects()`が前回生成分を消してから作り直す）。
+   **生成後は必ず`EditorSceneManager.SaveScene()`でシーンを保存すること。**
+   これを忘れると生成物はメモリ上にしか無く、Unityを閉じた時点で消える
+   （実際にSampleScene.unityが空のまま数セッション進んでしまった経緯がある）。
 
 5. **絵文字はUI文字列に絶対に使わない。** `Assets/Fonts/Meiryo SDF`はCustom Charactersで
    生成された日本語専用SDFフォントで、絵文字グリフを一切持たない（Meiryo自体も色付き絵文字は
@@ -144,6 +148,11 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 ```powershell
 -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
 ```
+
+**重要：バッチモードはUnity Editorが起動中だと使えない**（「別のインスタンスが開いている」で失敗する）。
+逆に言えば、加藤さんがUnityを閉じてくれさえすれば、Claude Code側でコンパイル確認・シーン構築・
+生成結果の検証（`SampleScene.unity`をgrepしてオブジェクトの有無や重複、未割当参照を調べる）まで
+自力でできる。UIを大きく変えたときは、憶測で「できたはず」と言わずにこの手順で必ず裏を取ること。
 
 ---
 

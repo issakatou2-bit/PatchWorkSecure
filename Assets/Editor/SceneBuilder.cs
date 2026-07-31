@@ -192,16 +192,35 @@ namespace PatchWorkSecure.EditorTools
             var scene = EditorSceneManager.GetActiveScene();
             EditorSceneManager.MarkSceneDirty(scene);
 
+            string path;
             if (string.IsNullOrEmpty(scene.path))
             {
-                const string defaultPath = "Assets/Scenes/SampleScene.unity";
+                path = "Assets/Scenes/SampleScene.unity";
                 Directory.CreateDirectory("Assets/Scenes");
-                EditorSceneManager.SaveScene(scene, defaultPath);
-                return defaultPath;
+                EditorSceneManager.SaveScene(scene, path);
+            }
+            else
+            {
+                path = scene.path;
+                EditorSceneManager.SaveScene(scene);
             }
 
-            EditorSceneManager.SaveScene(scene);
-            return scene.path;
+            RegisterSceneInBuildSettings(path);
+            return path;
+        }
+
+        /// <summary>
+        /// シーンをBuild Settingsに登録する。
+        /// 実際のビルドに含めるためだけでなく、自動テストがSceneManager.LoadScene()で
+        /// 読み込めるようにするためにも必要。
+        /// </summary>
+        private static void RegisterSceneInBuildSettings(string scenePath)
+        {
+            var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            if (scenes.Exists(s => s.path == scenePath)) return;
+
+            scenes.Insert(0, new EditorBuildSettingsScene(scenePath, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
 
         // ================= 背景 =================

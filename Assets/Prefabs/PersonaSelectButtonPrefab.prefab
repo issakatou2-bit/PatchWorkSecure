@@ -149,7 +149,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 796e7f714a8be504bb83820a9d51a20c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PatchWorkSecure.UIButtonPunch
+  m_EditorClassIdentifier: PatchWorkSecure::PatchWorkSecure.UIButtonPunch
   pressedScale: 0.94
   speed: 14
 --- !u!1 &1257874581960973544

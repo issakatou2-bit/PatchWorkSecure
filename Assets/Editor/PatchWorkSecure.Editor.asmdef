@@ -1,0 +1,24 @@
+{
+    "name": "PatchWorkSecure.Editor",
+    "rootNamespace": "PatchWorkSecure.EditorTools",
+    "references": [
+        "PatchWorkSecure",
+        "UnityEngine.UI",
+        "UnityEditor.UI",
+        "Unity.TextMeshPro",
+        "Unity.TextMeshPro.Editor",
+        "Unity.InputSystem",
+        "Unity.InputSystem.ForUI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

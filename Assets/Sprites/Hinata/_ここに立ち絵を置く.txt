@@ -1,0 +1,16 @@
+このフォルダに ひなた の立ち絵（PNG・背景透過）を置いてください。
+ファイル名に以下のいずれかの語が含まれていれば、自動で表情スロットに割り当てられます。
+
+  normal    … 通常（デフォルトの笑顔）
+  proud     … 得意げ／自信あり  ※confident でも可
+  worried   … 心配・困り顔      ※thinking でも可
+  alert     … 驚き・警戒        ※shocked / surprised でも可
+  relieved  … 安堵・照れ        ※embarrassed でも可
+  sad       … 落ち込み・泣き    ※crying でも可
+
+例: hinata_normal.png / normal.png / ひなた_通常.png
+
+置いたあと、Unityメニューの
+  PatchWorkSecure → キャラ立ち絵を取り込む
+を実行すると Persona_Hinata.asset に反映されます。
+（「シーンを自動構築」でも同時に取り込まれます）

@@ -604,27 +604,48 @@ namespace PatchWorkSecure
             foreach (Transform child in choiceButtonContainer)
                 Destroy(child.gameObject);
 
-            foreach (var choice in GameData.Choices)
+            for (int i = 0; i < GameData.Choices.Count; i++)
             {
+                var choice = GameData.Choices[i];
                 var go = Instantiate(choiceButtonPrefab, choiceButtonContainer);
-                var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
+                bool affordable = _state.Budget >= choice.BudgetCost;
+
+                var view = go.GetComponent<ChoiceRowView>();
+                if (view != null)
                 {
-                    string costText = choice.BudgetCost > 0 ? $"予算 -{choice.BudgetCost}" : "予算 0";
-                    string stressText = choice.StressCost >= 0
-                        ? $"ストレス +{choice.StressCost}"
-                        : $"ストレス {choice.StressCost}";
-                    label.text = $"{choice.Label}\n<size=68%><color=#9AA3B0>{choice.Description}　{costText} / {stressText}</color></size>";
+                    if (view.NumberText != null) view.NumberText.text = (i + 1).ToString();
+                    if (view.NumberBadge != null)
+                        view.NumberBadge.color = affordable ? ChoiceBadgeColor(choice.Id) : new Color(0.4f, 0.4f, 0.44f);
+                    if (view.LabelText != null) view.LabelText.text = choice.Label;
+                    if (view.DetailText != null)
+                    {
+                        string cost = choice.BudgetCost > 0 ? $"費用 {Money.Yen(choice.BudgetCost)}" : "費用なし";
+                        string stress = choice.StressCost >= 0
+                            ? $"ストレス +{choice.StressCost}"
+                            : $"ストレス {choice.StressCost}";
+                        view.DetailText.text = $"{choice.Description}　{cost} / {stress}";
+                    }
                 }
 
                 var button = go.GetComponent<Button>();
                 var captured = choice; // クロージャ対策
-                button.interactable = _state.Budget >= choice.BudgetCost;
+                button.interactable = affordable;
                 button.onClick.AddListener(() =>
                 {
                     AudioManager.Instance?.PlayClick();
                     OnSelectChoice(captured);
                 });
+            }
+        }
+
+        /// <summary>対応方針ごとの番号バッジ色。積極的な対応ほど緑に寄せる。</summary>
+        private static Color ChoiceBadgeColor(string choiceId)
+        {
+            switch (choiceId)
+            {
+                case "block": return new Color(0.45f, 0.80f, 0.50f);
+                case "investigate": return new Color(0.40f, 0.62f, 0.92f);
+                default: return new Color(0.72f, 0.72f, 0.78f);
             }
         }
 
@@ -648,7 +669,6 @@ namespace PatchWorkSecure
                 bool maxed = currentLvl >= maxLvl;
 
                 var go = Instantiate(defenseButtonPrefab, defenseButtonContainer);
-                var label = go.GetComponentInChildren<TextMeshProUGUI>();
                 var button = go.GetComponent<Button>();
 
                 bool affordable = false;
@@ -661,22 +681,42 @@ namespace PatchWorkSecure
                 {
                     var next = def.Levels[currentLvl];
                     affordable = _state.Budget >= next.Cost;
-                    rightText = $"¥{next.Cost}";
+                    rightText = Money.Yen(next.Cost);
                 }
 
-                if (label != null)
+                var view = go.GetComponent<DefenseRowView>();
+                if (view != null)
                 {
-                    // Lv.1/3 のように到達度が一目で分かる形にする
-                    string costColor = maxed ? "#7FB88A" : (affordable ? "#E7D08A" : "#8A8A93");
-                    label.text =
-                        $"{def.DisplayName}  <size=80%><color=#9AA3B0>Lv.{currentLvl}/{maxLvl}</color></size>\n" +
-                        $"<size=68%><color={costColor}>{rightText}</color>　<color=#7F8894>{def.ScTerm}</color></size>";
-                }
+                    Color iconColor = DefenseIconColor(key);
+                    bool installed = currentLvl > 0;
 
-                // 導入済みのものは左端を緑に光らせて、入っていないものと区別する
-                var image = go.GetComponent<Image>();
-                if (image != null)
-                    image.color = currentLvl > 0 ? new Color(0.19f, 0.27f, 0.23f) : new Color(0.18f, 0.19f, 0.24f);
+                    if (view.NameText != null) view.NameText.text = def.DisplayName;
+
+                    // レベルは導入済みなら緑、未導入は灰色。参考UIの「Lv.2が緑」の見せ方に合わせる
+                    if (view.LevelText != null)
+                    {
+                        view.LevelText.text = $"Lv.{currentLvl}";
+                        view.LevelText.color = installed ? new Color(0.50f, 0.82f, 0.52f) : new Color(0.52f, 0.54f, 0.60f);
+                    }
+
+                    if (view.CostText != null)
+                    {
+                        view.CostText.text = rightText;
+                        view.CostText.color = maxed
+                            ? new Color(0.50f, 0.82f, 0.52f)
+                            : (affordable ? new Color(0.92f, 0.93f, 0.96f) : new Color(0.48f, 0.48f, 0.54f));
+                    }
+
+                    // アイコンは対策ごとに色を変える。導入前はくすませて、入れると鮮やかになる
+                    if (view.IconFrame != null)
+                        view.IconFrame.color = installed ? iconColor : new Color(iconColor.r * 0.35f, iconColor.g * 0.35f, iconColor.b * 0.35f);
+                    if (view.IconGlyph != null)
+                        view.IconGlyph.color = installed ? new Color(1f, 1f, 1f, 0.92f) : new Color(1f, 1f, 1f, 0.35f);
+                    if (view.SelectedEdge != null)
+                        view.SelectedEdge.color = installed ? iconColor : new Color(1f, 1f, 1f, 0.06f);
+                    if (view.Background != null)
+                        view.Background.color = installed ? new Color(0.165f, 0.190f, 0.205f) : new Color(0.140f, 0.150f, 0.190f);
+                }
 
                 if (button != null)
                 {
@@ -689,6 +729,26 @@ namespace PatchWorkSecure
                         OnClickUpgradeDefense(capturedKey, capturedRect);
                     });
                 }
+            }
+        }
+
+        /// <summary>
+        /// 対策ごとのアイコン色。専用のアイコン画像が用意できるまでは、
+        /// 色そのものを識別子として使う（8種を色で見分けられるようにする）。
+        /// </summary>
+        private static Color DefenseIconColor(string defenseKey)
+        {
+            switch (defenseKey)
+            {
+                case "firewall": return new Color(0.86f, 0.42f, 0.32f); // レンガの赤
+                case "mfa": return new Color(0.38f, 0.62f, 0.92f); // 端末の青
+                case "training": return new Color(0.92f, 0.76f, 0.36f); // 教本の黄
+                case "waf": return new Color(0.36f, 0.74f, 0.72f); // Webの水色
+                case "idsIps": return new Color(0.66f, 0.48f, 0.88f); // 監視の紫
+                case "backup": return new Color(0.55f, 0.62f, 0.72f); // 記憶装置の灰青
+                case "vpn": return new Color(0.42f, 0.78f, 0.52f); // 経路の緑
+                case "passwordPolicy": return new Color(0.90f, 0.52f, 0.66f); // 認証の桃
+                default: return new Color(0.60f, 0.62f, 0.68f);
             }
         }
 
@@ -848,7 +908,7 @@ namespace PatchWorkSecure
             resultText.color = result.Defended ? UIEffects.Good : UIEffects.Bad;
             resultText.text = result.Defended
                 ? $"{result.Flavor}（防御率 {Mathf.RoundToInt(result.FinalDefenseRate * 100)}%）"
-                : $"{result.Flavor}（予算 -{result.BudgetDamage} / 人望 -{result.TrustDamage}）";
+                : $"{result.Flavor}（被害 {Money.Yen(result.BudgetDamage)} / 人望 -{result.TrustDamage}）";
             resultCharacterLine.text = $"「{result.CharacterLine}」";
             if (effects != null) effects.Punch(resultText.rectTransform, 1.25f);
 
@@ -900,7 +960,7 @@ namespace PatchWorkSecure
             if (turnLabel != null) turnLabel.text = $"ターン {_state.Day} / {GameState.TotalPeriods}";
 
             ApplyStat(budgetText, budgetChip, budgetBar,
-                v => $"予算　¥{v}", _prevBudget, _state.Budget,
+                v => $"予算　{Money.Yen(v)}", _prevBudget, _state.Budget,
                 Mathf.Clamp01(_state.Budget / 100f), higherIsBetter: true);
             ApplyStat(trustText, trustChip, trustBar,
                 v => $"人望　{v} / 100", _prevTrust, _state.Trust,
@@ -1006,7 +1066,7 @@ namespace PatchWorkSecure
                 riskLevelText.color = color;
             }
             if (riskDamageText != null)
-                riskDamageText.text = $"被害予測　¥{Mathf.RoundToInt(expected)}";
+                riskDamageText.text = $"被害予測　{Money.Yen(Mathf.RoundToInt(expected))}";
             if (riskBar != null)
             {
                 riskBar.color = color;

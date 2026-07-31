@@ -2,6 +2,19 @@ using System.Collections.Generic;
 
 namespace PatchWorkSecure
 {
+    /// <summary>
+    /// 金額の表示形式。内部の数値は扱いやすい小さな単位（予算100など）のままにして、
+    /// 画面上だけ「¥1,000,000」のような企業予算らしい桁で見せる。
+    /// 表示専用なのでバランス計算には一切影響しない。
+    /// </summary>
+    public static class Money
+    {
+        /// <summary>内部値1 = 1万円として表示する。</summary>
+        public const int DisplayScale = 10000;
+
+        public static string Yen(int internalValue) => $"¥{(long)internalValue * DisplayScale:N0}";
+    }
+
     /// <summary>攻撃の格付け。IPA情報セキュリティ10大脅威2026の継続年数・初選出年に基づく。</summary>
     public enum AttackGrade
     {

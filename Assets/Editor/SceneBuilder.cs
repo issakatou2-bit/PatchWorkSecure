@@ -112,6 +112,8 @@ namespace PatchWorkSecure.EditorTools
 
             BuildAudioManager();
             BuildNavigatorPersonas(so);
+            // 立ち絵がAssets/Sprites/<キャラ名>/に置かれていれば、この時点で自動的に割り当てる
+            PersonaSpriteImporter.ImportAllInternal(verbose: false);
 
             BuildBackdrop(shakeRoot);
             BuildStatusBar(shakeRoot, so);
@@ -134,8 +136,8 @@ namespace PatchWorkSecure.EditorTools
             // 画面が揺れてもフラッシュとバナーだけは揺れないようにする。
             BuildEffectLayer(canvasGO.transform, shakeRoot, so);
 
-            SetRef(so, "choiceButtonPrefab", BuildButtonPrefab("ChoiceButtonPrefab", 82f, 22, TextAlignmentOptions.MidlineLeft));
-            SetRef(so, "defenseButtonPrefab", BuildButtonPrefab("DefenseButtonPrefab", 54f, 18, TextAlignmentOptions.MidlineLeft));
+            SetRef(so, "choiceButtonPrefab", BuildChoiceRowPrefab());
+            SetRef(so, "defenseButtonPrefab", BuildDefenseRowPrefab());
             SetRef(so, "quizOptionButtonPrefab", BuildButtonPrefab("QuizOptionButtonPrefab", 64f, 22, TextAlignmentOptions.Center));
             SetRef(so, "personaSelectButtonPrefab", BuildButtonPrefab("PersonaSelectButtonPrefab", 54f, 20, TextAlignmentOptions.Center));
 
@@ -1181,6 +1183,138 @@ namespace PatchWorkSecure.EditorTools
         }
 
         // ================= プレハブ =================
+
+        /// <summary>
+        /// 対策リストの1行。左にアイコン、中央に名前とレベル、右端に金額を置く。
+        /// 参考UIの「アイコン + 2行テキスト + 右寄せ金額」の並びを再現している。
+        /// </summary>
+        private static GameObject BuildDefenseRowPrefab()
+        {
+            var go = new GameObject("DefenseRowPrefab", typeof(Image), typeof(Button), typeof(DefenseRowView));
+            var bg = go.GetComponent<Image>();
+            bg.color = new Color(0.145f, 0.155f, 0.195f);
+            ApplyRounded(go, ButtonSprite);
+            // 8種がサイドバーに収まる高さにしてある（8行 x 58 + 行間 = 約500）
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(500, 58);
+
+            // 左端の縦線（導入済みかどうかの目印）
+            var edge = new GameObject("SelectedEdge", typeof(Image));
+            edge.transform.SetParent(go.transform, false);
+            var edgeImg = edge.GetComponent<Image>();
+            edgeImg.raycastTarget = false;
+            ApplyRounded(edge, PanelSprite);
+            StretchTo(edge.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(0, 1), new Vector2(4, 8), new Vector2(8, -8));
+
+            // アイコン（角丸の枠＋内側の図形。対策ごとに色を変える）
+            var iconFrame = new GameObject("IconFrame", typeof(Image));
+            iconFrame.transform.SetParent(go.transform, false);
+            var iconFrameImg = iconFrame.GetComponent<Image>();
+            iconFrameImg.raycastTarget = false;
+            ApplyRounded(iconFrame, ButtonSprite);
+            var iconRT = iconFrame.GetComponent<RectTransform>();
+            iconRT.anchorMin = iconRT.anchorMax = new Vector2(0, 0.5f);
+            iconRT.pivot = new Vector2(0, 0.5f);
+            iconRT.sizeDelta = new Vector2(44, 44);
+            iconRT.anchoredPosition = new Vector2(14, 0);
+
+            var glyph = new GameObject("IconGlyph", typeof(Image));
+            glyph.transform.SetParent(iconFrame.transform, false);
+            var glyphImg = glyph.GetComponent<Image>();
+            glyphImg.raycastTarget = false;
+            ApplyRounded(glyph, PanelSprite);
+            StretchTo(glyph.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(11, 11), new Vector2(-11, -11));
+
+            // 対策名（上段）
+            var nameText = CreateLabel(go.transform, "NameText", "対策名", 19, 0, bold: true);
+            nameText.alignment = TextAlignmentOptions.BottomLeft;
+            StretchTo(nameText.rectTransform, new Vector2(0, 0.45f), new Vector2(1, 1), new Vector2(70, 0), new Vector2(-150, -6));
+
+            // レベル（下段左）
+            var levelText = CreateLabel(go.transform, "LevelText", "Lv.0", 15, 0, bold: true);
+            levelText.alignment = TextAlignmentOptions.TopLeft;
+            StretchTo(levelText.rectTransform, new Vector2(0, 0), new Vector2(1, 0.48f), new Vector2(70, 6), new Vector2(-150, 0));
+
+            // 金額（右端に寄せる）
+            var costText = CreateLabel(go.transform, "CostText", "¥0", 17, 0, bold: true);
+            costText.alignment = TextAlignmentOptions.Right;
+            StretchTo(costText.rectTransform, new Vector2(1, 0), new Vector2(1, 1), new Vector2(-148, 6), new Vector2(-14, -6));
+
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = bg;
+            ApplyButtonColors(button);
+            go.AddComponent<UIButtonPunch>();
+
+            var view = go.GetComponent<DefenseRowView>();
+            view.Background = bg;
+            view.IconFrame = iconFrameImg;
+            view.IconGlyph = glyphImg;
+            view.SelectedEdge = edgeImg;
+            view.NameText = nameText;
+            view.LevelText = levelText;
+            view.CostText = costText;
+
+            string path = $"{PrefabDir}/DefenseRowPrefab.prefab";
+            var prefabAsset = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            return prefabAsset;
+        }
+
+        /// <summary>
+        /// 攻撃への対応選択肢1つ分。左に番号バッジ、右に見出しとコストを置く。
+        /// </summary>
+        private static GameObject BuildChoiceRowPrefab()
+        {
+            var go = new GameObject("ChoiceRowPrefab", typeof(Image), typeof(Button), typeof(ChoiceRowView));
+            var bg = go.GetComponent<Image>();
+            bg.color = new Color(0.185f, 0.200f, 0.255f);
+            ApplyRounded(go, ButtonSprite);
+            AddShadow(go, 3f, 0.35f);
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(500, 78);
+
+            var badge = new GameObject("NumberBadge", typeof(Image));
+            badge.transform.SetParent(go.transform, false);
+            var badgeImg = badge.GetComponent<Image>();
+            badgeImg.raycastTarget = false;
+            ApplyRounded(badge, ButtonSprite);
+            var badgeRT = badge.GetComponent<RectTransform>();
+            badgeRT.anchorMin = badgeRT.anchorMax = new Vector2(0, 0.5f);
+            badgeRT.pivot = new Vector2(0, 0.5f);
+            badgeRT.sizeDelta = new Vector2(44, 44);
+            badgeRT.anchoredPosition = new Vector2(14, 0);
+
+            var numberText = CreateLabel(badge.transform, "NumberText", "1", 24, 0, bold: true);
+            numberText.alignment = TextAlignmentOptions.Center;
+            numberText.color = new Color(0.10f, 0.10f, 0.13f);
+            StretchTo(numberText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            var labelText = CreateLabel(go.transform, "LabelText", "選択肢", 23, 0, bold: true);
+            labelText.alignment = TextAlignmentOptions.BottomLeft;
+            StretchTo(labelText.rectTransform, new Vector2(0, 0.44f), new Vector2(1, 1), new Vector2(70, 0), new Vector2(-18, -8));
+
+            var detailText = CreateLabel(go.transform, "DetailText", "", 15, 0);
+            detailText.color = TextSub;
+            detailText.alignment = TextAlignmentOptions.TopLeft;
+            StretchTo(detailText.rectTransform, new Vector2(0, 0), new Vector2(1, 0.48f), new Vector2(70, 8), new Vector2(-18, 0));
+
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = bg;
+            ApplyButtonColors(button);
+            go.AddComponent<UIButtonPunch>();
+
+            var view = go.GetComponent<ChoiceRowView>();
+            view.Background = bg;
+            view.NumberBadge = badgeImg;
+            view.NumberText = numberText;
+            view.LabelText = labelText;
+            view.DetailText = detailText;
+
+            string path = $"{PrefabDir}/ChoiceRowPrefab.prefab";
+            var prefabAsset = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            return prefabAsset;
+        }
 
         private static GameObject BuildButtonPrefab(string name, float height, int fontSize, TextAlignmentOptions align)
         {

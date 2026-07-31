@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.IO;
 #if ENABLE_INPUT_SYSTEM
@@ -77,6 +78,11 @@ namespace PatchWorkSecure.EditorTools
         [MenuItem("PatchWorkSecure/シーンを自動構築")]
         public static void BuildScene()
         {
+            // 前回生成した分を必ず消してから作り直す。
+            // これをやらないと実行のたびにCanvas/GameManagerが二重三重に積み上がり、
+            // 古いUIが上に乗って「デザインが変わっていない」ように見える（実際に起きた不具合）。
+            int removed = ClearGeneratedObjects();
+
             if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 var esGO = new GameObject("EventSystem", typeof(UnityEngine.EventSystems.EventSystem));
@@ -136,11 +142,64 @@ namespace PatchWorkSecure.EditorTools
             so.ApplyModifiedProperties();
             AssetDatabase.SaveAssets();
 
+            // ここでシーンを保存しないと、生成したUIはメモリ上にしか存在せず、
+            // Unityを閉じた時点で全部消える（実際にSampleScene.unityが空のままだった）。
+            string savedPath = SaveActiveScene();
+
             Selection.activeGameObject = gmGO;
             EditorUtility.DisplayDialog(
                 "構築完了",
-                "シーンを生成しました。\n\nPlayして、タイトル→事前クイズ→本編→エンディング→事後クイズ→サマリー、の流れを確認してください。\nConsoleにエラーが出たら、そのまま貼ってください。",
+                $"シーンを生成して保存しました。\n\n保存先: {savedPath}\n" +
+                (removed > 0 ? $"（前回生成された{removed}個のオブジェクトを削除してから作り直しました）\n" : "") +
+                "\nPlayして、タイトル→事前クイズ→本編→エンディング→事後クイズ→サマリー、の流れを確認してください。\n" +
+                "Consoleにエラーが出たら、そのまま貼ってください。",
                 "OK");
+        }
+
+        /// <summary>
+        /// 前回このスクリプトが生成したオブジェクトを取り除く。
+        /// 目印はGameManager / AudioManager / UIEffects の各コンポーネントと、ルートの"Canvas"。
+        /// EventSystemは他と衝突しないので残す。
+        /// </summary>
+        private static int ClearGeneratedObjects()
+        {
+            var targets = new System.Collections.Generic.HashSet<GameObject>();
+
+            foreach (var c in Object.FindObjectsByType<GameManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                targets.Add(c.gameObject);
+            foreach (var c in Object.FindObjectsByType<AudioManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                targets.Add(c.gameObject);
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                targets.Add(c.transform.root.gameObject); // Canvas配下のUIごと消す
+
+            int count = 0;
+            foreach (var go in targets)
+            {
+                if (go == null) continue;
+                Object.DestroyImmediate(go);
+                count++;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// 現在開いているシーンをディスクに保存する。名前が未設定なら既定のパスに保存する。
+        /// </summary>
+        private static string SaveActiveScene()
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+            EditorSceneManager.MarkSceneDirty(scene);
+
+            if (string.IsNullOrEmpty(scene.path))
+            {
+                const string defaultPath = "Assets/Scenes/SampleScene.unity";
+                Directory.CreateDirectory("Assets/Scenes");
+                EditorSceneManager.SaveScene(scene, defaultPath);
+                return defaultPath;
+            }
+
+            EditorSceneManager.SaveScene(scene);
+            return scene.path;
         }
 
         // ================= 背景 =================
@@ -400,10 +459,13 @@ namespace PatchWorkSecure.EditorTools
             var portraitGO = new GameObject("NavigatorPortrait", typeof(Image));
             portraitGO.transform.SetParent(frameRT, false);
             var portraitImg = portraitGO.GetComponent<Image>();
-            portraitImg.color = new Color(0.96f, 0.55f, 0.70f);
+            portraitImg.color = Color.white;
             portraitImg.preserveAspect = true;
             portraitImg.raycastTarget = false;
+            portraitImg.enabled = false; // 立ち絵が割り当てられるまでは代わりにプレースホルダーを出す
             StretchTo(portraitGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(8, 8), new Vector2(-8, -8));
+
+            var placeholder = BuildPortraitPlaceholder(frameRT, new Color(0.96f, 0.55f, 0.70f), out var hairParts);
 
             // 吹き出し
             var bubble = CreatePanelBase("SpeechBubble", rt, new Color(0.145f, 0.155f, 0.200f, 0.98f));
@@ -445,12 +507,67 @@ namespace PatchWorkSecure.EditorTools
             StretchTo(nameText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             SetRef(so, "navigatorPortrait", portraitImg);
+            SetRef(so, "portraitPlaceholder", placeholder);
+            SetRefArray(so, "placeholderHairImages", hairParts);
             SetRef(so, "portraitFrame", frameImg);
             SetRef(so, "speechBubble", bubble.gameObject);
             SetRef(so, "speechBubbleAccent", accentImg);
             SetRef(so, "navigatorLine", line);
             SetRef(so, "navigatorNameChip", nameChipImg);
             SetRef(so, "navigatorNameText", nameText);
+        }
+
+        /// <summary>
+        /// 立ち絵素材が届くまでの代役となる、簡易的なチビキャラ。
+        /// Unity組み込みの円(Knob)と角丸(UISprite)だけで組み立てるので追加素材は要らない。
+        /// 髪のパーツだけ配列で返し、選択中キャラのイメージカラーで塗り分けられるようにする。
+        /// 立ち絵が割り当てられたらGameManager側でこの階層ごと非表示にする。
+        /// </summary>
+        private static GameObject BuildPortraitPlaceholder(RectTransform parent, Color theme, out Object[] hairParts)
+        {
+            var root = new GameObject("PortraitPlaceholder", typeof(RectTransform));
+            root.transform.SetParent(parent, false);
+            StretchTo(root.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(8, 8), new Vector2(-8, -8));
+
+            var skin = new Color(0.99f, 0.88f, 0.83f);
+            var uniform = new Color(0.24f, 0.27f, 0.38f);
+            var ink = new Color(0.16f, 0.14f, 0.20f);
+            var t = root.transform;
+
+            // 奥から手前の順に置く（後に作ったものが手前に描画される）
+            var hairBack = AddPortraitPart(t, "HairBack", CircleSprite, theme, new Vector2(128, 128), new Vector2(0, 96));
+            var tailL = AddPortraitPart(t, "TwinTailL", CircleSprite, theme, new Vector2(44, 76), new Vector2(-58, 86));
+            var tailR = AddPortraitPart(t, "TwinTailR", CircleSprite, theme, new Vector2(44, 76), new Vector2(58, 86));
+            AddPortraitPart(t, "Body", ButtonSprite, uniform, new Vector2(108, 70), new Vector2(0, 36));
+            AddPortraitPart(t, "Head", CircleSprite, skin, new Vector2(102, 102), new Vector2(0, 100));
+            AddPortraitPart(t, "EyeL", CircleSprite, ink, new Vector2(15, 19), new Vector2(-22, 100));
+            AddPortraitPart(t, "EyeR", CircleSprite, ink, new Vector2(15, 19), new Vector2(22, 100));
+            AddPortraitPart(t, "Mouth", ButtonSprite, new Color(0.88f, 0.46f, 0.52f), new Vector2(17, 7), new Vector2(0, 84));
+            var bangs = AddPortraitPart(t, "Bangs", CircleSprite, theme, new Vector2(110, 56), new Vector2(0, 136));
+
+            hairParts = new Object[] { hairBack, tailL, tailR, bangs };
+            return root;
+        }
+
+        /// <summary>プレースホルダーの部品を1つ置く。下端中央を原点とした座標で指定する。</summary>
+        private static Image AddPortraitPart(Transform parent, string name, Sprite sprite, Color color,
+                                             Vector2 size, Vector2 position)
+        {
+            var go = new GameObject(name, typeof(Image));
+            go.transform.SetParent(parent, false);
+            var img = go.GetComponent<Image>();
+            img.sprite = sprite;
+            img.color = color;
+            img.raycastTarget = false;
+            // 円(Knob)はSimpleのまま拡縮して楕円にする。角丸(UISprite)だけ9-Sliceにする。
+            img.type = sprite == ButtonSprite ? Image.Type.Sliced : Image.Type.Simple;
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = size;
+            rt.anchoredPosition = position;
+            return img;
         }
 
         // ================= メインフェーズパネル =================

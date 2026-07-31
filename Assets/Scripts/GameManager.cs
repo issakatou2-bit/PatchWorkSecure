@@ -39,6 +39,8 @@ namespace PatchWorkSecure
         // ---- ナビゲーターキャラ ----
         [Header("ナビゲーター")]
         [SerializeField] private Image navigatorPortrait;
+        [SerializeField] private GameObject portraitPlaceholder;  // 立ち絵が無い間に出す簡易キャラ
+        [SerializeField] private Image[] placeholderHairImages;   // プレースホルダーの髪（イメージカラーで着色）
         [SerializeField] private Image portraitFrame;             // 立ち絵の背後の枠（イメージカラーで着色）
         [SerializeField] private GameObject speechBubble;
         [SerializeField] private TextMeshProUGUI navigatorLine;
@@ -262,6 +264,13 @@ namespace PatchWorkSecure
             if (navigatorNameChip != null) navigatorNameChip.color = theme;
             if (speechBubbleAccent != null) speechBubbleAccent.color = theme;
             if (portraitFrame != null) portraitFrame.color = new Color(theme.r * 0.35f, theme.g * 0.35f, theme.b * 0.35f, 1f);
+
+            // プレースホルダーの髪を選択中キャラの色に塗り替える（誰を選んだか一目で分かるように）
+            if (placeholderHairImages != null)
+            {
+                foreach (var hair in placeholderHairImages)
+                    if (hair != null) hair.color = theme;
+            }
         }
 
         /// <summary>
@@ -300,15 +309,20 @@ namespace PatchWorkSecure
 
         /// <summary>
         /// 立ち絵を差し替える。素材が未実装（スプライトがnull）の間は、
-        /// キャラのイメージカラーで塗った矩形をプレースホルダーとして表示する。
+        /// 組み込みスプライトで組んだ簡易キャラをプレースホルダーとして表示する。
         /// </summary>
         private void ApplyFace(Sprite face)
         {
-            if (navigatorPortrait == null) return;
-            navigatorPortrait.sprite = face;
-            navigatorPortrait.color = face != null
-                ? Color.white
-                : (_activePersona != null ? _activePersona.ThemeColor : new Color(0.6f, 0.6f, 0.7f));
+            bool hasArt = face != null;
+
+            if (navigatorPortrait != null)
+            {
+                navigatorPortrait.sprite = face;
+                navigatorPortrait.color = Color.white;
+                navigatorPortrait.enabled = hasArt;
+            }
+            if (portraitPlaceholder != null && portraitPlaceholder.activeSelf != !hasArt)
+                portraitPlaceholder.SetActive(!hasArt);
         }
 
         /// <summary>キャラ固有のセリフを使う。未入力なら共通のセリフにフォールバックする。</summary>

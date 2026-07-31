@@ -26,7 +26,7 @@ Claude Codeは起動時にこれを自動で読み込むので、毎回コピペ
 | Unity Editorバージョン | `6000.5.6f1`（Universal 2D / URP。当初6.3 LTSを想定していたが、プロジェクト作成時に実際にはこのバージョンで作成された） |
 | テンプレート | Universal 2D |
 | GitHub | `https://github.com/issakatou2-bit/PatchWorkSecure.git`（`main`ブランチ） |
-| UIフォント | TextMeshPro、`Assets/Fonts/Meiryo SDF`（日本語用にCustom Charactersで生成済み） |
+| UIフォント | TextMeshPro、`Assets/Fonts/meiryo SDF`（**動的生成モード**。未収録の文字は実行時に`meiryo.ttc`から自動生成されるので文字が抜けない。TMPの既定フォント兼フォールバックにも設定済み） |
 
 ---
 
@@ -84,11 +84,11 @@ Start() → ShowTitle()
    これを忘れると生成物はメモリ上にしか無く、Unityを閉じた時点で消える
    （実際にSampleScene.unityが空のまま数セッション進んでしまった経緯がある）。
 
-5. **絵文字はUI文字列に絶対に使わない。** `Assets/Fonts/Meiryo SDF`はCustom Charactersで
-   生成された日本語専用SDFフォントで、絵文字グリフを一切持たない（Meiryo自体も色付き絵文字は
-   非対応）。使うと表示が空白になり、Consoleに大量の警告が出る(実際に発生した不具合)。
-   アイコンが欲しい場合は`SceneBuilder.CreateIconChip()`のような色付き角丸チップ(Image)を使うこと。
-   全角スペース(`　`/U+3000)も同フォントの文字セットに含まれていないため使わない(半角スペースで代替)。
+5. **絵文字はUI文字列に使わない。** `meiryo.ttc`自体が色付き絵文字を持たないため、
+   フォントを動的生成モードにした今も絵文字だけは表示できない（漢字・記号は解決済み）。
+   アイコンが欲しい場合は`SceneBuilder.AddAccentBar()`や`DefenseRowView.IconFrame`のような
+   色付き図形で表現すること。対策8種はキーごとの色（`GameManager.DefenseIconColor()`）で
+   見分けられるようにしてある。
 
 6. **角丸・影は独自テクスチャ生成をせず、Unity組み込みアセットで実現する。**
    `SceneBuilder.ApplyRounded()`がUnity標準の`UI/Skin/Background.psd`(パネル用)・
@@ -154,6 +154,34 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 生成結果の検証（`SampleScene.unity`をgrepしてオブジェクトの有無や重複、未割当参照を調べる）まで
 自力でできる。UIを大きく変えたときは、憶測で「できたはず」と言わずにこの手順で必ず裏を取ること。
 
+### 通しテスト（これが一番確実な裏取り）
+
+`Assets/Tests/GameFlowSmokeTest.cs`が、実際にシーンを再生して
+タイトル→事前クイズ→本編→雑務→次フェーズまで例外なく進むかを確認する。
+Playした瞬間に出るNullReferenceの類はここで捕まるので、UIやフローを触ったら必ず流すこと。
+
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests `
+  -testPlatform PlayMode -projectPath "C:\Projects\PatchWorkSecure" `
+  -testResults "C:\Projects\PatchWorkSecure\test_results.xml" `
+  -logFile "C:\Projects\PatchWorkSecure\batch_log.txt"
+```
+
+`test_results.xml`の`total`/`passed`/`failed`を見る。
+テストを足すときの注意：テスト用asmdefの`includePlatforms`は**空**にすること
+（`["Editor"]`にするとPlayModeテストの対象外になり、1件も実行されないまま成功扱いになる）。
+
+### アセンブリ構成
+
+テストからゲーム本体を参照するため、3つのアセンブリに分かれている。
+新しいスクリプトを足す場所を間違えると参照が通らないので注意。
+
+| 置き場所 | アセンブリ | 用途 |
+|---|---|---|
+| `Assets/Scripts/` | `PatchWorkSecure` | ゲーム本体 |
+| `Assets/Editor/` | `PatchWorkSecure.Editor` | エディタ拡張（Editor限定） |
+| `Assets/Tests/` | `PatchWorkSecure.Tests` | テスト（`UNITY_INCLUDE_TESTS`時のみ） |
+
 ---
 
 ## 4. 現状（完了していること）
@@ -181,13 +209,16 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 
 ## 5. 未完了・次にやってほしいこと（優先順位順）
 
-1. **素材の実装**：加藤さんが学校のComfyUI環境（`/mnt/skills`ではなく別PC）で立ち絵（6表情）を
-   生成後、`pixelate.py`でドット化してGitHub経由で受け取る想定。届いたら
-   `Assets/Personas/Persona_Hinata.asset`の各Sprite欄に直接ドラッグするだけでよい
-   （旧方式のようなGameManagerフィールドへの自動割当スクリプトは不要になった）。
-   まずは「ひなた」1人分（6表情）があれば成立する。キャラ2・3を正式に作る場合は、
-   名前・性格が決まり次第`Persona_Aria`/`Persona_Chloe`の`DisplayName`/`Description`/セリフ欄を
-   更新すること（セリフ欄が空のままでも共通セリフで動く）。
+1. **立ち絵素材の投入**：`Assets/Sprites/<キャラ名>/`（例: `Assets/Sprites/Hinata/`）に
+   **透過PNGを1表情1ファイル**で置き、Unityメニュー「PatchWorkSecure → キャラ立ち絵を取り込む」
+   を実行するだけでよい。`PersonaSpriteImporter`がファイル名から表情スロットを判定し、
+   Sprite化・透過・ミップマップ無効といったインポート設定まで自動で整える
+   （「シーンを自動構築」でも同時に走る）。
+   必要な6表情とファイル名: `normal` / `proud`(confident) / `worried`(thinking) /
+   `alert`(shocked) / `relieved`(embarrassed) / `sad`(crying)。
+   素材が入るまでは組み込みスプライトで組んだチビキャラが代役として表示される。
+   キャラ2・3を正式に作る場合は、名前・性格が決まり次第`Persona_Aria`/`Persona_Chloe`の
+   `DisplayName`/`Description`/セリフ欄を更新すること（空のままでも共通セリフで動く）。
 2. **ドット絵・見下ろし視点のオフィス背景ビジュアル**（将来的な検討事項、加藤さんが参考UIを提示済み）：
    部屋レイアウト・社員ドット絵・什器アイコンなど専用素材が必要な大きめの機能。素材が揃うまでは
    現行のパネル/カードUIで進行し、揃った時点で背景として組み込む2段階の計画。

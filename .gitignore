@@ -44,3 +44,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 /RawAssets/
+
+# Unityが未保存シーンから作る復旧用フォルダ（成果物ではないので追跡しない）
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta

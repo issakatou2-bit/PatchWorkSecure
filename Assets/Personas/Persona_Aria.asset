@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47343751cd76a5d4ba87a80b0246a0dd, type: 3}
+  m_Name: Persona_Aria
+  m_EditorClassIdentifier: Assembly-CSharp::PatchWorkSecure.NavigatorPersona
+  DisplayName: "\u30A2\u30EA\u30A2"
+  Description: "\uFF08\u30AD\u30E3\u30E9\u672A\u78BA\u5B9A\u306E\u30D7\u30EC\u30FC\u30B9\u30DB\u30EB\u30C0\u30FC\uFF09\u51B7\u9759\u306B\u6570\u5B57\u3067\u8A9E\u308B\u5206\u6790\u5F79\u3092\u60F3\u5B9A\u3002\u30BB\u30EA\u30D5\u672A\u5165\u529B\u306E\u305F\u3081\u5171\u901A\u30BB\u30EA\u30D5\u3067\u8A71\u3059\u3002"
+  ThemeColor: {r: 0.45, g: 0.72, b: 0.95, a: 1}
+  FaceNormal: {fileID: 0}
+  FaceWorried: {fileID: 0}
+  FaceAlert: {fileID: 0}
+  FaceRelieved: {fileID: 0}
+  FaceProud: {fileID: 0}
+  FaceSad: {fileID: 0}
+  LineNormal: 
+  LineNoDefense: 
+  LineLowBudget: 
+  LineLowTrust: 
+  LineHighStress: 
+  LineEndgame: 
+  LineGood: 
+  LineAttackSevere: 
+  LineAttackNew: 
+  LineAttackNormal: 
+  LineParry: 
+  LineWin: 
+  LineWinNarrow: 
+  LineLose: 
+  LineGameOver: 
+  LineClear: 

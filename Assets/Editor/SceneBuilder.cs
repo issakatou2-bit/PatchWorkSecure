@@ -165,11 +165,11 @@ namespace PatchWorkSecure.EditorTools
         {
             var targets = new System.Collections.Generic.HashSet<GameObject>();
 
-            foreach (var c in Object.FindObjectsByType<GameManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var c in Object.FindObjectsByType<GameManager>(FindObjectsInactive.Include))
                 targets.Add(c.gameObject);
-            foreach (var c in Object.FindObjectsByType<AudioManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var c in Object.FindObjectsByType<AudioManager>(FindObjectsInactive.Include))
                 targets.Add(c.gameObject);
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include))
                 targets.Add(c.transform.root.gameObject); // Canvas配下のUIごと消す
 
             int count = 0;

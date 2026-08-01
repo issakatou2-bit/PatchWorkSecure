@@ -36,13 +36,98 @@ namespace PatchWorkSecure.EditorTools
         public static void ImportAll()
         {
             int assigned = ImportAllInternal(verbose: true);
+            string report = CheckTransparencyReport();
+
             EditorUtility.DisplayDialog(
                 "立ち絵の取り込み",
-                assigned > 0
+                (assigned > 0
                     ? $"{assigned}枚の立ち絵を割り当てました。"
                     : $"割り当てられる画像が見つかりませんでした。\n\n{SpriteRoot}/<キャラ名>/ に、\n" +
-                      "表情名を含むファイル名(normal / worried / alert / relieved / proud / sad)で置いてください。",
+                      "表情名を含むファイル名(normal / worried / alert / relieved / proud / sad)で置いてください。")
+                + report,
                 "OK");
+        }
+
+        /// <summary>
+        /// 立ち絵が本当に透過されているかを調べる。
+        /// 「市松模様に見えるのに実は不透明」（編集画面のスクリーンショットを保存した場合など）を
+        /// 見抜くための確認用。JPEGはそもそも透過を保持できないので、その時点で警告する。
+        /// </summary>
+        [MenuItem("PatchWorkSecure/立ち絵の透過を確認する")]
+        public static void CheckTransparency()
+        {
+            string report = CheckTransparencyReport();
+            EditorUtility.DisplayDialog(
+                "立ち絵の透過チェック",
+                string.IsNullOrEmpty(report) ? "確認対象の画像が見つかりませんでした。" : report.TrimStart('\n'),
+                "OK");
+        }
+
+        private static string CheckTransparencyReport()
+        {
+            if (!Directory.Exists(SpriteRoot)) return "";
+
+            var lines = new List<string>();
+            foreach (string dir in Directory.GetDirectories(SpriteRoot))
+            {
+                foreach (string path in Directory.GetFiles(dir).Select(p => p.Replace('\\', '/')))
+                {
+                    string ext = Path.GetExtension(path).ToLowerInvariant();
+                    if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".psd") continue;
+
+                    string fileName = Path.GetFileName(path);
+
+                    if (ext == ".jpg" || ext == ".jpeg")
+                    {
+                        lines.Add($"× {fileName}\n　　JPEGは透過を保存できません。PNGで書き出してください。");
+                        continue;
+                    }
+
+                    float ratio = TransparentPixelRatio(path);
+                    if (ratio < 0f) continue; // 読み取れなかったものは黙って飛ばす
+
+                    if (ratio <= 0.001f)
+                        lines.Add($"× {fileName}\n　　透明な部分がありません。背景が塗り込まれています" +
+                                  "（編集画面のスクリーンショットを保存した場合によく起きます）。");
+                    else if (ratio < 0.05f)
+                        lines.Add($"△ {fileName}\n　　透明部分が{ratio * 100f:F1}%しかありません。意図通りか確認してください。");
+                    else
+                        lines.Add($"○ {fileName}（背景は透過されています）");
+                }
+            }
+
+            if (lines.Count == 0) return "";
+            return "\n\n― 透過チェック ―\n" + string.Join("\n", lines);
+        }
+
+        /// <summary>
+        /// 画像ファイルを直接読み込んで、完全に透明なピクセルの割合を返す。
+        /// インポート設定に依存しないよう、アセットではなくファイルの中身から判定する。
+        /// 読み取れなかった場合は-1を返す。
+        /// </summary>
+        private static float TransparentPixelRatio(string path)
+        {
+            byte[] bytes;
+            try { bytes = File.ReadAllBytes(path); }
+            catch { return -1f; }
+
+            var texture = new Texture2D(2, 2);
+            bool loaded = texture.LoadImage(bytes);
+            if (!loaded)
+            {
+                Object.DestroyImmediate(texture);
+                return -1f;
+            }
+
+            var pixels = texture.GetPixels32();
+            int transparent = 0;
+            foreach (var p in pixels)
+            {
+                if (p.a < 8) transparent++;
+            }
+
+            Object.DestroyImmediate(texture);
+            return pixels.Length == 0 ? -1f : (float)transparent / pixels.Length;
         }
 
         /// <summary>

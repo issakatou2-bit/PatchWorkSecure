@@ -149,6 +149,10 @@ Unityはコマンドラインから`-batchmode -quit`で起動でき、GUIを開
 -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
 ```
 
+**注意：バッチモードを実行すると`Library/LastSceneManagerSetup.txt`が空になる**ことがある。
+この状態で加藤さんがUnityを開くと**無題の空シーンが立ち上がり、「何も変わっていない」ように見える**
+（実際にそう報告された）。バッチ実行のあとは、`SampleScene`を開き直してもらうよう必ず伝えること。
+
 **重要：バッチモードはUnity Editorが起動中だと使えない**（「別のインスタンスが開いている」で失敗する）。
 逆に言えば、加藤さんがUnityを閉じてくれさえすれば、Claude Code側でコンパイル確認・シーン構築・
 生成結果の検証（`SampleScene.unity`をgrepしてオブジェクトの有無や重複、未割当参照を調べる）まで

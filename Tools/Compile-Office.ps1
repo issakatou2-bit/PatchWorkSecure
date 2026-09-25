@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path -Parent $PSScriptRoot
 Set-Location $projectDirectory
 $unityDataDirectory = 'C:/Program Files/Unity/Hub/Editor/6000.5.6f1/Editor/Data'

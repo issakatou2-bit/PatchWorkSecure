@@ -1,0 +1,7 @@
+# このファイルを読むエディタ（VS Code / Visual Studio / Rider 等）向けの保存設定
+root = true
+
+# Windows PowerShell 5.1 はBOMなしUTF-8をShift-JISとして読むため、
+# 日本語を含む .ps1 は構文ごと壊れる。必ずBOM付きで保存する。
+[*.ps1]
+charset = utf-8-bom

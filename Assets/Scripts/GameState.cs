@@ -27,6 +27,12 @@ namespace PatchWorkSecure
         public bool IsGameOver;
         public string GameOverReason = "";
         public bool IsCleared;
+        public int HelpedColleagues;
+        public int DefendedIncidents;
+        public int PreventedLoss;
+        public int RecoverySavings;
+        public const int HandsOnStress = 3;
+        public const int RecoveryStress = -6;
 
         private readonly Random _rng;
 
@@ -105,12 +111,15 @@ namespace PatchWorkSecure
 
         // ---- 日常フェーズ ----
 
-        /// <summary>ヘルプデスク対応。誠実に対応すれば人望が上がり、後回しにすると下がる。</summary>
+        /// <summary>相談を一緒に解決して信頼を得るか、受付に留めて負担を回復するかを選ぶ。</summary>
         public void ResolveChore(bool solved, int trustGain)
         {
+            if (IsGameOver || IsCleared) return;
             Trust = Clamp(Trust + (solved ? trustGain : -2), 0, 100);
+            Stress = Clamp(Stress + (solved ? HandsOnStress : RecoveryStress), 0, 100);
+            if (solved) HelpedColleagues++;
             Budget = Clamp(Budget + DailyIncome, 0, 999);
-            AddLog(solved ? $"雑務を解決した（人望+{trustGain}）" : "対応を後回しにした（人望-2）");
+            AddLog(solved ? $"一緒に解決（人望+{trustGain} / ストレス+{HandsOnStress}）" : $"受付して休息を優先（人望-2 / ストレス{RecoveryStress}）");
             AddLog($"本日の売上 +{Money.Yen(DailyIncome)}");
 
             if (Trust <= 0)
@@ -123,6 +132,7 @@ namespace PatchWorkSecure
         /// <summary>対策の導入・強化。ストレスも変動する（社員教育のみストレスが下がる）。</summary>
         public bool UpgradeDefense(string key)
         {
+            if (IsGameOver || IsCleared) return false;
             if (!GameData.Defenses.TryGetValue(key, out var def)) return false;
             int currentLvl = DefenseLevels.TryGetValue(key, out int lv) ? lv : 0;
             if (currentLvl >= def.Levels.Count) return false;
@@ -214,8 +224,11 @@ namespace PatchWorkSecure
         /// <summary>攻撃への対応を確定し、被害または防御成功を反映する。</summary>
         public AttackResult ResolveAttack(string attackKey, AttackChoice choice, float parryBonus)
         {
+            if (IsGameOver || IsCleared) throw new InvalidOperationException("終了後の攻撃判定はできません。");
+            if (choice == null || Budget < choice.BudgetCost) throw new InvalidOperationException("対応費が足りません。");
             var attack = GameData.Attacks[attackKey];
             float finalRate = CalcFinalDefenseRate(attackKey, choice, parryBonus);
+            float stressPenalty = Stress > 60 ? (Stress - 60f) / 300f : 0f;
             double roll = _rng.NextDouble();
             bool defended = roll < finalRate;
             double margin = Math.Abs(roll - finalRate);
@@ -228,11 +241,20 @@ namespace PatchWorkSecure
                 AttackKey = attackKey,
                 Defended = defended,
                 FinalDefenseRate = finalRate,
-                CharacterLine = defended ? attack.LineWin : attack.LineLose
+                CharacterLine = defended ? attack.LineWin : attack.LineLose,
+                EquipmentRate = CalcDefenseRate(attackKey),
+                ResponseBonus = choice.DefenseBonus,
+                ParryBonus = parryBonus,
+                TrustBonus = (Trust - 50f) / 400f,
+                // 最終率は対応によるストレス変動の前に判定される。
+                StressPenalty = stressPenalty,
+                ResponseCost = choice.BudgetCost
             };
 
             if (defended)
             {
+                DefendedIncidents++;
+                PreventedLoss += attack.DamageBudget;
                 result.Flavor = margin < 0.08 ? "紙一重で防いだ！" : "危なげなく防いだ。";
                 AddLog($"{attack.DisplayName}を{result.Flavor}（防御率{Math.Round(finalRate * 100)}%）");
             }
@@ -247,6 +269,8 @@ namespace PatchWorkSecure
                 Trust = Clamp(Trust - attack.DamageTrust, 0, 100);
                 result.Flavor = margin < 0.08 ? "僅かの差で防げなかった…" : "呆気なく突破された…";
                 result.BudgetDamage = damage;
+                result.RecoverySavings = attack.DamageBudget - damage;
+                RecoverySavings += result.RecoverySavings;
                 result.TrustDamage = attack.DamageTrust;
                 AddLog($"{attack.DisplayName}に{result.Flavor}（-{Money.Yen(damage)}, 人望-{attack.DamageTrust}）");
             }
@@ -268,6 +292,7 @@ namespace PatchWorkSecure
         /// <summary>次の期間へ進む。最終期間を超えたらクリア。</summary>
         public void AdvanceDay()
         {
+            if (IsGameOver || IsCleared) return;
             if (Day >= TotalPeriods)
             {
                 IsCleared = true;
@@ -293,5 +318,12 @@ namespace PatchWorkSecure
         public string CharacterLine;
         public int BudgetDamage;
         public int TrustDamage;
+        public float EquipmentRate;
+        public float ResponseBonus;
+        public float ParryBonus;
+        public float TrustBonus;
+        public float StressPenalty;
+        public int ResponseCost;
+        public int RecoverySavings;
     }
 }

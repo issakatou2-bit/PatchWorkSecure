@@ -48,3 +48,10 @@ crashlytics-build.properties
 # Unityが未保存シーンから作る復旧用フォルダ（成果物ではないので追跡しない）
 /[Aa]ssets/_Recovery/
 /[Aa]ssets/_Recovery.meta
+
+# 検証の生成物（ソース・背景素材はAssetsとToolsで管理）
+/Artifacts/
+/office_build_log.txt
+/office_test_log.txt
+/office_test_results.xml
+/license_check_log.txt

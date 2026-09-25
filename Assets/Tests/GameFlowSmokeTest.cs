@@ -94,8 +94,10 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("SampleScene");
             yield return null;
             yield return new WaitForSeconds(0.6f); // タイプライター演出が流れる分だけ待つ
+            FindByName<Button>("QuickStartButton").onClick.Invoke();
+            yield return new WaitForSeconds(0.6f);
 
-            var nameText = FindByName<TextMeshProUGUI>("NameText");
+            var nameText = FindByName<Transform>("SpeechBubble").Find("NameChip/NameText").GetComponent<TextMeshProUGUI>();
             Assert.IsNotNull(nameText, "キャラ名の表示が見つからない");
             Assert.IsNotEmpty(nameText.text, "キャラ名が空になっている");
 

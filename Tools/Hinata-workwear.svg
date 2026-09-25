@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254">
+  <!-- 暫定キャラの仕事着。生成画像ではなく編集可能なベクターで衣装を置き換える。 -->
+  <g stroke="#241917" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+    <path fill="#edbd9f" d="M573 650H681V745L631 780 570 742Z"/>
+    <path fill="#303e4a" d="M525 932Q627 903 730 932L706 1118 643 1124 623 999 602 1122 531 1120Z"/>
+    <path fill="#24323c" d="M624 970L643 1124 668 1115 657 986Z" stroke="none"/>
+    <path fill="#352b2b" d="M529 1099L600 1104 602 1156Q582 1180 514 1161L511 1139Z"/>
+    <path fill="#352b2b" d="M644 1104L706 1098 724 1144Q730 1175 651 1170L636 1155Z"/>
+    <path fill="none" stroke="#756365" stroke-width="8" d="M531 1142L579 1146M659 1147L701 1143"/>
+    <path fill="#f7f3e7" d="M552 716L577 702 625 742 677 705 707 728 725 945Q631 977 519 947Z"/>
+    <path fill="#fffaf0" d="M577 702L625 742 594 779 557 733ZM677 705L625 742 654 779 701 735Z"/>
+    <path fill="#397c78" d="M552 716L594 773 582 954Q526 976 481 941L499 795Z"/>
+    <path fill="#397c78" d="M705 716L657 774 670 955Q726 975 769 939L750 793Z"/>
+    <path fill="#438b84" d="M513 739Q467 733 449 787L465 855 503 876 552 822 529 788Z"/>
+    <path fill="#438b84" d="M741 740Q785 730 803 785L790 855 747 877 704 822 727 790Z"/>
+    <path fill="#f7f2e6" d="M480 794L520 779 550 815 513 841Z"/>
+    <path fill="#f7f2e6" d="M733 779L773 794 740 841 704 815Z"/>
+    <path fill="#ffdbb8" d="M492 791Q470 762 483 739L504 720Q520 710 530 722L552 747Q565 772 545 795L528 809Z"/>
+    <path fill="#ffdbb8" d="M726 797Q698 776 711 749L733 722Q748 710 761 723L779 744Q790 769 768 792L748 809Z"/>
+    <path fill="none" stroke="#b37662" stroke-width="6" d="M495 751L518 764M502 737L523 750M742 749L767 739M740 763L764 753"/>
+    <path fill="none" stroke="#293845" stroke-width="9" d="M596 777L624 857 658 777"/>
+    <rect x="603" y="843" width="47" height="63" rx="6" fill="#e7bd59" stroke-width="7"/>
+    <rect x="611" y="853" width="31" height="43" rx="2" fill="#f8f3da" stroke="none"/>
+    <path stroke="#577984" stroke-width="5" d="M617 878H636M617 886H630"/>
+    <circle cx="626" cy="866" r="6" fill="#729892" stroke="none"/>
+    <path fill="none" stroke="#28615e" stroke-width="7" d="M503 916L558 922M694 922L748 916"/>
+  </g>
+</svg>

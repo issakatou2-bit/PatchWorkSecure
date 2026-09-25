@@ -13,6 +13,8 @@ namespace PatchWorkSecure
         public const int DisplayScale = 10000;
 
         public static string Yen(int internalValue) => $"¥{(long)internalValue * DisplayScale:N0}";
+        /// <summary>期待値は内部整数に丸めず、100円単位で伝える。</summary>
+        public static string EstimatedYen(float internalValue) => $"¥{System.Math.Round(internalValue * DisplayScale / 100f) * 100:N0}";
     }
 
     /// <summary>攻撃の格付け。IPA情報セキュリティ10大脅威2026の継続年数・初選出年に基づく。</summary>
@@ -102,7 +104,7 @@ namespace PatchWorkSecure
             },
             ["ransomware"] = new AttackType
             {
-                Key = "ransomware", DisplayName = "ランサム(仮)", Grade = AttackGrade.S,
+                Key = "ransomware", DisplayName = "ランサムウェア", Grade = AttackGrade.S,
                 Special = AttackSpecial.MultiDefenseRequired,
                 BaseChance = 0.18f, DamageBudget = 35, DamageTrust = 18,
                 LineIntro = "……もう遅い。データは、頂いた。",
@@ -123,7 +125,7 @@ namespace PatchWorkSecure
             },
             ["insider"] = new AttackType
             {
-                Key = "insider", DisplayName = "内部者(仮)", Grade = AttackGrade.Veteran,
+                Key = "insider", DisplayName = "内部からの情報持ち出し", Grade = AttackGrade.Veteran,
                 Special = AttackSpecial.TechIgnored,
                 BaseChance = 0.12f, DamageBudget = 22, DamageTrust = 22,
                 LineIntro = "……ねえ、誰も見てないよね？",
@@ -134,7 +136,7 @@ namespace PatchWorkSecure
             },
             ["aiRisk"] = new AttackType
             {
-                Key = "aiRisk", DisplayName = "模倣者(仮)", Grade = AttackGrade.Rookie,
+                Key = "aiRisk", DisplayName = "AI利用による情報漏えい", Grade = AttackGrade.Rookie,
                 Special = AttackSpecial.DefenseDampen,
                 BaseChance = 0.15f, DamageBudget = 20, DamageTrust = 12,
                 LineIntro = "私、本物の連絡ですよ……たぶん。",
@@ -145,7 +147,7 @@ namespace PatchWorkSecure
             },
             ["supplyChain"] = new AttackType
             {
-                Key = "supplyChain", DisplayName = "委託(仮)", Grade = AttackGrade.MidTier,
+                Key = "supplyChain", DisplayName = "取引先経由の侵入", Grade = AttackGrade.MidTier,
                 BaseChance = 0.12f, DamageBudget = 25, DamageTrust = 14,
                 ExcludeDefenses = new[] { "firewall" },
                 LineIntro = "お前じゃない、お前の取引先が甘いんだよ。",
@@ -156,7 +158,7 @@ namespace PatchWorkSecure
             },
             ["bec"] = new AttackType
             {
-                Key = "bec", DisplayName = "詐欺(仮)", Grade = AttackGrade.MidTier,
+                Key = "bec", DisplayName = "ビジネスメール詐欺", Grade = AttackGrade.MidTier,
                 BaseChance = 0.12f, DamageBudget = 20, DamageTrust = 10,
                 LineIntro = "至急のご送金、お願いします。",
                 LineWin = "ダブルチェックとは、面倒な。",
@@ -166,7 +168,7 @@ namespace PatchWorkSecure
             },
             ["vuln"] = new AttackType
             {
-                Key = "vuln", DisplayName = "隙間(仮)", Grade = AttackGrade.MidTier,
+                Key = "vuln", DisplayName = "脆弱性を突いた侵入", Grade = AttackGrade.MidTier,
                 BaseChance = 0.13f, DamageBudget = 20, DamageTrust = 8,
                 LineIntro = "パッチが当たる前に、失礼するよ。",
                 LineWin = "もう塞がれてたか、早いな。",
@@ -176,7 +178,7 @@ namespace PatchWorkSecure
             },
             ["remote"] = new AttackType
             {
-                Key = "remote", DisplayName = "裏口(仮)", Grade = AttackGrade.MidTier,
+                Key = "remote", DisplayName = "リモート接続への攻撃", Grade = AttackGrade.MidTier,
                 Special = AttackSpecial.VpnCritical,
                 BaseChance = 0.13f, DamageBudget = 22, DamageTrust = 10,
                 LineIntro = "在宅の設定、甘いままだよね？",
@@ -187,7 +189,7 @@ namespace PatchWorkSecure
             },
             ["geopolitical"] = new AttackType
             {
-                Key = "geopolitical", DisplayName = "使者(仮)", Grade = AttackGrade.Rising,
+                Key = "geopolitical", DisplayName = "標的型の複合攻撃", Grade = AttackGrade.Rising,
                 Special = AttackSpecial.Composite,
                 BaseChance = 0.10f, DamageBudget = 28, DamageTrust = 16,
                 LineIntro = "個人的な恨みはない。指示があるだけだ。",

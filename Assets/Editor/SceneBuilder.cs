@@ -27,17 +27,17 @@ namespace PatchWorkSecure.EditorTools
     /// 使い方: Unity上部メニュー「PatchWorkSecure」→「シーンを自動構築」
     /// 実行前にCanvas/GameManager/AudioManagerを削除しておくと、重複生成を避けられます。
     /// </summary>
-    public static class SceneBuilder
+    public static partial class SceneBuilder
     {
         private const string PrefabDir = "Assets/Prefabs";
         private const string PersonaDir = "Assets/Personas";
 
         // ---- 配色パレット ----
-        private static readonly Color BgDeep = new Color(0.055f, 0.060f, 0.085f, 1f);
-        private static readonly Color CardBg = new Color(0.105f, 0.115f, 0.150f, 0.98f);
-        private static readonly Color CardBgSoft = new Color(0.135f, 0.145f, 0.185f, 0.98f);
-        private static readonly Color TextMain = new Color(0.92f, 0.94f, 0.97f);
-        private static readonly Color TextSub = new Color(0.58f, 0.62f, 0.70f);
+        private static readonly Color BgDeep = new Color(0.038f, 0.073f, 0.094f, 1f);
+        private static readonly Color CardBg = new Color(0.037f, 0.064f, 0.075f, 0.98f);
+        private static readonly Color CardBgSoft = new Color(0.09f, 0.14f, 0.16f, 1f);
+        private static readonly Color TextMain = new Color(0.94f, 0.95f, 0.91f);
+        private static readonly Color TextSub = new Color(0.64f, 0.73f, 0.70f);
 
         private static readonly Color ColBudget = new Color(0.45f, 0.80f, 0.50f);
         private static readonly Color ColTrust = new Color(0.40f, 0.62f, 0.92f);
@@ -55,8 +55,8 @@ namespace PatchWorkSecure.EditorTools
         private static readonly Color AccentSummary = new Color(0.52f, 0.46f, 0.78f);
 
         // ---- レイアウト定数（1920x1080基準） ----
-        private const float TopBarHeight = 100f;
-        private const float SidebarWidth = 340f;
+        private const float TopBarHeight = 76f;
+        private const float SidebarWidth = 350f;
         private const float CharacterStripHeight = 220f;
         private const float Margin = 20f;
 
@@ -78,6 +78,9 @@ namespace PatchWorkSecure.EditorTools
         [MenuItem("PatchWorkSecure/シーンを自動構築")]
         public static void BuildScene()
         {
+            if (Application.isBatchMode)
+                EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity");
+            FontSetup.FixFontGlyphCoverage();
             // 前回生成した分を必ず消してから作り直す。
             // これをやらないと実行のたびにCanvas/GameManagerが二重三重に積み上がり、
             // 古いUIが上に乗って「デザインが変わっていない」ように見える（実際に起きた不具合）。
@@ -126,11 +129,12 @@ namespace PatchWorkSecure.EditorTools
             BuildParryPanel(shakeRoot, so);
             BuildResultPanel(shakeRoot, so);
 
-            BuildTitlePanel(shakeRoot, so);
+            BuildOfficeTitle(shakeRoot, so);
             BuildQuizPanel(shakeRoot, so);
             BuildEndingPanel(shakeRoot, so);
             BuildSummaryPanel(shakeRoot, so);
             BuildSettingsOverlay(shakeRoot, so);
+            BuildOfficeStage(shakeRoot, so);
 
             // 演出レイヤーはShakeRootの外（Canvas直下の最後）に置き、
             // 画面が揺れてもフラッシュとバナーだけは揺れないようにする。
@@ -149,7 +153,7 @@ namespace PatchWorkSecure.EditorTools
             string savedPath = SaveActiveScene();
 
             Selection.activeGameObject = gmGO;
-            EditorUtility.DisplayDialog(
+            if (!Application.isBatchMode) EditorUtility.DisplayDialog(
                 "構築完了",
                 $"シーンを生成して保存しました。\n\n保存先: {savedPath}\n" +
                 (removed > 0 ? $"（前回生成された{removed}個のオブジェクトを削除してから作り直しました）\n" : "") +
@@ -172,7 +176,8 @@ namespace PatchWorkSecure.EditorTools
             foreach (var c in Object.FindObjectsByType<AudioManager>(FindObjectsInactive.Include))
                 targets.Add(c.gameObject);
             foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include))
-                targets.Add(c.transform.root.gameObject); // Canvas配下のUIごと消す
+                if (c.transform.Find("ShakeRoot") != null && c.transform.Find("EffectLayer") != null)
+                    targets.Add(c.gameObject); // 自動生成UIだけを対象にする
 
             int count = 0;
             foreach (var go in targets)
@@ -321,6 +326,7 @@ namespace PatchWorkSecure.EditorTools
             fillGO.transform.SetParent(barBg.transform, false);
             barFill = fillGO.GetComponent<Image>();
             barFill.color = accent;
+            barFill.sprite = ButtonSprite;
             barFill.raycastTarget = false;
             barFill.type = Image.Type.Filled;
             barFill.fillMethod = Image.FillMethod.Horizontal;
@@ -350,7 +356,7 @@ namespace PatchWorkSecure.EditorTools
             layout.childForceExpandHeight = false;
 
             // 導入済み対策（残りの高さを全部使う）
-            var defenseCard = CreateSidebarCard(rt, "DefenseCard", "導入済み対策", AccentDay, 0f, 1f, out var defenseContent);
+            var defenseCard = CreateSidebarCard(rt, "DefenseCard", "備えを整える  /  下にスクロール", AccentDay, 0f, 1f, out var defenseContent);
             var defenseContainer = new GameObject("DefenseButtonContainer", typeof(RectTransform));
             defenseContainer.transform.SetParent(defenseContent, false);
             StretchTo(defenseContainer.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -361,6 +367,21 @@ namespace PatchWorkSecure.EditorTools
             dLayout.childForceExpandWidth = true;
             dLayout.childControlHeight = false;
             dLayout.childForceExpandHeight = false;
+            defenseContent.gameObject.AddComponent<RectMask2D>();
+            var scroll = defenseContent.gameObject.AddComponent<ScrollRect>();
+            var scrollHit = defenseContent.gameObject.AddComponent<Image>();
+            scrollHit.color = new Color(1, 1, 1, 0.01f);
+            scroll.viewport = defenseContent;
+            scroll.content = defenseContainer.GetComponent<RectTransform>();
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 35;
+            scroll.content.anchorMin = new Vector2(0, 1);
+            scroll.content.anchorMax = Vector2.one;
+            scroll.content.pivot = new Vector2(0.5f, 1);
+            var fit = defenseContainer.AddComponent<ContentSizeFitter>();
+            fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            dLayout.childControlHeight = true;
 
             // リスク表示（対策を買うと下がるので、投資の効果がその場で分かる）
             CreateSidebarCard(rt, "RiskCard", "リスク", ColRisk, 132f, 0f, out var riskContent);
@@ -386,6 +407,7 @@ namespace PatchWorkSecure.EditorTools
             riskFillGO.transform.SetParent(riskBarBg.transform, false);
             var riskFill = riskFillGO.GetComponent<Image>();
             riskFill.color = ColRisk;
+            riskFill.sprite = ButtonSprite;
             riskFill.raycastTarget = false;
             riskFill.type = Image.Type.Filled;
             riskFill.fillMethod = Image.FillMethod.Horizontal;
@@ -393,7 +415,7 @@ namespace PatchWorkSecure.EditorTools
             StretchTo(riskFillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(2, 2), new Vector2(-2, -2));
 
             // ログ
-            CreateSidebarCard(rt, "LogCard", "ログ", AccentResult, 210f, 0f, out var logContent);
+            CreateSidebarCard(rt, "LogCard", "最近のできごと", AccentResult, 170f, 0f, out var logContent);
             var logText = CreateLabel(logContent, "LogText", "", 15, 0);
             logText.color = TextSub;
             logText.alignment = TextAlignmentOptions.TopLeft;
@@ -489,7 +511,7 @@ namespace PatchWorkSecure.EditorTools
             var placeholder = BuildPortraitPlaceholder(frameRT, new Color(0.96f, 0.55f, 0.70f), out var hairParts);
 
             // 吹き出し
-            var bubble = CreatePanelBase("SpeechBubble", rt, new Color(0.145f, 0.155f, 0.200f, 0.98f));
+            var bubble = CreatePanelBase("SpeechBubble", rt, new Color(1f, 0.955f, 0.83f));
             ApplyRounded(bubble.gameObject, PanelSprite);
             AddShadow(bubble.gameObject, 6f, 0.45f);
             StretchTo(bubble, Vector2.zero, Vector2.one, new Vector2(220, 34), new Vector2(0, -10));
@@ -503,7 +525,7 @@ namespace PatchWorkSecure.EditorTools
             StretchTo(accentGO.GetComponent<RectTransform>(), new Vector2(0, 0), new Vector2(0, 1), new Vector2(10, 12), new Vector2(17, -12));
 
             var line = CreateLabel(bubble, "NavigatorLine", "", 23, 0);
-            line.color = TextMain;
+            line.color = new Color(0.13f, 0.14f, 0.14f);
             line.alignment = TextAlignmentOptions.TopLeft;
             StretchTo(line.rectTransform, Vector2.zero, Vector2.one, new Vector2(34, 30), new Vector2(-26, -20));
 
@@ -596,7 +618,7 @@ namespace PatchWorkSecure.EditorTools
         /// <summary>サイドバー・ステータスバー・キャラ帯を避けた中央の作業領域にパネルを作る。</summary>
         private static RectTransform CreateMainAreaPanel(string name, Transform parent, Color bg, Color accent, string phaseTitle)
         {
-            var rt = CreatePanelBase(name, parent, bg);
+            var rt = CreatePanelBase(name, parent, CardBg);
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.offsetMin = new Vector2(Margin * 2 + SidebarWidth, Margin * 2 + CharacterStripHeight);
@@ -616,7 +638,7 @@ namespace PatchWorkSecure.EditorTools
         private static VerticalLayoutGroup AddPanelLayout(RectTransform rt, int spacing, TextAnchor align)
         {
             var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(40, 40, 78, 34);
+            layout.padding = new RectOffset(26, 26, 74, 26);
             layout.spacing = spacing;
             layout.childAlignment = align;
             layout.childControlHeight = true;
@@ -641,7 +663,8 @@ namespace PatchWorkSecure.EditorTools
                 21, 0);
             guide.color = TextSub;
             guide.alignment = TextAlignmentOptions.Center;
-            guide.gameObject.AddComponent<LayoutElement>().preferredHeight = 76;
+            guide.gameObject.AddComponent<LayoutElement>().preferredHeight = 220;
+            SetRef(so, "dayGuide", guide);
 
             var proceedBtn = CreateButton(rt, "ProceedButton", "今日の業務を進める", AccentDay);
             proceedBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 86;
@@ -673,10 +696,10 @@ namespace PatchWorkSecure.EditorTools
         private static void BuildAttackPanel(Transform parent, SerializedObject so)
         {
             var rt = CreateMainAreaPanel("AttackPanel", parent, new Color(0.16f, 0.085f, 0.09f, 0.96f), AccentAttack, "インシデント対応");
-            AddPanelLayout(rt, 12, TextAnchor.UpperLeft);
+            AddPanelLayout(rt, 10, TextAnchor.UpperLeft);
 
-            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 38, 0, bold: true);
-            nameText.gameObject.AddComponent<LayoutElement>().preferredHeight = 54;
+            var nameText = CreateLabel(rt, "AttackNameText", "（攻撃名）", 27, 0, bold: true);
+            nameText.gameObject.AddComponent<LayoutElement>().preferredHeight = 42;
 
             // 格付けバッジは横並びの行に入れて、幅がテキストに引きずられないようにする
             var gradeRow = new GameObject("GradeRow", typeof(RectTransform));
@@ -701,12 +724,12 @@ namespace PatchWorkSecure.EditorTools
             gradeText.alignment = TextAlignmentOptions.Center;
             StretchTo(gradeText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 24, 0);
-            introLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 44;
+            var introLine = CreateLabel(rt, "AttackIntroLine", "「（台詞）」", 19, 0);
+            introLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 54;
 
-            var scTerm = CreateLabel(rt, "ScTermText", "（SC用語）", 18, 0);
-            scTerm.color = new Color(0.70f, 0.78f, 0.86f);
-            scTerm.gameObject.AddComponent<LayoutElement>().preferredHeight = 52;
+            var scTerm = CreateLabel(rt, "ScTermText", "（SC用語）", 16, 0);
+            scTerm.color = TextSub;
+            scTerm.gameObject.AddComponent<LayoutElement>().preferredHeight = 90;
 
             var containerGO = new GameObject("ChoiceButtonContainer", typeof(RectTransform));
             containerGO.transform.SetParent(rt, false);
@@ -737,7 +760,7 @@ namespace PatchWorkSecure.EditorTools
 
             var hint = CreateLabel(rt, "ParryHint", "黄色いゾーンで「ここだ！」を押すと防御率が上がる", 21, 0);
             hint.alignment = TextAlignmentOptions.Center;
-            hint.color = new Color(0.88f, 0.82f, 0.70f);
+            hint.color = TextSub;
             var hintLE = hint.gameObject.AddComponent<LayoutElement>();
             hintLE.preferredWidth = 900;
             hintLE.preferredHeight = 34;
@@ -773,7 +796,7 @@ namespace PatchWorkSecure.EditorTools
             markerRT.sizeDelta = new Vector2(16, 62);
             markerRT.anchoredPosition = Vector2.zero;
 
-            var feedbackText = CreateLabel(rt, "ParryFeedbackText", "", 40, 0, bold: true);
+            var feedbackText = CreateLabel(rt, "ParryFeedbackText", "", 30, 0, bold: true);
             feedbackText.alignment = TextAlignmentOptions.Center;
             var fbLE = feedbackText.gameObject.AddComponent<LayoutElement>();
             fbLE.preferredWidth = 600;
@@ -811,14 +834,14 @@ namespace PatchWorkSecure.EditorTools
             var rt = CreateMainAreaPanel("ResultPanel", parent, new Color(0.10f, 0.10f, 0.14f, 0.96f), AccentResult, "対応結果");
             AddPanelLayout(rt, 26, TextAnchor.MiddleCenter);
 
-            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 34, 0, bold: true);
+            var resultText = CreateLabel(rt, "ResultText", "（結果メッセージ）", 26, 0, bold: true);
             resultText.alignment = TextAlignmentOptions.Center;
-            resultText.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
+            resultText.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
 
-            var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 23, 0);
+            var resultLine = CreateLabel(rt, "ResultCharacterLine", "「（キャラ台詞）」", 18, 0);
             resultLine.alignment = TextAlignmentOptions.Center;
             resultLine.color = TextSub;
-            resultLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
+            resultLine.gameObject.AddComponent<LayoutElement>().preferredHeight = 280;
 
             var nextBtn = CreateButton(rt, "NextDayButton", "次の日へ", AccentResult);
             nextBtn.gameObject.AddComponent<LayoutElement>().preferredHeight = 82;
@@ -833,7 +856,7 @@ namespace PatchWorkSecure.EditorTools
 
         private static RectTransform CreateFullScreenPanel(string name, Transform parent, Color bg, Color accent)
         {
-            var rt = CreatePanelBase(name, parent, bg);
+            var rt = CreatePanelBase(name, parent, BgDeep);
             StretchTo(rt, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             if (accent.a > 0f) AddAccentStrip(rt, accent);
             rt.gameObject.SetActive(false);
@@ -846,7 +869,7 @@ namespace PatchWorkSecure.EditorTools
             var go = new GameObject(name, typeof(Image));
             go.transform.SetParent(parent, false);
             var img = go.GetComponent<Image>();
-            img.color = bg;
+            img.color = CardBg;
             ApplyRounded(go, PanelSprite);
             AddShadow(go, 10f, 0.55f);
 
@@ -857,64 +880,6 @@ namespace PatchWorkSecure.EditorTools
             return rt;
         }
 
-        private static void BuildTitlePanel(Transform parent, SerializedObject so)
-        {
-            var rt = CreateFullScreenPanel("TitlePanel", parent, new Color(0.055f, 0.055f, 0.085f, 1f), AccentTitle);
-            var layout = rt.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 22;
-            // 子はそれぞれLayoutElementで幅・高さを指定してあるので、引き伸ばさずその値を使う
-            layout.childControlHeight = true;
-            layout.childControlWidth = true;
-            layout.childForceExpandHeight = false;
-            layout.childForceExpandWidth = false;
-
-            var title = CreateLabel(rt, "GameTitle", "PatchWorkSecure", 76, 0, bold: true);
-            title.alignment = TextAlignmentOptions.Center;
-            var titleLE = title.gameObject.AddComponent<LayoutElement>();
-            titleLE.preferredWidth = 1000;
-            titleLE.preferredHeight = 96;
-
-            var tagline = CreateLabel(
-                rt, "Tagline",
-                "なにごともない、いつもの平穏なオフィスの日常を\nツギハギ（PatchWork）しながら守り抜け",
-                21, 0);
-            tagline.alignment = TextAlignmentOptions.Center;
-            tagline.color = TextSub;
-            var taglineLE = tagline.gameObject.AddComponent<LayoutElement>();
-            taglineLE.preferredWidth = 900;
-            taglineLE.preferredHeight = 76;
-
-            var personaLabel = CreateLabel(rt, "PersonaSelectLabel", "ナビゲーターを選ぶ", 17, 0);
-            personaLabel.alignment = TextAlignmentOptions.Center;
-            personaLabel.color = TextSub;
-            var personaLabelLE = personaLabel.gameObject.AddComponent<LayoutElement>();
-            personaLabelLE.preferredWidth = 900;
-            personaLabelLE.preferredHeight = 28;
-
-            var personaContainerGO = new GameObject("PersonaSelectContainer", typeof(RectTransform));
-            personaContainerGO.transform.SetParent(rt, false);
-            var personaContainerRT = personaContainerGO.GetComponent<RectTransform>();
-            var personaLayout = personaContainerGO.AddComponent<HorizontalLayoutGroup>();
-            personaLayout.spacing = 14;
-            personaLayout.childAlignment = TextAnchor.MiddleCenter;
-            personaLayout.childControlWidth = false;
-            personaLayout.childForceExpandWidth = false;
-            personaLayout.childControlHeight = false;
-            personaLayout.childForceExpandHeight = false;
-            var personaContainerLE = personaContainerGO.AddComponent<LayoutElement>();
-            personaContainerLE.preferredWidth = 900;
-            personaContainerLE.preferredHeight = 60;
-
-            var startBtn = CreateButton(rt, "StartButton", "はじめる", AccentTitle);
-            var startLE = startBtn.gameObject.AddComponent<LayoutElement>();
-            startLE.preferredWidth = 300;
-            startLE.preferredHeight = 82;
-
-            SetRef(so, "titlePanel", rt.gameObject);
-            SetRef(so, "startButton", startBtn);
-            SetRef(so, "personaSelectContainer", personaContainerRT);
-        }
 
         private static void BuildQuizPanel(Transform parent, SerializedObject so)
         {
@@ -931,7 +896,7 @@ namespace PatchWorkSecure.EditorTools
 
             var progress = CreateLabel(card, "QuizProgressText", "事前クイズ 1 / 3", 19, 0);
             progress.alignment = TextAlignmentOptions.Center;
-            progress.color = new Color(0.58f, 0.80f, 0.65f);
+            progress.color = TextSub;
             progress.gameObject.AddComponent<LayoutElement>().preferredHeight = 30;
 
             var question = CreateLabel(card, "QuizQuestionText", "（設問がここに入る）", 28, 0, bold: true);
@@ -960,7 +925,7 @@ namespace PatchWorkSecure.EditorTools
         {
             var rt = CreateFullScreenPanel("EndingPanel", parent, new Color(0.08f, 0.055f, 0.065f, 1f), AccentEnding);
 
-            var card = CreateCenterCard(rt, "EndingCard", new Vector2(1000, 460), new Color(0.115f, 0.085f, 0.100f, 0.99f));
+            var card = CreateCenterCard(rt, "EndingCard", new Vector2(1000, 560), CardBg);
             var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(60, 60, 56, 48);
             layout.childAlignment = TextAnchor.MiddleCenter;
@@ -976,7 +941,7 @@ namespace PatchWorkSecure.EditorTools
             var line = CreateLabel(card, "EndingCharacterLine", "", 22, 0);
             line.alignment = TextAlignmentOptions.Center;
             line.color = TextSub;
-            line.gameObject.AddComponent<LayoutElement>().preferredHeight = 60;
+            line.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
 
             var btn = CreateButton(card, "EndingContinueButton", "結果を振り返る", AccentEnding);
             btn.gameObject.AddComponent<LayoutElement>().preferredHeight = 80;
@@ -1023,13 +988,13 @@ namespace PatchWorkSecure.EditorTools
             var btnGO = new GameObject("SettingsOpenButton", typeof(Image), typeof(Button));
             btnGO.transform.SetParent(parent, false);
             var btnBg = btnGO.GetComponent<Image>();
-            btnBg.color = new Color(0.20f, 0.21f, 0.26f, 0.95f);
+            btnBg.color = CardBgSoft;
             ApplyRounded(btnGO, ButtonSprite);
             AddShadow(btnGO, 3f, 0.4f);
             var btnRT = btnGO.GetComponent<RectTransform>();
             btnRT.anchorMin = btnRT.anchorMax = btnRT.pivot = new Vector2(1, 1);
             btnRT.sizeDelta = new Vector2(84, 40);
-            btnRT.anchoredPosition = new Vector2(-(Margin + 14), -(TopBarHeight + Margin + 12));
+            btnRT.anchoredPosition = new Vector2(-(Margin + 14), -48);
 
             var icon = CreateLabel(btnGO.transform, "Label", "設定", 17, 0, bold: true);
             icon.alignment = TextAlignmentOptions.Center;
@@ -1042,6 +1007,7 @@ namespace PatchWorkSecure.EditorTools
 
             // 背景は画面全体を薄暗く覆うだけ。中身は中央のダイアログカードにまとめる。
             var overlayRT = CreateFullScreenPanel("SettingsPanel", parent, new Color(0.02f, 0.02f, 0.04f, 0.80f), new Color(0, 0, 0, 0));
+            overlayRT.GetComponent<Image>().color = new Color(0.10f, 0.16f, 0.17f, 0.8f);
 
             var card = CreateCenterCard(overlayRT, "SettingsCard", new Vector2(520, 470), CardBg);
             var layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -1183,7 +1149,8 @@ namespace PatchWorkSecure.EditorTools
                 p.ThemeColor = new Color(0.64f, 0.46f, 0.88f);
             });
 
-            SetRefArray(so, "personas", new Object[] { hinata, aria, chloe });
+            // 未完成の候補は選択肢に出さない。アセットは将来の追加用に残す。
+            SetRefArray(so, "personas", new Object[] { hinata });
         }
 
         /// <summary>アセットが無ければ作って初期設定を流し込む。既にあればそのまま返す。</summary>
@@ -1215,7 +1182,8 @@ namespace PatchWorkSecure.EditorTools
             ApplyRounded(go, ButtonSprite);
             // 8種がサイドバーに収まる高さにしてある（8行 x 58 + 行間 = 約500）
             var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(500, 58);
+            rt.sizeDelta = new Vector2(326, 66);
+            go.AddComponent<LayoutElement>().preferredHeight = 66;
 
             // 左端の縦線（導入済みかどうかの目印）
             var edge = new GameObject("SelectedEdge", typeof(Image));
@@ -1243,21 +1211,30 @@ namespace PatchWorkSecure.EditorTools
             glyphImg.raycastTarget = false;
             ApplyRounded(glyph, PanelSprite);
             StretchTo(glyph.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(11, 11), new Vector2(-11, -11));
+            glyphImg.enabled = false;
+            var symbol = new GameObject("DefenseSymbol", typeof(RectTransform), typeof(CanvasRenderer), typeof(DefenseGlyph));
+            symbol.transform.SetParent(iconFrame.transform, false);
+            symbol.GetComponent<DefenseGlyph>().raycastTarget = false;
+            StretchTo(symbol.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, new Vector2(5, 5), new Vector2(-5, -5));
 
             // 対策名（上段）
             var nameText = CreateLabel(go.transform, "NameText", "対策名", 19, 0, bold: true);
-            nameText.alignment = TextAlignmentOptions.BottomLeft;
-            StretchTo(nameText.rectTransform, new Vector2(0, 0.45f), new Vector2(1, 1), new Vector2(70, 0), new Vector2(-150, -6));
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            StretchTo(nameText.rectTransform, new Vector2(0, 1), Vector2.one, new Vector2(70, -34), new Vector2(-10, -6));
 
             // レベル（下段左）
             var levelText = CreateLabel(go.transform, "LevelText", "Lv.0", 15, 0, bold: true);
             levelText.alignment = TextAlignmentOptions.TopLeft;
-            StretchTo(levelText.rectTransform, new Vector2(0, 0), new Vector2(1, 0.48f), new Vector2(70, 6), new Vector2(-150, 0));
+            StretchTo(levelText.rectTransform, Vector2.zero, new Vector2(0.5f, 0), new Vector2(70, 8), new Vector2(0, 30));
 
             // 金額（右端に寄せる）
             var costText = CreateLabel(go.transform, "CostText", "¥0", 17, 0, bold: true);
             costText.alignment = TextAlignmentOptions.Right;
-            StretchTo(costText.rectTransform, new Vector2(1, 0), new Vector2(1, 1), new Vector2(-148, 6), new Vector2(-14, -6));
+            StretchTo(costText.rectTransform, new Vector2(0.5f, 0), new Vector2(1, 0), new Vector2(0, 8), new Vector2(-12, 30));
+            var detailText = CreateLabel(go.transform, "DetailText", "", 14, 0);
+            detailText.color = TextSub;
+            StretchTo(detailText.rectTransform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(70, 34), new Vector2(-10, -36));
+            detailText.gameObject.SetActive(false);
 
             var button = go.GetComponent<Button>();
             button.targetGraphic = bg;
@@ -1272,6 +1249,7 @@ namespace PatchWorkSecure.EditorTools
             view.NameText = nameText;
             view.LevelText = levelText;
             view.CostText = costText;
+            view.DetailText = detailText;
 
             string path = $"{PrefabDir}/DefenseRowPrefab.prefab";
             var prefabAsset = PrefabUtility.SaveAsPrefabAsset(go, path);
@@ -1286,11 +1264,11 @@ namespace PatchWorkSecure.EditorTools
         {
             var go = new GameObject("ChoiceRowPrefab", typeof(Image), typeof(Button), typeof(ChoiceRowView));
             var bg = go.GetComponent<Image>();
-            bg.color = new Color(0.185f, 0.200f, 0.255f);
+            bg.color = CardBgSoft;
             ApplyRounded(go, ButtonSprite);
             AddShadow(go, 3f, 0.35f);
             var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(500, 78);
+            rt.sizeDelta = new Vector2(500, 96);
 
             var badge = new GameObject("NumberBadge", typeof(Image));
             badge.transform.SetParent(go.transform, false);
@@ -1308,11 +1286,11 @@ namespace PatchWorkSecure.EditorTools
             numberText.color = new Color(0.10f, 0.10f, 0.13f);
             StretchTo(numberText.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            var labelText = CreateLabel(go.transform, "LabelText", "選択肢", 23, 0, bold: true);
+            var labelText = CreateLabel(go.transform, "LabelText", "選択肢", 20, 0, bold: true);
             labelText.alignment = TextAlignmentOptions.BottomLeft;
             StretchTo(labelText.rectTransform, new Vector2(0, 0.44f), new Vector2(1, 1), new Vector2(70, 0), new Vector2(-18, -8));
 
-            var detailText = CreateLabel(go.transform, "DetailText", "", 15, 0);
+            var detailText = CreateLabel(go.transform, "DetailText", "", 14, 0);
             detailText.color = TextSub;
             detailText.alignment = TextAlignmentOptions.TopLeft;
             StretchTo(detailText.rectTransform, new Vector2(0, 0), new Vector2(1, 0.48f), new Vector2(70, 8), new Vector2(-18, 0));
@@ -1339,7 +1317,7 @@ namespace PatchWorkSecure.EditorTools
         {
             var go = new GameObject(name, typeof(Image), typeof(Button));
             var bgImage = go.GetComponent<Image>();
-            bgImage.color = new Color(0.18f, 0.19f, 0.24f);
+            bgImage.color = CardBgSoft;
             ApplyRounded(go, ButtonSprite);
             AddShadow(go, 3f, 0.35f);
             var rt = go.GetComponent<RectTransform>();
@@ -1400,8 +1378,14 @@ namespace PatchWorkSecure.EditorTools
         /// <summary>UI標準のShadowコンポーネントでドロップシャドウを付ける。</summary>
         private static void AddShadow(GameObject go, float distance = 4f, float alpha = 0.4f)
         {
+            if (go.GetComponent<Outline>() == null)
+            {
+                var edge = go.AddComponent<Outline>();
+                edge.effectColor = new Color(0.29f, 0.43f, 0.44f, 0.85f);
+                edge.effectDistance = new Vector2(1.25f, -1.25f);
+            }
             var shadow = go.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, alpha);
+            shadow.effectColor = new Color(0.16f, 0.24f, 0.23f, alpha * 0.25f);
             shadow.effectDistance = new Vector2(distance, -distance);
         }
 
@@ -1484,7 +1468,7 @@ namespace PatchWorkSecure.EditorTools
             var go = new GameObject(name, typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var bgImage = go.GetComponent<Image>();
-            bgImage.color = new Color(accent.r * 0.42f, accent.g * 0.42f, accent.b * 0.42f, 1f);
+            bgImage.color = Color.Lerp(CardBgSoft, accent, 0.25f);
             ApplyRounded(go, ButtonSprite);
             AddShadow(go, 4f, 0.4f);
 
@@ -1517,11 +1501,11 @@ namespace PatchWorkSecure.EditorTools
         private static void ApplyButtonColors(Button button)
         {
             var colors = button.colors;
-            colors.normalColor = new Color(0.86f, 0.87f, 0.90f);
+            colors.normalColor = Color.white;
             colors.highlightedColor = Color.white;
             colors.pressedColor = new Color(0.62f, 0.63f, 0.68f);
-            colors.selectedColor = new Color(0.86f, 0.87f, 0.90f);
-            colors.disabledColor = new Color(0.40f, 0.40f, 0.44f, 0.5f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.86f, 0.86f, 0.86f, 0.8f);
             colors.fadeDuration = 0.08f;
             button.colors = colors;
         }

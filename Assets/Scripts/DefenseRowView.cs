@@ -19,5 +19,6 @@ namespace PatchWorkSecure
         public TextMeshProUGUI NameText;
         public TextMeshProUGUI LevelText;
         public TextMeshProUGUI CostText;
+        public TextMeshProUGUI DetailText;
     }
 }

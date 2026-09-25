@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using TMPro;
+using UnityEngine.TextCore.LowLevel;
 
 namespace PatchWorkSecure.EditorTools
 {
@@ -16,8 +17,8 @@ namespace PatchWorkSecure.EditorTools
     ///
     /// 【対処】
     /// AtlasPopulationModeをDynamic（動的）に変え、元フォント(meiryo.ttc)への参照を復元する。
-    /// これで未収録の文字は実行時にその場でアトラスへ追加されるようになり、原理的に抜けなくなる。
-    /// 既存の焼き込み済みグリフはそのまま残す（消すと起動時の生成量が増えるため）。
+    /// 動的生成に加えてアトラスの読み書きを許可する。元フォントに無い絵文字は対象外。
+    /// 読み取り不可の古いアトラスだけはTMPの公開APIで作り直す（アセット参照は維持する）。
     /// アトラスが1枚で足りなくなる場合に備えてマルチアトラスも有効にする。
     /// </summary>
     public static class FontSetup
@@ -43,6 +44,12 @@ namespace PatchWorkSecure.EditorTools
                 return;
             }
 
+            // バッチ起動直後は描画が始まっていないため、ネイティブの文字描画機構を先に初期化する。
+            FontEngine.InitializeFontEngine();
+            var faceError = FontEngine.LoadFontFace(sourceFont, (int)fontAsset.faceInfo.pointSize);
+            if (faceError != FontEngineError.Success)
+                throw new System.InvalidOperationException($"元の日本語フォントを読み込めません: {faceError}");
+
             var so = new SerializedObject(fontAsset);
 
             // 元フォントへの参照を復元する（動的生成にはこれが必須）
@@ -56,6 +63,23 @@ namespace PatchWorkSecure.EditorTools
             SetBool(so, "m_IsMultiAtlasTexturesEnabled", true);
 
             so.ApplyModifiedProperties();
+            // 静的生成時のアトラスは読み取り不可。Dynamicへの変更だけでは追加に失敗する。
+            bool rebuildAtlas = false;
+            foreach (var atlas in fontAsset.atlasTextures)
+                if (atlas != null && !atlas.isReadable) rebuildAtlas = true;
+            // TMP自身のエディタ処理が読み取り属性・パッキング情報をまとめて初期化する。
+            if (rebuildAtlas) fontAsset.ClearFontAssetData();
+            foreach (var atlas in fontAsset.atlasTextures)
+            {
+                if (atlas == null) continue;
+                if (!atlas.isReadable) throw new System.InvalidOperationException("アトラスの読み書き設定を復元できませんでした。");
+                EditorUtility.SetDirty(atlas);
+            }
+            const string probe = "ひなた 予算 人望 ストレス 緒常選済測和誠丈夫費黄思弾返学習記録低音声：　→ ¥0123456789%";
+            // TMPは「すべて収録済みで追加ゼロ」の場合もfalseを返すため、追加の戻り値では判定しない。
+            fontAsset.TryAddCharacters(probe, out _);
+            if (!fontAsset.HasCharacters(probe, out System.Collections.Generic.List<char> missing))
+                throw new System.InvalidOperationException($"日本語フォントの描画準備に失敗: {new string(missing.ToArray())}");
             EditorUtility.SetDirty(fontAsset);
 
             ApplyAsProjectDefaultFont(fontAsset);
@@ -63,7 +87,7 @@ namespace PatchWorkSecure.EditorTools
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[FontSetup] フォントを動的生成モードに切り替えました。未収録の文字も実行時に生成されます。");
+            Debug.Log("[FontSetup] 読み書き可能な動的アトラスを確認し、日本語の追加生成テストに成功しました。");
         }
 
         /// <summary>

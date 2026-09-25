@@ -24,9 +24,9 @@ namespace PatchWorkSecure
         [SerializeField] private TMP_FontAsset font;         // 動的生成テキスト用（未指定ならTMPの既定）
 
         // ---- よく使う色 ----
-        public static readonly Color Good = new Color(0.42f, 0.88f, 0.50f);
-        public static readonly Color Bad = new Color(0.96f, 0.36f, 0.36f);
-        public static readonly Color Gold = new Color(1.00f, 0.82f, 0.25f);
+        public static readonly Color Good = new Color(0.55f, 0.85f, 0.48f);
+        public static readonly Color Bad = new Color(0.96f, 0.39f, 0.31f);
+        public static readonly Color Gold = new Color(1f, 0.79f, 0.30f);
 
         private Vector2 _shakeHome;
         private Coroutine _flashRoutine, _shakeRoutine, _bannerRoutine;

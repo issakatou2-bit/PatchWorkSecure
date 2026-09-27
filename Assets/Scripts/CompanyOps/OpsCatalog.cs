@@ -5,6 +5,11 @@ namespace PatchWorkSecure.CompanyOps
 [Serializable] public class OpsProject { public string id, name, tag, group, desc, effect, term, requires; public int cost, time, upkeep, max; }
 [Serializable] public class OpsMonth { public string name, season, title, news, boss, person, staff, hint, kind, @event, symptom, finding, lesson, calm; public int @base; }
 [Serializable] public class OpsTerm { public string id, name, basic, deep; }
+[Serializable] public class OpsSituation
+{
+    public string id, title, description, advice, action, group;
+    public int stopLossCap, extraFatigue, costDiscount, timeDiscount;
+}
 [Serializable] public class OpsMission
 {
     public string title, equipmentRoute, fieldRoute, projectA, projectB, actionA, actionB;
@@ -12,6 +17,18 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+// 年度内の適用対象と連携値。保存データの復元と、性能・処理の再開は別の備え。
+public static readonly int[] DataRecoveryMonths = { 0, 9, 11 };
+public static readonly int[] RestartMonths = { 3, 4 };
+public const int RestorePowerPerLevel = 6, RestartPowerPerLevel = 5, ChainLossPerLevel = 3, ChainStopPerLevel = 3;
+// 月初に公開する社内事情。攻撃の真偽とは独立し、年度内での読み込みでは変わらない。
+public static readonly OpsSituation[] Situations = {
+new OpsSituation { id="normal", title="新年度の整備期間", description="今月は特別な業務制約はありません。予算と工数の使い方を試せます。", advice="調査や対話も、設備の導入も同じ工数を使います。今月の社内依頼から優先順位を決めよう。" },
+new OpsSituation { id="deadline", title="大型案件の納品が集中", description="停止すると納品の手配にも費用がかかります。広く止めるか、業務を残すかが今月の判断です。", advice="代替業務を準備すれば追加損失を防げます。業務の優先度確認や冗長化で停止自体を短くする道もあります。", action="代替業務を準備する", stopLossCap=6 },
+new OpsSituation { id="absence", title="担当者の休暇が重なる", description="少人数での対応が必要な月です。事件対応の負担が残りやすくなります。", advice="当番の事前調整で追加疲労をなくせます。引継ぎ手順が育っていれば、毎回調整しなくても負担を軽減できます。", action="応援当番を調整する", extraFatigue=8 },
+new OpsSituation { id="maintenance", title="合同メンテナンスの機会", description="保守会社とまとめて作業できます。今月は復旧分野の設備を少ない工数で整備できます。", advice="バックアップや冗長化を整える機会。ただし導入費と毎月の維持費は通常どおりです。今月必要な対策との配分を考えよう。", group="recover", timeDiscount=1 },
+new OpsSituation { id="support", title="防御設備の導入支援", description="保守会社の導入支援が使えます。今月は防御分野の導入・強化にかかる費用が下がります。", advice="多要素認証・監視・分離・更新運用が対象。必要な前提設備と工数は変わりません。割引だけで選ばず、維持費も確認しよう。", group="protect", costDiscount=4 },
+};
 public static readonly OpsProject[] Projects = {
 new OpsProject { id = "inventory", name = "資産と業務の台帳", tag = "把握", group = "operations", cost = 8, time = 1, upkeep = 0, max = 2, desc = "誰の、どの仕事が、このシステムに依存するか。", effect = "限定対応の精度が上がり、監視・分離・冗長化を導入できる。", term = "asset" },
 new OpsProject { id = "backup", name = "分離バックアップ", tag = "復旧", group = "recover", cost = 20, time = 2, upkeep = 2, max = 2, desc = "本番環境とは分けて、戻せるデータを残す。", effect = "侵入は防がない。データ被害を減らす。訓練と組み合わせると復旧が早い。", term = "backup" },

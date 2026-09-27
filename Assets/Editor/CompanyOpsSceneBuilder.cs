@@ -40,6 +40,12 @@ namespace PatchWorkSecure.EditorTools
             controller.PanelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
             if (controller.PanelSprite == null) controller.PanelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             Directory.CreateDirectory("Assets/CompanyOps");
+            controller.Sounds = AssetDatabase.LoadAssetAtPath<OpsSoundPalette>("Assets/CompanyOps/YearSounds.asset");
+            if (controller.Sounds == null)
+            {
+                controller.Sounds = ScriptableObject.CreateInstance<OpsSoundPalette>();
+                AssetDatabase.CreateAsset(controller.Sounds, "Assets/CompanyOps/YearSounds.asset");
+            }
             var prefab = new GameObject("OpsChoice", typeof(RectTransform), typeof(Image), typeof(Button));
             prefab.GetComponent<Image>().sprite = controller.PanelSprite; prefab.GetComponent<Image>().type = Image.Type.Sliced;
             var button = prefab.GetComponent<Button>(); button.targetGraphic = prefab.GetComponent<Image>();

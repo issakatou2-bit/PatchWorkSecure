@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 
 namespace PatchWorkSecure.Tests
 {
-    public class CompanyOpsTests
+    public partial class CompanyOpsTests
     {
         private readonly List<string> glyphWarnings = new List<string>();
         [SetUp] public void Setup() { OpsGame.TestMode = true; glyphWarnings.Clear(); Application.logMessageReceived += Observe; }
@@ -230,7 +230,7 @@ namespace PatchWorkSecure.Tests
             {
                 int i = OpsCatalog.Index(key); var p = OpsCatalog.Projects[i];
                 if (s.levels[i] != 0 || s.UpgradeBlock(i) != "") continue;
-                if (s.capacity >= p.time + 1 && !s.proposed) s.Act("proposal", p.group);
+                if (s.capacity >= s.WorkCost(i) + 1 && !s.proposed) s.Act("proposal", p.group);
                 if (s.budget >= s.Cost(i) + 12) s.Upgrade(i);
             }
             s.Act("audit"); s.Act("rest"); s.Act("map");
@@ -256,7 +256,7 @@ namespace PatchWorkSecure.Tests
             foreach (var text in Object.FindObjectsByType<TextMeshProUGUI>())
             {
                 text.ForceMeshUpdate();
-                if (text.name.EndsWith("Value") || new[] { "CaseTitle", "IncidentTitle", "ReviewTitle", "EndingTitle", "NavigatorName", "InvestmentNumbers", "InvestmentForecast", "ImpactNumbers", "Causality", "MissionTitle", "MissionEquipment", "MissionField", "ScoreBreakdown" }.Contains(text.name))
+                if (text.name.EndsWith("Value") || text.name.StartsWith("StatHint") || new[] { "CaseTitle", "IncidentTitle", "ReviewTitle", "EndingTitle", "NavigatorName", "InvestmentNumbers", "InvestmentForecast", "ImpactNumbers", "Causality", "MissionTitle", "MissionEquipment", "MissionField", "ScoreBreakdown", "SituationTitle", "SituationEffect", "SituationImpactText", "SituationAdvice", "StatDetailHint", "AudioStatus", "FeedbackDetail" }.Contains(text.name))
                     Assert.IsFalse(text.isTextOverflowing, "重要な文字が欠ける: " + text.name + " / " + text.text);
             }
         }

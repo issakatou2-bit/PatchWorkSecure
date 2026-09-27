@@ -15,7 +15,7 @@ public static class CompanyOpsChecks
         {
             int i = OpsCatalog.Index(key);
             if (s.levels[i] != 0 || s.UpgradeBlock(i) != "") continue;
-            if (s.capacity >= OpsCatalog.Projects[i].time + 1 && !s.proposed)
+            if (s.capacity >= s.WorkCost(i) + 1 && !s.proposed)
                 s.Act("proposal", OpsCatalog.Projects[i].group);
             if (s.budget >= s.Cost(i) + 12) s.Upgrade(i);
         }

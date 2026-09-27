@@ -48,7 +48,7 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     int index = OpsCatalog.Index(key); var p = OpsCatalog.Projects[index];
                     if (s.levels[index] != 0 || s.UpgradeBlock(index) != "") continue;
-                    if (s.capacity >= p.time + 1 && !s.proposed) s.Act("proposal", p.group);
+                    if (s.capacity >= s.WorkCost(index) + 1 && !s.proposed) s.Act("proposal", p.group);
                     if (s.budget >= s.Cost(index) + 12) s.Upgrade(index);
                 }
                 s.Act("audit"); s.Act("rest"); s.Act("map");

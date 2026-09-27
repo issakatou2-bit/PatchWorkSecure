@@ -24,7 +24,7 @@ namespace PatchWorkSecure.CompanyOps
         private void Start()
         {
             if (!Application.isEditor) Screen.SetResolution(1600, 900, FullScreenMode.Windowed);
-            ReadSave(); RenderHome();
+            LoadFeedbackSettings(); ReadSave(); RenderHome();
         }
         public void BuildPreview() => RenderHome();
 
@@ -39,45 +39,71 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { State = new OpsState(seed); tab = 0; Save(); Render(); }
+        public void StartYear(int seed) { State = new OpsState(seed); statChanges = new int[6]; tab = 0; Save(); Render(); }
         public void OpenTab(int next) { tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
+            var previous = ReadStats();
+            var oldLevels = State.GrowthLevels;
             int before = State.milestones.Count;
             if (!State.Act(action, group)) return;
+            RecordStatChanges(previous);
             string feedback = action == "audit" ? "現状調査 完了 / 見積もりの幅が狭まりました" :
                 action == "listen" ? "社員との対話 / 相談文化が育ちました" :
                 action == "map" ? "重要業務を確認 / 停止を短くする準備ができました" :
-                action == "rest" ? "当番を調整 / 疲労が軽くなりました" : "追加予算 獲得 / 今月の整備を約束しました";
-            Save(); Render(); Toast(State.milestones.Count > before ? "成長達成 / " + State.milestones.Last() : feedback);
+                action == "rest" ? "当番を調整 / 疲労が軽くなりました" :
+                action == "prepare" ? "事前調整 完了 / 今月の追加負担に備えました" : "追加予算 獲得 / 今月の整備を約束しました";
+            bool growth = State.milestones.Count > before;
+            string levelUp = LevelUpNotice(oldLevels);
+            Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
         }
         public void Buy(int index)
         {
+            var previous = ReadStats();
+            var oldLevels = State.GrowthLevels;
             int before = State.milestones.Count;
             if (!State.Upgrade(index)) return;
-            Save(); Render(); Toast(State.milestones.Count > before ? "成長達成 / " + State.milestones.Last() :
-                OpsCatalog.Projects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました");
+            RecordStatChanges(previous);
+            bool growth = State.milestones.Count > before;
+            string levelUp = LevelUpNotice(oldLevels);
+            Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" :
+                OpsCatalog.Projects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました", true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Purchase);
         }
         public void BeginIncident()
         {
+            var previous = ReadStats();
             int before = State.MissionCount;
             if (!State.BeginIncident()) return;
+            RecordStatChanges(previous);
             Save(); Render();
-            Toast(State.MissionCount > before ? "社内依頼 達成 / 経営の信頼 +3" : "状況発生 / 対応方針を選択", State.MissionCount > before);
+            bool achieved = State.MissionCount > before;
+            Toast(achieved ? "社内依頼 達成 / 信頼 +3・年間 +45点 / 続けて状況に対応しよう" : "状況発生 / 対応方針を選択", achieved, achieved ? OpsCue.Growth : OpsCue.Alert);
         }
         public void Resolve(string response)
         {
+            var previous = ReadStats();
+            var oldLevels = State.GrowthLevels;
             if (!State.Resolve(response)) return;
+            RecordStatChanges(previous);
             Save(); Render();
             var r = State.Latest;
+            bool success = r.loss == 0 && r.downtime <= 4;
             Toast(r.loss == 0 ? "危機対応 完了 / 被害なし・停止 " + r.downtime + "h" :
-                "業務への影響 / 被害 " + r.loss + "万円・停止 " + r.downtime + "h", r.loss == 0);
+                "業務への影響 / 被害 " + r.loss + "万円・停止 " + r.downtime + "h", success, success ? OpsCue.Success : OpsCue.Damage);
+            string levelUp = LevelUpNotice(oldLevels);
+            if (Application.isPlaying) StartCoroutine(ReviewGrowthFeedback(r, levelUp));
         }
-        public void Next() { if (!State.NextMonth()) return; tab = 0; Save(); Render(); }
+        public void Next()
+        {
+            var previous = ReadStats(); if (!State.NextMonth()) return;
+            RecordStatChanges(previous); tab = 0; Save(); Render();
+            if (State.phase == OpsPhase.Ended) Feedback(State.IsClear ? OpsCue.Clear : OpsCue.Failure);
+            else Toast(State.Current.name + "の計画 / 月次予算・工数を更新しました", true, OpsCue.Month);
+        }
 
         private void RenderHome()
         {
-            NewScreen();
+            homeVisible = true; NewScreen(); SetMusic(Sounds == null ? null : Sounds.titleMusic);
             Art(screen, 615, -95, 1030, 1030);
             var intro = Box(screen, "Welcome", 44, 54, 580, 786, Ink, true);
             Text(intro, "Eyebrow", "PATCHWORK SECURE  /  情シスの一年", 38, 34, 500, 34, 17, Gold);
@@ -94,7 +120,7 @@ namespace PatchWorkSecure.CompanyOps
                 }
             }, Gold);
             Button(intro, "ContinueYear", saved == null ? "続きの記録はありません" : saved.Current.name + " の記録から続ける", 38, 632, 504, 58,
-                () => { State = saved; tab = 0; Render(); }, Edge, saved != null);
+                () => { State = saved; statChanges = new int[6]; tab = 0; Render(); }, Edge, saved != null);
             Text(intro, "Disclaimer", "1年12か月 / 1周 約20～30分を想定\n数値・ニュースは架空です。既存版とは別の試作。", 38, 712, 504, 58, 16, Muted);
             if (Navigator != null && Navigator.FaceNormal != null)
             {
@@ -105,47 +131,44 @@ namespace PatchWorkSecure.CompanyOps
                 Text(greeting, "HomeGreetingLine", "今月の相談、一緒に確認しよう！", 18, 52, 350, 54, 21, Ink);
             }
             Text(screen, "HomeFooter", "ねっとわーく商事  /  会社運営・セキュリティ育成シミュレーション", 674, 826, 866, 48, 21);
+            Button(screen, "HomeSettings", "音・演出の設定", 1352, 28, 218, 48, Menu);
             if (SaveWarning != "") Text(screen, "SaveWarning", SaveWarning, 40, 866, 1500, 28, 18, Coral);
         }
         private void Render()
         {
+            homeVisible = false;
+            SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
+                State.phase == OpsPhase.Incident ? Sounds.incidentMusic : Sounds.reviewMusic);
             NewScreen(); Header(); Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
             var right = Box(screen, "DecisionPanel", 978, 120, 598, 744, Panel, true);
             if (State.phase == OpsPhase.Planning) Planning(right);
             else if (State.phase == OpsPhase.Incident) Incident(right);
             else Review(right);
-            Text(screen, "SaveStatus", SaveWarning == "" ? "自動保存 / 予算は万円・停止はゲーム内の時間 / 試作 v0.3" : SaveWarning, 30, 874, 1510, 22, 14, SaveWarning == "" ? Muted : Coral);
+            Text(screen, "SaveStatus", SaveWarning == "" ? "自動保存 / 設備・担当者・社員が成長 / 運用チームで支援方針を指定 / 試作 v0.6" : SaveWarning, 30, 874, 1510, 22, 14, SaveWarning == "" ? Muted : Coral);
         }
         private void Header()
         {
-            Box(screen, "Header", 24, 20, 1552, 80, Panel, true);
-            Text(screen, "Brand", "PATCHWORK\n情シスの一年", 42, 27, 245, 68, 22, Gold);
-            HeaderStat("予算", State.budget + " 万円", 300, Gold, "維持 " + State.Upkeep + " / 月");
-            HeaderStat("工数", State.capacity + " / " + State.MaxCapacity, 495, Mint, "今月使える時間");
-            HeaderStat("業務の安定", State.stability + " / 100", 670, State.stability < 35 ? Coral : Paper, "0で運営終了");
-            HeaderStat("相談文化", State.culture + " / 100", 860, Mint, "早い報告につながる");
-            HeaderStat("経営の信頼", State.trust + " / 100", 1050, Paper, "月次予算に影響");
-            HeaderStat("疲労", State.fatigue + " / 100", 1240, State.fatigue > 65 ? Coral : Paper, "高いと対応力低下");
-            Button(screen, "Menu", "記録", 1450, 36, 104, 48, Menu);
-        }
-        private void HeaderStat(string name, string value, float x, Color color, string hint)
-        {
-            Text(screen, name + "Label", name, x, 27, 180, 28, 16, Muted);
-            Text(screen, name + "Value", value, x, 52, 180, 44, 26, color);
+            Text(screen, "Brand", "PATCHWORK\n情シスの一年", 30, 20, 238, 64, 23, Gold);
+            Text(screen, "PhaseName", State.phase == OpsPhase.Planning ? "計画  >  対応  >  月報" : State.phase == OpsPhase.Incident ?
+                "計画済  >  対応中  >  月報" : State.phase == OpsPhase.Review ? "計画済  >  対応済  >  月報" : "年度の記録", 30, 83, 242, 23, 14, Muted);
+            for (int i = 0; i < 6; i++) StatusCard(i, 294 + i * 186);
+            Button(screen, "Menu", "記録\n設定", 1422, 20, 154, 86, Menu);
         }
         private void Sidebar()
         {
             var left = Box(screen, "CompanyGrowth", 24, 120, 254, 744, Panel, true);
             Text(left, "Month", State.Current.name + " / " + (State.month + 1) + "か月目", 20, 18, 218, 52, 32, Gold);
-            Text(left, "Season", State.Current.season + "  •  ねっとわーく商事", 20, 72, 218, 35, 16, Muted);
+            Text(left, "Season", State.SeasonLabel + (State.SeasonPressure > 0 ? " / 負荷+" + State.SeasonPressure : ""), 20, 72, 218, 35, 15, State.QuarterPeak ? Coral : Muted);
             for (int i = 0; i < 12; i++)
             {
                 var c = Box(left, "Month" + i, 20 + i % 4 * 54, 113 + i / 4 * 37, 46, 29, i == State.month ? Gold : i < State.month ? Edge : Ink);
+                if (State.growthRules > 0 && i % 3 == 2)
+                    Box(c, "PeakMark", 3, 25, 40, 3, Coral).GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
                 Text(c, "MonthLabel", OpsCatalog.Months[i].name, 5, 3, 39, 25, 15, i == State.month ? Ink : Muted);
             }
             Text(left, "MissionCounter", "社内依頼の達成  " + State.MissionCount + " / 12", 20, 220, 218, 24, 14, Gold);
-            Text(left, "MaturityHeading", "会社の育ちかた", 20, 244, 218, 35, 22);
+            Text(left, "MaturityHeading", "設備 Lv." + State.EquipmentLevel + " / 導入 " + State.levels.Sum(), 20, 244, 218, 35, 19, EquipmentColor);
             Bar(left, "備え", State.Preparedness, 20, 293, 211, Mint);
             Bar(left, "立て直す力", State.Resilience, 20, 348, 211, Gold);
             Bar(left, "チームの力", State.Organization, 20, 403, 211, Coral);
@@ -155,7 +178,9 @@ namespace PatchWorkSecure.CompanyOps
             for (int i = 0; i < 3; i++)
             {
                 bool done = State.milestones.Contains(goals[i]);
-                Text(left, "Goal" + i, (done ? "達成 / " : "目標 / ") + goals[i] + "\n<size=13>" + requirements[i] + "</size>", 20, 516 + i * 54, 220, 52, 15, done ? Gold : Muted);
+                int goal = i;
+                Button(left, "Goal" + i, "<size=14>" + (done ? "達成 / " : "計画 / ") + goals[i] + "</size>\n<size=12>" + requirements[i] + "  ></size>",
+                    16, 510 + i * 55, 222, 51, () => GrowthPlan(goal), done ? Edge : Ink);
             }
             Button(left, "OpenGuide", "遊び方と考え方", 18, 688, 218, 40, Guide);
         }
@@ -171,11 +196,14 @@ namespace PatchWorkSecure.CompanyOps
                 var crisisRail = Box(map, "CrisisRail", 6, 6, 652, 7, Coral);
                 crisisRail.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             }
-            var badge = Box(map, "OfficeBadge", 18, 16, 360, 56, Ink);
-            Text(badge, "OfficeStatus", State.phase == OpsPhase.Incident ? "インシデント対応中" : "ねっとわーく商事 / 社員45人", 15, 14, 330, 36, 20, State.phase == OpsPhase.Incident ? Coral : Paper);
+            var badge = Box(map, "OfficeBadge", 18, 16, 336, 56, Ink);
+            Text(badge, "OfficeStatus", State.phase == OpsPhase.Incident ? "インシデント対応中" : "ねっとわーく商事 / 社員45人", 15, 14, 306, 36, 19, State.phase == OpsPhase.Incident ? Coral : Paper);
+            Button(map, "OpenTeam", State.growthRules > 0 ? "運用チーム / あなた Lv." + State.PlayerLevel +
+                "\n<size=14>小川 " + State.StaffLevel(0) + "  佐伯 " + State.StaffLevel(1) + "  森 " + State.StaffLevel(2) + "  ></size>" : "運用チーム / 旧年度", 368, 16, 278, 56, TeamDialog, Edge);
             MapPin(map, "復旧基盤", State.Level("backup") + State.Level("drill"), 250, 119, "backup", "recover");
             MapPin(map, "相談できる現場", State.Level("education"), 443, 258, "culture", "people");
-            MapPin(map, "運用のしくみ", State.Level("automation") + State.Level("runbook"), 31, 329, "change", "operations");
+            MapPin(map, "運用のしくみ", State.Level("automation") + State.Level("runbook"), 31, 300, "change", "operations");
+            SituationCard(map);
             var message = Box(screen, "Navigator", 294, 610, 664, 254, Paper);
             Portrait(message, "NavigatorPortrait", 12, 16, 186, 222);
             Text(message, "NavigatorName", (Navigator != null ? Navigator.DisplayName : "ひなた") + " / 情シスパートナー", 216, 18, 420, 32, 20, Ink);
@@ -240,11 +268,11 @@ namespace PatchWorkSecure.CompanyOps
             var news = Box(p, "News", 24, 167, 550, 86, Ink);
             Text(news, "NewsBody", "業界ニュース / 架空\n" + State.Current.news, 14, 10, 520, 72, 18, Gold);
             Text(p, "Boss", State.Current.person + " からの相談\n「" + State.Current.boss + "」", 24, 274, 550, 112, 21);
-            Text(p, "Staff", State.Current.staff, 24, 392, 550, 61, 18, Muted);
+            Text(p, "Staff", State.StaffVoice, 24, 392, 550, 61, 18, Muted);
             ActionButton(p, "audit", "現状を調べる", "見積もりと限定対応を改善", 24, 467);
             ActionButton(p, "listen", "社員と話す", "相談文化 +7 / 疲労 -3", 306, 467);
             ActionButton(p, "map", "業務の優先度を確認", "信頼 +4 / 停止 -2h", 24, 548);
-            ActionButton(p, "rest", "当番を調整し休息", "疲労 -18", 306, 548);
+            ActionButton(p, "rest", "当番を調整し休息", State.Situation.extraFatigue > 0 ? "疲労 -18 / 休暇の追加疲労も防止" : "疲労 -18", 306, 548);
         }
         private void ActionButton(Transform p, string id, string title, string effect, float x, float y)
         {
@@ -264,42 +292,52 @@ namespace PatchWorkSecure.CompanyOps
                 Text(card, "ProjectName", project.name + "  <color=#EAC573>Lv." + State.levels[i] + "</color>", 16, 12, 502, 36, 21);
                 Text(card, "ProjectDescription", project.desc, 16, 51, 502, 34, 16, Muted);
                 string blocked = State.UpgradeBlock(i);
-                Button(card, "Details_" + project.id, blocked == "" ? "計画を見る  / " + State.Cost(i) + "万円・" + project.time + "工数" : blocked + " / 詳細", 16, 92, 502, 42, () => ProjectDialog(index), blocked == "" ? Edge : Ink);
+                var rail = Box(card, "ProjectCategory", 0, 6, 4, 135, GroupColor(project.group));
+                rail.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
+                string benefit = State.Cost(i) < State.BaseCost(i) || State.WorkCost(i) < project.time ? " [今月の支援]" : "";
+                Button(card, "Details_" + project.id, blocked == "" ? "計画を見る  / " + State.Cost(i) + "万円・" + State.WorkCost(i) + "工数" + benefit : blocked + " / 詳細", 16, 92, 502, 42, () => ProjectDialog(index), blocked == "" ? Edge : Ink);
             }
             Button(p, "Proposal", "根拠を示して追加予算を相談する  / 1工数", 24, 568, 550, 52, Proposal, Edge, State.ActionBlock("proposal") == "");
             if (State.proposed) Text(p, "Promise", "今月の約束 / " + GroupName(State.promiseGroup) + "を提案後に1段階整備", 24, 543, 550, 25, 15, Gold);
         }
-        private void ProjectDialog(int index)
+        private void ProjectDialog(int index, string response = "scope")
         {
             var p = OpsCatalog.Projects[index]; string block = State.UpgradeBlock(index);
             var after = State.PreviewUpgrade(index);
             var d = Dialog(p.name + " / Lv." + State.levels[index] + " → " + Math.Min(2, State.levels[index] + 1),
-                p.effect, 720);
+                p.effect + (State.Cost(index) < State.BaseCost(index) || State.WorkCost(index) < p.time ?
+                    "\n今月の支援：通常 " + State.BaseCost(index) + "万円・" + p.time + "工数 → " + State.Cost(index) + "万円・" + State.WorkCost(index) + "工数" : ""), 720);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 84);
             var comparison = Box(d, "InvestmentComparison", 32, 200, 752, 176, Ink);
             comparison.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            string metrics = after == null ? block + "\n\n導入費 " + State.Cost(index) + "万円 / " + p.time + "工数\n維持費 +" + p.upkeep + "万円 / 月" :
+            string metrics = after == null ? block + "\n\n導入費 " + State.Cost(index) + "万円 / " + State.WorkCost(index) + "工数\n維持費 +" + p.upkeep + "万円 / 月" :
                 "導入前 → 導入後\n手元予算  " + State.budget + " → " + after.budget + "万円    今月の工数  " + State.capacity + " → " + after.capacity +
                 "\n毎月の維持費  " + State.Upkeep + " → " + after.Upkeep + "万円    翌月の工数  " + State.MaxCapacity + " → " + after.MaxCapacity +
                 "\n備え  " + State.Preparedness + " → " + after.Preparedness + "    復旧力  " + State.Resilience + " → " + after.Resilience + "    チーム  " + State.Organization + " → " + after.Organization;
             Text(comparison, "InvestmentNumbers", metrics, 18, 16, 716, 148, 22, Mint);
+            string[] responses = { "contain", "scope", "recover" }, names = { "広範囲の停止", "対象を限定", "復旧を優先" };
+            for (int i = 0; i < responses.Length; i++)
+            {
+                string selected = responses[i];
+                Button(d, "Compare_" + selected, names[i], 32 + i * 254, 394, 244, 37, () => ProjectDialog(index, selected), response == selected ? Gold : Edge);
+            }
             Text(d, "InvestmentForecast", after == null ? "先に条件を満たすと、導入前後の被害予測を比較できます。" :
-                "今月・対象を限定して対応した場合の予測\n現在    " + State.Forecast("scope") + "\n導入後  " + after.Forecast("scope"), 32, 402, 748, 119, 21, Ink);
+                "今月・選択した重点配分の予測\n現在    " + State.Forecast(response) + "\n導入後  " + after.Forecast(response), 32, 447, 748, 87, 20, Ink);
             Text(d, "InvestmentCaveat", "予測は対応費を含みません。事件の種類や対応方針で効果は変わります。\n" +
-                (after != null && after.budget < 6 ? "注意：手元予算が少なく、一部の対応費も賄えません。" : "今月効かない整備でも、別の脅威や来月以降に役立つことがあります。"), 32, 543, 748, 74, 18, Ink);
+                (after != null && after.budget < 6 ? "注意：手元予算が少なく、一部の対応費も賄えません。" : "今月効かない整備でも、別の脅威や来月以降に役立つことがあります。"), 32, 547, 748, 74, 18, Ink);
             Button(d, "Buy_" + p.id, "この整備を実施する", 32, 650, 350, 48, () => Buy(index), Gold, block == "");
             Button(d, "Learn_" + p.id, "知識を読む", 400, 650, 184, 48, () => Knowledge(p.term));
         }
         private static string GroupName(string group) => group == "protect" ? "防御" : group == "recover" ? "復旧" : group == "people" ? "組織" : "運用";
         private void Proposal()
         {
-            var d = Dialog("追加予算の申請", "追加予算 +" + (12 + State.Evidence * 3) + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5、未達で -7。使える工数と導入費を確認しよう。", 560);
+            var d = Dialog("追加予算の申請", "追加予算 +" + (12 + State.Evidence * 3) + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5。未達は信頼 -7・交付額を全額返却。", 560);
             string[] groups = { "recover", "protect", "people", "operations" };
             for (int i = 0; i < groups.Length; i++)
             {
                 string g = groups[i];
                 bool possible = OpsCatalog.Projects.Select((p, j) => new { p, j }).Any(x => x.p.group == g && State.levels[x.j] < 2 &&
-                    State.capacity - 1 >= x.p.time && State.budget + 12 + State.Evidence * 3 >= State.Cost(x.j) &&
+                    State.capacity - 1 >= State.WorkCost(x.j) && State.budget + 12 + State.Evidence * 3 >= State.Cost(x.j) &&
                     (string.IsNullOrEmpty(x.p.requires) || State.Level(x.p.requires) > 0));
                 Button(d, "Propose_" + g, GroupName(g) + "を改善する" + (possible ? "" : " / 今月は工数等が不足"), 32, 260 + i * 51, 552, 44, () => ChooseAction("proposal", g), Edge, possible);
             }
@@ -323,18 +361,27 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Incident(RectTransform p)
         {
-            Text(p, "IncidentTag", "状況発生 / " + State.Current.name, 26, 22, 550, 34, 20, Coral);
+            Text(p, "IncidentTag", State.SeasonLabel + " / " + State.Current.name + " / 季節負荷 +" + State.SeasonPressure, 26, 22, 550, 34, 19, Coral);
             Text(p, "IncidentTitle", State.Current.@event, 26, 74, 544, 77, 31);
-            Text(p, "IncidentSymptom", State.Current.symptom, 26, 166, 544, 93, 22);
-            Text(p, "Evidence", State.audited ? "調査が役立つ / " + State.Current.finding : "情報は不確かです。予測は攻撃・障害だった場合の目安。正常な活動の可能性も残ります。", 26, 281, 544, 85, 18, Muted);
+            Text(p, "IncidentSymptom", State.Current.symptom, 26, 162, 544, 65, 22);
+            Text(p, "Evidence", State.audited ? "調査が役立つ / " + State.Current.finding : "情報は不確かです。予測は攻撃・障害だった場合の目安。正常な活動の可能性も残ります。", 26, 234, 544, 60, 18, Muted);
+            string[] inspectIds = { "contain", "scope", "recover" }, inspectNames = { "停止の加算", "限定の加算", "復旧の加算" };
+            for (int i = 0; i < 3; i++)
+            {
+                string response = inspectIds[i];
+                Button(p, "Power_" + response, inspectNames[i] + " >", 24 + i * 187, 310, 176, 42, () => PowerReport(response));
+            }
+            Text(p, "RecoveryReadiness", State.RecoveryReadiness, 26, 365, 544, 24, 15, Gold);
             string[] ids = { "contain", "scope", "recover" }, names = { "広範囲の停止・隔離", "対象を限定して対応", "代替業務・復旧を優先" };
-            string[] tradeoffs = { "正常な業務も止まる / 対応費6万円", "台帳・監視・報告・調査が支える / 対応費3万円", "復元訓練・手順・代替経路が支える / 対応費4万円" };
+            string[] tradeoffs = { "正常な業務も止まる / 対応費6万円", "台帳・監視・報告・調査が支える / 対応費3万円", "安全確認後に復元・再開 / 対応費4万円" };
             for (int i = 0; i < ids.Length; i++)
             {
                 string id = ids[i];
-                Button(p, "Respond_" + id, "0" + (i + 1) + "  /  " + names[i] + "\n<size=16>" + State.Forecast(id) + "\n" + tradeoffs[i] + "</size>", 24, 390 + i * 103, 550, 92, () => Resolve(id), Edge);
+                var power = State.ResponsePower(id);
+                Button(p, "Respond_" + id, "0" + (i + 1) + "  /  " + names[i] + "\n<size=16>" + State.Forecast(id) +
+                    "\n" + tradeoffs[i] + "</size>\n<size=14><color=#EAC573>抑制力 " + power.Total + "</color>  " + PowerLine(power) + "</size>", 24, 390 + i * 103, 550, 92, () => Resolve(id), Edge);
             }
-            Text(p, "NoTimer", "選択の時間制限なし / 予測に対応費は含みません", 26, 710, 550, 26, 16, Muted);
+            Text(p, "NoTimer", "基本の封じ込め・安全確認は共通。重点配分を選びます。\n時間制限なし / 予測に対応費は含みません", 26, 704, 550, 38, 14, Muted);
         }
         private void Review(RectTransform p)
         {
@@ -346,13 +393,21 @@ namespace PatchWorkSecure.CompanyOps
             var impact = Box(p, "InvestmentImpact", 24, 276, 550, 105, Ink);
             impact.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             Text(impact, "ImpactNumbers", r.hasInvestmentComparison ? "設備・運用整備の効果\n被害 " + r.avoidedLoss + "万円 / 停止 " + r.avoidedDowntime + "h を削減" : "この記録には整備効果の比較がありません", 14, 10, 522, 63, 23, Mint);
-            Text(impact, "ImpactBasis", "同じ対応・社員状態で、全整備Lv.0の場合と比較", 14, 77, 522, 23, 15, Muted);
-            Text(p, "Causality", r.explanation + "\n" + r.promise, 26, 394, 550, 144, 20);
+            Text(impact, "ImpactBasis", string.IsNullOrEmpty(r.recoveryChain) ? "同じ対応・社員状態で、全整備Lv.0の場合と比較" :
+                r.recoveryChain + "が機能 / 下の「効いた整備」で詳しく確認", 14, 77, 522, 23, 15, string.IsNullOrEmpty(r.recoveryChain) ? Muted : Gold);
+            Text(p, "Causality", r.explanation + "\n" + r.promise, 26, 390, 550, 84, 18);
+            ReviewPower(p, r);
             string growth = State.Level("education") > 0 ? "社員の声 /「不安な時は、早めに相談していいんですね」" : "社員の声 /「次は、どこに相談すればいいか教えてください」";
-            Text(p, "EmployeeGrowth", growth, 26, 545, 550, 46, 17, Muted);
-            Button(p, "MonthlyLesson", "今回の知識 / " + OpsCatalog.Term(State.Current.lesson).name, 24, 600, 550, 42, () => Knowledge(State.Current.lesson));
-            Text(p, "NextBudget", State.month == 11 ? "3月の対応完了。年間評価を確認しよう。" : "翌月予算 +" + State.MonthlyGrant + "万円 / 維持 -" + State.Upkeep + "万円", 26, 649, 550, 27, 17, Muted);
-            Button(p, "NextMonth", State.month == 11 || State.budget < 0 || State.stability == 0 ? "一年の記録を見る" : "来月へ / " + OpsCatalog.Months[State.month + 1].name, 24, 683, 550, 44, Next, Gold);
+            Text(p, "EmployeeGrowth", r.growth != null ? !string.IsNullOrEmpty(r.growth.mentoring) ? r.growth.mentoring :
+                "対応の振り返り / あなた 経験 +" + r.growth.playerXp + "・社員 経験 +" + r.growth.staffXp.Sum() + "\n詳しい成長結果は「加算を見る」へ" :
+                !string.IsNullOrEmpty(r.situationId) && r.situationId != "normal" ? OutcomeSituation(r) : growth, 26, 545, 550, 46, 17, Muted);
+            Button(p, "EffectDetails", "効いた整備・連携を見る", 24, 600, 320, 42, () => InvestmentReport(r), Edge);
+            Button(p, "MonthlyLesson", "今回の知識", 358, 600, 216, 42, () => Knowledge(State.Current.lesson));
+            Text(p, "NextBudget", State.month == 11 ? "3月の対応完了。年間評価を確認しよう。" : "翌月 +" + State.MonthlyGrant + "万円 / 維持 -" + State.Upkeep + "万円" +
+                (State.situationRules > 0 ? "\n来月の社内事情 / " + State.SituationAt(State.month + 1).title : ""), 26, 641, 550, 39, 16, Muted);
+            Button(p, "NextMonth", State.QuarterRewardPending ? "山場クリア / 報酬を選んで来月へ" :
+                State.month == 11 || State.budget < 0 || State.stability == 0 ? "一年の記録を見る" : "来月へ / " + OpsCatalog.Months[State.month + 1].name, 24, 683, 550, 44,
+                () => { if (State.QuarterRewardPending) QuarterRewardDialog(); else Next(); }, Gold);
         }
         private void Ending()
         {
@@ -373,10 +428,28 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Menu()
         {
-            var d = Dialog("記録と設定", "進行は行動ごとに自動保存します。\n試作のセーブは既存版と分離しています。\n\n" + (SaveWarning == "" ? "保存状態：自動保存済み" : SaveWarning), 470);
-            Button(d, "ViewHistory", "月ごとの記録", 32, 270, 350, 48, History);
-            Button(d, "ToggleSound", muted ? "操作音を入れる" : "操作音を消す", 410, 270, 350, 48, () => { muted = !muted; Menu(); });
-            Button(d, "Home", "保存してタイトルへ", 32, 400, 420, 48, () => { Save(); RenderHome(); }, Gold);
+            var d = Dialog("記録と設定", "操作と結果には別々の効果音。演出中も操作できます。\n" +
+                (homeVisible ? "設定は次回起動時も引き継ぎます。" : SaveWarning == "" ? "進行は行動ごとに自動保存済み。" : SaveWarning), 650);
+            d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 84);
+            Button(d, "ToggleSound", muted ? "音声 / 消音中" : "音声 / 有効", 32, 211, 350, 48, () =>
+            {
+                muted = !muted;
+                if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); }
+                StoreFeedbackSettings(); Menu();
+            });
+            Button(d, "ReduceMotion", ReducedMotion ? "動きを減らす / 有効" : "動きを減らす / 無効", 410, 211, 350, 48,
+                () => { ReducedMotion = !ReducedMotion; StoreFeedbackSettings(); Menu(); });
+            Button(d, "SoundVolume", "効果音 " + Mathf.RoundToInt(soundVolume * 100) + "% / 変更", 32, 274, 350, 48,
+                () => { soundVolume = soundVolume >= .99f ? .2f : Mathf.Min(1, soundVolume + .2f); StoreFeedbackSettings(); Menu(); PlayCue(OpsCue.Action); });
+            Button(d, "MusicVolume", "BGM " + Mathf.RoundToInt(musicVolume * 100) + "% / 変更", 410, 274, 350, 48,
+                () => { musicVolume = musicVolume >= .99f ? 0 : Mathf.Min(1, musicVolume + .2f); StoreFeedbackSettings(); Menu(); });
+            bool hasMusic = Sounds != null && (Sounds.titleMusic != null || Sounds.planningMusic != null || Sounds.incidentMusic != null || Sounds.reviewMusic != null);
+            Text(d, "AudioStatus", hasMusic ? "BGM素材を使用中 / 場面に応じて切り替え" : "効果音は試作の合成音。BGM素材は未設定です。", 32, 341, 748, 38, 18, Ink);
+            Button(d, "PreviewSuccess", "試聴 / 達成", 32, 398, 232, 46, () => PlayCue(OpsCue.Growth));
+            Button(d, "PreviewAlert", "試聴 / 警告", 280, 398, 232, 46, () => PlayCue(OpsCue.Alert));
+            Button(d, "PreviewDamage", "試聴 / 被害", 528, 398, 232, 46, () => PlayCue(OpsCue.Damage));
+            Button(d, "ViewHistory", "月ごとの記録", 32, 477, 350, 48, History, Edge, !homeVisible && State != null);
+            if (!homeVisible) Button(d, "Home", "保存してタイトルへ", 32, 580, 420, 48, () => { Save(); RenderHome(); }, Gold);
         }
         private void History()
         {
@@ -389,11 +462,12 @@ namespace PatchWorkSecure.CompanyOps
                     (State.completedMissions != null && State.completedMissions.Contains(r.month) ? "  社内依頼達成" : "") +
                     "\n対応 " + response + "  /  被害 " + r.loss + "万円・停止 " + r.downtime + "h" +
                     "\n" + (r.hasInvestmentComparison ? "整備効果  被害 -" + r.avoidedLoss + "万円・停止 -" + r.avoidedDowntime + "h" : "整備効果  過去の記録には比較なし") +
-                    "\n今回の知識  " + OpsCatalog.Term(OpsCatalog.Months[r.month].lesson).name;
-                var card = Box(content, "HistoryCard" + r.month, 0, 0, 720, 112, Panel, true);
-                card.gameObject.AddComponent<LayoutElement>().preferredHeight = 112;
+                    "\n今回の知識  " + OpsCatalog.Term(OpsCatalog.Months[r.month].lesson).name +
+                    (!string.IsNullOrEmpty(r.situationId) && r.situationId != "normal" ? "\n" + OutcomeSituation(r) : "");
+                var card = Box(content, "HistoryCard" + r.month, 0, 0, 720, 146, Panel, true);
+                card.gameObject.AddComponent<LayoutElement>().preferredHeight = 146;
                 card.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(card, "History" + r.month, result, 14, 10, 688, 94, 17);
+                Text(card, "History" + r.month, result, 14, 10, 688, 126, 17);
             }
         }
         private void Guide() => Dialog("遊び方", "1. 相談とニュースを読み、今月の優先順位を決める。\n2. 工数を使って調査・対話・休息。改善計画から導入する。\n3. 社内依頼は設備と現場の二つの道から選べる。達成すると信頼と年間得点が増える。\n4. 余裕があれば根拠付きの追加予算を提案する。\n5. 出来事に対応し、効いた備えと不足を振り返る。\n\n目標は4月から3月まで事業を継続すること。予算がマイナス、または業務の安定が0になるとゲームオーバー。\n自動化の工数増加は翌月から。維持費と対応費を残そう。", 640);

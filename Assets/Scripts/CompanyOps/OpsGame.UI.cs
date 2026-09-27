@@ -50,7 +50,9 @@ namespace PatchWorkSecure.CompanyOps
             t.alignment = TextAlignmentOptions.MidlineLeft;
             t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one;
             t.rectTransform.offsetMin = new Vector2(16, 6); t.rectTransform.offsetMax = new Vector2(-14, -6);
-            b.interactable = enabled; b.onClick.AddListener(() => { PlayTone(540, 0.035f); action(); }); return b;
+            b.interactable = enabled;
+            b.gameObject.AddComponent<OpsButtonFeedback>().Owner = this;
+            b.onClick.AddListener(() => { PlayCue(OpsCue.Click); action(); }); return b;
         }
         private void Clear(Transform root)
         {
@@ -62,6 +64,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            if (Application.isPlaying) StopAllCoroutines();
             Clear(Surface); modal = null; toast = null; toastGroup = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
         }
@@ -94,7 +97,7 @@ namespace PatchWorkSecure.CompanyOps
             return card;
         }
         private void CloseDialog() { if (modal == null) return; modal.gameObject.SetActive(false); Destroy(modal.gameObject); modal = null; }
-        private void Toast(string message, bool good = true)
+        private void Toast(string message, bool good = true, OpsCue cue = OpsCue.Action)
         {
             if (toast != null) Destroy(toast.gameObject);
             int split = message.IndexOf(" / ", StringComparison.Ordinal);
@@ -105,42 +108,27 @@ namespace PatchWorkSecure.CompanyOps
             toastGroup.blocksRaycasts = false; toastGroup.interactable = false;
             var plate = Box(toast, "FeedbackPlate", 6, 6, 616, 100, Ink);
             plate.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(plate, "FeedbackKicker", good ? "OPERATION COMPLETE" : "INCIDENT REPORT", 18, 6, 576, 22, 14, good ? Mint : Coral);
+            Text(plate, "FeedbackKicker", good ? "行動・成長の記録" : "状況と結果の報告", 18, 6, 576, 22, 14, good ? Mint : Coral);
             Text(plate, "FeedbackTitle", heading, 18, 27, 576, 40, 28, Paper);
             Text(plate, "FeedbackDetail", detail, 18, 68, 576, 27, 18, Muted);
             toastUntil = Time.unscaledTime + 2.7f;
-            PlayTone(good ? 740 : 210, 0.12f);
+            Feedback(cue);
         }
         private void Update()
         {
+            TickMusic();
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                if (modal != null) CloseDialog(); else if (State != null) Menu();
+                if (modal != null) CloseDialog(); else Menu();
             }
             if (toast != null)
             {
                 float t = toastUntil - Time.unscaledTime;
-                toast.localScale = Vector3.one * (1f + 0.06f * Mathf.Clamp01((t - 2.45f) / 0.25f));
+                toast.localScale = Vector3.one * (ReducedMotion ? 1 : 1f + 0.06f * Mathf.Clamp01((t - 2.45f) / 0.25f));
                 if (toastGroup != null) toastGroup.alpha = Mathf.Clamp01(t / 0.35f);
                 if (t < 0) { Destroy(toast.gameObject); toast = null; }
             }
         }
-        private AudioSource audioSource;
-        private AudioClip clickClip;
-        private bool muted;
-        private void PlayTone(float frequency, float duration)
-        {
-            if (!Application.isPlaying || muted || TestMode) return;
-            if (audioSource == null) { audioSource = gameObject.AddComponent<AudioSource>(); audioSource.playOnAwake = false; }
-            if (clickClip == null)
-            {
-                const int count = 8000; var samples = new float[count];
-                for (int i = 0; i < count; i++) samples[i] = Mathf.Sin(i * 440f * 2 * Mathf.PI / 44100) * Mathf.Exp(-i / 1600f) * 0.12f;
-                clickClip = AudioClip.Create("試作の操作音", count, 1, 44100, false); clickClip.SetData(samples, 0);
-            }
-            audioSource.pitch = frequency / 440; audioSource.PlayOneShot(clickClip, duration < .1f ? .4f : .8f);
-        }
-        private void OnDestroy() { if (clickClip != null) Destroy(clickClip); }
         private RectTransform Scroll(Transform parent, float x, float y, float w, float h)
         {
             var root = Box(parent, "ProjectScroll", x, y, w, h, Ink);

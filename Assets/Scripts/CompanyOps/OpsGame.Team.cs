@@ -7,7 +7,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
-        private static readonly Color PlayerColor = Hex("EAC573"), StaffColor = Hex("EFABB8"), EquipmentColor = Hex("A2D9B2");
+        private static readonly Color PlayerColor = Hex("70B4FF"), StaffColor = Hex("43CEC6"), EquipmentColor = Hex("47D7A0");
 
         private string LevelUpNotice(int[] before)
         {
@@ -48,9 +48,9 @@ namespace PatchWorkSecure.CompanyOps
                 float fill = State.StaffLevel(i) == 3 ? 1 : (State.staffExperience[i] - OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i) - 1]) /
                     (float)(OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i)] - OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i) - 1]);
                 if (fill > 0) Box(card, "ExperienceFill", 14, 110, 216 * fill, 5, StaffColor).GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(card, "TeamJob" + i, jobs[i], 14, 124, 216, 43, 14, Muted);
+                Text(card, "TeamJob" + i, jobs[i], 14, 119, 216, 40, 14, Muted);
                 string block = State.PracticeBlock(i);
-                Button(card, "Practice_" + i, block == "" ? "共同練習 / 経験+2" : block, 10, 169, 224, 28, () => PracticeWith(member), Edge, block == "");
+                Button(card, "Practice_" + i, block == "" ? "共同練習 / 経験+2" : block, 10, 163, 224, 34, () => PracticeWith(member), Edge, block == "");
             }
             Text(d, "TeamOrderHeading", string.IsNullOrEmpty(State.supportOrder) ? "今月の支援方針 / 確定は1回・工数不要" :
                 "今月は「" + OpsGrowthCatalog.OrderName(State.supportOrder) + "」 / 来月変更できます", 32, 493, 750, 29, 19, Ink);
@@ -84,7 +84,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var d = Dialog("四半期の山場をクリア", "6・9・12月の完了報酬。次の整備期間に欲しいものを一つ選ぼう。\n翌月は季節負荷が下がります。3月は一年の総力対応です。", 480);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 89);
-            Button(d, "Reward_budget", "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円\n<size=17>導入費・維持費に使える</size>", 32, 223, 364, 93, () => TakeQuarterReward("budget"), Gold);
+            Button(d, "Reward_budget", "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円\n<size=17>導入費・維持費に使える</size>", 32, 223, 364, 93, () => TakeQuarterReward("budget"), Accent);
             Button(d, "Reward_capacity", "翌月の支援枠 +1工数\n<size=17>共同練習や整備をもう一つ</size>", 420, 223, 364, 93, () => TakeQuarterReward("capacity"), Mint);
             Text(d, "QuarterRewardHelp", "どちらも1回限り。支援枠は翌月だけ有効で、繰り越せません。\n選ばず自動進行する場合の既定報酬は改善予算です。", 32, 336, 748, 57, 18, Ink);
         }
@@ -119,7 +119,7 @@ namespace PatchWorkSecure.CompanyOps
             var totalCard = Box(d, "PowerTotalCard", 32, 354, 752, 84, Ink);
             totalCard.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             Text(totalCard, "PowerTotalLabel", "合計抑制力", 18, 14, 275, 30, 23, Paper);
-            var total = Text(totalCard, "PowerTotalValue", p.Total.ToString(), 525, 6, 205, 69, 52, Gold);
+            var total = Text(totalCard, "PowerTotalValue", p.Total.ToString(), 525, 6, 205, 69, 52, Accent);
             Text(totalCard, "PowerTotalHint", record != null && record.benign ? "正常な活動だったため、攻撃の抑制には未使用" : "脅威から差し引く値 / 疲労による負担は別", 18, 49, 505, 26, 16, Muted);
             Text(d, "PowerSupport", p.support + (p.staff == 0 ? "\nこの対応への社員加算は0 / 未習熟・担当外・日常対応のいずれか" : "\n今回の重点配分で社員の助力が有効"), 32, 457, 752, 64, 19, Ink);
             string growth = record == null ? "現在のレベルで計算。解決後の成長は次の仕事から有効です。\n社員の成長・支援の指定は、オフィス上部の「運用チーム」へ。" : GrowthResultText(record);
@@ -147,7 +147,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             var g = r.growth;
             if (g == null) return "この記録には社員・担当者の経験値の内訳がありません。";
-            string result = "あなた 経験 +" + g.playerXp + " / Lv." + g.playerBefore + (g.playerAfter > g.playerBefore ? " → " + g.playerAfter + "  LEVEL UP" : "");
+            string result = g.playerXp == 0 && g.playerAfter == 5 ? "あなた Lv.5 / 習熟MAX" :
+                "あなた 経験 +" + g.playerXp + " / Lv." + g.playerBefore + (g.playerAfter > g.playerBefore ? " → " + g.playerAfter + "  LEVEL UP" : "");
             for (int i = 0; i < 3; i++) if (g.staffXp[i] > 0)
                 result += "\n" + OpsGrowthCatalog.StaffNames[i] + " 経験 +" + g.staffXp[i] + " / Lv." + g.staffBefore[i] + (g.staffAfter[i] > g.staffBefore[i] ? " → " + g.staffAfter[i] + "  LEVEL UP" : "");
             return result;
@@ -169,7 +170,7 @@ namespace PatchWorkSecure.CompanyOps
                 for (int i = 0; i < 3; i++)
                 {
                     sum += additions[i];
-                    label.text = "抑制力 " + sum + "  <color=#EAC573>＋" + additions[i] + " " + sources[i] + "</color>\n<size=15>" + PowerLine(r.power) + "</size>";
+                    label.text = "抑制力 " + sum + "  <color=#70B4FF>＋" + additions[i] + " " + sources[i] + "</color>\n<size=15>" + PowerLine(r.power) + "</size>";
                     yield return new WaitForSecondsRealtime(.25f);
                     if (label == null) yield break;
                 }

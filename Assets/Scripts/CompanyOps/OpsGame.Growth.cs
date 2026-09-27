@@ -52,7 +52,7 @@ namespace PatchWorkSecure.CompanyOps
             string[] stages = { "01 予防", "02 影響限定", "03 復旧の備え" };
             string[] values = r.benign ? new[] { "正常な活動", "広がりなし", "攻撃被害なし" } :
                 new[] { "脅威 -" + r.prevention, "広がり -" + r.containment, "データ被害 -" + r.recovery + "万円" };
-            Color[] colors = { Mint, Coral, Gold };
+            Color[] colors = { Mint, Rose, Accent };
             for (int i = 0; i < 3; i++)
             {
                 var step = Box(d, "EffectStage" + i, 32 + i * 254, 197, 244, 100, Ink);

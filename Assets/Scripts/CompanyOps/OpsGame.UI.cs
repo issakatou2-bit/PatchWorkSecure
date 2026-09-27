@@ -8,8 +8,9 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
-        private static readonly Color Ink = Hex("102D33"), Panel = Hex("173940"), Edge = Hex("36565A"),
-            Paper = Hex("F2EDD9"), Muted = Hex("A7BEB7"), Gold = Hex("EAC573"), Mint = Hex("A2D9B2"), Coral = Hex("EF917B");
+        // 面は無彩色、操作は青。緑と赤は成果・警告に限定し、白へ黄みを混ぜない。
+        private static readonly Color Ink = Hex("12161D"), Panel = Hex("1E2530"), Edge = Hex("354151"),
+            Paper = Hex("F5F7FA"), Muted = Hex("AFBBCB"), Accent = Hex("70B4FF"), Mint = Hex("47D7A0"), Coral = Hex("FF7E88");
         private RectTransform screen, modal, toast;
         private CanvasGroup toastGroup;
         private float toastUntil;
@@ -22,8 +23,9 @@ namespace PatchWorkSecure.CompanyOps
         }
         private RectTransform Box(Transform parent, string name, float x, float y, float w, float h, Color color, bool outline = false)
         {
-            var r = Rect(parent, name, x, y, w, h); var img = r.gameObject.AddComponent<Image>();
-            img.color = color; img.sprite = PanelSprite; img.type = Image.Type.Sliced;
+            var r = Rect(parent, name, x, y, w, h); var img = r.gameObject.AddComponent<UnityEngine.UI.Image>();
+            // 標準スキンの陰影を乗算せず、指定した白・面色をそのまま描画する。
+            img.color = color; img.sprite = null;
             if (outline) { var edge = r.gameObject.AddComponent<Outline>(); edge.effectColor = Edge; edge.effectDistance = new Vector2(1, -1); }
             return r;
         }
@@ -42,9 +44,14 @@ namespace PatchWorkSecure.CompanyOps
             var b = Instantiate(ChoicePrefab, parent); b.name = id;
             var r = b.GetComponent<RectTransform>(); r.anchorMin = r.anchorMax = r.pivot = new Vector2(0, 1);
             r.anchoredPosition = new Vector2(x, -y); r.sizeDelta = new Vector2(w, h);
-            var bg = color ?? Edge; b.GetComponent<Image>().color = bg;
+            var bg = color ?? Edge; var graphic = b.GetComponent<UnityEngine.UI.Image>();
+            graphic.color = bg; graphic.sprite = null;
+            var states = b.colors; states.normalColor = Color.white;
+            states.highlightedColor = new Color(1.12f, 1.12f, 1.12f);
+            states.pressedColor = new Color(.78f, .78f, .78f);
+            states.selectedColor = Color.white; b.colors = states;
             var t = b.GetComponentInChildren<TextMeshProUGUI>(); t.font = Font; t.text = label;
-            t.color = bg == Gold || bg == Mint || bg == Paper || bg == Coral ? Ink : Paper;
+            t.color = bg == Accent || bg == Mint || bg == Paper || bg == Coral ? Ink : Paper;
             t.fontSize = 19; t.enableAutoSizing = true; t.fontSizeMin = 14; t.fontSizeMax = 19;
             t.lineSpacing = -8; t.textWrappingMode = TextWrappingModes.Normal; t.overflowMode = TextOverflowModes.Ellipsis;
             t.alignment = TextAlignmentOptions.MidlineLeft;
@@ -89,7 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform Dialog(string heading, string body, int height = 480)
         {
             if (modal != null) { modal.gameObject.SetActive(false); Destroy(modal.gameObject); }
-            modal = Box(screen, "ModalBlocker", 0, 0, 1600, 900, new Color(0.015f, 0.05f, 0.06f, 0.9f));
+            modal = Box(screen, "ModalBlocker", 0, 0, 1600, 900, new Color(.02f, .025f, .035f, .9f));
             var card = Box(modal, "Dialog", 390, (900 - height) / 2, 820, height, Paper);
             Text(card, "DialogHeading", heading, 32, 28, 740, 64, 31, Ink);
             Text(card, "DialogBody", body, 32, 104, 748, height - 195, 21, Ink);
@@ -139,7 +146,7 @@ namespace PatchWorkSecure.CompanyOps
             layout.childControlWidth = layout.childControlHeight = true; layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
             var fitter = content.gameObject.AddComponent<ContentSizeFitter>(); fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             var rail = Box(root, "ScrollRail", w - 8, 0, 8, h, Edge);
-            var handle = Box(rail, "Handle", 0, 0, 8, 50, Gold);
+            var handle = Box(rail, "Handle", 0, 0, 8, 50, Accent);
             var bar = rail.gameObject.AddComponent<Scrollbar>(); bar.handleRect = handle; bar.targetGraphic = handle.GetComponent<Image>(); bar.direction = Scrollbar.Direction.BottomToTop;
             scroll.viewport = viewport; scroll.content = content; scroll.verticalScrollbar = bar;
             scroll.scrollSensitivity = 32; return content;

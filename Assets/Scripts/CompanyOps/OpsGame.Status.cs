@@ -5,7 +5,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
-        private static readonly Color Sky = Hex("87CEEB"), Rose = Hex("EAB2C8"), Lavender = Hex("C8BBF2");
+        private static readonly Color Sky = Hex("70B4FF"), Rose = Hex("43CEC6"), Lavender = Hex("ABA5FF");
         private static readonly string[] StatNames = { "予算", "工数", "業務の安定", "相談文化", "経営の信頼", "疲労" };
         private int[] statChanges = new int[6];
         private int[] ReadStats() => new[] { State.budget, State.capacity, State.stability, State.culture, State.trust, State.fatigue };
@@ -14,7 +14,7 @@ namespace PatchWorkSecure.CompanyOps
             var after = ReadStats();
             for (int i = 0; i < after.Length; i++) statChanges[i] = after[i] - before[i];
         }
-        private Color StatColor(int index) => new[] { Gold, Sky, Mint, Rose, Lavender, Coral }[index];
+        private Color StatColor(int index) => new[] { Paper, Sky, Mint, Rose, Lavender, Coral }[index];
         private Color GroupColor(string group) => group == "protect" ? Sky : group == "recover" ? Mint : group == "people" ? Rose : Lavender;
         private bool StatWarning(int index) => index == 0 ? State.budget < 6 : index == 2 ? State.stability < 35 : index == 5 && State.fatigue >= 60;
         private string StatHint(int index)
@@ -32,14 +32,14 @@ namespace PatchWorkSecure.CompanyOps
         private void StatusCard(int index, float x)
         {
             var color = StatColor(index); bool warning = StatWarning(index);
-            var button = Button(screen, "Stat_" + index, "", x, 14, 174, 94, () => StatusDetail(index), Color.Lerp(Ink, color, warning ? .22f : .09f));
+            var button = Button(screen, "Stat_" + index, "", x, 14, 174, 94, () => StatusDetail(index), warning ? Color.Lerp(Panel, Coral, .15f) : Panel);
             var card = button.transform;
             var rail = Box(card, "StatCategory", 0, 5, 4, 84, color);
             rail.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             Text(card, StatNames[index] + "Label", StatNames[index], 12, 7, 112, 23, 16, Paper);
             int value = ReadStats()[index];
             string amount = value + (index == 0 ? " <size=17>万円</size>" : index == 1 ? " <size=17>/ " + State.MaxCapacity + "</size>" : " <size=16>/ 100</size>");
-            Text(card, StatNames[index] + "Value", amount, 12, 29, 152, 35, 29, warning ? Coral : color);
+            Text(card, StatNames[index] + "Value", amount, 12, 29, 152, 35, 29, warning ? Coral : Paper);
             if (statChanges[index] != 0)
             {
                 int delta = statChanges[index]; bool good = index == 5 ? delta < 0 : delta > 0;
@@ -81,7 +81,7 @@ namespace PatchWorkSecure.CompanyOps
                 string action = index == 5 ? "rest" : index == 3 ? "listen" : "";
                 Button(d, "StatDetailAction", action == "rest" ? "休息する / 1工数" : action == "listen" ? "社員と話す / 1工数" : "改善計画を確認する",
                     32, 480, 544, 48, () => { if (action != "") ChooseAction(action); else { filter = "all"; tab = 1; Render(); } },
-                    Gold, action == "" || State.ActionBlock(action) == "");
+                    Accent, action == "" || State.ActionBlock(action) == "");
             }
         }
     }

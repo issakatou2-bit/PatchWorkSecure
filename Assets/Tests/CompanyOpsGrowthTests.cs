@@ -128,6 +128,13 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
+            // 白い会話面と無彩色の画面地を確認。標準スキンの色乗算も戻さない。
+            var speechSurface = Find<UnityEngine.UI.Image>("Navigator");
+            Assert.Greater(speechSurface.color.b, speechSurface.color.r);
+            Assert.Greater(speechSurface.color.r, .95f);
+            Assert.IsNull(speechSurface.sprite);
+            var backdrop = Find<UnityEngine.UI.Image>("OpsScreen").color;
+            Assert.Less(Mathf.Abs(backdrop.r - backdrop.g), .03f);
             CheckPointer("OpenTeam"); Click("OpenTeam"); yield return null;
             Capture("24-team-new"); CheckTeamText();
             Assert.IsFalse(Find<Button>("Support_routine").interactable);
@@ -193,7 +200,9 @@ namespace PatchWorkSecure.Tests
             foreach (var t in Object.FindObjectsByType<TextMeshProUGUI>())
             {
                 t.ForceMeshUpdate();
-                if (t.name.StartsWith("Team") || t.name.StartsWith("Power") || t.name.StartsWith("Player") || t.name == "DialogBody" || t.name == "QuarterRewardHelp")
+                string parent = t.transform.parent == null ? "" : t.transform.parent.name;
+                if (t.name.StartsWith("Team") || t.name.StartsWith("Power") || t.name.StartsWith("Player") || t.name.StartsWith("Response") ||
+                    parent.StartsWith("Practice_") || parent.StartsWith("Support_") || t.name == "DialogBody" || t.name == "QuarterRewardHelp")
                     Assert.IsFalse(t.isTextOverflowing, t.name + " / " + t.text);
             }
         }

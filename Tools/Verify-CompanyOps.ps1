@@ -12,3 +12,7 @@ if ($LASTEXITCODE -ne 0) { throw '年間検証に失敗' }
 if ($LASTEXITCODE -ne 0) { throw '仮想試遊のコンパイルに失敗' }
 & "$opsMono/bin/mono.exe" Artifacts/CompanyOps/Playtest.exe
 if ($LASTEXITCODE -ne 0) { throw '仮想試遊に失敗' }
+& "$opsMono/bin/mono.exe" "$opsMono/lib/mono/4.5/csc.exe" -nologo -out:Artifacts/CompanyOps/GrowthChecks.exe Assets/Scripts/CompanyOps/OpsCatalog.cs Assets/Scripts/CompanyOps/OpsState.cs Assets/Scripts/CompanyOps/OpsState.Growth.cs Tools/CompanyOpsGrowthChecks.cs
+if ($LASTEXITCODE -ne 0) { throw '育成検証のコンパイルに失敗' }
+& "$opsMono/bin/mono.exe" Artifacts/CompanyOps/GrowthChecks.exe
+if ($LASTEXITCODE -ne 0) { throw '育成と年間負荷の検証に失敗' }

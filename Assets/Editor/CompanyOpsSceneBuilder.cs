@@ -22,7 +22,7 @@ namespace PatchWorkSecure.EditorTools
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var camera = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
-            camera.tag = "MainCamera"; camera.GetComponent<Camera>().backgroundColor = new Color(.04f, .12f, .14f);
+            camera.tag = "MainCamera"; camera.GetComponent<Camera>().backgroundColor = new Color(.071f, .086f, .114f);
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             var canvasObject = new GameObject("CompanyOpsCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;

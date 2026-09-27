@@ -88,7 +88,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             bool warning = cue == OpsCue.Alert || cue == OpsCue.Damage || cue == OpsCue.Failure;
             bool celebration = cue == OpsCue.Growth || cue == OpsCue.Clear;
-            Color color = warning ? Coral : celebration ? Gold : Mint;
+            Color color = warning ? Coral : celebration ? Accent : Mint;
             var fx = Rect(screen, "ResultEffects", 0, 0, 1600, 900);
             var group = fx.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false; group.interactable = false;
             var stripe = Box(fx, "ResultAccent", 980, 121, 594, 5, color);
@@ -107,7 +107,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 for (int i = 0; i < 12; i++)
                 {
-                    var spark = Box(fx, "AchievementSpark" + i, 616, 492, 5, 9, i % 2 == 0 ? Gold : Mint);
+                    var spark = Box(fx, "AchievementSpark" + i, 616, 492, 5, 9, i % 2 == 0 ? Accent : Mint);
                     spark.GetComponent<UnityEngine.UI.Image>().raycastTarget = false; sparks.Add(spark);
                 }
             }

@@ -17,7 +17,7 @@ namespace PatchWorkSecure.CompanyOps
             button = GetComponent<UnityEngine.UI.Button>();
             focus = gameObject.AddComponent<UnityEngine.UI.Outline>();
             focus.effectDistance = new Vector2(2, -2); focus.useGraphicAlpha = false;
-            focus.effectColor = new Color(.92f, .77f, .45f, .7f); focus.enabled = false;
+            focus.effectColor = new Color(.44f, .71f, 1f, .85f); focus.enabled = false;
         }
         private bool Available => button != null && button.IsInteractable();
         private void Update()

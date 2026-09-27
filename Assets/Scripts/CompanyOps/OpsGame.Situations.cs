@@ -40,10 +40,10 @@ namespace PatchWorkSecure.CompanyOps
             {
                 string block = State.ActionBlock("prepare");
                 Button(d, "PrepareSituation", block == "" ? s.action + " / 1工数" : block, 32, 540, 544, 48,
-                    () => ChooseAction("prepare"), Gold, block == "");
+                    () => ChooseAction("prepare"), Accent, block == "");
             }
             else if (!string.IsNullOrEmpty(s.group))
-                Button(d, "SituationProjects", "対象の改善計画を見る", 32, 540, 544, 48, () => { filter = s.group; tab = 1; Render(); }, Gold);
+                Button(d, "SituationProjects", "対象の改善計画を見る", 32, 540, 544, 48, () => { filter = s.group; tab = 1; Render(); }, Accent);
         }
         private static string OutcomeSituation(OpsOutcome r)
         {

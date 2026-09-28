@@ -66,10 +66,10 @@ namespace PatchWorkSecure.CompanyOps
             var mark=PButton(map,"IncidentLocation","!",270,150,64,64,IncidentEvidence,IncidentRed,Color.white,28);
             mark.GetComponent<Image>().sprite=PlanningArt.markerBubble;Border(mark,Color.white,4);
             mark.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=38;Motion((RectTransform)mark.transform,"pop",1.6f);
-            var symptom=PCard(map,"IncidentSymptomCard",110,420,380,83,new Color(.11f,.16f,.27f,.9f),16,false);
+            var symptom=PCard(map,"IncidentSymptomCard",110,320,380,105,new Color(.11f,.16f,.27f,.9f),16,false);
             PText(symptom,"LocationName",desks?"社員の席・情報の扱い":reception?"受付・社外とのやりとり":meeting?"会議室・情報の確認":"サーバー室・システム",16,8,348,25,15,Hex("ff9fb5"));
-            PText(symptom,"IncidentSymptom",State.Current.symptom,16,33,348,26,15,Color.white,false);
-            PText(symptom,"UnknownScope","影響範囲は未確認",16,59,348,20,13,Color.white,false);
+            PText(symptom,"IncidentSymptom",State.Current.symptom,16,33,348,44,15,Color.white,false);
+            PText(symptom,"UnknownScope","影響範囲は未確認",16,80,348,20,13,Color.white,false);
             var portrait=Rect(map,"IncidentHinata",10,440,266,330);Portrait(portrait,"NavigatorPortrait",0,0,266,330,"pose_startled");
             var navigator=PCard(map,"Navigator",250,560,320,126,Color.white,20,false);
             PImage(navigator,"SpeechTail",PlanningArt.tail,-20,20,26,36);

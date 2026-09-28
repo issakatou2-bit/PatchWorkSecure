@@ -35,3 +35,10 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 `ArtSource/SfxCandidates/`の22音と連続試聴2本は、`Tools/Generate-Sfx-Candidates.py`によるプロジェクト用の独自プロシージャル生成。倍音・ノイズ・短い残響から作り、第三者の録音・サンプル・音楽素材・学習モデルは使用していない。AIサービスで生成した音とは扱わない。
 
 新たな第三者素材ライセンスや追加クレジットはない。採用は加藤さんの試聴・承認後。詳細と場面対応は`Docs/Sfx-Candidates-2026-09-29.md`。現段階では`Assets/`、`YearSounds.asset`、実行時の効果音に登録していない。
+
+## 2026-09-29 ひなたの新デザイン（生成・未投入）
+
+- 生成：ChatGPT（加藤さんのログイン済みアカウント、アプリ内ブラウザからClaude Codeが操作）。指示文の原型は`Docs/Hinata-Sheet-Prompts.md`。
+- 経緯：8頭身の設定画 → 2〜5頭身の比較 → デフォルメ強め（色付き・線画）→ **加藤さんが3頭身の線画を選択** → 色鉛筆塗り → アニメ塗り → **太い輪郭線のアニメ塗りに決定**。表情18種・ポーズ18種を3×2のシートで生成。
+- 原画：`ArtSource/Hinata/gen-20260929/hinata-*.png`（ChatGPTの生成物をそのまま保存）。切り抜き：同`cut/`（`Tools/Cut-CharacterSheet.py`で外周の白だけを透過）。一覧：同`contact-sheet.png`。
+- 指の本数は「5本」と指定したが、原寸での全数確認は未実施。**ゲームへの投入・採用は加藤さんの確認後**。販売物への利用可否は生成サービスの規約を確認すること。

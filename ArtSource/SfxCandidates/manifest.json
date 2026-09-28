@@ -1,0 +1,227 @@
+{
+  "generator": "独自プロシージャル生成。AIサービス・第三者サンプルは使用していない。",
+  "approval": "未承認・ゲーム未投入",
+  "sample_rate": 48000,
+  "entries": [
+    {
+      "set": "A-soft",
+      "number": 1,
+      "scene": "通常ボタン",
+      "file": "A-soft/01-click.wav",
+      "start": 0,
+      "seconds": 0.15,
+      "peak": 0.12,
+      "rms": 0.023
+    },
+    {
+      "set": "A-soft",
+      "number": 2,
+      "scene": "決定",
+      "file": "A-soft/02-confirm.wav",
+      "start": 0.8,
+      "seconds": 0.65,
+      "peak": 0.22,
+      "rms": 0.034
+    },
+    {
+      "set": "A-soft",
+      "number": 3,
+      "scene": "設備導入",
+      "file": "A-soft/03-purchase.wav",
+      "start": 2.1,
+      "seconds": 1.05,
+      "peak": 0.23,
+      "rms": 0.032
+    },
+    {
+      "set": "A-soft",
+      "number": 4,
+      "scene": "ランクアップ",
+      "file": "A-soft/04-growth.wav",
+      "start": 3.8,
+      "seconds": 1.25,
+      "peak": 0.25,
+      "rms": 0.0463
+    },
+    {
+      "set": "A-soft",
+      "number": 5,
+      "scene": "数え上げ",
+      "file": "A-soft/05-count.wav",
+      "start": 5.7,
+      "seconds": 1.3,
+      "peak": 0.14,
+      "rms": 0.0145
+    },
+    {
+      "set": "A-soft",
+      "number": 6,
+      "scene": "事件発生",
+      "file": "A-soft/06-alert.wav",
+      "start": 7.65,
+      "seconds": 0.85,
+      "peak": 0.27,
+      "rms": 0.064
+    },
+    {
+      "set": "A-soft",
+      "number": 7,
+      "scene": "備え発動",
+      "file": "A-soft/07-shield.wav",
+      "start": 9.15,
+      "seconds": 1.15,
+      "peak": 0.34,
+      "rms": 0.0386
+    },
+    {
+      "set": "A-soft",
+      "number": 8,
+      "scene": "被害確定",
+      "file": "A-soft/08-damage.wav",
+      "start": 10.95,
+      "seconds": 0.55,
+      "peak": 0.24,
+      "rms": 0.0403
+    },
+    {
+      "set": "A-soft",
+      "number": 9,
+      "scene": "判子",
+      "file": "A-soft/09-stamp.wav",
+      "start": 12.15,
+      "seconds": 0.48,
+      "peak": 0.31,
+      "rms": 0.04
+    },
+    {
+      "set": "A-soft",
+      "number": 10,
+      "scene": "年度クリア",
+      "file": "A-soft/10-clear.wav",
+      "start": 13.28,
+      "seconds": 3.6,
+      "peak": 0.32,
+      "rms": 0.0469
+    },
+    {
+      "set": "A-soft",
+      "number": 11,
+      "scene": "画面遷移",
+      "file": "A-soft/11-transition.wav",
+      "start": 17.53,
+      "seconds": 0.4,
+      "peak": 0.16,
+      "rms": 0.0232
+    },
+    {
+      "set": "B-bright",
+      "number": 1,
+      "scene": "通常ボタン",
+      "file": "B-bright/01-click.wav",
+      "start": 0,
+      "seconds": 0.15,
+      "peak": 0.12,
+      "rms": 0.023
+    },
+    {
+      "set": "B-bright",
+      "number": 2,
+      "scene": "決定",
+      "file": "B-bright/02-confirm.wav",
+      "start": 0.8,
+      "seconds": 0.65,
+      "peak": 0.22,
+      "rms": 0.0355
+    },
+    {
+      "set": "B-bright",
+      "number": 3,
+      "scene": "設備導入",
+      "file": "B-bright/03-purchase.wav",
+      "start": 2.1,
+      "seconds": 1.05,
+      "peak": 0.23,
+      "rms": 0.0355
+    },
+    {
+      "set": "B-bright",
+      "number": 4,
+      "scene": "ランクアップ",
+      "file": "B-bright/04-growth.wav",
+      "start": 3.8,
+      "seconds": 1.25,
+      "peak": 0.25,
+      "rms": 0.0424
+    },
+    {
+      "set": "B-bright",
+      "number": 5,
+      "scene": "数え上げ",
+      "file": "B-bright/05-count.wav",
+      "start": 5.7,
+      "seconds": 1.3,
+      "peak": 0.14,
+      "rms": 0.0147
+    },
+    {
+      "set": "B-bright",
+      "number": 6,
+      "scene": "事件発生",
+      "file": "B-bright/06-alert.wav",
+      "start": 7.65,
+      "seconds": 0.85,
+      "peak": 0.27,
+      "rms": 0.064
+    },
+    {
+      "set": "B-bright",
+      "number": 7,
+      "scene": "備え発動",
+      "file": "B-bright/07-shield.wav",
+      "start": 9.15,
+      "seconds": 1.15,
+      "peak": 0.34,
+      "rms": 0.0404
+    },
+    {
+      "set": "B-bright",
+      "number": 8,
+      "scene": "被害確定",
+      "file": "B-bright/08-damage.wav",
+      "start": 10.95,
+      "seconds": 0.55,
+      "peak": 0.24,
+      "rms": 0.0403
+    },
+    {
+      "set": "B-bright",
+      "number": 9,
+      "scene": "判子",
+      "file": "B-bright/09-stamp.wav",
+      "start": 12.15,
+      "seconds": 0.48,
+      "peak": 0.31,
+      "rms": 0.04
+    },
+    {
+      "set": "B-bright",
+      "number": 10,
+      "scene": "年度クリア",
+      "file": "B-bright/10-clear.wav",
+      "start": 13.28,
+      "seconds": 3.6,
+      "peak": 0.32,
+      "rms": 0.0453
+    },
+    {
+      "set": "B-bright",
+      "number": 11,
+      "scene": "画面遷移",
+      "file": "B-bright/11-transition.wav",
+      "start": 17.53,
+      "seconds": 0.4,
+      "peak": 0.16,
+      "rms": 0.0232
+    }
+  ]
+}

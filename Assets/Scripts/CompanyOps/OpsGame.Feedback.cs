@@ -105,7 +105,7 @@ namespace PatchWorkSecure.CompanyOps
             var group = fx.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false; group.interactable = false;
             bool incident = State != null && State.phase == OpsPhase.Incident;
             bool planning = State != null && State.phase == OpsPhase.Planning;
-            var stripe = Box(fx, "ResultAccent", planning ? 600 : incident ? 656 : 980, planning ? 669 : 121, planning ? 420 : incident ? 918 : 594, 5, color);
+            var stripe = Box(fx, "ResultAccent", planning ? 600 : incident ? 656 : 980, planning ? 709 : 121, planning ? 420 : incident ? 918 : 594, 5, color);
             stripe.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             var panel = screen.Find("DecisionPanel") as RectTransform;
             Vector2 origin = panel == null ? Vector2.zero : panel.anchoredPosition;

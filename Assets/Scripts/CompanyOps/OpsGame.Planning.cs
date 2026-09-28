@@ -137,7 +137,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
             PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
             var work=PButton(screen,"Stat_1","",workX,24,workWidth,64,()=>StatusDetail(1),new Color(1,1,1,.92f),PlanInk,20);
-            PText(work.transform,"CapacityTitle","工数",20,0,38,64,14,PlanGray);
+            // 工数はコマで示し、押したときの詳細で残数・回復量を確認する。
             for(int j=0;j<slots;j++)
             {
                 var token=PCard(work.transform,"WorkToken"+j,64+j*30,15,22,34,j<State.capacity?PlanBlue:PlanTrack,12,false);
@@ -189,7 +189,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(card,"ConsultationHeading","今月の相談",20,0,190,38,15,Color.white);
             var caller=PCard(card,"CallerBadge",20,66,50,50,PlanInk,28,false);
             string person=State.Current.person.Split('・')[0].Trim(); PText(caller,"CallerRole",person,2,0,46,50,17,Hex("ffd23f"),true,true);
-            PText(card,"CaseTitle",State.Current.title,82,58,206,68,24);
+            PText(card,"CaseTitle",State.Current.title.Replace("、","、\n"),82,58,206,68,24);
             string category=State.CurrentProfile==null?"今月の相談":State.CurrentProfile.category;
             var chip=PCard(card,"CategoryChip",20,142,114,25,Hex("ffe3ec"),12,false);
             PText(chip,"CategoryText",category,5,0,104,25,13,Hex("c23a60"),true,true);
@@ -218,10 +218,10 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void PlanningNavigator()
         {
-            var character=Rect(screen,"PlanningCharacter",230,450,470,470);Motion(character,"bob",3.2f);
+            var character=Rect(screen,"PlanningCharacter",260,450,470,470);Motion(character,"bob",3.2f);
             PImage(character,"HinataShadow",PlanningArt.hinataShadow,0,10,470,470);
             Portrait(character,"NavigatorPortrait",0,0,470,470);
-            var speech=PCard(screen,"Navigator",600,540,420,129.2f,Color.white,24);
+            var speech=PCard(screen,"Navigator",600,580,420,129.2f,Color.white,24);
             PImage(speech,"SpeechTail",PlanningArt.tail,-13,36,14,20);
             var tag=PCard(speech,"NavigatorTag",18,-14,82,28,PlanPink,12,false);
             PText(tag,"NavigatorName",Navigator!=null?Navigator.DisplayName:"ひなた",0,0,82,28,14,Color.white,true,true);

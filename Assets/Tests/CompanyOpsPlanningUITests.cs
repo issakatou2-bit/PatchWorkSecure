@@ -25,8 +25,8 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
             CheckRect("OfficeStage",352,108,900,792);CheckRect("CompanyGrowth",24,108,312,612);
-            CheckRect("ConsultationCard",1268,108,308,237.2f);CheckRect("PlanningCharacter",230,450,470,470,10);
-            CheckRect("Navigator",600,540,420,129.2f);CheckRect("Action_audit",660,740,165.9f,144);
+            CheckRect("ConsultationCard",1268,108,308,237.2f);CheckRect("PlanningCharacter",260,450,470,470,10);
+            CheckRect("Navigator",600,580,420,129.2f);CheckRect("Action_audit",660,740,165.9f,144);
             CheckRect("AdvanceMonth",1268,660,308,60);
             Assert.AreEqual(game.State.budget.ToString(),Find<TextMeshProUGUI>("予算Value").text);
             int[] values={game.State.stability,game.State.Organization,game.State.trust,game.State.culture,game.State.Preparedness,game.State.Resilience};
@@ -34,6 +34,9 @@ namespace PatchWorkSecure.Tests
             for(int i=0;i<6;i++) Assert.AreEqual(values[i].ToString(),Find<TextMeshProUGUI>(labels[i]+"Value").text);
             Assert.AreEqual("総合 "+OpsGame.PlanningRank(values.Sum()/6),Find<TextMeshProUGUI>("CompanyRank").text);
             Assert.AreEqual("達成で 信頼+3",Find<TextMeshProUGUI>("RewardText").text);
+            Assert.IsNull(Find<Button>("Stat_1").transform.Find("CapacityTitle"),"工数コマの小ラベルは表示しない");
+            Assert.AreEqual(game.State.capacity,Object.FindObjectsByType<Image>().Count(i=>i.name.StartsWith("WorkToken")&&i.color==new Color(63/255f,169/255f,245/255f)));
+            Assert.AreEqual(game.State.Current.title.Replace("、","、\n"),Find<TextMeshProUGUI>("CaseTitle").text);
             foreach(string marker in new[]{"OfficeConsultation","OfficeTicket"})
             {
                 var label=Find<Button>(marker).GetComponentInChildren<TextMeshProUGUI>();label.ForceMeshUpdate();
@@ -64,6 +67,24 @@ namespace PatchWorkSecure.Tests
             yield return new WaitForSecondsRealtime(.35f);
             for(int i=0;i<motions.Length;i++)
             {Assert.AreEqual(positions[i],((RectTransform)motions[i].transform).anchoredPosition);Assert.AreEqual(Vector3.one,motions[i].transform.localScale);}
+            Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
+        }
+        [UnityTest] public IEnumerator 相談見出しの改行と工数コマを一年分確認する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
+            var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
+            for(int month=0;month<12;month++)
+            {
+                game.State.month=month;game.OpenTab(0);yield return null;
+                var title=Find<TextMeshProUGUI>("CaseTitle");title.ForceMeshUpdate();
+                Assert.AreEqual(game.State.Current.title.Replace("、","、\n"),title.text);
+                Assert.IsFalse(title.isTextOverflowing,game.State.Current.name+" / "+title.text);
+                Assert.IsNull(Find<Button>("Stat_1").transform.Find("CapacityTitle"));
+            }
+            game.State.month=0;game.State.capacity=8;game.OpenTab(0);yield return null;
+            Assert.AreEqual(8,Find<Button>("Stat_1").GetComponentsInChildren<Image>().Count(i=>i.name.StartsWith("WorkToken")));
+            foreach(string id in new[]{"Stat_0","Stat_1","Menu","Action_audit","AdvanceMonth"})CheckPointer(id);
+            CheckText();Capture("49-planning-finish-max-work",1600,900);
             Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
         }
         private static void CheckRect(string name,float x,float y,float w,float h,float tolerance=.1f)

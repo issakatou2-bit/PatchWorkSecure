@@ -143,7 +143,7 @@ namespace PatchWorkSecure.CompanyOps
             homeVisible = false;
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
                 State.phase == OpsPhase.Incident || ResolutionActive ? Sounds.incidentMusic : Sounds.reviewMusic);
-            NewScreen();
+            NewScreen();CheckDangerSignal();
             if (State.phase == OpsPhase.Planning) { PlanningScreen(); return; }
             if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
             if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }

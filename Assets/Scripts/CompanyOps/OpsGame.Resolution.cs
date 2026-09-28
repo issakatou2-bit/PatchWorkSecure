@@ -70,6 +70,7 @@ namespace PatchWorkSecure.CompanyOps
             PCard(resources,"StabilityResourceTrack",770,12,230,7,new Color(1,1,1,.2f),12,false);
             LossTrail(resources,"ResolutionStabilityLossTrail",770,12,230,7,State.stability-statChanges[2],State.stability,100);
             PCard(resources,"StabilityResourceFill",770,12,230*State.stability/100f,7,PlanMint,12,false);
+            DangerGauge(resources,"ResolutionDanger",770,12,230*State.stability/100f,7);
             var result=PCard(screen,"ResolutionResults",560,610,1016,180,new Color(1,1,1,.96f),24,false);
             var lossNeedle=ResolutionMeter(result,"Loss","被害",r.loss,Math.Max(r.loss,resolutionEstimate.lossMax),22,Hex("ff9f43"),"万円");
             var stopNeedle=ResolutionMeter(result,"Stop","業務停止",r.downtime,Math.Max(r.downtime,resolutionEstimate.stopMax),76,PlanPink,"時間");

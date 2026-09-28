@@ -181,6 +181,7 @@ namespace PatchWorkSecure.CompanyOps
                 PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
                 if(j==0)LossTrail(row.transform,"StabilityLossTrail",62,37,150,6,State.stability-statChanges[2],State.stability,100);
                 if(values[j]>0) PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
+                if(j==0)DangerGauge(row.transform,"StabilityDanger",62,37,150*values[j]/100f,6);
                 PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
             }
             rankBefore=rankAfter=null;

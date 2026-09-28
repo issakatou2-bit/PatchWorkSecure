@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
+using System.Collections;
 
 namespace PatchWorkSecure.CompanyOps
 {
@@ -10,6 +11,34 @@ namespace PatchWorkSecure.CompanyOps
         private bool budgetGainPending;
         private int[] rankBefore,rankAfter;
         private bool workCompletePending;private int workCompleteMonth=-1;
+        private int lastDanger=100;private OpsState dangerState;private AudioSource dangerAudio;
+        public int DangerPulseCount {get;private set;}
+        private void CheckDangerSignal()
+        {
+            if(!Application.isPlaying)return;
+            if(dangerState!=State){dangerState=State;lastDanger=100;DangerPulseCount=0;}
+            if(State.stability>=35){lastDanger=100;return;}
+            if(State.stability>=lastDanger)return;
+            lastDanger=State.stability;DangerPulseCount++;StartCoroutine(QuietHeartbeat());
+        }
+        private IEnumerator QuietHeartbeat()
+        {
+            // 登録済みB案の低いダメージ音を小音量・短い二打で使う。新しい音源を登録しない。
+            if(muted||soundVolume<=0||Sounds==null||Sounds.damage==null)yield break;
+            if(dangerAudio==null)dangerAudio=NewAudioSource();
+            for(int i=0;i<2;i++)
+            {
+                dangerAudio.clip=Sounds.damage;dangerAudio.pitch=.65f;dangerAudio.volume=soundVolume*(i==0?.12f:.08f);dangerAudio.Play();
+                yield return new WaitForSecondsRealtime(.09f);dangerAudio.Stop();
+                if(i==0)yield return new WaitForSecondsRealtime(.1f);
+            }
+        }
+        private void DangerGauge(Transform parent,string id,float x,float y,float width,float height)
+        {
+            if(State.stability>=35||width<=0)return;
+            var overlay=PCard(parent,id,x,y,width,height,IncidentRed,12,false);
+            overlay.gameObject.AddComponent<OpsDangerPulse>();
+        }
         private void WorkCompleteEffect()
         {
             if(!Application.isPlaying||!workCompletePending)return;workCompletePending=false;workCompleteMonth=State.month;
@@ -37,6 +66,12 @@ namespace PatchWorkSecure.CompanyOps
                 effect.Coins[i]=coin;
             }
         }
+    }
+    public sealed class OpsDangerPulse : MonoBehaviour
+    {
+        private Image image;private float started;
+        private void Start(){image=GetComponent<Image>();started=Time.realtimeSinceStartup;}
+        private void Update(){image.color=new Color(1,.23f,.36f,.65f+.35f*Mathf.Cos((Time.realtimeSinceStartup-started)*Mathf.PI));}
     }
     public sealed class OpsWorkComplete : MonoBehaviour
     {

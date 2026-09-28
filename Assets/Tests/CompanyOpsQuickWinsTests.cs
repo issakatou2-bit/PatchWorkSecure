@@ -14,6 +14,23 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins4_危険域の最初と悪化だけ心音を鳴らし点滅は動かない()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
+                game.State.stability=35;game.OpenTab(0);Assert.AreEqual(0,game.DangerPulseCount);
+                game.State.stability=34;game.OpenTab(0);yield return null;Assert.AreEqual(1,game.DangerPulseCount);
+                var pulse=Find<Image>("StabilityDanger");var pos=pulse.rectTransform.anchoredPosition;float alpha=pulse.color.a;
+                string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.5f);Assert.AreNotEqual(alpha,pulse.color.a);Assert.AreEqual(pos,pulse.rectTransform.anchoredPosition);Assert.AreEqual(Vector3.one,pulse.transform.localScale);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+                Capture(reduced?"114-quickwins4-reduced":"114-quickwins4-danger");game.OpenTab(0);Assert.AreEqual(1,game.DangerPulseCount);
+                game.State.stability=33;game.OpenTab(0);Assert.AreEqual(2,game.DangerPulseCount);game.State.stability=34;game.OpenTab(0);Assert.AreEqual(2,game.DangerPulseCount);
+                yield return new WaitForSecondsRealtime(.5f);Assert.IsFalse(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.damage&&s.isPlaying));
+                game.State.stability=36;game.OpenTab(0);Assert.IsFalse(Object.FindObjectsByType<OpsDangerPulse>().Any());
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins3_工数を使い切った月だけ一度光り省演出で動かない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

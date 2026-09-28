@@ -9,7 +9,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame : MonoBehaviour
     {
-        public TMP_FontAsset Font;
+        public TMP_FontAsset Font, HeadingFont;
         public Sprite OfficeArt, PanelSprite;
         public NavigatorPersona Navigator;
         public Button ChoicePrefab;

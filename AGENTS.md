@@ -8,7 +8,7 @@ Codexは起動時にこれを自動で読み込むので、毎回コピペし直
 
 ---
 
-## 最新の開発対象（2026-09-27）
+## 最新の開発対象（2026-09-28）
 
 以下の旧版説明に加えて、別シーンの育成・運用シミュレーションを開発中。
 現在の試遊対象は `Assets/Scenes/CompanyYear.unity`、Windows版は `Builds/CompanyYear/PatchWorkSecure-Year.exe`。
@@ -17,10 +17,11 @@ Codexは起動時にこれを自動で読み込むので、毎回コピペし直
 - 実装と検証の現状：`Docs/CompanyYear-Prototype.md`（v0.6）。社員育成・支援方針・季節負荷・四半期報酬の範囲と計測は `Docs/CompanyYear-v0.6-Review.md`。
 - v0.6の成長・季節ルールはニューゲームで有効。担当者Lv.1〜5・社員3人Lv.1〜3、設備＋自分＋社員の加算を表示。45人全員の自律行動や複数事件の同時進行は未実装。
 - 9/27配色改修：黄みのある白・金色の常用・大きなパステル色の面を廃止。チャコール＋白＋青の操作色、成果は緑・危険は赤。旧版の配色とアート原画像は変更していない。
+- 9/28書体・形状改修：新試作の本文はZen Kaku Gothic New Medium、見出し・数値・操作はM PLUS Rounded 1c Bold。既知文字は静的収録＋同梱書体の動的補完。標準Knobのテクスチャを共有した9-sliceで窓・カード・ボタンを角丸化。参考調査・ライセンス・生成方法は `Docs/CompanyYear-Typography-2026-09.md`。旧版のmeiryo設定は維持。
 - 専門観点のAI評価・仮想プレイ・最新更新の追加調査：`Docs/Playtest-Review-2026-09-26.md`（末尾に9/27の再計測を追記）。実在の専門家・人間の初見プレイとは区別する。
 - ゲーム体験・UI・音の調査と次の設計仮説：`Docs/Game-Experience-Research-2026-09.md`。
 - 本体：`Assets/Scripts/CompanyOps/`。純粋C#の状態と表示を分離。シーン生成は `CompanyOpsSceneBuilder`。
-- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（46件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
+- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（47件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
 - UI・効果音と4種の月次事情を追加済み。BGMは素材枠のみ、楽曲未投入。ひなたは暫定素材で手描き完成原画ではない。
 - v0.5は復元/再開連携、成長目標からの導入、3方針の購入前比較、設備別の効果表示を追加。追加予算未達時の返却と休暇の休息統合も実装。適用対象と連携値はOpsCatalog。過去の結果を書き換えず、旧記録の未保存項目は未記録と表示。
 - 自動完走と「面白い」は別。今後は設備・運用・社員の連携、会社の成長の可視化、状況で迷う選択を優先する。新しい設計案は実装済みと扱わない。
@@ -210,8 +211,8 @@ Playした瞬間に出るNullReferenceの類はここで捕まるので、UIや�
   -logFile "C:\Projects\PatchWorkSecure\batch_log.txt"
 ```
 
-`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-27時点で**46件**：
-新試作37件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
+`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-28時点で**47件**：
+新試作38件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
 **`-nographics`を付けずに**実行すること。
 テストを足すときの注意：テスト用asmdefの`includePlatforms`は**空**にすること
 （`["Editor"]`にするとPlayModeテストの対象外になり、1件も実行されないまま成功扱いになる）。
@@ -276,7 +277,7 @@ Unity同梱のMonoでC#を直接コンパイルして動かす。**攻撃・防�
 
 ### 検証の状態
 
-- PlayModeテスト 46件中46件成功、コンパイルのエラー・警告0件、日本語グリフ欠け警告0件（9/27にバッチ実行で確認）
+- PlayModeテスト47件中47件成功（9/28）。新書体の日本語・角丸・クリック・1280×720/1600×900の表示を追加確認。更新したWindows版の12か月通し検証も成功。文字欠け警告・ゲーム例外なし。ビルドの既存ライセンス検証警告と、終了時のComputeBuffer解放警告は残る。
 - `Tools/Verify-*.ps1` 3本とも成功（9/27）
 
 ## 5. 次にやってほしいこと（優先順位順）

@@ -33,12 +33,11 @@ namespace PatchWorkSecure.EditorTools
             surface.pivot = new Vector2(.5f, .5f); surface.sizeDelta = new Vector2(1600, 900);
             var controller = new GameObject("CompanyOpsGame").AddComponent<OpsGame>();
             controller.Surface = surface;
-            controller.Font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/meiryo SDF.asset");
-            if (controller.Font == null || controller.Font.sourceFontFile == null) throw new System.InvalidOperationException("日本語フォントが未設定です。");
+            CompanyOpsTypography.Configure(controller);
             controller.OfficeArt = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Office/office-topdown.png");
             controller.Navigator = AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
-            controller.PanelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
-            if (controller.PanelSprite == null) controller.PanelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            controller.PanelSprite = RoundedPanel();
+            if (controller.PanelSprite == null) throw new System.InvalidOperationException("角丸UIスプライトがありません。");
             Directory.CreateDirectory("Assets/CompanyOps");
             controller.Sounds = AssetDatabase.LoadAssetAtPath<OpsSoundPalette>("Assets/CompanyOps/YearSounds.asset");
             if (controller.Sounds == null)
@@ -49,7 +48,7 @@ namespace PatchWorkSecure.EditorTools
             var prefab = new GameObject("OpsChoice", typeof(RectTransform), typeof(Image), typeof(Button));
             prefab.GetComponent<Image>().sprite = controller.PanelSprite; prefab.GetComponent<Image>().type = Image.Type.Sliced;
             var button = prefab.GetComponent<Button>(); button.targetGraphic = prefab.GetComponent<Image>();
-            var colors = button.colors; colors.highlightedColor = new Color(1.15f, 1.15f, 1.1f); colors.pressedColor = new Color(.7f, .85f, .75f);
+            var colors = button.colors; colors.highlightedColor = new Color(1.12f, 1.12f, 1.12f); colors.pressedColor = new Color(.78f, .78f, .78f);
             colors.disabledColor = new Color(.55f, .55f, .55f); button.colors = colors;
             var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)); label.transform.SetParent(prefab.transform, false);
             label.GetComponent<TextMeshProUGUI>().font = controller.Font; label.GetComponent<TextMeshProUGUI>().raycastTarget = false;
@@ -81,8 +80,25 @@ namespace PatchWorkSecure.EditorTools
             });
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
                 throw new System.InvalidOperationException("試遊版のビルドに失敗: " + report.summary.result);
+            CompanyOpsTypography.CopyLicenses("Builds/CompanyYear");
             Debug.Log("[CompanyOps] Windows試遊版のビルド成功");
         }
         public static void BuildRelease() { BuildScene(); BuildPlayer(); }
+
+        private static Sprite RoundedPanel()
+        {
+            const string path = "Assets/CompanyOps/RoundedPanel.asset";
+            var panel = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (panel != null) return panel;
+            // 標準の円のテクスチャを共有する。画像生成や元のインポーターの編集は行わない。
+            var circle = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+            if (circle == null) throw new System.InvalidOperationException("標準の円形UI素材がありません。");
+            var rect = circle.rect;
+            var border = new Vector4(rect.width / 2 - 1, rect.height / 2 - 1, rect.width / 2 - 1, rect.height / 2 - 1);
+            panel = Sprite.Create(circle.texture, rect, new Vector2(.5f, .5f), circle.pixelsPerUnit, 0, SpriteMeshType.FullRect, border);
+            panel.name = "CompanyYearRoundedPanel";
+            AssetDatabase.CreateAsset(panel, path);
+            return panel;
+        }
     }
 }

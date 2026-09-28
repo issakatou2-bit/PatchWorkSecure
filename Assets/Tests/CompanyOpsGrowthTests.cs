@@ -128,11 +128,12 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
-            // 白い会話面と無彩色の画面地を確認。標準スキンの色乗算も戻さない。
+            // 白い会話面と無彩色の画面地を確認。角丸は新しい標準9-sliceを使う。
             var speechSurface = Find<UnityEngine.UI.Image>("Navigator");
             Assert.Greater(speechSurface.color.b, speechSurface.color.r);
             Assert.Greater(speechSurface.color.r, .95f);
-            Assert.IsNull(speechSurface.sprite);
+            Assert.IsNotNull(speechSurface.sprite);
+            Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, speechSurface.type);
             var backdrop = Find<UnityEngine.UI.Image>("OpsScreen").color;
             Assert.Less(Mathf.Abs(backdrop.r - backdrop.g), .03f);
             CheckPointer("OpenTeam"); Click("OpenTeam"); yield return null;

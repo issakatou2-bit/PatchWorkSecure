@@ -24,17 +24,28 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform Box(Transform parent, string name, float x, float y, float w, float h, Color color, bool outline = false)
         {
             var r = Rect(parent, name, x, y, w, h); var img = r.gameObject.AddComponent<UnityEngine.UI.Image>();
-            // 標準スキンの陰影を乗算せず、指定した白・面色をそのまま描画する。
             img.color = color; img.sprite = null;
+            // 背景・ゲージは直線、情報のまとまりは角丸。標準の9-sliceを再利用する。
+            if (w > 35 && h > 24 && name != "OpsScreen" && name != "ModalBlocker" && name != "CrisisTint")
+                RoundSurface(img, name == "Dialog" || name == "Navigator" || name == "HomeGreeting" ? 18 : h > 160 ? 14 : 8);
             if (outline) { var edge = r.gameObject.AddComponent<Outline>(); edge.effectColor = Edge; edge.effectDistance = new Vector2(1, -1); }
+            if (name == "Dialog" || name == "DecisionPanel" || name == "Navigator")
+            {
+                var shadow = r.gameObject.AddComponent<UnityEngine.UI.Shadow>();
+                shadow.effectColor = new Color(0, 0, 0, .22f); shadow.effectDistance = new Vector2(0, -3);
+            }
             return r;
         }
         private TextMeshProUGUI Text(Transform parent, string name, string value, float x, float y, float w, float h, float size = 20, Color? color = null)
         {
             var r = Rect(parent, name, x, y, w, h); var label = r.gameObject.AddComponent<TextMeshProUGUI>();
-            label.font = Font; label.fontSize = size; label.color = color ?? Paper; label.text = value;
+            bool heading = name.EndsWith("Title") || name.EndsWith("Heading") || name.EndsWith("Value") ||
+                name == "Title" || name == "Brand" || name == "Month" || name == "CompanyRank" || name.StartsWith("ResponseName_") ||
+                name.StartsWith("PowerStepValue") || name.StartsWith("TeamLevel") || name == "PlayerLevel";
+            label.font = heading && HeadingFont != null ? HeadingFont : Font;
+            label.fontSize = size; label.color = color ?? Paper; label.text = value;
             label.enableAutoSizing = true; label.fontSizeMin = size * .8f; label.fontSizeMax = size;
-            label.lineSpacing = -8;
+            label.lineSpacing = 0;
             label.textWrappingMode = TextWrappingModes.Normal; label.overflowMode = TextOverflowModes.Ellipsis;
             label.raycastTarget = false; return label;
         }
@@ -45,21 +56,26 @@ namespace PatchWorkSecure.CompanyOps
             var r = b.GetComponent<RectTransform>(); r.anchorMin = r.anchorMax = r.pivot = new Vector2(0, 1);
             r.anchoredPosition = new Vector2(x, -y); r.sizeDelta = new Vector2(w, h);
             var bg = color ?? Edge; var graphic = b.GetComponent<UnityEngine.UI.Image>();
-            graphic.color = bg; graphic.sprite = null;
+            graphic.color = bg; RoundSurface(graphic, h >= 80 ? 12 : 8);
             var states = b.colors; states.normalColor = Color.white;
             states.highlightedColor = new Color(1.12f, 1.12f, 1.12f);
             states.pressedColor = new Color(.78f, .78f, .78f);
             states.selectedColor = Color.white; b.colors = states;
-            var t = b.GetComponentInChildren<TextMeshProUGUI>(); t.font = Font; t.text = label;
+            var t = b.GetComponentInChildren<TextMeshProUGUI>(); t.font = HeadingFont != null ? HeadingFont : Font; t.text = label;
             t.color = bg == Accent || bg == Mint || bg == Paper || bg == Coral ? Ink : Paper;
             t.fontSize = 19; t.enableAutoSizing = true; t.fontSizeMin = 14; t.fontSizeMax = 19;
-            t.lineSpacing = -8; t.textWrappingMode = TextWrappingModes.Normal; t.overflowMode = TextOverflowModes.Ellipsis;
+            t.lineSpacing = 0; t.textWrappingMode = TextWrappingModes.Normal; t.overflowMode = TextOverflowModes.Ellipsis;
             t.alignment = TextAlignmentOptions.MidlineLeft;
             t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one;
             t.rectTransform.offsetMin = new Vector2(16, 6); t.rectTransform.offsetMax = new Vector2(-14, -6);
             b.interactable = enabled;
             b.gameObject.AddComponent<OpsButtonFeedback>().Owner = this;
             b.onClick.AddListener(() => { PlayCue(OpsCue.Click); action(); }); return b;
+        }
+        private void RoundSurface(UnityEngine.UI.Image image, float radius)
+        {
+            image.sprite = PanelSprite; image.type = UnityEngine.UI.Image.Type.Sliced;
+            if (PanelSprite != null) image.pixelsPerUnitMultiplier = Mathf.Max(.01f, PanelSprite.border.x / radius);
         }
         private void Clear(Transform root)
         {

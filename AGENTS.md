@@ -24,25 +24,37 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない（共有は`NavigatorPersona`のみ）。
-- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold（`Docs/CompanyYear-Typography-2026-09.md`）。チャコール＋白＋青の操作色、成果は緑・危険は赤。
+- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold（`Docs/CompanyYear-Typography-2026-09.md`）。現行はチャコール＋白＋青の操作色（参考作品寄せのモックで見直し中）。
 - Windows版：`Builds/CompanyYear/PatchWorkSecure-Year.exe`（gitでは追跡しない）。
 - 旧版は自動で新試作へ置き換えない。9/13の改修以降は機能追加をせず、回帰テストだけを続けている。
 - 旧版の主なファイル：`GameData`(マスターデータ) / `GameState`(純粋C#のルール) / `GameManager`(UIとフェーズ進行) / `AudioManager` / `UIEffects`(フラッシュ・シェイク・バナー・浮遊テキスト等) / `NavigatorPersona` / `EducationTracker`(クイズ・CSV) / `GamePresentation` / `DefenseGlyph` / `DefenseDetailsTrigger`。
 - 旧版の流れ：タイトル →（教育モードのみ事前クイズ）→ [雑務→攻撃判定→選択→パリィ→結果]の繰り返し → エンディング →（事後クイズ）→ まとめ。
 
-## 3. 実装ルール
+## 3. 実装ルール（2026-09-28に見直し）
+
+### デザインの方針
+
+- **参考はウマ娘・シャインポスト。** 新試作は仕組みがウマ娘の育成（月＝ターン、行動＝トレーニング、社員支援＝サポートカード、事件＝レース、年間評価＝育成ランク）と同じなので、**画面の構造と表現**を参考にする。他作品の画像・ロゴ・固有デザインは複製しない。
+- **文字で伝えていることを、絵・動き・音に置き換える。** 数値はランク文字・ゲージ・アイコンで、説明は必要時だけ開く。キャラを箱に閉じ込めず、画面に大きく出す。
+- **見た目の大きな変更は、HTMLモックで加藤さんの承認を得てからUnityへ移す。** モック：計画画面 https://claude.ai/artifact/6BcEHfHb5UM6JrBfLNZwFk （9/28作成、承認待ち）。
+- **UI画像（帯・バッジ・ボタン・ランク文字・アイコン）は作ってよい。** 置き場所は`Assets/Art/UI/`。作り方・出典・ライセンスは`Docs/Reference-Asset-Provenance.md`に記録する。組み込みの`UI/Skin`・`Knob`・`UI.Shadow`も引き続き使える。独自シェーダーは必要なときだけ（URPのUIで動作をスクリーンショットで確認）。
+- **絵文字は使わない**（フォントに無く、文字化けする）。アイコンは図形かUI画像で描く。
+- **予測と確定を見た目で区別し、未確認を侵害確定のように見せない。** 派手に見せるための架空の数値は作らない（教育ゲームとしての誠実さ）。
+
+### 両方のゲームに共通
 
 1. **ロジックとUIを分離する。** バランス調整は`GameData`／`OpsCatalog`の数値だけで完結させる。
-2. **UIは生成スクリプト側を直す。** Inspectorの手作業やOnClickの手動登録はしない。旧版のボタンは3点セットで追加する：①Managerにフィールド ②`WireButtons()`で`AddListener` ③SceneBuilderで生成して`SetRef()`。新しいパネルは`HideAllPanels()`にも追加する。
-3. **生成後は`EditorSceneManager.SaveScene()`で保存する**（忘れて空シーンのまま数セッション進んだことがある）。`ClearGeneratedObjects()`が前回分を消すので、手動削除は不要。
-4. **リストUIはプレハブ＋動的Instantiate**（ルートにButton+Image、子にTextMeshProUGUI）。
-5. **絵文字は使わない**（フォントに無い）。アイコンは図形で描く（`DefenseGlyph`、色付きバーなど）。
-6. **角丸・影はUnityの組み込みで作る**（`UI/Skin/*.psd`、`Knob`の9-slice、`UI.Shadow`）。独自シェーダーや生成テクスチャは避ける。
-7. **キャラは`NavigatorPersona`経由にする。** 表情とセリフはアセット側に持たせ、空欄は共通セリフへフォールバックする（`Pick()`）。追加は`BuildNavigatorPersonas()`に`GetOrCreatePersona(...)`を足す。
-8. **ステータスは「項目名＋数値」を一つの文字列で更新する**（数値だけで上書きしてラベルが消えた不具合があった）。
-9. **LayoutGroupで`childControlWidth/Height=false`なら、子のサイズを自分で設定する**（0サイズで見えなくなる）。trueなら子に`LayoutElement`を付ける。
-10. **画面シェイクはCanvasではなく`ShakeRoot`を動かす**（Overlay Canvasは動かせない）。演出レイヤーは`ShakeRoot`の外に置く。
-11. **UIを変えたら、憶測で「できたはず」と言わない。** テストとスクリーンショットで裏を取る。
+2. **UIはコード・生成スクリプト側を直す。** Inspectorの手作業やOnClickの手動登録はしない。
+3. **ステータスは「項目名＋数値」を一緒に更新する**（数値だけで上書きしてラベルが消えた不具合があった）。
+4. **キャラは`NavigatorPersona`経由にする。** 表情とセリフはアセット側に持たせ、空欄は共通セリフへフォールバック（`Pick()`）。
+5. **UIを変えたら、憶測で「できたはず」と言わない。** テストとスクリーンショットで裏を取る。
+
+### 旧版（SampleScene）固有
+
+- ボタンは3点セット：①`GameManager`にフィールド ②`WireButtons()`で`AddListener` ③`SceneBuilder`で生成して`SetRef()`。新しいパネルは`HideAllPanels()`にも追加する。リストUIはプレハブ＋動的Instantiate。
+- 生成後は`EditorSceneManager.SaveScene()`で保存する（忘れて空シーンのまま数セッション進んだことがある）。
+- LayoutGroupで`childControlWidth/Height=false`なら子のサイズを自分で設定する（0サイズで見えなくなる）。
+- 画面シェイクはCanvasではなく`ShakeRoot`を動かす（Overlay Canvasは動かせない）。
 
 ## 4. 検証
 

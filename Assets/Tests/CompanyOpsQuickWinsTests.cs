@@ -14,6 +14,23 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins1_増収だけにコインが出て省演出では動かない()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
+                game.ChooseAction("audit");game.ChooseAction("proposal");yield return null;var effect=Find<OpsBudgetGain>("BudgetGainEffect");Assert.IsNotNull(effect);
+                var first=effect.Coins[0].anchoredPosition;var state=JsonUtility.ToJson(game.State);
+                yield return new WaitForSecondsRealtime(.18f);Capture(reduced?"111-quickwins1-reduced":"111-quickwins1-coins");
+                if(reduced){Assert.AreEqual(first,effect.Coins[0].anchoredPosition);Assert.AreEqual(Vector3.one,effect.Target.localScale);}
+                else Assert.AreNotEqual(first,effect.Coins[0].anchoredPosition);
+                Assert.AreEqual(state,JsonUtility.ToJson(game.State));yield return new WaitForSecondsRealtime(.6f);Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());
+                game.OpenTab(0);yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());
+                game.Buy(OpsCatalog.Index("backup"));yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins0_全事件の説明札はひなたと重ならず読める()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);

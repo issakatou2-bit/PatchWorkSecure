@@ -139,6 +139,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(coin,"CoinLabel","円",0,0,30,30,16,Hex("7a5a00"),true,true);
             PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
             PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
+            BudgetGainEffect((RectTransform)budget.transform);
             if(statChanges[0]<0)
             {
                 int previous=State.budget-statChanges[0];

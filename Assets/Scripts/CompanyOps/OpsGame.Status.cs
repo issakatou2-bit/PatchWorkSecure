@@ -14,6 +14,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var after = ReadStats();
             for (int i = 0; i < after.Length; i++) statChanges[i] = after[i] - before[i];
+            budgetGainPending=statChanges[0]>0;
             // 購入・作業の支出と、事件の損失を同じ「失敗の赤」にしない。
             expectedResourceSpend = State.phase == OpsPhase.Planning ||
                 State.phase == OpsPhase.Review && State.Latest != null && State.Latest.loss == 0;

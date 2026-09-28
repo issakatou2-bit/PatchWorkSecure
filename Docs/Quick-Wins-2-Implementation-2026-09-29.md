@@ -10,3 +10,9 @@
 - 全40事件を通常・省演出の両方で確認するテストを追加。
 - 撮影：`Artifacts/CompanyOps/110-quickwins0-incident.png`、`110-quickwins0-reduced.png`。
 - 専用PlayMode 1/1成功（80条件）。3アセンブリのコンパイル・Verify4本成功。
+
+## 1 増収のコイン
+
+- 実際の増収だけで5枚のコインが散って予算へ集まり、欄を1.1倍に弾ませる（0.6秒）。支出・再表示では出ない。
+- 省演出は固定位置でフェードのみ。重い画面生成直後にも0.6秒を確保。
+- 専用PlayMode 1/1成功、コンパイル・Verify4本成功。撮影：`111-quickwins1-coins.png`／`111-quickwins1-reduced.png`。

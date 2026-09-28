@@ -1,0 +1,21 @@
+{
+  "source": "..\\line-proposals-20260928\\C-compact-sd.png",
+  "sha256": "6914ab6e93cfd63e34c1035c21187b32bab5a9cb89dc256cc43ba1b5feb397bd",
+  "status": "検討用・未採用",
+  "imageGenerationCalls": 0,
+  "humanDrawing": false,
+  "records": [
+    {
+      "kind": "normal",
+      "outsideChanges": 0
+    },
+    {
+      "kind": "cheer",
+      "outsideChanges": 0
+    },
+    {
+      "kind": "focus",
+      "outsideChanges": 0
+    }
+  ]
+}

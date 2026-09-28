@@ -15,6 +15,7 @@ MonoBehaviour:
   DisplayName: "\u3072\u306A\u305F"
   Description: "\u660E\u308B\u304F\u5143\u6C17\u306A\u30CA\u30D3\u30B2\u30FC\u30BF\u30FC\u3002\u96E3\u3057\u3044\u8A71\u3082\u52E2\u3044\u3088\u304F\u565B\u307F\u7815\u3044\u3066\u3001\u80CC\u4E2D\u3092\u62BC\u3057\u3066\u304F\u308C\u308B\u3002"
   ThemeColor: {r: 0.96, g: 0.55, b: 0.7, a: 1}
+  Reactions: {fileID: 11400000, guid: 29aac21b9e0a49d4b8f0bfbcdbc113b6, type: 2}
   FaceNormal: {fileID: 21300000, guid: 67d31562b50117543b1c2de8dc6ce439, type: 3}
   FaceWorried: {fileID: 0}
   FaceAlert: {fileID: 0}

@@ -1,5 +1,5 @@
 ﻿<Solution>
+  <Project Path="PatchWorkSecure.Tests.csproj" />
   <Project Path="PatchWorkSecure.csproj" />
   <Project Path="PatchWorkSecure.Editor.csproj" />
-  <Project Path="PatchWorkSecure.Tests.csproj" />
 </Solution>

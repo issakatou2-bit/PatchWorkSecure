@@ -68,6 +68,7 @@ namespace PatchWorkSecure.CompanyOps
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" :
                 OpsCatalog.Projects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました", true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Purchase);
+            ShowInstallation(index);
         }
         public void BeginIncident()
         {
@@ -103,6 +104,7 @@ namespace PatchWorkSecure.CompanyOps
 
         private void RenderHome()
         {
+            StopVoice();
             homeVisible = true; NewScreen(); SetMusic(Sounds == null ? null : Sounds.titleMusic);
             Art(screen, 615, -95, 1030, 1030);
             var intro = Box(screen, "Welcome", 44, 54, 580, 786, Ink, true);
@@ -139,13 +141,15 @@ namespace PatchWorkSecure.CompanyOps
             homeVisible = false;
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
                 State.phase == OpsPhase.Incident ? Sounds.incidentMusic : Sounds.reviewMusic);
-            NewScreen(); Header(); Sidebar(); Office();
+            NewScreen(); Header();
+            if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
+            Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
             var right = Box(screen, "DecisionPanel", 978, 120, 598, 744, Panel, true);
             if (State.phase == OpsPhase.Planning) Planning(right);
             else if (State.phase == OpsPhase.Incident) Incident(right);
             else Review(right);
-            Text(screen, "SaveStatus", SaveWarning == "" ? "自動保存 / 設備・担当者・社員が成長 / 出来事と日常チケットは年度ごとに抽選 / 試作 v0.7" : SaveWarning, 30, 874, 1510, 22, 14, SaveWarning == "" ? Muted : Coral);
+            Text(screen, "SaveStatus", SaveWarning == "" ? "自動保存 / 設備・担当者・社員が成長 / 出来事と日常チケットは年度ごとに抽選 / 試作 v0.8" : SaveWarning, 30, 874, 1510, 22, 14, SaveWarning == "" ? Muted : Coral);
         }
         private void Header()
         {
@@ -204,6 +208,7 @@ namespace PatchWorkSecure.CompanyOps
             MapPin(map, "相談できる現場", State.Level("education"), 443, 258, "culture", "people");
             MapPin(map, "運用のしくみ", State.Level("automation") + State.Level("runbook"), 31, 300, "change", "operations");
             SituationCard(map);
+            if (State.phase == OpsPhase.Review) OfficeOutcome(map, State.Latest);
             var message = Box(screen, "Navigator", 294, 610, 664, 254, Paper);
             Portrait(message, "NavigatorPortrait", 12, 16, 186, 222);
             Text(message, "NavigatorName", (Navigator != null ? Navigator.DisplayName : "ひなた") + " / 情シスパートナー", 216, 18, 420, 32, 20, Ink);
@@ -362,31 +367,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Incident(RectTransform p)
         {
-            Button(p, "IncidentTopic", (State.CurrentProfile == null ? "今月の出来事" : State.CurrentProfile.category) + " / 題材・備え >", 26, 22, 550, 34, EventBriefDialog, Ink);
-            Text(p, "IncidentTitle", State.Current.@event, 26, 74, 544, 77, 31);
-            Text(p, "IncidentSymptom", State.Current.symptom, 26, 162, 544, 65, 22);
-            Text(p, "Evidence", State.audited ? "調査が役立つ / " + State.Current.finding : "情報は不確かです。予測は攻撃・障害だった場合の目安。正常な活動の可能性も残ります。", 26, 234, 544, 60, 18, Muted);
-            string[] inspectIds = { "contain", "scope", "recover" }, inspectNames = { "停止の加算", "限定の加算", "復旧の加算" };
-            for (int i = 0; i < 3; i++)
-            {
-                string response = inspectIds[i];
-                Button(p, "Power_" + response, inspectNames[i] + " >", 24 + i * 187, 310, 176, 42, () => PowerReport(response));
-            }
-            Text(p, "RecoveryReadiness", State.RecoveryReadiness, 26, 354, 544, 24, 15, Accent);
-            string[] ids = { "contain", "scope", "recover" };
-            string[] tradeoffs = { "正常な業務も止まる / 対応費6万円", "台帳・監視・報告・調査が支える / 対応費3万円", "安全確認後に復元・再開 / 対応費4万円" };
-            for (int i = 0; i < ids.Length; i++)
-            {
-                string id = ids[i];
-                var power = State.ResponsePower(id);
-                var choice = Button(p, "Respond_" + id, "", 24, 384 + i * 105, 550, 99, () => Resolve(id), Edge);
-                // 固定サイズのリッチテキストを4行詰めると最終行が省略されるため、行ごとに領域を確保する。
-                Text(choice.transform, "ResponseName_" + id, "0" + (i + 1) + " / " + State.ResponseName(id), 16, 7, 515, 26, 20);
-                Text(choice.transform, "ResponseForecast_" + id, State.Forecast(id), 16, 35, 515, 24, 18, Paper);
-                Text(choice.transform, "ResponseTradeoff_" + id, tradeoffs[i], 16, 61, 515, 19, 14, Muted);
-                Text(choice.transform, "ResponsePower_" + id, "抑制力 " + power.Total + "  / " + PowerLine(power), 16, 81, 515, 18, 14, Accent);
-            }
-            Text(p, "NoTimer", "基本の封じ込め・安全確認は共通。重点配分を選びます。\n時間制限なし / 予測に対応費は含みません", 26, 704, 550, 38, 14, Muted);
+            IncidentComparison(p);
         }
         private void Review(RectTransform p)
         {
@@ -434,12 +415,12 @@ namespace PatchWorkSecure.CompanyOps
         private void Menu()
         {
             var d = Dialog("記録と設定", "操作と結果には別々の効果音。演出中も操作できます。\n" +
-                (homeVisible ? "設定は次回起動時も引き継ぎます。" : SaveWarning == "" ? "進行は行動ごとに自動保存済み。" : SaveWarning), 650);
+                (homeVisible ? "設定は次回起動時も引き継ぎます。" : SaveWarning == "" ? "進行は行動ごとに自動保存済み。" : SaveWarning), 760);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 84);
             Button(d, "ToggleSound", muted ? "音声 / 消音中" : "音声 / 有効", 32, 211, 350, 48, () =>
             {
                 muted = !muted;
-                if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); }
+                if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); StopVoice(); }
                 StoreFeedbackSettings(); Menu();
             });
             Button(d, "ReduceMotion", ReducedMotion ? "動きを減らす / 有効" : "動きを減らす / 無効", 410, 211, 350, 48,
@@ -448,13 +429,22 @@ namespace PatchWorkSecure.CompanyOps
                 () => { soundVolume = soundVolume >= .99f ? .2f : Mathf.Min(1, soundVolume + .2f); StoreFeedbackSettings(); Menu(); PlayCue(OpsCue.Action); });
             Button(d, "MusicVolume", "BGM " + Mathf.RoundToInt(musicVolume * 100) + "% / 変更", 410, 274, 350, 48,
                 () => { musicVolume = musicVolume >= .99f ? 0 : Mathf.Min(1, musicVolume + .2f); StoreFeedbackSettings(); Menu(); });
+            Button(d, "VoiceToggle", VoiceEnabled ? "反応ボイス / 有効" : "反応ボイス / 無効", 32, 338, 350, 48,
+                () => { VoiceEnabled = !VoiceEnabled; if (!VoiceEnabled) StopVoice(); StoreFeedbackSettings(); Menu(); });
+            Button(d, "VoiceVolume", "ボイス " + Mathf.RoundToInt(voiceVolume * 100) + "% / 変更", 410, 338, 350, 48,
+                () => { voiceVolume = voiceVolume >= .99f ? 0 : Mathf.Min(1, voiceVolume + .1f); if (voiceAudio != null) voiceAudio.volume = voiceVolume; if (voiceVolume <= 0) StopVoice(); StoreFeedbackSettings(); Menu(); });
+            Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ? "反応ボイス素材を使用中 / 字幕あり・連続再生を抑制" :
+                "反応ボイスは音源未投入 / 短い反応の字幕のみ", 32, 402, 748, 32, 18, Ink);
             bool hasMusic = Sounds != null && (Sounds.titleMusic != null || Sounds.planningMusic != null || Sounds.incidentMusic != null || Sounds.reviewMusic != null);
-            Text(d, "AudioStatus", hasMusic ? "BGM素材を使用中 / 場面に応じて切り替え" : "効果音は試作の合成音。BGM素材は未設定です。", 32, 341, 748, 38, 18, Ink);
-            Button(d, "PreviewSuccess", "試聴 / 達成", 32, 398, 232, 46, () => PlayCue(OpsCue.Growth));
-            Button(d, "PreviewAlert", "試聴 / 警告", 280, 398, 232, 46, () => PlayCue(OpsCue.Alert));
-            Button(d, "PreviewDamage", "試聴 / 被害", 528, 398, 232, 46, () => PlayCue(OpsCue.Damage));
-            Button(d, "ViewHistory", "月ごとの記録", 32, 477, 350, 48, History, Edge, !homeVisible && State != null);
-            if (!homeVisible) Button(d, "Home", "保存してタイトルへ", 32, 580, 420, 48, () => { Save(); RenderHome(); }, Accent);
+            Text(d, "AudioStatus", hasMusic ? "BGM素材を使用中 / 場面に応じて切り替え" : "効果音は試作の合成音。BGM素材は未設定です。", 32, 446, 748, 38, 18, Ink);
+            Button(d, "PreviewSuccess", "試聴 / 達成", 32, 500, 232, 46, () => PlayCue(OpsCue.Growth));
+            Button(d, "PreviewAlert", "試聴 / 警告", 280, 500, 232, 46, () => PlayCue(OpsCue.Alert));
+            Button(d, "PreviewDamage", "試聴 / 被害", 528, 500, 232, 46, () => PlayCue(OpsCue.Damage));
+            Button(d, "ViewHistory", "月ごとの記録", 32, 570, 350, 48, History, Edge, !homeVisible && State != null);
+            Button(d, "PreviewVoice", "試聴 / 反応ボイス", 410, 570, 350, 48, () => React(OpsCue.Success), Edge,
+                ReactionBank != null && ReactionBank.HasAudio && VoiceEnabled && !muted && voiceVolume > 0);
+            Text(d, "VoicePreviewCaption", LastReactionCaption == "" ? "試聴の字幕はここに表示" : LastReactionCaption, 32, 631, 748, 42, 22, Ink);
+            if (!homeVisible) Button(d, "Home", "保存してタイトルへ", 32, 685, 420, 48, () => { Save(); RenderHome(); }, Accent);
         }
         private void History()
         {

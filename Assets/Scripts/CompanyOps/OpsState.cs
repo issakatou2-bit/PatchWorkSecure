@@ -6,6 +6,12 @@ namespace PatchWorkSecure.CompanyOps
 {
     public enum OpsPhase { Planning, Incident, Review, Ended }
 
+    // 幅はシナリオ上の見積もりで、確率分布・信頼区間ではない。対応費は被害と分ける。
+    public sealed class OpsEstimate
+    {
+        public int lossMin, lossMax, stopMin, stopMax, cost;
+    }
+
     [Serializable] public class OpsOutcome
     {
         public int month, loss, downtime, pressure, prevention, containment, recovery, cost;
@@ -265,13 +271,20 @@ namespace PatchWorkSecure.CompanyOps
         // 未調査の見積もりは公開情報のみ。調査後は把握した深刻度の周辺へ幅を絞る。
         public string Forecast(string response)
         {
+            var estimate = Estimate(response);
+            return "被害 " + estimate.lossMin + "～" + estimate.lossMax + "万円 / 停止 " + estimate.stopMin + "～" + estimate.stopMax + "h";
+        }
+        // 表示側で文章を分解せず、同じ公開情報の見積もりを数値・図・文章へ使う。
+        // Previewは未確認の真相も使うため、購入前・対応前の画面には使わない。
+        public OpsEstimate Estimate(string response)
+        {
             int margin = audited ? 2 : Level("monitor") > 0 ? 6 : 9;
             int center = audited ? Severity : Current.@base + SeasonPressure + 6;
             var low = Calculate(response, Math.Max(0, center - margin), false);
             var high = Calculate(response, center + margin, false);
-            string lowLoss = (!string.IsNullOrEmpty(Current.calm) ? Math.Min(low.loss, Calculate(response, 0, true).loss) : low.loss).ToString();
+            int lowLoss = !string.IsNullOrEmpty(Current.calm) ? Math.Min(low.loss, Calculate(response, 0, true).loss) : low.loss;
             int lowStop = !string.IsNullOrEmpty(Current.calm) ? Math.Min(low.downtime, Calculate(response, 0, true).downtime) : low.downtime;
-            return "被害 " + lowLoss + "～" + high.loss + "万円 / 停止 " + lowStop + "～" + high.downtime + "h";
+            return new OpsEstimate { lossMin = lowLoss, lossMax = high.loss, stopMin = lowStop, stopMax = high.downtime, cost = high.cost };
         }
         public OpsOutcome Preview(string response) => Calculate(response, Severity, Benign);
         private OpsOutcome Calculate(string response, int severity, bool benign)

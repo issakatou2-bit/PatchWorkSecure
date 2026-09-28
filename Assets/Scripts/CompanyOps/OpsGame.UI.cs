@@ -122,6 +122,8 @@ namespace PatchWorkSecure.CompanyOps
         private void CloseDialog() { if (modal == null) return; modal.gameObject.SetActive(false); Destroy(modal.gameObject); modal = null; }
         private void Toast(string message, bool good = true, OpsCue cue = OpsCue.Action)
         {
+            // 対応開始の通知は案件表示・キャラの反応で伝える。比較の数値をポップアップで遮らない。
+            if (State != null && State.phase == OpsPhase.Incident) { Feedback(cue); return; }
             if (toast != null) Destroy(toast.gameObject);
             int split = message.IndexOf(" / ", StringComparison.Ordinal);
             string heading = split < 0 ? message : message.Substring(0, split);

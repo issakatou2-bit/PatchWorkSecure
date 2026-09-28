@@ -14,7 +14,7 @@ Codexは起動時にこれを自動で読み込むので、毎回コピペし直
 現在の試遊対象は `Assets/Scenes/CompanyYear.unity`、Windows版は `Builds/CompanyYear/PatchWorkSecure-Year.exe`。
 旧版 `SampleScene` は保存してあり、自動的に新試作へ置き換えない。**どちらを本命にするかは加藤さんが未決定。**
 
-- 実装と検証の現状：`Docs/CompanyYear-Prototype.md`（v0.7）。社員育成・季節負荷は `Docs/CompanyYear-v0.6-Review.md`、出来事・日常業務・調査資料は `Docs/CompanyYear-Events-2026-09.md`。
+- 実装と検証の現状：`Docs/CompanyYear-Prototype.md`（v0.8）。社員育成・季節負荷は `Docs/CompanyYear-v0.6-Review.md`、出来事・日常業務・調査資料は `Docs/CompanyYear-Events-2026-09.md`。
 - v0.7は攻撃・不正利用29件＋運用トラブル11件、日常チケット18件。年度ごとに抽選結果を保存し、相談・社内依頼・兆候・知識を連動。担当社員Lv.2＋手順で日常仕事を委任。新方式はニューゲームから、旧セーブは固定月のまま。
 - 作業対象は両エージェント共通のリポジトリ。9/27のClaudeはCodexによる新試作の検証・記録と引き継ぎ整理、9/27〜28のCodexは新試作のUI・育成・出来事を改修。旧版は9/13改修（9/25記録）以降、機能追加せず回帰テストを継続。独立したClaude版／Codex版ではなく、旧版と新試作が並存する。これ以降の他エージェントの進行状況は履歴と差分を確認し、推測で断定しない。
 - v0.6の成長・季節ルールはニューゲームで有効。担当者Lv.1〜5・社員3人Lv.1〜3、設備＋自分＋社員の加算を表示。45人全員の自律行動や複数事件の同時進行は未実装。
@@ -24,8 +24,11 @@ Codexは起動時にこれを自動で読み込むので、毎回コピペし直
 - 9/28の3タイプ仮想方針：`Docs/Persona-Playtest-2026-09-28.md`。各5年度を画面で検証、各30組×5年度で計450年度を計算（446完走）。人間の試遊・学習測定ではなく、本体は変更していない。初学者の停止過多、限定対応への偏り、慣れた方針の余工数を確認。購入方針は主にLv.1なので、余工数を「できることがない」と断定しない。継続効果・偶発的成果・連携強化の追加案は未実装。
 - ゲーム体験・UI・音の調査と次の設計仮説：`Docs/Game-Experience-Research-2026-09.md`。
 - 本体：`Assets/Scripts/CompanyOps/`。純粋C#の状態と表示を分離。シーン生成は `CompanyOpsSceneBuilder`。
-- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Verify-CompanyOps-Personas.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（57件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
+- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Verify-CompanyOps-Personas.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（63件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
 - UI・効果音と4種の月次事情を追加済み。BGMは素材枠のみ、楽曲未投入。ひなたは暫定素材で手描き完成原画ではない。
+- 9/28音声試聴：無料のAI Studioで9案のWAVを保存。D・Gと、Hの舌足らずの方向をユーザーが評価。Iは未評価。生成原音とヘッダーだけ整えた試聴コピーをArtSourceに保持、ゲームへの登録は0件。課金・キー作成・声の複製・Voice Design登録はしていない。
+- 9/28 v0.8：対応画面の3列比較、単位付きの浮遊増減値、購入箇所の反応、確定した被害・停止の記録、実数値の社員支援を追加。反応台詞36候補・音量／字幕／連続抑制も実装。ゲーム用の声とBGMは未投入。コンパイル3本・ルール検証・PlayMode全63件が成功。Windows版も更新し、更新後の実行版で12か月の自動通し検証PASSED。CLIのビルド呼出しは応答タイムアウトしたが、Editorログのビルド成功と更新DLL・実行版で完了を確認。
+- ひなたの最新指示：旧顔を保持する案、A/B/C線画、コードによる顔の描き直しはすべて不採用。アニメ／萌え寄り・かわいい仕事着・表情／ポーズ差分を希望。外注を前提にせず、制作方法を工夫する。Ink Workshopは使用済みだが品質を保証しない。ゲームの旧暫定絵は保持、新案を承認済みとして採用しない。演出の実装済み／未実装は `Docs/Game-Feel-Next-2026-09-28.md`、音声試聴は `Docs/Hinata-Voice-2026-09-28.md`。
 - v0.5は復元/再開連携、成長目標からの導入、3方針の購入前比較、設備別の効果表示を追加。追加予算未達時の返却と休暇の休息統合も実装。適用対象と連携値はOpsCatalog。過去の結果を書き換えず、旧記録の未保存項目は未記録と表示。
 - 自動完走と「面白い」は別。今後は設備・運用・社員の連携、会社の成長の可視化、状況で迷う選択を優先する。新しい設計案は実装済みと扱わない。
 - バッチ後は `CompanyYear` を明示的に開く。自動テストの画面撮影で表示確認できるが、楽しさ・音色の最終判断は試遊が必要。
@@ -214,8 +217,8 @@ Playした瞬間に出るNullReferenceの類はここで捕まるので、UIや�
   -logFile "C:\Projects\PatchWorkSecure\batch_log.txt"
 ```
 
-`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-28時点で**57件**：
-新試作48件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
+`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-28時点で**63件**：
+新試作54件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
 **`-nographics`を付けずに**実行すること。
 テストを足すときの注意：テスト用asmdefの`includePlatforms`は**空**にすること
 （`["Editor"]`にするとPlayModeテストの対象外になり、1件も実行されないまま成功扱いになる）。
@@ -281,7 +284,7 @@ Unity同梱のMonoでC#を直接コンパイルして動かす。**攻撃・防�
 
 ### 検証の状態
 
-- PlayModeテスト57件中57件成功（9/28、`Artifacts/company-persona-full-tests.xml`）。3タイプ各5年度・180か月の画面検証を追加。40件の相談・対応画面、日常業務、保存、旧方式互換、効果差、文字の収まり・クリックを確認。前回更新したWindows版の12か月通し検証も成功。今回は本体・ビルドを変更していない。文字欠け警告・ゲーム例外なし。ビルドの既存ライセンス検証警告と、終了時のComputeBuffer解放警告は残る。
+- PlayModeテスト63件中63件成功（9/28、`Artifacts/company-all-feedback-20260928.json`）。3タイプ各5年度・180か月の画面検証、40件の出来事、購入／休息／社員支援、反応字幕・消音、対応比較、文字収まりとクリックを確認。Windows v0.8の12か月通し検証PASSED（`Artifacts/company-player-feedback-20260928.log`）。ゲーム例外・文字欠け警告なし。終了時の既存ComputeBuffer解放警告は残る。自動検証は面白さ・人間の学習効果・音色の評価ではない。
 - `Tools/Verify-*.ps1` 3本とも成功（9/27）
 
 ## 5. 次にやってほしいこと（優先順位順）

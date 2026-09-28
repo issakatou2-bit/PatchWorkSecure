@@ -8,12 +8,18 @@ namespace PatchWorkSecure.CompanyOps
         private static readonly Color Sky = Hex("70B4FF"), Rose = Hex("43CEC6"), Lavender = Hex("ABA5FF");
         private static readonly string[] StatNames = { "予算", "工数", "業務の安定", "相談文化", "経営の信頼", "疲労" };
         private int[] statChanges = new int[6];
+        private bool expectedResourceSpend;
         private int[] ReadStats() => new[] { State.budget, State.capacity, State.stability, State.culture, State.trust, State.fatigue };
         private void RecordStatChanges(int[] before)
         {
             var after = ReadStats();
             for (int i = 0; i < after.Length; i++) statChanges[i] = after[i] - before[i];
+            // 購入・作業の支出と、事件の損失を同じ「失敗の赤」にしない。
+            expectedResourceSpend = State.phase == OpsPhase.Planning ||
+                State.phase == OpsPhase.Review && State.Latest != null && State.Latest.loss == 0;
         }
+        private Color DeltaColor(int index, int delta) => index == 1 || index == 0 && delta < 0 && expectedResourceSpend ? Sky :
+            (index == 5 ? delta < 0 : delta > 0) ? Mint : Coral;
         private Color StatColor(int index) => new[] { Paper, Sky, Mint, Rose, Lavender, Coral }[index];
         private Color GroupColor(string group) => group == "protect" ? Sky : group == "recover" ? Mint : group == "people" ? Rose : Lavender;
         private bool StatWarning(int index) => index == 0 ? State.budget < 6 : index == 2 ? State.stability < 35 : index == 5 && State.fatigue >= 60;
@@ -42,8 +48,8 @@ namespace PatchWorkSecure.CompanyOps
             Text(card, StatNames[index] + "Value", amount, 12, 29, 152, 35, 29, warning ? Coral : Paper);
             if (statChanges[index] != 0)
             {
-                int delta = statChanges[index]; bool good = index == 5 ? delta < 0 : delta > 0;
-                Text(card, "StatDelta" + index, (delta > 0 ? "+" : "") + delta, 120, 7, 48, 23, 15, index == 1 ? Sky : good ? Mint : Coral);
+                int delta = statChanges[index];
+                Text(card, "StatDelta" + index, (delta > 0 ? "+" : "") + delta, 120, 7, 48, 23, 15, DeltaColor(index, delta));
             }
             if (index > 0)
             {

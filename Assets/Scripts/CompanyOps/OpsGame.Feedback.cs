@@ -24,6 +24,8 @@ namespace PatchWorkSecure.CompanyOps
             ReducedMotion = PlayerPrefs.GetInt("pws_ops_reduce_motion", 0) != 0;
             soundVolume = Mathf.Clamp01(PlayerPrefs.GetFloat("pws_ops_sfx", .6f));
             musicVolume = Mathf.Clamp01(PlayerPrefs.GetFloat("pws_ops_music", .4f));
+            VoiceEnabled = PlayerPrefs.GetInt("pws_ops_voice_enabled", 1) != 0;
+            voiceVolume = Mathf.Clamp01(PlayerPrefs.GetFloat("pws_ops_voice_volume", .7f));
         }
         private void StoreFeedbackSettings()
         {
@@ -31,6 +33,8 @@ namespace PatchWorkSecure.CompanyOps
             PlayerPrefs.SetInt("pws_ops_mute", muted ? 1 : 0);
             PlayerPrefs.SetInt("pws_ops_reduce_motion", ReducedMotion ? 1 : 0);
             PlayerPrefs.SetFloat("pws_ops_sfx", soundVolume); PlayerPrefs.SetFloat("pws_ops_music", musicVolume);
+            PlayerPrefs.SetInt("pws_ops_voice_enabled", VoiceEnabled ? 1 : 0);
+            PlayerPrefs.SetFloat("pws_ops_voice_volume", voiceVolume);
             PlayerPrefs.Save();
         }
         private AudioSource NewAudioSource()
@@ -74,14 +78,21 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (musicA == null || musicB == null) return;
             musicBlend = Mathf.Clamp01(musicBlend + Time.unscaledDeltaTime / .8f);
-            musicA.volume = muted ? 0 : musicVolume * .45f * musicBlend;
-            musicB.volume = muted ? 0 : previousMusicVolume * (1 - musicBlend);
+            float duck = voiceAudio != null && voiceAudio.isPlaying ? .55f : 1;
+            musicA.volume = muted ? 0 : musicVolume * .45f * musicBlend * duck;
+            musicB.volume = muted ? 0 : previousMusicVolume * (1 - musicBlend) * duck;
             if (musicB.volume <= 0 && musicB.isPlaying) musicB.Stop();
         }
         private void Feedback(OpsCue cue)
         {
             PlayCue(cue);
+            React(cue);
             if (!Application.isPlaying || screen == null) return;
+            if (State != null && State.phase == OpsPhase.Review && State.Latest?.power?.staff > 0)
+            {
+                var support = screen.Find("OfficeStage/OutcomeSupport") as RectTransform;
+                if (support != null) StartCoroutine(InstallationPulse(support));
+            }
             StartCoroutine(FeedbackRoutine(cue));
         }
         private IEnumerator FeedbackRoutine(OpsCue cue)
@@ -91,16 +102,27 @@ namespace PatchWorkSecure.CompanyOps
             Color color = warning ? Coral : celebration ? Accent : Mint;
             var fx = Rect(screen, "ResultEffects", 0, 0, 1600, 900);
             var group = fx.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false; group.interactable = false;
-            var stripe = Box(fx, "ResultAccent", 980, 121, 594, 5, color);
+            bool incident = State != null && State.phase == OpsPhase.Incident;
+            var stripe = Box(fx, "ResultAccent", incident ? 656 : 980, 121, incident ? 918 : 594, 5, color);
             stripe.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             var panel = screen.Find("DecisionPanel") as RectTransform;
             Vector2 origin = panel == null ? Vector2.zero : panel.anchoredPosition;
             var changed = new List<RectTransform>();
+            var deltaTags = new List<RectTransform>();
+            var deltaOrigins = new List<Vector2>();
             for (int i = 0; i < statChanges.Length; i++)
             {
                 if (statChanges[i] == 0) continue;
                 var card = screen.Find("Stat_" + i) as RectTransform;
                 if (card != null) changed.Add(card.Find(StatNames[i] + "Value") as RectTransform);
+                if (card == null) continue;
+                int delta = statChanges[i];
+                var tag = Box(fx, "StatChangeEffect" + i, card.anchoredPosition.x + 6, 104, 162, 33, Ink);
+                tag.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
+                var text = Text(tag, "StatChangeAmount" + i, (delta > 0 ? "+" : "") + delta + (i == 0 ? "万円" : i == 1 ? "工数" : ""),
+                    9, 2, 144, 28, 21, DeltaColor(i, delta));
+                text.alignment = TMPro.TextAlignmentOptions.Center;
+                deltaTags.Add(tag); deltaOrigins.Add(tag.anchoredPosition);
             }
             var sparks = new List<RectTransform>();
             if (!ReducedMotion && celebration)
@@ -121,6 +143,8 @@ namespace PatchWorkSecure.CompanyOps
                 else if (panel != null) panel.anchoredPosition = origin;
                 foreach (var value in changed) if (value != null)
                     value.localScale = Vector3.one * (ReducedMotion ? 1 : 1 + Mathf.Sin(t * Mathf.PI) * .08f);
+                for (int i = 0; i < deltaTags.Count; i++)
+                    deltaTags[i].anchoredPosition = deltaOrigins[i] + Vector2.up * (ReducedMotion ? 0 : t * 20);
                 for (int i = 0; i < sparks.Count; i++)
                 {
                     float angle = i * Mathf.PI * 2 / sparks.Count;

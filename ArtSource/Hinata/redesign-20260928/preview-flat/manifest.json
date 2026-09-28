@@ -1,0 +1,17 @@
+{
+  "line_sha256": "388b8c91971e5af5aad0f7d07a30a06d232a9b232b6c53c88d692eff4d609bfc",
+  "size": [
+    1254,
+    1254
+  ],
+  "model_calls": 0,
+  "model_calls_scope": "this local renderer only; excludes upstream image generation",
+  "provenance": {
+    "line_origin": "generated",
+    "new_image_generation_calls": 1,
+    "color_origin": "assistant-authored material fills and polygons",
+    "status": "proposal, not human-drawn final art"
+  },
+  "alpha": "inferred exterior; inspect visually",
+  "layers": 13
+}

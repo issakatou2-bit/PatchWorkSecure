@@ -49,7 +49,14 @@ namespace PatchWorkSecure.Tests
                     if(state.phase==OpsPhase.Planning) { PersonaClick("ConfirmAdvance"); yield return null; clicks++; }
                     Assert.AreEqual(OpsPhase.Incident,state.phase);
                     foreach(string response in CompanyOpsPersonaPolicy.Responses)
-                        Assert.AreEqual(state.Forecast(response),Find<TextMeshProUGUI>("ResponseForecast_"+response).text);
+                    {
+                        var estimate = state.Estimate(response);
+                        Assert.AreEqual(estimate.lossMin == estimate.lossMax ? estimate.lossMin.ToString() : estimate.lossMin+"～"+estimate.lossMax,
+                            Find<TextMeshProUGUI>("EstimateValue_Loss_"+response).text);
+                        Assert.AreEqual(estimate.stopMin == estimate.stopMax ? estimate.stopMin.ToString() : estimate.stopMin+"～"+estimate.stopMax,
+                            Find<TextMeshProUGUI>("EstimateValue_Stop_"+response).text);
+                        Assert.AreEqual("対応費 "+estimate.cost+"万円", Find<TextMeshProUGUI>("ResponseCost_"+response).text);
+                    }
                     CheckText(); CollectPersonaOverflow(overflow);
                     if((cycle==0 || cycle==4) && (state.month==2 || state.month==11))
                         Capture("Persona/"+role+"-"+(cycle+1)+"-incident-"+(state.month+1),1280,720);

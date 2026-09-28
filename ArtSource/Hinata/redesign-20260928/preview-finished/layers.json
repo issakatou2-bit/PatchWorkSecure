@@ -1,0 +1,74 @@
+[
+  {
+    "name": "髪・前髪",
+    "file": "layer-01.png"
+  },
+  {
+    "name": "開いた毛先",
+    "file": "layer-02.png"
+  },
+  {
+    "name": "顔",
+    "file": "layer-03.png"
+  },
+  {
+    "name": "耳・首・手・脚",
+    "file": "layer-04.png"
+  },
+  {
+    "name": "瞳の白",
+    "file": "layer-05.png"
+  },
+  {
+    "name": "瞳の下色",
+    "file": "layer-06.png"
+  },
+  {
+    "name": "口",
+    "file": "layer-07.png"
+  },
+  {
+    "name": "髪留め",
+    "file": "layer-08.png"
+  },
+  {
+    "name": "ブラウス・丸襟",
+    "file": "layer-09.png"
+  },
+  {
+    "name": "カーディガン",
+    "file": "layer-10.png"
+  },
+  {
+    "name": "社員証",
+    "file": "layer-11.png"
+  },
+  {
+    "name": "端末",
+    "file": "layer-12.png"
+  },
+  {
+    "name": "スカート",
+    "file": "layer-13.png"
+  },
+  {
+    "name": "靴",
+    "file": "layer-14.png"
+  },
+  {
+    "name": "首の影",
+    "file": "layer-15.png"
+  },
+  {
+    "name": "結び髪の影",
+    "file": "layer-16.png"
+  },
+  {
+    "name": "服の影",
+    "file": "layer-17.png"
+  },
+  {
+    "name": "スカートの影",
+    "file": "layer-18.png"
+  }
+]

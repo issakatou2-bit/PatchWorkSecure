@@ -20,6 +20,9 @@ namespace PatchWorkSecure
         /// <summary>名前チップ・吹き出しの縁・立ち絵プレースホルダーに使うイメージカラー。</summary>
         public Color ThemeColor = new Color(0.55f, 0.60f, 0.85f);
 
+        [Header("短い反応・音声（未設定なら無音）")]
+        public CompanyOps.OpsReactionBank Reactions;
+
         [Header("表情スプライト（素材が届くまでは未割当でよい）")]
         public Sprite FaceNormal;
         public Sprite FaceWorried;

@@ -36,6 +36,18 @@ namespace PatchWorkSecure.EditorTools
             CompanyOpsTypography.Configure(controller);
             controller.OfficeArt = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Office/office-topdown.png");
             controller.Navigator = AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
+            if (controller.Navigator != null)
+            {
+                const string reactionPath = "Assets/Personas/HinataReactions.asset";
+                var reactions = AssetDatabase.LoadAssetAtPath<OpsReactionBank>(reactionPath);
+                if (reactions == null)
+                {
+                    reactions = ScriptableObject.CreateInstance<OpsReactionBank>(); reactions.lines = OpsReactionBank.Defaults();
+                    AssetDatabase.CreateAsset(reactions, reactionPath);
+                }
+                controller.Navigator.Reactions = reactions;
+                EditorUtility.SetDirty(controller.Navigator);
+            }
             controller.PanelSprite = RoundedPanel();
             if (controller.PanelSprite == null) throw new System.InvalidOperationException("角丸UIスプライトがありません。");
             Directory.CreateDirectory("Assets/CompanyOps");

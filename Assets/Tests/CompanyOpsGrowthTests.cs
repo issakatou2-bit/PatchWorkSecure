@@ -134,8 +134,7 @@ namespace PatchWorkSecure.Tests
             Assert.Greater(speechSurface.color.r, .95f);
             Assert.IsNotNull(speechSurface.sprite);
             Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, speechSurface.type);
-            var backdrop = Find<UnityEngine.UI.Image>("OpsScreen").color;
-            Assert.Less(Mathf.Abs(backdrop.r - backdrop.g), .03f);
+            Assert.AreSame(game.PlanningArt.gradient,Find<UnityEngine.UI.Image>("PlanningBackground").sprite);
             yield return PreparePointer("OpenTeam"); Click("OpenTeam"); yield return null;
             Capture("24-team-new"); CheckTeamText();
             Assert.IsFalse(Find<Button>("Support_routine").interactable);

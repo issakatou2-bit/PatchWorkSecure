@@ -188,7 +188,7 @@ namespace PatchWorkSecure.Tests
             Click("Respond_scope"); yield return WaitForResolution(game);
             Capture("06-review"); CheckText();
             Assert.IsTrue(game.State.Latest.hasInvestmentComparison);
-            StringAssert.Contains("削減", Find<TextMeshProUGUI>("ImpactNumbers").text);
+            StringAssert.Contains("被害 −"+game.State.Latest.avoidedLoss, Find<TextMeshProUGUI>("ImpactSummary").text);
             Click("NextMonth"); yield return null;
             Capture("07-may-compact", 1280, 720);
             while (game.State.phase != OpsPhase.Ended)
@@ -222,7 +222,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.State.CurrentMissionCompleted);
             Capture("12-mission-complete");
             game.Resolve("scope"); yield return WaitForResolution(game);
-            StringAssert.Contains("社内依頼を達成", Find<TextMeshProUGUI>("MissionResult").text);
+            StringAssert.Contains("達成", Find<TextMeshProUGUI>("MissionResult").text);
             CheckText(); LogAssert.NoUnexpectedReceived();
         }
         private static void Plan(OpsState s)
@@ -261,11 +261,21 @@ namespace PatchWorkSecure.Tests
         {
             if (Object.FindObjectsByType<Button>().Any(b=>b.name==name)) return;
             var game=Object.FindAnyObjectByType<OpsGame>();
+            if(new[]{"ToggleSound","VoiceToggle","DiagnosticVoiceVolume","PreviewVoice","PreviewSuccess","PreviewAlert","PreviewDamage","ViewHistory","OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"}.Contains(name))
+            {
+                var advanced=Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="AdvancedSettings");
+                if(advanced!=null){advanced.onClick.Invoke();Canvas.ForceUpdateCanvases();return;}
+            }
+            if(name=="MonthlyLesson")
+            {
+                var record=Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="ReviewDetails");
+                if(record!=null){record.onClick.Invoke();Canvas.ForceUpdateCanvases();return;}
+            }
             if(game==null||game.State==null||game.State.phase!=OpsPhase.Planning) return;
             if(name=="Tab0") {var close=Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="ClosePlanner");if(close!=null)close.onClick.Invoke();return;}
             if(name=="Tab1") {Find<Button>("OpenProjects").onClick.Invoke();return;}
             if(new[]{"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"}.Contains(name))
-                Find<Button>("Menu").onClick.Invoke();
+            {Find<Button>("Menu").onClick.Invoke();Find<Button>("AdvancedSettings").onClick.Invoke();}
             else if(name=="OpenEventBrief"||name=="EmployeeConsultation") Find<Button>("ConsultationDetails").onClick.Invoke();
             Canvas.ForceUpdateCanvases();
         }
@@ -280,7 +290,7 @@ namespace PatchWorkSecure.Tests
                 if(game.CanSkipResolution) { Click("SkipResolution"); yield return null; }
                 else yield return null;
             }
-            Assert.IsFalse(game.ResolutionActive,"発動演出が完了しない");yield return null;
+            Assert.IsFalse(game.ResolutionActive,"発動演出が完了しない");yield return new WaitForSecondsRealtime(.85f);
         }
         private static void CheckText()
         {

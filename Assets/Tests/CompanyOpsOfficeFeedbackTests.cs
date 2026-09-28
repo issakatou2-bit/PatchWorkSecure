@@ -29,18 +29,18 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(Vector3.one, Find<UnityEngine.UI.Button>("Pin_backup").transform.localScale);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t => t.name == "StatChangeEffect0"));
             game.State.fatigue = 50; game.ChooseAction("rest"); yield return null;
-            Assert.AreEqual("#47D7A0", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatChangeAmount5").color));
+            Assert.AreEqual("#22B08C", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatChangeAmount5").color));
             Assert.AreEqual("-18", Find<TextMeshProUGUI>("StatChangeAmount5").text);
             game.State.staffExperience[1] = OpsGrowthCatalog.StaffThresholds[1];
             game.State.supportOrder = "investigate";
             game.BeginIncident(); game.Resolve("scope"); yield return WaitForResolution(game);
             var result = game.State.Latest;
             Assert.Greater(result.power.staff, 0);
-            StringAssert.Contains("+" + result.power.staff, Find<TextMeshProUGUI>("OutcomeSupportTitle").text);
-            StringAssert.Contains(result.loss + "万円", Find<TextMeshProUGUI>("OfficeOutcomeNumbers").text);
-            StringAssert.Contains("今月の記録", Find<TextMeshProUGUI>("OfficeOutcomeNote").text);
+            StringAssert.Contains("+" + result.power.staff, Find<TextMeshProUGUI>("SupportPower").text);
+            Assert.AreEqual(result.loss+"<size=17>万円</size>", Find<TextMeshProUGUI>("MonthlyLossValue").text);
+            StringAssert.Contains("今月", Find<TextMeshProUGUI>("ReviewTitle").text);
             Capture("41-staff-response-feedback", 1280, 720);
-            foreach (string name in new[] { "OfficeOutcomeTitle", "OfficeOutcomeNumbers", "OfficeOutcomeNote", "OutcomeSupportTitle", "OutcomeSupportDetail" })
+            foreach (string name in new[] { "ReviewTitle", "MonthlyLossValue", "SupportPower", "SupportName", "SupportTask" })
             {
                 var text = Find<TextMeshProUGUI>(name); text.ForceMeshUpdate();
                 Assert.IsFalse(text.isTextOverflowing, name + " / " + text.text);

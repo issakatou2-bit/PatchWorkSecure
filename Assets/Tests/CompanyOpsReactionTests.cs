@@ -69,9 +69,10 @@ namespace PatchWorkSecure.Tests
             var game = Object.FindAnyObjectByType<OpsGame>(); Assert.IsNotNull(game.Navigator.Reactions);
             Assert.IsFalse(game.Navigator.Reactions.HasAudio, "公開試作にはまだ音源を入れていない");
             Click("HomeSettings"); yield return null;
+            Click("AdvancedSettings");yield return null;
             StringAssert.Contains("音源未投入", Find<TextMeshProUGUI>("VoiceStatus").text);
             Assert.IsFalse(Find<Button>("PreviewVoice").interactable);
-            CheckPointer("VoiceToggle"); CheckPointer("VoiceVolume"); Click("CloseDialog");
+            CheckPointer("VoiceToggle"); CheckPointer("DiagnosticVoiceVolume"); Click("CloseDialog");
             var original = game.Navigator;
             var persona = Object.Instantiate(original);
             var bank = ScriptableObject.CreateInstance<OpsReactionBank>(); bank.lines = OpsReactionBank.Defaults();
@@ -80,6 +81,7 @@ namespace PatchWorkSecure.Tests
             {
                 persona.Reactions = bank; game.Navigator = persona;
                 Click("HomeSettings"); yield return null; CheckText();
+                Click("AdvancedSettings");yield return null;
                 Assert.IsTrue(Find<Button>("PreviewVoice").interactable);
                 Click("PreviewVoice"); yield return null;
                 Assert.AreEqual(bank.lines[16].id, game.LastReactionId);

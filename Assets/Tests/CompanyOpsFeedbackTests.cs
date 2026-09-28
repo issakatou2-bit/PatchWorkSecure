@@ -118,7 +118,7 @@ namespace PatchWorkSecure.Tests
             var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerEnterHandler);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerDownHandler);
-            yield return new WaitForSeconds(.12f); Assert.AreEqual(actionOrigin.y-6,action.GetComponent<RectTransform>().anchoredPosition.y,.01f);
+            yield return new WaitForSeconds(.12f); Assert.AreEqual(actionOrigin.y-4,action.GetComponent<RectTransform>().anchoredPosition.y,.01f);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerUpHandler);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerExitHandler);
             EventSystem.current.SetSelectedGameObject(null);

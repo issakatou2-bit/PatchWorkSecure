@@ -36,7 +36,8 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.GetComponents<AudioSource>().Where(s => s.loop).All(s => s.volume == 0));
             Click("ToggleSound"); yield return new WaitForSeconds(1);
             AssertMusic(game, calm);
-            Click("MusicVolume"); yield return null;
+            Click("CloseDialog");yield return new WaitForSecondsRealtime(.25f);Click("Menu");yield return null;
+            Find<UnityEngine.UI.Slider>("MusicVolume").value=.6f; yield return null;
             Assert.AreEqual(.27f, game.GetComponents<AudioSource>().Single(s => s.loop && s.isPlaying).volume, .002f);
             CheckText(); Assert.IsEmpty(glyphWarnings); LogAssert.NoUnexpectedReceived();
         }

@@ -20,6 +20,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void IncidentBackdrop(bool resolving)
         {
+            var background=screen.Find("SharedBackground");if(background!=null)background.gameObject.SetActive(false);
             screen.GetComponent<Image>().color=resolving?Hex("1b2340"):Hex("2a1020");
             PImage(screen,"OfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,
                 resolving?new Color(.55f,.55f,.55f,.8f):new Color(.5f,.5f,.5f,.7f));

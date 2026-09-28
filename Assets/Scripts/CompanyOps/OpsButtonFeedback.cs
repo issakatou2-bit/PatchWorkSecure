@@ -29,13 +29,12 @@ namespace PatchWorkSecure.CompanyOps
             bool active = Available && (hovered || selected);
             if (focus != null) focus.enabled = active;
             float target = !Available || Owner == null || Owner.ReducedMotion ? 1 :
-                pressed || Time.unscaledTime < submittedUntil ? .977f : active ? 1.009f : 1;
+                pressed || Time.unscaledTime < submittedUntil ? .96f : active ? 1.02f : 1;
             if (GetComponent<OpsPlanningMotion>() == null)
                 transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * target, 1 - Mathf.Exp(-35 * Time.unscaledDeltaTime));
             if (Owner != null && Owner.ReducedMotion) transform.localScale = Vector3.one;
             if (PressDepth > 0 && GetComponent<OpsPlanningMotion>() == null)
             {
-                transform.localScale = Vector3.one;
                 ((RectTransform)transform).anchoredPosition = origin + Vector2.down *
                     (Available && Owner != null && !Owner.ReducedMotion && (pressed || Time.unscaledTime < submittedUntil) ? PressDepth : 0);
             }

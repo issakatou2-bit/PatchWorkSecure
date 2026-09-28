@@ -20,11 +20,11 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 
 | シーン | 中身 | コード | 詳細 |
 |---|---|---|---|
-| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.9。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
+| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.10。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない（共有は`NavigatorPersona`のみ）。
-- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold。計画画面と事件の選択・発動を承認モックへ移行。月報・年間評価は旧デザイン。`Docs/Planning-Mock-Migration-2026-09-28.md`、`Docs/Incident-Mock-Migration-2026-09-28.md`。
+- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold。計画・事件・初回ガイド・月報・年間評価・設定を承認モックへ移行し、共通UIキットを適用。`Docs/UI-Kit-and-Next2-2026-09-28.md`。
 - Windows版：`Builds/CompanyYear/PatchWorkSecure-Year.exe`（gitでは追跡しない）。
 - 旧版は自動で新試作へ置き換えない。9/13の改修以降は機能追加をせず、回帰テストだけを続けている。
 - 旧版の主なファイル：`GameData`(マスターデータ) / `GameState`(純粋C#のルール) / `GameManager`(UIとフェーズ進行) / `AudioManager` / `UIEffects`(フラッシュ・シェイク・バナー・浮遊テキスト等) / `NavigatorPersona` / `EducationTracker`(クイズ・CSV) / `GamePresentation` / `DefenseGlyph` / `DefenseDetailsTrigger`。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で89件（新試作80＋旧版の通し2＋オフィス7）
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で98件（新試作89＋旧版の通し2＋オフィス7）
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -86,12 +86,12 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 - 経緯・計測値・調査結果は`Docs/`に書く。このファイルに足すのは「次の作業者が毎回知るべき規則と現状」だけ。
 - 同じ検証の重複実行や、不要なサブエージェントの起動はしない。報告は結論から短く書く。
 
-## 6. 現状（2026-09-28）— 詳細は`Docs/Dev-Status.md`
+## 6. 現状（2026-09-29）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.9：承認モックの計画画面に続き、事件の選択・設備と社員の発動・12か月の季節を実装。工数ラベルの仕上げと生成BGM2曲は維持。PlayMode89/89、最終表示3件の再確認、Verify系成功。報酬・難易度の数値は変更なし。詳細は`Docs/Incident-Mock-Migration-2026-09-28.md`。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
+- 新試作v0.10：共通UI、初回の実操作ガイド、月報・年間評価・設定を移行。目と口の差分対応は仕組みだけ（現在は1枚絵）。PlayMode98/98、最終表示修正後の対象3件各1/1、Verify系成功。報酬・難易度は変更なし。詳細は`Docs/UI-Kit-and-Next2-2026-09-28.md`。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：`Assets/Sprites/Hinata/hinata_normal.png`の暫定1表情だけ（生成画像を加工したもの）。加藤さんの希望は、アニメ／萌え寄り・かわいい仕事着・表情とポーズの差分。学生服は不可。旧顔を保持する案、A/B/C線画、コードで顔を描き直す案はいずれも不採用。仕様は`Docs/Hinata-Art-Brief.md`。
-- 音：SEは簡易合成音（`OpsSoundDesign`）。BGMはGemini / Lyriaの生成2曲（`Docs/CompanyYear-Music-2026-09-28.md`）。声はLが基準案で、ゲームへは未投入（`Docs/Hinata-Voice-2026-09-28.md`）。
+- 音：SEは簡易合成音。新しい22音のWAV候補は試聴・承認待ちで未投入（`Docs/Sfx-Candidates-2026-09-29.md`）。BGMはGemini / Lyriaの生成2曲。声はLが基準案で未投入。目・口の差分は`NavigatorPersona.AnimationFrames`で設定する。
 - UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
 
 ## 7. 次にやること（優先順）
@@ -99,7 +99,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
 2. ひなたの原画（6表情：`hinata_normal / proud / worried / alert / relieved / sad`）を`Assets/Sprites/Hinata/`へ置く。「PatchWorkSecure → キャラ立ち絵を取り込む」で反映する（透過も検査される）。
 3. `Docs/Mockups/Next-Screens.md`を正として承認済みの次画面を順に移行。①事件・④季節を実装済み、次は②依頼書・報酬、③タイトル・共通遷移、⑤部屋の操作、⑥ステータス恩恵。②と⑥の数値変更はVerify系で検証する。依頼報酬はまだ信頼+3・年間+45点のみ。
-4. 生成BGM2曲の試聴・ループ調整、SEの音色改善。商用本採用前に利用条件を再確認する。
+4. 生成BGM2曲の試聴・ループ調整、SE候補の試聴と採否（承認前に登録しない）。図鑑は年度内遭遇集計と枠まで、一覧画面・年度をまたぐ集計は未実装。商用本採用前に利用条件を再確認する。
 5. 難易度：限定対応を弱めるより、状況で選び分ける理由を増やす。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。
 6. Player Settings（Steam向け）、ブランチ整理。
 

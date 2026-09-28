@@ -20,6 +20,7 @@ namespace PatchWorkSecure.CompanyOps
 
         private void LoadFeedbackSettings()
         {
+            LoadDisplaySettings();
             if (TestMode) return;
             muted = PlayerPrefs.GetInt("pws_ops_mute", 0) != 0;
             ReducedMotion = PlayerPrefs.GetInt("pws_ops_reduce_motion", 0) != 0;

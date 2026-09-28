@@ -22,13 +22,18 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(shadow) PImage(p,name+"Shadow",PlanningArt.shadow,x-24,y-16,w+48,h+48,Color.white,true);
             var sprite=radius>=28?PlanningArt.round28:radius>=24?PlanningArt.round24:radius>=20?PlanningArt.round20:radius>=16?PlanningArt.round16:PlanningArt.round12;
-            return PImage(p,name,sprite,x,y,w,h,color??new Color(1,1,1,.94f),true);
+            var card=PImage(p,name,sprite,x,y,w,h,color??new Color(1,1,1,.94f),true);
+            var c=color??Color.white;
+            if(w>200 && h>100 && c.a>.85f && c.r>.9f && c.g>.9f && c.b>.9f) KitPanel(card,c);
+            return card;
         }
         private TextMeshProUGUI PText(Transform p,string name,string value,float x,float y,float w,float h,float size=20,Color? c=null,bool heading=true,bool center=false)
         {
             var t=Text(p,name,value,x,y,w,h,size,c??PlanInk); t.font=heading&&HeadingFont!=null?HeadingFont:Font;
             t.alignment=center?TextAlignmentOptions.Midline:TextAlignmentOptions.MidlineLeft;
-            if(heading) t.fontStyle=FontStyles.Bold; return t;
+            if(heading) t.fontStyle=FontStyles.Bold;
+            if(name=="NavigatorSpeech" || name=="TutorialLine" || name=="ResolutionReaction")PortraitSpeech(t);
+            return t;
         }
         private Button PButton(Transform p,string id,string label,float x,float y,float w,float h,Action action,Color bg,Color fg,float radius=20,Color? shadow=null,bool enabled=true)
         {
@@ -36,8 +41,8 @@ namespace PatchWorkSecure.CompanyOps
             i.sprite=radius>=20?PlanningArt.round20:PlanningArt.round16; i.pixelsPerUnitMultiplier=1; i.type=Image.Type.Sliced;
             var t=b.GetComponentInChildren<TextMeshProUGUI>(); t.color=fg; t.alignment=TextAlignmentOptions.Midline; t.margin=Vector4.zero;
             t.rectTransform.offsetMin=Vector2.zero;t.rectTransform.offsetMax=Vector2.zero;
-            if(shadow.HasValue) { var s=b.gameObject.AddComponent<Shadow>(); s.effectDistance=new Vector2(0,-6); s.effectColor=shadow.Value; s.useGraphicAlpha=true; }
-            var feedback=b.GetComponent<OpsButtonFeedback>(); feedback.PressDepth=shadow.HasValue?6:0; return b;
+            if(shadow.HasValue) { var s=b.GetComponent<Shadow>(); s.effectDistance=new Vector2(0,-6); s.effectColor=shadow.Value; s.useGraphicAlpha=true; }
+            var feedback=b.GetComponent<OpsButtonFeedback>(); feedback.PressDepth=4; return b;
         }
         private void Motion(RectTransform r,string kind,float period,float delay=0)
         {
@@ -246,10 +251,12 @@ namespace PatchWorkSecure.CompanyOps
         {
             screen.Find("AdvanceMonth").name="AdvanceFromDashboard";
             modal=Box(screen,"ModalBlocker",0,0,1600,900,new Color(.02f,.025f,.035f,.72f));
-            var p=Box(modal,"PlanningDetails",501,78,598,744,Panel,true);
-            Planning(p); // 既存の導入比較・知識・操作条件をそのまま利用する。
-            var close=Button(modal,"ClosePlanner","×",1120,78,52,52,()=>OpenTab(0),Paper);
-            close.GetComponentInChildren<TextMeshProUGUI>().color=Ink;
+            var p=Box(modal,"PlanningDetails",501,28,598,844,Panel,true); Reveal(p);
+            WindowHeader(p,tab==1?"設備・運用の導入":"運用ノート","PLANNING",598);
+            var close=p.Find("KitHeader/HeaderClose").GetComponent<Button>(); close.name="ClosePlanner";
+            close.onClick.RemoveAllListeners(); close.onClick.AddListener(()=>OpenTab(0));
+            var content=Rect(p,"PlanningContent",0,84,598,744);
+            Planning(content); // 既存の導入比較・知識・操作条件をそのまま利用する。
         }
         private void PlanningBriefDialog()
         {

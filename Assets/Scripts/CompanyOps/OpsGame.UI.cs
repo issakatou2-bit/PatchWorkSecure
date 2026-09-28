@@ -9,9 +9,9 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
-        // 面は無彩色、操作は青。緑と赤は成果・警告に限定し、白へ黄みを混ぜない。
-        private static readonly Color Ink = Hex("12161D"), Panel = Hex("1E2530"), Edge = Hex("354151"),
-            Paper = Hex("F5F7FA"), Muted = Hex("AFBBCB"), Accent = Hex("70B4FF"), Mint = Hex("47D7A0"), Coral = Hex("FF7E88");
+        // UI-Kitの共通色。成果・未確認・危険の意味は別の色で保つ。
+        private static readonly Color Ink = Hex("1d2a44"), Panel = Hex("ffffff"), Edge = Hex("e2e7f0"),
+            Paper = Hex("F5F7FA"), Muted = Hex("6b7894"), Accent = Hex("ff6f91"), Mint = Hex("22b08c"), Coral = Hex("c23a60");
         private RectTransform screen, modal, toast;
         private CanvasGroup toastGroup;
         private TextMeshProUGUI toastSpeech;
@@ -26,11 +26,12 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform Box(Transform parent, string name, float x, float y, float w, float h, Color color, bool outline = false)
         {
             var r = Rect(parent, name, x, y, w, h); var img = r.gameObject.AddComponent<UnityEngine.UI.Image>();
-            img.color = color; img.sprite = null;
+            if (color == Ink && name != "OpsScreen") color = Hex("f3f6fb");
+            img.color = color; img.sprite = null; img.raycastTarget = name == "ModalBlocker";
             // 背景・ゲージは直線、情報のまとまりは角丸。標準の9-sliceを再利用する。
             if (w > 35 && h > 24 && name != "OpsScreen" && name != "ModalBlocker" && name != "CrisisTint")
-                RoundSurface(img, name == "Dialog" || name == "Navigator" || name == "HomeGreeting" ? 18 : h > 160 ? 14 : 8);
-            if (outline) { var edge = r.gameObject.AddComponent<Outline>(); edge.effectColor = Edge; edge.effectDistance = new Vector2(1, -1); }
+                RoundSurface(img, name == "Dialog" ? 28 : name == "Navigator" || name == "HomeGreeting" ? 18 : h > 160 ? 14 : 8);
+            if (outline || name == "Dialog") KitPanel(r, color, name == "Dialog");
             if (name == "Dialog" || name == "DecisionPanel" || name == "Navigator")
             {
                 var shadow = r.gameObject.AddComponent<UnityEngine.UI.Shadow>();
@@ -45,11 +46,13 @@ namespace PatchWorkSecure.CompanyOps
                 name == "Title" || name == "Brand" || name == "Month" || name == "CompanyRank" || name.StartsWith("ResponseName_") ||
                 name.StartsWith("PowerStepValue") || name.StartsWith("TeamLevel") || name == "PlayerLevel";
             label.font = heading && HeadingFont != null ? HeadingFont : Font;
-            label.fontSize = size; label.color = color ?? Paper; label.text = value;
+            label.fontSize = size; label.color = color.HasValue && color.Value == Paper ? Ink : color ?? Ink; label.text = value;
             label.enableAutoSizing = true; label.fontSizeMin = size * .8f; label.fontSizeMax = size;
             label.lineSpacing = 0;
             label.textWrappingMode = TextWrappingModes.Normal; label.overflowMode = TextOverflowModes.Ellipsis;
-            label.raycastTarget = false; return label;
+            label.raycastTarget = false;
+            if(size>=15 && size<=25)label.gameObject.AddComponent<OpsTextPreference>().Initialize(label,TextScale);
+            return label;
         }
         private Button Button(Transform parent, string id, string label, float x, float y, float w, float h, Action action, Color? color = null, bool enabled = true)
         {
@@ -72,12 +75,16 @@ namespace PatchWorkSecure.CompanyOps
             t.rectTransform.offsetMin = new Vector2(16, 6); t.rectTransform.offsetMax = new Vector2(-14, -6);
             b.interactable = enabled;
             b.gameObject.AddComponent<OpsButtonFeedback>().Owner = this;
-            b.onClick.AddListener(() => { PlayCue(OpsCue.Click); action(); }); return b;
+            KitButton(b, bg);
+            if (bg == Edge || bg == Panel || bg == Paper) t.color = Ink;
+            if (bg == Accent || bg == PlanPink || bg == Coral || bg == Ink) t.color = Color.white;
+            b.onClick.AddListener(() => { PlayCue(OpsCue.Click); action(); TutorialAction(id); }); return b;
         }
         private void RoundSurface(UnityEngine.UI.Image image, float radius)
         {
-            image.sprite = PanelSprite; image.type = UnityEngine.UI.Image.Type.Sliced;
-            if (PanelSprite != null) image.pixelsPerUnitMultiplier = Mathf.Max(.01f, PanelSprite.border.x / radius);
+            image.sprite = PlanningArt==null?PanelSprite:radius>=28?PlanningArt.round28:radius>=24?PlanningArt.round24:radius>=20?PlanningArt.round20:radius>=16?PlanningArt.round16:PlanningArt.round12;
+            image.type = UnityEngine.UI.Image.Type.Sliced;
+            if (image.sprite != null) image.pixelsPerUnitMultiplier = Mathf.Max(.01f, image.sprite.border.x / radius);
         }
         private void Clear(Transform root)
         {
@@ -92,6 +99,8 @@ namespace PatchWorkSecure.CompanyOps
             if (Application.isPlaying) StopAllCoroutines();
             Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
+            if (PlanningArt != null) PImage(screen,"SharedBackground",PlanningArt.gradient,0,0,1600,900);
+            if (Application.isPlaying) StartCoroutine(ScreenWipe(screen));
         }
         private void Bar(Transform parent, string title, int value, float x, float y, float w, Color color)
         {
@@ -110,21 +119,24 @@ namespace PatchWorkSecure.CompanyOps
             var image = art.gameObject.AddComponent<UnityEngine.UI.Image>();
             image.sprite = Navigator != null ? Navigator.FaceNormal : null;
             image.preserveAspect = true; image.raycastTarget = false;
+            art.gameObject.AddComponent<OpsPortraitAnimator>().Owner=this;
         }
         private RectTransform Dialog(string heading, string body, int height = 480)
         {
             if (modal != null) { modal.gameObject.SetActive(false); Destroy(modal.gameObject); }
-            modal = Box(screen, "ModalBlocker", 0, 0, 1600, 900, new Color(.02f, .025f, .035f, .9f));
-            var card = Box(modal, "Dialog", 390, (900 - height) / 2, 820, height, Paper);
-            Text(card, "DialogHeading", heading, 32, 28, 740, 64, 31, Ink);
+            WindowBackdrop();
+            var card = Box(modal, "Dialog", 390, (900 - height) / 2, 820, height, Color.white);
+            WindowHeader(card,heading,WindowCategory(heading),820); Reveal(card);
             Text(card, "DialogBody", body, 32, 104, 748, height - 195, 21, Ink);
-            Button(card, "CloseDialog", "閉じる", 604, height - 70, 180, 48, CloseDialog, Edge);
+            PButton(card, "CloseDialog", "閉じる", 604, height - 70, 180, 48, CloseDialog, Color.white, Ink,18);
             return card;
         }
         private void CloseDialog()
         {
             if (modal == null) return;
-            modal.gameObject.SetActive(false); Destroy(modal.gameObject); modal = null;
+            var old = modal; modal = null;
+            if(Application.isPlaying)StartCoroutine(CloseWindow(old));else DestroyImmediate(old.gameObject);
+            TutorialWindowClosed();
             // 導入画面から開いた詳細を閉じると、背後の導入一覧と操作を再表示する。
             if (!homeVisible && State != null && State.phase == OpsPhase.Planning && tab != 0) Render();
         }
@@ -161,6 +173,7 @@ namespace PatchWorkSecure.CompanyOps
         private void Update()
         {
             TickMusic();
+            AlignDialogFooter(); RefreshTutorial();
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 if (modal != null) CloseDialog(); else Menu();

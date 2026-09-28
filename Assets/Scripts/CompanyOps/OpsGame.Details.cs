@@ -29,7 +29,8 @@ namespace PatchWorkSecure.CompanyOps
 
         private void AnnualDetails()
         {
-            Dialog("年間評価の内訳", "備え " + State.Preparedness + " / 立て直す力 " + State.Resilience + " / チームの力 " + State.Organization +
+            Dialog("年間評価の内訳", "残った予算 " + State.budget + "万円 / 累計被害 " + State.totalLoss + "万円 / 停止 " + State.totalDowntime + "時間\n" +
+                "備え " + State.Preparedness + " / 立て直す力 " + State.Resilience + " / チームの力 " + State.Organization +
                 "\n\n成長目標\n" + (State.milestones.Count == 0 ? "未達成" : string.Join("\n", State.milestones)) +
                 "\n\n採点\n基礎1000 − 被害 " + State.totalLoss * 7 + " − 停止 " + State.totalDowntime * 4 +
                 "\n依頼 +" + State.MissionCount * 45 + " / 成長 +" + State.milestones.Count * 30 +

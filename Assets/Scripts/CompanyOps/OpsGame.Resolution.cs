@@ -108,7 +108,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ResolutionRoutine(List<ResolutionStep> steps,RectTransform flow,RectTransform cutin,RectTransform loss,RectTransform stop,RectTransform hinata,bool good,OpsOutcome outcome)
         {
-            float stepDuration=3.2f/steps.Count;
+            float stepDuration=(ShortenInterruptions && resolutionCount>1 ? 1.15f : 3.2f)/steps.Count;
             for(int index=0;index<steps.Count;index++)
             {
                 var step=steps[index];ResolutionFlow(flow,steps,index);

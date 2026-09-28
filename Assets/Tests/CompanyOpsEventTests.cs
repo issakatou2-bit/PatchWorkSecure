@@ -108,7 +108,7 @@ namespace PatchWorkSecure.Tests
                 game.StartYear(14); SetEvent(game.State,e.id); game.OpenTab(0); yield return null;
                 CheckText();CheckPointer("ConsultationDetails");Click("ConsultationDetails");yield return null;CheckPointer("OpenEventBrief");
                 if (e.id=="ai-upload") { Capture("35-ai-brief",1280,720); Click("OpenEventBrief"); yield return null; CheckPointer("EventKnowledge"); Capture("36-event-details"); }
-                Click("CloseDialog");yield return null;Click("Menu");yield return null;CheckPointer("OpenTicket");Click("CloseDialog");yield return null;
+                Click("CloseDialog");yield return null;Click("Menu");yield return null;Click("AdvancedSettings");yield return new WaitForSecondsRealtime(.5f);CheckPointer("OpenTicket");Click("CloseDialog");yield return null;
                 game.BeginIncident(); yield return null; CheckText(); CheckPointer("Respond_scope");
                 if (e.id=="ops-update") Capture("37-update-incident",1280,720);
                 game.Resolve("scope"); yield return null; CheckText();

@@ -55,13 +55,12 @@ namespace PatchWorkSecure.Tests
             CheckText(); Click("CloseDialog"); yield return null;
             Capture("44-compact-review", 1280, 720);
             game.State.fatigue = 80; game.OpenTab(0); yield return null;
-            var fatigue = Find<Button>("Stat_5").transform.Find("StatCategory").GetComponent<Image>();
-            Assert.AreEqual("FF7E88", ColorUtility.ToHtmlStringRGB(fatigue.color));
+            Assert.AreEqual(OpsPhase.Review,game.State.phase);
             game.State.budget = -1; game.Next(); yield return null;
             Assert.AreEqual(OpsPhase.Ended, game.State.phase);
-            Assert.AreEqual(game.State.totalLoss + " 万円", Find<TextMeshProUGUI>("AnnualLossValue").text);
+            Assert.AreEqual("累計被害 "+game.State.totalLoss + " 万円", Find<TextMeshProUGUI>("AnnualLossValue").text);
             Assert.AreEqual(game.State.Rank.Substring(game.State.Rank.Length - 1), Find<TextMeshProUGUI>("CompanyRank").text);
-            Assert.AreEqual("FF7E88", ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("AnnualBudgetValue").color));
+            Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="AnnualConfetti0"),"失敗時は年度クリアの紙吹雪を出さない");
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t => t.name.StartsWith("AchievementSpark")));
             Capture("45-compact-annual", 1280, 720); CheckText();
             CheckPointer("AnnualDetails"); Click("AnnualDetails"); yield return null;

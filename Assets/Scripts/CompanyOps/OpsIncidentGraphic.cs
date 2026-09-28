@@ -12,10 +12,19 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="dashed")
+            if(Kind=="stripes")
+            {
+                for(float x=-h;x<w;x+=24)
+                    Polygon(vh,new[]{new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+x+10,r.yMin),new Vector2(r.xMin+x+h+10,r.yMax),new Vector2(r.xMin+x+h,r.yMax)},color);
+            }
+            else if(Kind=="dashed")
             {
                 for(float x=12;x<w-12;x+=16) {Quad(vh,r.xMin+x,r.yMin,Mathf.Min(9,w-12-x),2,color,color);Quad(vh,r.xMin+x,r.yMax-2,Mathf.Min(9,w-12-x),2,color,color);}
                 for(float y=8;y<h-8;y+=16) {Quad(vh,r.xMin,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);Quad(vh,r.xMax-2,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);}
+            }
+            else if(Kind=="finger")
+            {
+                Polygon(vh,new[]{new Vector2(r.xMin+w*.34f,r.yMax),new Vector2(r.xMin+w*.6f,r.yMax),new Vector2(r.xMin+w*.6f,r.yMin+h*.55f),new Vector2(r.xMax,r.yMin+h*.5f),new Vector2(r.xMin+w*.85f,r.yMin),new Vector2(r.xMin+w*.2f,r.yMin),new Vector2(r.xMin,r.yMin+h*.35f),new Vector2(r.xMin+w*.34f,r.yMin+h*.3f)},color);
             }
             else if(Kind=="alarm")
             {

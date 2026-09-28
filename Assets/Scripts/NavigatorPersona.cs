@@ -31,6 +31,14 @@ namespace PatchWorkSecure
         public Sprite FaceProud;
         public Sprite FaceSad;
 
+        [Header("表情ごとの目・口の差分（未設定なら立ち絵のまま）")]
+        public FaceAnimationFrames[] AnimationFrames = new FaceAnimationFrames[0];
+        [System.Serializable] public sealed class FaceAnimationFrames
+        {
+            public string Expression = "normal";
+            public Sprite EyesHalf, EyesClosed, MouthOpen, MouthMid;
+        }
+
         [Header("日常フェーズのセリフ")]
         [TextArea] public string LineNormal;      // 特に問題がないとき
         [TextArea] public string LineNoDefense;   // 対策を1つも導入していない

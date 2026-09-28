@@ -50,7 +50,7 @@ namespace PatchWorkSecure.Tests
             CheckPointer("OpenEventBrief");CheckPointer("EmployeeConsultation");CheckText();Click("CloseDialog");yield return null;
             foreach(string id in new[]{"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"})
             {
-                game.OpenTab(0);Click("Menu");yield return null;CheckPointer(id);Click(id);yield return null;
+                game.OpenTab(0);Click("Menu");yield return null;Click("AdvancedSettings");yield return new WaitForSecondsRealtime(.5f);CheckPointer(id);Click(id);yield return null;
                 Assert.IsTrue(Object.FindObjectsByType<Transform>().Any(t=>t.name=="ModalBlocker"));
             }
             game.OpenTab(0);game.State.fatigue=80;game.OpenTab(0);yield return null;

@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { resolutionActive = false; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); }
+        public void StartYear(int seed) { resolutionActive = false; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
         public void OpenTab(int next) { tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
@@ -145,6 +145,8 @@ namespace PatchWorkSecure.CompanyOps
             if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
             if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }
             resolutionActive = false;
+            if (State.phase == OpsPhase.Review) { MonthlyScreen(); return; }
+            if (State.phase == OpsPhase.Ended) { AnnualScreen(); return; }
             Header();
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
@@ -419,7 +421,7 @@ namespace PatchWorkSecure.CompanyOps
             Button(p, "EndingHistory", "月ごとの記録 >", 438, 548, 360, 54, History, Edge);
             Button(p, "BackHome", "タイトルへ", 842, 650, 360, 56, RenderHome, Accent);
         }
-        private void Menu()
+        private void DiagnosticMenu()
         {
             var d = Dialog("記録と設定", "操作と結果には別々の効果音。演出中も操作できます。\n" +
                 (homeVisible ? "設定は次回起動時も引き継ぎます。" : SaveWarning == "" ? "進行は行動ごとに自動保存済み。" : SaveWarning), 760);
@@ -428,18 +430,18 @@ namespace PatchWorkSecure.CompanyOps
             {
                 muted = !muted;
                 if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); StopVoice(); }
-                StoreFeedbackSettings(); Menu();
+                StoreFeedbackSettings(); DiagnosticMenu();
             });
             Button(d, "ReduceMotion", ReducedMotion ? "動きを減らす / 有効" : "動きを減らす / 無効", 410, 211, 350, 48,
-                () => { ReducedMotion = !ReducedMotion; StoreFeedbackSettings(); Menu(); });
-            Button(d, "SoundVolume", "効果音 " + Mathf.RoundToInt(soundVolume * 100) + "% / 変更", 32, 274, 350, 48,
-                () => { soundVolume = soundVolume >= .99f ? .2f : Mathf.Min(1, soundVolume + .2f); StoreFeedbackSettings(); Menu(); PlayCue(OpsCue.Action); });
-            Button(d, "MusicVolume", "BGM " + Mathf.RoundToInt(musicVolume * 100) + "% / 変更", 410, 274, 350, 48,
-                () => { musicVolume = musicVolume >= .99f ? 0 : Mathf.Min(1, musicVolume + .2f); StoreFeedbackSettings(); Menu(); });
+                () => { ReducedMotion = !ReducedMotion; StoreFeedbackSettings(); DiagnosticMenu(); });
+            Button(d, "DiagnosticSoundVolume", "効果音 " + Mathf.RoundToInt(soundVolume * 100) + "% / 変更", 32, 274, 350, 48,
+                () => { soundVolume = soundVolume >= .99f ? .2f : Mathf.Min(1, soundVolume + .2f); StoreFeedbackSettings(); DiagnosticMenu(); PlayCue(OpsCue.Action); });
+            Button(d, "DiagnosticMusicVolume", "BGM " + Mathf.RoundToInt(musicVolume * 100) + "% / 変更", 410, 274, 350, 48,
+                () => { musicVolume = musicVolume >= .99f ? 0 : Mathf.Min(1, musicVolume + .2f); StoreFeedbackSettings(); DiagnosticMenu(); });
             Button(d, "VoiceToggle", VoiceEnabled ? "反応ボイス / 有効" : "反応ボイス / 無効", 32, 338, 350, 48,
-                () => { VoiceEnabled = !VoiceEnabled; if (!VoiceEnabled) StopVoice(); StoreFeedbackSettings(); Menu(); });
-            Button(d, "VoiceVolume", "ボイス " + Mathf.RoundToInt(voiceVolume * 100) + "% / 変更", 410, 338, 350, 48,
-                () => { voiceVolume = voiceVolume >= .99f ? 0 : Mathf.Min(1, voiceVolume + .1f); if (voiceAudio != null) voiceAudio.volume = voiceVolume; if (voiceVolume <= 0) StopVoice(); StoreFeedbackSettings(); Menu(); });
+                () => { VoiceEnabled = !VoiceEnabled; if (!VoiceEnabled) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
+            Button(d, "DiagnosticVoiceVolume", "ボイス " + Mathf.RoundToInt(voiceVolume * 100) + "% / 変更", 410, 338, 350, 48,
+                () => { voiceVolume = voiceVolume >= .99f ? 0 : Mathf.Min(1, voiceVolume + .1f); if (voiceAudio != null) voiceAudio.volume = voiceVolume; if (voiceVolume <= 0) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
             Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ? "反応ボイス素材を使用中 / 字幕あり・連続再生を抑制" :
                 "反応ボイスは音源未投入 / 短い反応の字幕のみ", 32, 402, 748, 32, 18, Ink);
             int musicCount = Sounds == null ? 0 : new[] { Sounds.titleMusic, Sounds.planningMusic, Sounds.incidentMusic, Sounds.reviewMusic }.Where(c => c != null).Distinct().Count();

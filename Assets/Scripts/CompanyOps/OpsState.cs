@@ -7,7 +7,7 @@ namespace PatchWorkSecure.CompanyOps
     public enum OpsPhase { Planning, Incident, Review, Ended }
 
     // 幅はシナリオ上の見積もりで、確率分布・信頼区間ではない。対応費は被害と分ける。
-    public sealed class OpsEstimate
+    [Serializable] public sealed class OpsEstimate
     {
         public int lossMin, lossMax, stopMin, stopMax, cost;
     }
@@ -30,6 +30,11 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsInvestmentEffect> potentialInvestmentEffects;
         public OpsResponsePower power;
         public OpsGrowthResult growth;
+        // 表示専用の月初・対応後スナップショット。旧セーブのnullは未記録のまま。
+        public int[] metricsBefore, metricsAfter;
+        public OpsEstimate forecast;
+        public bool hasClosingState;
+        public int closingBudget, closingStability;
     }
 
     [Serializable] public class OpsInvestmentEffect
@@ -57,8 +62,10 @@ namespace PatchWorkSecure.CompanyOps
         public List<string> milestones = new List<string>();
         public List<int> completedMissions = new List<int>();
         public List<OpsOutcome> history = new List<OpsOutcome>();
+        public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; staffExperience = new int[3]; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
         public OpsSituation SituationAt(int targetMonth)
@@ -335,6 +342,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (phase != OpsPhase.Incident || !new[] { "contain", "scope", "recover" }.Contains(response)) return false;
             var result = Preview(response);
+            result.forecast = Estimate(response);
+            result.metricsBefore = monthStartMetrics == null ? null : (int[])monthStartMetrics.Clone();
             // 同じ事件・対応・社員の状態で、設備と運用整備の有無だけを比較する。
             var withoutInvestment = CopyForComparison();
             Array.Clear(withoutInvestment.levels, 0, withoutInvestment.levels.Length);
@@ -378,6 +387,8 @@ namespace PatchWorkSecure.CompanyOps
             else result.promise = "今月は追加予算の約束なし。";
             totalLoss += result.loss; totalDowntime += result.downtime; history.Add(result); Learn(Current.lesson);
             CompleteGrowth(result);
+            result.metricsAfter = ReportMetrics;
+            result.hasClosingState=true;result.closingBudget=budget;result.closingStability=stability;
             phase = OpsPhase.Review;
             Note("対応完了 / 被害 " + result.loss + "万円 / 停止 " + result.downtime + "h。");
             return true;
@@ -402,7 +413,7 @@ namespace PatchWorkSecure.CompanyOps
             ticketResolution = "";
             phase = budget < 0 ? OpsPhase.Ended : OpsPhase.Planning;
             Note("月次予算 +" + income + "万円 / 維持費 -" + upkeep + "万円。今月の工数 " + capacity + "。" +
-                (situationRules > 0 ? "社内事情「" + Situation.title + "」も確認しよう。" : "")); CheckMilestones(); return true;
+                (situationRules > 0 ? "社内事情「" + Situation.title + "」も確認しよう。" : "")); CheckMilestones(); monthStartMetrics = ReportMetrics; return true;
         }
         public bool Valid()
         {
@@ -413,12 +424,15 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
-            if (!ValidGrowth() || !ValidEvents() || capacity > MaxCapacity) return false;
+            if (!ValidGrowth() || !ValidEvents() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;
             if (learned.Any(t => OpsCatalog.Term(t) == null) || journal.Any(t => t == null || t.Length > 1500)) return false;
             if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > 200 || r.downtime < 0 || r.downtime > 200 ||
+                !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
+                (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > 5000 || r.closingStability < 0 || r.closingStability > 100)) ||
+                (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > 200 || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > 200 || r.forecast.cost < 0 || r.forecast.cost > 200)) ||
                 r.businessLoss < 0 || r.businessLoss > 6 || r.businessLoss > r.loss || r.extraFatigue < 0 || r.extraFatigue > 8 ||
                 r.chainLossReduction < 0 || r.chainLossReduction > 6 || r.chainDowntimeReduction < 0 || r.chainDowntimeReduction > 6 ||
                 (!string.IsNullOrEmpty(r.recoveryChain) && r.recoveryChain != "復元連携" && r.recoveryChain != "再開連携") ||
@@ -436,5 +450,6 @@ namespace PatchWorkSecure.CompanyOps
             if (phase == OpsPhase.Planning || phase == OpsPhase.Incident) return history.Count == month;
             return true;
         }
+        private static bool ValidReportMetrics(int[] values) => values == null || values.Length == 6 && values.All(v=>v>=0 && v<=100);
     }
 }

@@ -96,6 +96,18 @@ namespace PatchWorkSecure.CompanyOps
             }
         }
     }
+    public sealed class OpsStaffBounce : MonoBehaviour
+    {
+        public OpsGame Owner;public string Member;private RectTransform rect;private Vector2 origin;private float started;private CanvasGroup group;
+        private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;started=Time.realtimeSinceStartup;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;}
+        private void Update()
+        {
+            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.3f);
+            rect.anchoredPosition=origin+Vector2.up*(Owner.ReducedMotion?0:12*Mathf.Sin(t*Mathf.PI));
+            group.alpha=Owner.ReducedMotion?1-.45f*Mathf.Sin(t*Mathf.PI):1;
+            if(t>=1){rect.anchoredPosition=origin;group.alpha=1;Destroy(this);}
+        }
+    }
     public sealed class OpsBlockedTag : MonoBehaviour
     {
         private CanvasGroup group;private float started;

@@ -17,7 +17,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool ResolutionActive => resolutionActive && State != null && State.phase == OpsPhase.Review;
         public bool CanSkipResolution => ResolutionActive && resolutionCount > 1;
         public void SkipResolution() {if(CanSkipResolution) FinishResolution();}
-        private sealed class ResolutionStep { public string name,detail; public Color color; public bool equipment,staff,missing; }
+        private sealed class ResolutionStep { public string name,detail,member; public Color color; public bool equipment,staff,missing; }
         private static string EffectLine(OpsInvestmentEffect effect) =>
             (effect.avoidedLoss>0?"被害 −"+effect.avoidedLoss+"万円":"")+
             (effect.avoidedLoss>0&&effect.avoidedDowntime>0?" / ":"")+
@@ -34,7 +34,7 @@ namespace PatchWorkSecure.CompanyOps
                 string[] parts=result.power.support.Split('：');
                 string member=parts.Length>1?parts[0]:"社員";
                 string task=parts.Length>1?parts[1].Split(new[]{" / "},StringSplitOptions.None)[0]:"対応を助力";
-                steps.Add(new ResolutionStep{name=member+"の支援",detail="抑制力 +"+result.power.staff+" / "+task,color=PlanBlue,staff=true});
+                steps.Add(new ResolutionStep{name=member+"の支援",detail="抑制力 +"+result.power.staff+" / "+task,color=PlanBlue,staff=true,member=member});
             }
             var missing=result.potentialInvestmentEffects?.Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0)
                 .OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault();
@@ -109,8 +109,14 @@ namespace PatchWorkSecure.CompanyOps
                 var step=steps[index];float y=rowIndex++*72;
                 var row=PCard(flow,"ResolutionStep_"+index,0,y,480,60,step.missing?new Color(1,1,1,.12f):new Color(1,1,1,.95f),16,false);
                 if(step.missing)IncidentShape(row,"MissingDashedFrame","dashed",0,0,480,60,new Color(1,1,1,.9f));
-                var number=PCard(row,"StepNumber",16,12,36,36,step.color,20,false);
-                PText(number,"StepIndex",step.missing?"?":(index+1).ToString(),0,0,36,36,16,Color.white,true,true);
+                var number=PCard(row,step.staff?"StaffFace_"+step.member:"StepNumber",16,12,36,36,step.color,20,false);
+                if(step.staff)
+                {
+                    PImage(number,"StaffFaceGlyph",PlanningArt.morale,5,3,26,26,Color.white);
+                    PText(number,"StaffInitial",step.member.Substring(0,1),20,21,16,15,11,Color.white,true,true);
+                    if(index==current){var bounce=number.gameObject.AddComponent<OpsStaffBounce>();bounce.Owner=this;bounce.Member=step.member;}
+                }
+                else PText(number,"StepIndex",step.missing?"?":(index+1).ToString(),0,0,36,36,16,Color.white,true,true);
                 PText(row,"StepName",step.name,64,7,378,24,17,step.missing?Color.white:PlanInk);
                 PText(row,"StepEffect",step.detail,64,31,395,23,14,step.missing?Hex("e0e6f0"):step.color,false);
                 if(index==0)IncidentShape(row,"ChosenCheck","check",438,17,26,26,PlanMint);

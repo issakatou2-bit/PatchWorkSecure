@@ -15,6 +15,23 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins7_実際に働いた社員だけ顔マークが跳ねる()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");SetEvent(game.State,"ransom-backup");
+                game.State.staffExperience[1]=3;game.State.supportOrder="investigate";game.BeginIncident();game.Resolve("scope");Assert.Greater(game.State.Latest.power.staff,0);Assert.IsFalse(game.State.Latest.benign);
+                string state=JsonUtility.ToJson(game.State),member=game.State.Latest.power.support.Split('：')[0];float deadline=Time.realtimeSinceStartup+5;
+                while(!Object.FindObjectsByType<OpsStaffBounce>().Any()&&Time.realtimeSinceStartup<deadline)yield return null;
+                var bounce=Object.FindObjectsByType<OpsStaffBounce>().First();Assert.AreEqual(member,bounce.Member);yield return new WaitForSecondsRealtime(.08f);
+                var rect=bounce.GetComponent<RectTransform>();if(reduced)Assert.AreEqual(new Vector2(16,-12),rect.anchoredPosition);else Assert.Greater(rect.anchoredPosition.y,-12);
+                Assert.AreEqual(Vector3.one,rect.localScale);Capture(reduced?"117-quickwins7-reduced":"117-quickwins7-support");yield return new WaitForSecondsRealtime(.35f);Assert.IsFalse(Object.FindObjectsByType<OpsStaffBounce>().Any());Assert.AreEqual(state,JsonUtility.ToJson(game.State));yield return WaitForResolution(game);
+            }
+            game.StartYear(14);game.BeginIncident();game.Resolve("scope");Assert.AreEqual(0,game.State.Latest.power.staff);
+            while(game.ResolutionActive){Assert.IsFalse(Object.FindObjectsByType<OpsStaffBounce>().Any());Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name.StartsWith("StaffFace_")));yield return null;}
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins6_行動と方針カードはマウスとキーボードで四ピクセル浮く()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

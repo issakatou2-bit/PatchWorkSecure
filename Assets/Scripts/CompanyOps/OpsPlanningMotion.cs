@@ -11,13 +11,13 @@ namespace PatchWorkSecure.CompanyOps
         public float Period = 3.2f, Delay;
         private RectTransform rect;
         private Vector2 origin;
-        private Image image;
+        private Graphic image;
         private Color color;
         private float started;
         private void Start()
         {
             rect = (RectTransform)transform; origin = rect.anchoredPosition;
-            image = GetComponent<Image>(); if (image != null) color = image.color;
+            image = GetComponent<Graphic>(); if (image != null) color = image.color;
             started = Time.unscaledTime;
         }
         private void Update()
@@ -26,11 +26,15 @@ namespace PatchWorkSecure.CompanyOps
             if (Owner == null || Owner.ReducedMotion)
             {
                 rect.anchoredPosition = origin; rect.localScale = Vector3.one; rect.localRotation = Quaternion.identity;
-                if (image != null) image.color = Kind == "petal" || Kind == "shine" || Kind == "pulse" ? new Color(color.r,color.g,color.b,0) : color;
+                if (image != null) image.color = Kind == "petal" || Kind == "snow" || Kind == "rain" || Kind == "mote" || Kind == "haze" || Kind == "shine" || Kind == "pulse" ? new Color(color.r,color.g,color.b,0) : color;
                 return;
             }
             float t = Mathf.Repeat((Time.unscaledTime - started + Delay) / Period, 1);
             if (Kind == "bob") rect.anchoredPosition = origin + Vector2.up * (5 - 5 * Mathf.Cos(t * Mathf.PI * 2));
+            if (Kind == "shake") rect.anchoredPosition = origin + Vector2.right * (t < .35f ? Mathf.Sin(t * Mathf.PI * 18) * 3 : 0);
+            if (Kind == "alarm" && image != null) image.color = new Color(color.r,color.g,color.b,.7f+.3f*Mathf.Sin(t*Mathf.PI*2));
+            if (Kind == "rotate") rect.localEulerAngles = new Vector3(0,0,-360*t);
+            if (Kind == "hop") rect.anchoredPosition = origin + Vector2.up * Mathf.Max(0,Mathf.Sin(t*Mathf.PI*2))*28;
             if (Kind == "pop")
             {
                 float hop = Mathf.Max(0, Mathf.Sin(t * Mathf.PI * 2));
@@ -48,6 +52,13 @@ namespace PatchWorkSecure.CompanyOps
                 rect.anchoredPosition = origin + new Vector2(-120*t, 40 - 860*t); rect.localEulerAngles = new Vector3(0,0,540*t);
                 if (image != null) image.color = new Color(color.r,color.g,color.b,color.a*Mathf.Min(t*10,(1-t)*6));
             }
+            if (Kind == "snow" || Kind == "rain" || Kind == "mote")
+            {
+                float height=((RectTransform)rect.parent).rect.height;
+                rect.anchoredPosition=origin+new Vector2(Kind=="rain"?-80*t:Mathf.Sin(t*Mathf.PI*3)*20,Kind=="mote"?height*.5f*t:40-(height+80)*t);
+                if(image!=null)image.color=new Color(color.r,color.g,color.b,color.a*Mathf.Min(t*10,(1-t)*6));
+            }
+            if (Kind == "haze" && image != null) image.color=new Color(color.r,color.g,color.b,color.a*(.5f+.5f*Mathf.Sin(t*Mathf.PI*2)));
         }
     }
 }

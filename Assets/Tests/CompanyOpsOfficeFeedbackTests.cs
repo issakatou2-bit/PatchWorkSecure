@@ -33,7 +33,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual("-18", Find<TextMeshProUGUI>("StatChangeAmount5").text);
             game.State.staffExperience[1] = OpsGrowthCatalog.StaffThresholds[1];
             game.State.supportOrder = "investigate";
-            game.BeginIncident(); game.Resolve("scope"); yield return null;
+            game.BeginIncident(); game.Resolve("scope"); yield return WaitForResolution(game);
             var result = game.State.Latest;
             Assert.Greater(result.power.staff, 0);
             StringAssert.Contains("+" + result.power.staff, Find<TextMeshProUGUI>("OutcomeSupportTitle").text);

@@ -185,7 +185,7 @@ namespace PatchWorkSecure.Tests
             Click("AdvanceMonth"); yield return new WaitForSeconds(.2f);
             Capture("05-incident"); CheckText();
             CheckPointer("Respond_recover");
-            Click("Respond_scope"); yield return new WaitForSeconds(.2f);
+            Click("Respond_scope"); yield return WaitForResolution(game);
             Capture("06-review"); CheckText();
             Assert.IsTrue(game.State.Latest.hasInvestmentComparison);
             StringAssert.Contains("削減", Find<TextMeshProUGUI>("ImpactNumbers").text);
@@ -221,7 +221,7 @@ namespace PatchWorkSecure.Tests
             game.BeginIncident(); yield return null;
             Assert.IsTrue(game.State.CurrentMissionCompleted);
             Capture("12-mission-complete");
-            game.Resolve("scope"); yield return null;
+            game.Resolve("scope"); yield return WaitForResolution(game);
             StringAssert.Contains("社内依頼を達成", Find<TextMeshProUGUI>("MissionResult").text);
             CheckText(); LogAssert.NoUnexpectedReceived();
         }
@@ -271,6 +271,17 @@ namespace PatchWorkSecure.Tests
         }
         private static IEnumerator PreparePointer(string name)
         { NavigatePlanningControl(name); yield return null; CheckPointer(name); }
+        private static IEnumerator WaitForResolution(OpsGame game)
+        {
+            // 実際のスキップボタンだけを使う。初回は省略せず最後まで再生する。
+            float deadline=Time.realtimeSinceStartup+8;
+            while(game.ResolutionActive && Time.realtimeSinceStartup<deadline)
+            {
+                if(game.CanSkipResolution) { Click("SkipResolution"); yield return null; }
+                else yield return null;
+            }
+            Assert.IsFalse(game.ResolutionActive,"発動演出が完了しない");yield return null;
+        }
         private static void CheckText()
         {
             foreach (var text in Object.FindObjectsByType<TextMeshProUGUI>())

@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); }
+        public void StartYear(int seed) { resolutionActive = false; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); }
         public void OpenTab(int next) { tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
@@ -82,17 +82,14 @@ namespace PatchWorkSecure.CompanyOps
         }
         public void Resolve(string response)
         {
+            if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response))return;
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
+            var estimate = State.Estimate(response);
             if (!State.Resolve(response)) return;
             RecordStatChanges(previous);
-            Save(); Render();
-            var r = State.Latest;
-            bool success = r.loss == 0 && r.downtime <= 4;
-            Toast(r.loss == 0 ? "危機対応 完了 / 被害なし・停止 " + r.downtime + "h" :
-                "業務への影響 / 被害 " + r.loss + "万円・停止 " + r.downtime + "h", success, success ? OpsCue.Success : OpsCue.Damage);
-            string levelUp = LevelUpNotice(oldLevels);
-            if (Application.isPlaying) StartCoroutine(ReviewGrowthFeedback(r, levelUp));
+            Save(); resolutionEstimate = estimate; resolutionLevelUp = LevelUpNotice(oldLevels);
+            resolutionActive = true; resolutionCount++; Render();
         }
         public void Next()
         {
@@ -105,8 +102,10 @@ namespace PatchWorkSecure.CompanyOps
         private void RenderHome()
         {
             StopVoice();
+            resolutionActive = false;
             homeVisible = true; NewScreen(); SetMusic(Sounds == null ? null : Sounds.titleMusic);
             Art(screen, 615, -95, 1030, 1030);
+            if(PlanningArt!=null) SeasonLayer(Rect(screen,"TitleSeason",615,0,985,900),985,900,saved==null?0:saved.month);
             var intro = Box(screen, "Welcome", 44, 54, 580, 786, Ink, true);
             Text(intro, "Eyebrow", "PATCHWORK SECURE  /  情シスの一年", 38, 34, 500, 34, 17, Accent);
             Text(intro, "Title", "情シスの一年", 38, 99, 510, 163, 53);
@@ -140,11 +139,13 @@ namespace PatchWorkSecure.CompanyOps
         {
             homeVisible = false;
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
-                State.phase == OpsPhase.Incident ? Sounds.incidentMusic : Sounds.reviewMusic);
+                State.phase == OpsPhase.Incident || ResolutionActive ? Sounds.incidentMusic : Sounds.reviewMusic);
             NewScreen();
             if (State.phase == OpsPhase.Planning) { PlanningScreen(); return; }
-            Header();
             if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
+            if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }
+            resolutionActive = false;
+            Header();
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
             var right = Box(screen, "DecisionPanel", 978, 120, 598, 744, Panel, true);

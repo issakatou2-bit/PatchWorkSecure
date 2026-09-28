@@ -26,6 +26,8 @@ namespace PatchWorkSecure.CompanyOps
         public string recoveryChain;
         public int chainLossReduction, chainDowntimeReduction;
         public List<OpsInvestmentEffect> investmentEffects;
+        // 確定後だけ表示する仮定比較。報酬・購入・経験には反映しない。旧記録はnull。
+        public List<OpsInvestmentEffect> potentialInvestmentEffects;
         public OpsResponsePower power;
         public OpsGrowthResult growth;
     }
@@ -287,6 +289,13 @@ namespace PatchWorkSecure.CompanyOps
             return new OpsEstimate { lossMin = lowLoss, lossMax = high.loss, stopMin = lowStop, stopMax = high.downtime, cost = high.cost };
         }
         public OpsOutcome Preview(string response) => Calculate(response, Severity, Benign);
+        // 対応前の札は公開された見積もり同士で判断し、未確認の真相を漏らさない。
+        public OpsEstimate EstimateWithoutProject(int index, string response)
+        {
+            if (index < 0 || index >= levels.Length) throw new ArgumentOutOfRangeException(nameof(index));
+            var copy = CopyForComparison(); copy.levels[index] = 0;
+            return copy.Estimate(response);
+        }
         private OpsOutcome Calculate(string response, int severity, bool benign)
         {
             if (!new[] { "contain", "scope", "recover" }.Contains(response)) throw new ArgumentException("不明な対応");
@@ -342,6 +351,17 @@ namespace PatchWorkSecure.CompanyOps
                 var comparison = withoutOne.Preview(response);
                 result.investmentEffects.Add(new OpsInvestmentEffect { projectId = OpsCatalog.Projects[i].id, level = levels[i],
                     avoidedLoss = comparison.loss - result.loss, avoidedDowntime = comparison.downtime - result.downtime });
+            }
+            result.potentialInvestmentEffects = new List<OpsInvestmentEffect>();
+            for (int i = 0; i < levels.Length; i++)
+            {
+                var project = OpsCatalog.Projects[i];
+                if (levels[i] > 0 || (!string.IsNullOrEmpty(project.requires) && Level(project.requires) == 0)) continue;
+                var withOne = CopyForComparison(); withOne.levels[i] = 1;
+                var comparison = withOne.Preview(response);
+                int loss = result.loss - comparison.loss, stop = result.downtime - comparison.downtime;
+                if (loss > 0 || stop > 0) result.potentialInvestmentEffects.Add(new OpsInvestmentEffect {
+                    projectId = project.id, level = 1, avoidedLoss = loss, avoidedDowntime = stop });
             }
             budget -= result.loss + result.cost;
             stability = Clamp(stability - result.downtime + 4);
@@ -402,6 +422,11 @@ namespace PatchWorkSecure.CompanyOps
                 r.businessLoss < 0 || r.businessLoss > 6 || r.businessLoss > r.loss || r.extraFatigue < 0 || r.extraFatigue > 8 ||
                 r.chainLossReduction < 0 || r.chainLossReduction > 6 || r.chainDowntimeReduction < 0 || r.chainDowntimeReduction > 6 ||
                 (!string.IsNullOrEmpty(r.recoveryChain) && r.recoveryChain != "復元連携" && r.recoveryChain != "再開連携") ||
+                (r.potentialInvestmentEffects != null && (r.potentialInvestmentEffects.Count > levels.Length ||
+                    r.potentialInvestmentEffects.Select(e => e == null ? null : e.projectId).Distinct().Count() != r.potentialInvestmentEffects.Count ||
+                    r.potentialInvestmentEffects.Any(e => e == null || OpsCatalog.Index(e.projectId) < 0 || e.level != 1 ||
+                        e.avoidedLoss < 0 || e.avoidedLoss > 200 || e.avoidedDowntime < 0 || e.avoidedDowntime > 200 ||
+                        (e.avoidedLoss == 0 && e.avoidedDowntime == 0)))) ||
                 (r.investmentEffects != null && (r.investmentEffects.Count > levels.Length ||
                     r.investmentEffects.Select(e => e == null ? null : e.projectId).Distinct().Count() != r.investmentEffects.Count ||
                     r.investmentEffects.Any(e => e == null || OpsCatalog.Index(e.projectId) < 0 || e.level < 1 || e.level > 2 ||

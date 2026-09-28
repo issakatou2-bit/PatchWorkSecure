@@ -57,9 +57,9 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual("要休息",Find<TextMeshProUGUI>("StatHint5").text);
             Assert.AreEqual(50.4f,Find<RectTransform>("SpareFill").rect.width,.01f);
             game.State.month=4;game.OpenTab(0);yield return null;
-            Assert.IsNotNull(Find<Image>("SummerDaylight"));Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name.StartsWith("SeasonParticle")));
+            Assert.IsNotNull(Find<Image>("SeasonHaze"));Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name.StartsWith("SeasonParticle")));
             game.State.month=8;game.OpenTab(0);yield return null;
-            Assert.AreEqual(6,Object.FindObjectsByType<Image>().Count(t=>t.name.StartsWith("SeasonParticle")&&t.sprite==game.PlanningArt.snow));
+            Assert.AreEqual(8,Object.FindObjectsByType<Image>().Count(t=>t.name.StartsWith("SeasonParticle")&&t.sprite==game.PlanningArt.snow));
             game.OpenTab(0);Click("Menu");yield return null;
             if(!game.ReducedMotion)Click("ReduceMotion");Click("CloseDialog");yield return null;
             var motions=Object.FindObjectsByType<OpsPlanningMotion>();yield return null;
@@ -129,6 +129,17 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual("+"+state.ResponsePower("scope").staff,Find<TextMeshProUGUI>("PowerStepValue2").text);
             StringAssert.Contains(state.SupportSummary,Find<TextMeshProUGUI>("PowerSupport").text);
             CheckText();Capture("52-actual-incident-staff-support",1600,900);
+            Click("CloseDialog");yield return null;game.Resolve("scope");yield return null;
+            if(!state.Latest.benign)
+            {
+                float deadline=Time.realtimeSinceStartup+4;
+                while(!Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="CutinCaption"&&t.text=="社員が助けてくれた！")&&Time.realtimeSinceStartup<deadline)yield return null;
+                Assert.AreEqual("社員が助けてくれた！",Find<TextMeshProUGUI>("CutinCaption").text);
+                StringAssert.Contains("+"+state.Latest.power.staff,Find<TextMeshProUGUI>("CutinEffect").text);
+                while(Mathf.Abs(Find<RectTransform>("ResolutionCutin").anchoredPosition.x-380)>1&&Time.realtimeSinceStartup<deadline)yield return null;
+                Capture("66-natural-staff-cutin",1600,900);
+            }
+            yield return WaitForResolution(game);
             Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
         }
         private static void CheckRect(string name,float x,float y,float w,float h,float tolerance=.1f)

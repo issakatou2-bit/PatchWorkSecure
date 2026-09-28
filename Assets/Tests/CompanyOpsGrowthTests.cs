@@ -151,11 +151,11 @@ namespace PatchWorkSecure.Tests
             Capture("26-staff-assistance"); CheckText(); CheckPointer("Power_scope"); Click("Power_scope"); yield return new WaitForSeconds(.7f);
             Assert.AreEqual(game.State.ResponsePower("scope").Total.ToString(), Find<TextMeshProUGUI>("PowerTotalValue").text);
             Capture("27-additive-power", 1280, 720); CheckTeamText(); Click("CloseDialog"); yield return null;
-            var predicted = game.State.Preview("scope"); CheckPointer("Respond_scope"); Click("Respond_scope"); yield return new WaitForSeconds(.9f);
+            var predicted = game.State.Preview("scope"); CheckPointer("Respond_scope"); Click("Respond_scope"); yield return WaitForResolution(game);
             Assert.AreEqual(predicted.loss, game.State.Latest.loss);
             Capture("28-growth-review"); CheckText(); Click("ReviewPower"); yield return new WaitForSeconds(.7f); CheckTeamText();
             Click("CloseDialog"); game.Next(); yield return null;
-            game.ChooseAction("listen"); game.ChooseAction("map"); game.BeginIncident(); game.Resolve("scope"); yield return null;
+            game.ChooseAction("listen"); game.ChooseAction("map"); game.BeginIncident(); game.Resolve("scope"); yield return WaitForResolution(game);
             Assert.IsTrue(game.State.QuarterRewardPending); CheckPointer("NextMonth"); Click("NextMonth"); yield return null;
             Capture("29-quarter-reward"); CheckTeamText(); CheckPointer("Reward_capacity"); Click("Reward_capacity"); yield return null;
             Assert.AreEqual(3, game.State.month); Assert.AreEqual(1, game.State.monthExtraCapacity);
@@ -166,7 +166,7 @@ namespace PatchWorkSecure.Tests
                 if (game.State.month == 11) { Capture("31-year-final", 1280, 720); CheckText(); }
                 // 公開された予測だけで選ぶ。行動選択にはPreviewの真値を使わない。
                 string choice = PublicGrowthResponse(game.State);
-                game.Resolve(choice); yield return new WaitForSeconds(.8f);
+                game.Resolve(choice); yield return WaitForResolution(game);
                 if (game.State.month == 11)
                 {
                     Click("ReviewPower"); yield return new WaitForSeconds(.7f);

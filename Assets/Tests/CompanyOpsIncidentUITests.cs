@@ -43,12 +43,12 @@ namespace PatchWorkSecure.Tests
             foreach (string response in new[] { "contain", "scope", "recover" })
             {
                 var e = game.State.Estimate(response);
-                Assert.AreEqual("対応費 " + e.cost + "万円", Find<TextMeshProUGUI>("ResponseCost_" + response).text);
-                StringAssert.Contains("万円", Find<TextMeshProUGUI>("EstimateLabel_Loss_" + response).text);
-                StringAssert.Contains("時間", Find<TextMeshProUGUI>("EstimateLabel_Stop_" + response).text);
+                Assert.AreEqual(e.cost.ToString(), Find<TextMeshProUGUI>("ResponseCost_" + response).text);
+                Assert.AreEqual("万円", Find<TextMeshProUGUI>("EstimateUnit_Loss_" + response).text);
+                Assert.AreEqual("時間", Find<TextMeshProUGUI>("EstimateUnit_Stop_" + response).text);
                 CheckPointer("Respond_" + response); CheckPointer("Power_" + response);
             }
-            Assert.IsNotNull(Find<DefenseGlyph>("TargetGlyph"));
+            Assert.IsNotNull(Find<OpsIncidentGraphic>("WarningIcon"));
             Capture("35-incident-visual", 1280, 720); CheckIncidentText();
             string before = JsonUtility.ToJson(game.State);
             Click("IncidentEvidence"); yield return null; CheckText(); CheckPointer("IncidentKnowledge");

@@ -55,13 +55,13 @@ namespace PatchWorkSecure.Tests
                             Find<TextMeshProUGUI>("EstimateValue_Loss_"+response).text);
                         Assert.AreEqual(estimate.stopMin == estimate.stopMax ? estimate.stopMin.ToString() : estimate.stopMin+"～"+estimate.stopMax,
                             Find<TextMeshProUGUI>("EstimateValue_Stop_"+response).text);
-                        Assert.AreEqual("対応費 "+estimate.cost+"万円", Find<TextMeshProUGUI>("ResponseCost_"+response).text);
+                        Assert.AreEqual(estimate.cost.ToString(), Find<TextMeshProUGUI>("ResponseCost_"+response).text);
                     }
                     CheckText(); CollectPersonaOverflow(overflow);
                     if((cycle==0 || cycle==4) && (state.month==2 || state.month==11))
                         Capture("Persona/"+role+"-"+(cycle+1)+"-incident-"+(state.month+1),1280,720);
                     string chosen=CompanyOpsPersonaPolicy.Response(state,memory);
-                    yield return PersonaClick("Respond_"+chosen); yield return null; clicks++;
+                    yield return PersonaClick("Respond_"+chosen); yield return WaitForResolution(game); clicks++;
                     Assert.AreEqual(OpsPhase.Review,state.phase); CheckText(); CollectPersonaOverflow(overflow);
                     // 画面数は露出の記録。開くことを知識習得とみなさない。
                     bool read=CompanyOpsPersonaPolicy.ReadLesson(state,memory);

@@ -35,7 +35,11 @@ namespace PatchWorkSecure.CompanyOps
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.planningMusic);
                 game.BeginIncident(); yield return new WaitForSecondsRealtime(1);
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.incidentMusic);
-                game.Resolve("scope"); yield return new WaitForSecondsRealtime(1);
+                game.Resolve("scope");
+                float deadline=Time.realtimeSinceStartup+8;
+                while(game.ResolutionActive&&Time.realtimeSinceStartup<deadline)yield return null;
+                if(game.ResolutionActive)failed=true;
+                yield return new WaitForSecondsRealtime(1);
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.reviewMusic);
                 Debug.Log("[CompanyOps Player] BGM二曲の再生確認 " + (failed ? "FAILED" : "PASSED"));
                 game.StartYear(14); yield return null;

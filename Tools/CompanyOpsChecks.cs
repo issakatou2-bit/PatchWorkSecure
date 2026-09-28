@@ -60,5 +60,19 @@ public static class CompanyOpsChecks
         Check(a.Preview("scope").prevention == b.Preview("scope").prevention, "バックアップを侵入防止扱い");
         Check(a.Preview("scope").loss >= b.Preview("scope").loss, "復旧投資が逆効果");
         Console.WriteLine("境界・因果・年間進行: 成功");
+        int comparisons=0;
+        for(int seed=0;seed<30;seed++)foreach(string response in new[]{"contain","scope","recover"})
+        {
+            var state=new OpsState(seed,true);state.BeginIncident();var expected=state.Preview(response);int budget=state.budget;
+            state.Resolve(response);Check(state.budget==budget-expected.loss-expected.cost,"演出用比較で精算が変わった");
+            foreach(var effect in state.Latest.potentialInvestmentEffects)
+            {
+                var hypothetical=new OpsState(seed,true);hypothetical.levels[OpsCatalog.Index(effect.projectId)]=1;
+                var preview=hypothetical.Preview(response);
+                Check(effect.avoidedLoss==expected.loss-preview.loss&&effect.avoidedDowntime==expected.downtime-preview.downtime,"未導入の仮定比較が不一致");comparisons++;
+            }
+            Check(state.levels.All(v=>v==0)&&state.Valid(),"比較で未購入の設備を導入");
+        }
+        Console.WriteLine("発動演出の仮定比較: "+comparisons+"件一致 / 報酬・経験・精算の追加なし");
     }
 }

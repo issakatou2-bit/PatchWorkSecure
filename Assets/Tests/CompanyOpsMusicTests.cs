@@ -29,7 +29,8 @@ namespace PatchWorkSecure.Tests
             AssertMusic(game, calm);
             game.BeginIncident(); yield return new WaitForSeconds(1);
             AssertMusic(game, incident);
-            game.Resolve("scope"); yield return new WaitForSeconds(1);
+            game.Resolve("scope");yield return null;AssertMusic(game,incident);
+            yield return WaitForResolution(game);yield return new WaitForSeconds(1);
             AssertMusic(game, calm);
             Click("Menu"); yield return null; Click("ToggleSound"); yield return null;
             Assert.IsTrue(game.GetComponents<AudioSource>().Where(s => s.loop).All(s => s.volume == 0));

@@ -2,114 +2,160 @@ using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
         private static readonly string[] ResponseIds = { "contain", "scope", "recover" };
-
+        private static readonly string[] ResponseTitles = { "広く止める", "範囲を絞る", "復旧を急ぐ" };
+        private static readonly string[] ResponseLines = { "関連する環境を停止・隔離", "対象を特定して隔離・調査", "安全確認と復旧に人を配分" };
+        private static readonly Color IncidentRed = Hex("ff3b5c"), IncidentYellow = Hex("ffd23f");
+        private RectTransform IncidentShape(Transform parent,string name,string kind,float x,float y,float w,float h,Color color)
+        {
+            var rect=Rect(parent,name,x,y,w,h);
+            var graphic=rect.gameObject.AddComponent<OpsIncidentGraphic>();graphic.Kind=kind;graphic.color=color;
+            graphic.raycastTarget=false;return rect;
+        }
+        private void IncidentBackdrop(bool resolving)
+        {
+            screen.GetComponent<Image>().color=resolving?Hex("1b2340"):Hex("2a1020");
+            PImage(screen,"OfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,
+                resolving?new Color(.55f,.55f,.55f,.8f):new Color(.5f,.5f,.5f,.7f));
+            if(!resolving) IncidentShape(screen,"IncidentVignette","vignette",0,0,1600,900,new Color(.47f,.04f,.16f,.55f));
+        }
+        private bool EquipmentHelps(int index,string response)
+        {
+            if(State.levels[index]==0) return false;
+            var actual=State.Estimate(response);var absent=State.EstimateWithoutProject(index,response);
+            return absent.lossMin>actual.lossMin||absent.lossMax>actual.lossMax||absent.stopMin>actual.stopMin||absent.stopMax>actual.stopMax;
+        }
         private void IncidentWorkspace()
         {
-            // 対応中は成長目標を常時並べず、案件・比較・現場に視線を集める。
-            var map = Box(screen, "OfficeStage", 24, 120, 610, 440, Panel, true);
-            var viewport = Rect(map, "OfficeViewport", 6, 6, 598, 428);
-            viewport.gameObject.AddComponent<UnityEngine.UI.RectMask2D>();
-            Art(viewport, 0, -74, 598, 598);
-            var badge = Box(map, "OfficeBadge", 16, 16, 296, 48, Ink);
-            badge.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(badge, "Month", State.Current.name + " / " + (State.month + 1) + "か月目", 14, 8, 270, 32, 24);
-            Button(map, "OpenTeam", "社員の支援 >", 390, 16, 202, 48, TeamDialog, Edge);
-
-            bool people = State.Current.kind == "social" || State.Current.kind == "leak";
-            var target = Button(map, "IncidentLocation", "", people ? 365 : 196, people ? 222 : 118, 210, 85, IncidentEvidence, Ink);
-            Glyph(target.transform, "TargetGlyph", people ? "training" : "backup", 12, 14, 34);
-            Text(target.transform, "LocationLabel", "確認対象", 56, 10, 140, 28, 18, Coral);
-            Text(target.transform, "LocationName", people ? "社員・情報の扱い" : "システム・設備", 12, 48, 187, 28, 18);
-            // 地点は関連領域の案内。未確認の侵害や社員の行動を確定描写しない。
-            var strip = Box(map, "OfficeSupport", 16, 341, 578, 81, Ink);
-            strip.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(strip, "SupportHeading", "今月の支援", 14, 8, 550, 26, 18, StaffColor);
-            Text(strip, "SupportStatus", State.growthRules == 0 ? "旧年度 / 社員育成なし" : State.SupportSummary, 14, 37, 550, 37, 19);
-
-            var navigator = Box(screen, "Navigator", 24, 580, 610, 284, Paper);
-            Portrait(navigator, "NavigatorPortrait", 4, 9, 225, 266);
-            Text(navigator, "NavigatorName", Navigator != null ? Navigator.DisplayName : "ひなた", 244, 19, 343, 34, 25, Ink);
-            Text(navigator, "NavigatorSpeech", State.audited ? "調査できたね。3つの案を比べよう。" : "まだ未確認だね。止める範囲も比べよう。", 244, 67, 343, 96, 25, Ink);
-            Text(navigator, "NavigatorRole", State.CurrentMissionCompleted ? "依頼達成 +45点 / 信頼 +3" : "情シスパートナー", 244, 174, 343, 28, 17, Hex("526071"));
-            Button(navigator, "IncidentHelp", "根拠・知識を見る >", 244, 216, 343, 48, IncidentEvidence, Edge);
-
-            var right = Box(screen, "DecisionPanel", 654, 120, 922, 744, Panel, true);
-            Incident(right);
-            Text(screen, "SaveStatus", SaveWarning == "" ? "自動保存済み / 時間制限なし" : SaveWarning, 30, 874, 1510, 22, 15, SaveWarning == "" ? Muted : Coral);
+            IncidentBackdrop(false);
+            var tape=IncidentShape(screen,"WarningTape","tape",0,0,1600,14,IncidentYellow);
+            tape.gameObject.AddComponent<OpsIncidentTape>().Owner=this;
+            var emergency=PCard(screen,"EmergencyBadge",24,34,250,64,IncidentRed,20,false);
+            var shadow=emergency.gameObject.AddComponent<Shadow>();shadow.effectDistance=new Vector2(0,-5);shadow.effectColor=Hex("b3203d");
+            IncidentShape(emergency,"WarningIcon","warning",26,17,30,30,Color.white);
+            PText(emergency,"EmergencyTitle","緊急対応",68,0,170,64,30,Color.white);Motion(emergency,"shake",1.8f);
+            var header=PCard(screen,"IncidentHeader",290,34,1064,64,Color.white,20,false);
+            var month=PCard(header,"MonthBadge",22,19,64,26,PlanInk,12,false);
+            PText(month,"Month",State.Current.name,0,0,64,26,14,Color.white,true,true);
+            PText(header,"IncidentTitle",State.Current.title,100,0,590,64,26);
+            var category=PButton(header,"IncidentTopic",State.CurrentProfile==null?"今月の出来事":State.CurrentProfile.category,704,18,338,28,EventBriefDialog,Hex("ffe3ec"),Hex("c23a60"),16);
+            category.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+            var budget=PButton(screen,"Menu","",1370,34,206,64,Menu,Color.white,PlanInk,20);
+            var coin=PCard(budget.transform,"BudgetCoin",22,18,28,28,IncidentYellow,28,false);
+            PText(coin,"CoinMark","円",0,0,28,28,12,Hex("7a5a00"),true,true);
+            PText(budget.transform,"BudgetValue",State.budget.ToString(),62,0,80,64,30);
+            PText(budget.transform,"BudgetUnit","万円",142,0,58,64,15,PlanGray);
+            PCard(screen,"StageWhiteBorder",19,115,610,780,Color.white,28,false);
+            var map=PCard(screen,"OfficeStage",24,120,600,770,Color.white,28,false);
+            map.gameObject.AddComponent<Mask>().showMaskGraphic=false;
+            // 確認対象の場所であり、侵害や犯人を確定した描写ではない。
+            bool desks=State.Current.kind=="leak"||State.Current.kind=="identity";
+            bool reception=State.CurrentProfile?.id=="bec";
+            bool meeting=State.Current.kind=="social"&&!reception;
+            PImage(map,"OfficeArt",OfficeArt,desks?-40:reception?-450:meeting?-840:-440,desks||meeting?-140:reception?-560:-20,1500,1500,new Color(.55f,.55f,.55f,1));
+            var alarm=IncidentShape(map,"AffectedRoom","alarm",110,16,380,390,IncidentRed);Motion(alarm,"alarm",1.2f);
+            var mark=PButton(map,"IncidentLocation","!",270,150,64,64,IncidentEvidence,IncidentRed,Color.white,28);
+            mark.GetComponent<Image>().sprite=PlanningArt.markerBubble;Border(mark,Color.white,4);
+            mark.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=38;Motion((RectTransform)mark.transform,"pop",1.6f);
+            var symptom=PCard(map,"IncidentSymptomCard",110,420,380,83,new Color(.11f,.16f,.27f,.9f),16,false);
+            PText(symptom,"LocationName",desks?"社員の席・情報の扱い":reception?"受付・社外とのやりとり":meeting?"会議室・情報の確認":"サーバー室・システム",16,8,348,25,15,Hex("ff9fb5"));
+            PText(symptom,"IncidentSymptom",State.Current.symptom,16,33,348,26,15,Color.white,false);
+            PText(symptom,"UnknownScope","影響範囲は未確認",16,59,348,20,13,Color.white,false);
+            var portrait=Rect(map,"IncidentHinata",-40,470,360,360);Portrait(portrait,"NavigatorPortrait",0,0,360,360);Motion(portrait,"shake",2.4f);
+            var navigator=PCard(map,"Navigator",250,560,320,126,Color.white,20,false);
+            PImage(navigator,"SpeechTail",PlanningArt.tail,-20,20,26,36);
+            var tag=PCard(navigator,"NavigatorTag",16,-13,78,23,PlanPink,12,false);
+            PText(tag,"NavigatorName",Navigator==null?"ひなた":Navigator.DisplayName,0,0,78,23,13,Color.white,true,true);
+            PText(navigator,"NavigatorSpeech",State.audited?"調査できたね！\n止める範囲も比べよう！":"まだ確認が必要だね！\nまずは止める範囲を決めよう！",18,17,284,76,18,PlanInk,false);
+            PButton(map,"IncidentHelp","",250,560,320,126,IncidentEvidence,Color.clear,Color.clear,20);
+            var right=Rect(screen,"DecisionPanel",648,120,928,770);IncidentComparison(right);
         }
-
         private void IncidentComparison(RectTransform p)
         {
-            Button(p, "IncidentTopic", (State.CurrentProfile == null ? "今月の出来事" : State.CurrentProfile.category) + " / 題材 >", 24, 20, 874, 36, EventBriefDialog, Ink);
-            Text(p, "IncidentTitle", State.Current.@event, 24, 71, 874, 69, 33);
-            Text(p, "IncidentSymptom", State.Current.symptom, 24, 149, 874, 52, 21, Muted);
-            Button(p, "IncidentEvidence", State.audited ? "調査済み / 根拠を見る >" : "未確認 / 正常な活動の可能性もあり >", 24, 215, 486, 44, IncidentEvidence, Ink);
-            string recovery = State.DataRecoveryApplies ?
-                (State.RestoreChain > 0 ? "復元連携 Lv." + State.RestoreChain : "復元連携 / 未整備") + "\nバックアップ + 復元訓練" :
-                State.RestartApplies ? (State.RestartChain > 0 ? "再開連携 Lv." + State.RestartChain : "再開連携 / 未整備") + "\n自動化 + 引継ぎ手順" : "今回は復元・再開連携の対象外";
-            Text(p, "RecoveryReadiness", recovery, 530, 207, 367, 60, 18, Accent);
-
-            var estimates = ResponseIds.Select(State.Estimate).ToArray();
-            int lossScale = Math.Max(1, estimates.Max(e => e.lossMax));
-            int stopScale = Math.Max(1, estimates.Max(e => e.stopMax));
-            string[] glyphs = { "firewall", "idsIps", "backup" };
-            string[] caution = { "正常な業務も止まる", "範囲を絞る備えが重要", "安全確認後に再開" };
-            for (int i = 0; i < ResponseIds.Length; i++)
+            PText(p,"DecisionHeading","対応方針を選ぶ",0,0,235,39,26,Color.white);
+            PButton(p,"IncidentEvidence","未確認：正常な操作の可能性もある",247,5,340,29,IncidentEvidence,IncidentYellow,Hex("5c4000"),16).GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+            var ready=PCard(p,"Readiness",0,53,928,62,new Color(1,1,1,.1f),20,false);
+            PText(ready,"ReadinessTitle","あなたの備え",16,0,112,62,15,Color.white);
+            var relevant=Enumerable.Range(0,State.levels.Length).Where(i=>ResponseIds.Any(r=>EquipmentHelps(i,r))).Take(3).ToList();
+            string[] missing=State.DataRecoveryApplies?new[]{"backup","drill","monitor"}:new[]{"monitor","education","runbook"};float x=134;
+            foreach(int i in relevant)
             {
-                string id = ResponseIds[i]; var estimate = estimates[i]; float x = 24 + i * 298;
-                var card = Box(p, "ResponseCard_" + id, x, 282, 278, 382, Ink);
-                card.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Glyph(card.transform, "ResponseGlyph_" + id, glyphs[i], 16, 16, 36);
-                Text(card.transform, "ResponseType_" + id, "0" + (i + 1) + " / " + (i == 0 ? "停止・隔離" : i == 1 ? "範囲を限定" : "復旧に配分"), 63, 18, 199, 30, 20, Accent);
-                Text(card.transform, "ResponseName_" + id, State.ResponseName(id), 16, 62, 246, 59, 21);
-                Text(card.transform, "ResponseCost_" + id, "対応費 " + estimate.cost + "万円", 16, 125, 246, 33, 22, State.budget < estimate.cost ? Coral : Paper);
-                EstimateMetric(card.transform, "Loss_" + id, "被害見積もり / 万円", estimate.lossMin, estimate.lossMax, lossScale, 162);
-                EstimateMetric(card.transform, "Stop_" + id, "停止見積もり / 時間", estimate.stopMin, estimate.stopMax, stopScale, 232);
-                Text(card.transform, "ResponseCaution_" + id, State.budget < estimate.cost ? "手元予算が対応費に不足" : caution[i], 16, 303, 246, 24, 17, State.budget < estimate.cost ? Coral : Muted);
-                Button(card, "Respond_" + id, "この対応で進む", 10, 334, 258, 44, () => Resolve(id), Accent);
-                Button(p, "Power_" + id, "抑制力 " + State.ResponsePower(id).Total + " / 内訳 >", x, 674, 278, 32, () => PowerReport(id), Ink);
+                var item=OpsCatalog.Projects[i];float w=Mathf.Min(220,30+item.name.Length*14+40);if(x+w>694) break;
+                var tag=PCard(ready,"Ready_"+item.id,x,15,w,32,PlanMint,12,false);
+                PText(tag,"ReadyLabel_"+item.id,item.name+" Lv."+State.levels[i],10,0,w-20,32,14,Color.white);x+=w+10;
             }
-            Text(p, "NoTimer", "見積もりの幅 ≠ 確率 / 対応費は被害と別 / 時間制限なし", 24, 714, 874, 26, 16, Muted);
+            foreach(string id in missing.Where(id=>State.Level(id)==0).Take(relevant.Count==0?2:1))
+            {
+                string name=OpsCatalog.Projects[OpsCatalog.Index(id)].name;float w=30+name.Length*14+42;if(x+w>694) break;
+                var tag=PCard(ready,"Missing_"+id,x,15,w,32,new Color(1,1,1,.18f),12,false);
+                PText(tag,"MissingLabel_"+id,name+" 未導入",10,0,w-20,32,14,Hex("c9d3e3"));x+=w+10;
+            }
+            bool support=ResponseIds.Any(id=>State.ResponsePower(id).staff>0);
+            string member=State.SupportSummary.Split('：')[0];
+            var staff=PButton(ready,"OpenTeam",support?member+"が支援できる":"社員の育成・支援",702,15,210,32,TeamDialog,support?PlanBlue:new Color(1,1,1,.18f),support?Color.white:Hex("c9d3e3"),12);
+            staff.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+            if(support)
+            {
+                PImage(staff.transform,"SupportFace",PlanningArt.morale,10,5,22,22,Color.white);
+                staff.GetComponentInChildren<TextMeshProUGUI>().margin=new Vector4(30,0,0,0);
+            }
+            var estimates=ResponseIds.Select(State.Estimate).ToArray();int lossScale=Math.Max(1,estimates.Max(e=>e.lossMax)),stopScale=Math.Max(1,estimates.Max(e=>e.stopMax));
+            string[] caution={"広がりを抑える一方、正常な業務も止まる","業務を続けやすいが、範囲を絞る備えが重要","安全確認の後に再開。戻せる備えが重要"};
+            for(int i=0;i<3;i++)
+            {
+                string id=ResponseIds[i];var e=estimates[i];float w=896f/3,xCard=i*(w+16);
+                bool prepared=Enumerable.Range(0,State.levels.Length).Any(j=>EquipmentHelps(j,id));
+                if(prepared) PCard(p,"PreparedOutline_"+id,xCard-4,125,w+8,584,PlanMint,28,false);
+                var card=PCard(p,"ResponseCard_"+id,xCard,129,w,576,Color.white,24,false);
+                if(prepared)
+                {
+                    var badge=PCard(card,"PreparedBadge_"+id,w-121,-14,105,27,PlanMint,12,false);
+                    PText(badge,"PreparedText_"+id,"備えが効く",0,0,105,27,13,Color.white,true,true);
+                }
+                var icon=PCard(card,"ResponseIcon_"+id,20,20,56,56,Hex(i==0?"ffe3ec":i==1?"e3f2ff":"e3faf3"),20,false);
+                if(i==1) PImage(icon,"ResponseGlyph_"+id,PlanningArt.audit,12,12,32,32);
+                else IncidentShape(icon,"ResponseGlyph_"+id,i==0?"stop":"restore",12,12,32,32,i==0?IncidentRed:Hex("1a9c7c"));
+                PText(card,"ResponseName_"+id,ResponseTitles[i],88,18,w-108,32,22);
+                PText(card,"ResponseType_"+id,State.CurrentProfile==null?ResponseLines[i]:State.ResponseName(id),88,51,w-108,37,14,PlanGray,false);
+                PText(card,"CostLabel_"+id,"対応費",20,105,98,38,15,PlanGray);
+                PText(card,"ResponseCost_"+id,e.cost.ToString(),127,105,w-147,38,26,State.budget<e.cost?IncidentRed:PlanInk,true,true);
+                PText(card,"CostUnit_"+id,"万円",w-59,122,39,24,14,PlanGray);
+                EstimateMetric(card,"Stop_"+id,"業務停止",e.stopMin,e.stopMax,stopScale,159,PlanPink,w);
+                EstimateMetric(card,"Loss_"+id,"被害",e.lossMin,e.lossMax,lossScale,227,Hex("ff9f43"),w);
+                PText(card,"ResponseCaution_"+id,State.budget<e.cost?"手元予算が対応費に不足\n"+caution[i]:caution[i],20,305,w-40,70,14,PlanInk,false);
+                // 詳細はアイコンから開く。モックにない説明列は常設しない。
+                var details=PButton(card,"Power_"+id,"",20,20,56,56,()=>PowerReport(id),Color.clear,Color.clear,20);Hover(details,"抑制力の内訳を見る");
+                PButton(card,"Respond_"+id,"この方針で対応",20,500,w-40,56,()=>Resolve(id),PlanInk,Color.white,16,Hex("0c1226"));
+            }
+            PText(p,"NoTimer","見積もりは目安の幅で、確率ではありません。「備えが効く」は導入済みの設備がこの方針で働くことを示します。",0,724,928,43,14,Hex("e8c9d3"),false);
         }
-
-        private void EstimateMetric(Transform parent, string id, string title, int min, int max, int scale, float y)
+        private void EstimateMetric(Transform parent,string id,string title,int min,int max,int scale,float y,Color color,float width)
         {
-            Text(parent, "EstimateLabel_" + id, title, 16, y, 246, 22, 16, Muted);
-            var value = Text(parent, "EstimateValue_" + id, min == max ? min.ToString() : min + "～" + max, 16, y + 26, 246, 36, 26);
-            if (HeadingFont != null) value.font = HeadingFont;
-            var track = Box(parent, "EstimateTrack_" + id, 16, y + 62, 246, 6, Edge);
-            track.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            // 3案は同一尺度。濃い部分が下限、薄い部分が見積もりの幅。ゼロにも数値を残す。
-            if (max > 0)
-            {
-                var band = Box(track, "EstimateBand_" + id, 0, 0, 246f * max / scale, 6, Hex("6A4653"));
-                band.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            }
-            if (min > 0)
-            {
-                var floor = Box(track, "EstimateFloor_" + id, 0, 0, 246f * min / scale, 6, Coral);
-                floor.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            }
+            float w=width-40;
+            PText(parent,"EstimateLabel_"+id,title,20,y,95,30,15,PlanGray);
+            PText(parent,"EstimateValue_"+id,min==max?min.ToString():min+"～"+max,115,y,width-135,30,18,PlanInk,true,true);
+            PText(parent,"EstimateUnit_"+id,id.StartsWith("Stop")?"時間":"万円",width-57,y+23,37,18,11,PlanGray);
+            var track=PCard(parent,"EstimateTrack_"+id,20,y+44,w,10,Hex("e6eaf2"),12,false);
+            // 帯は下限から上限まで。3方針の尺度は同一で、確率に見える塗り分けはしない。
+            PCard(track,"EstimateBand_"+id,w*min/scale,0,w*(max-min)/scale,10,color,12,false);
+            if(min==max) PCard(track,"EstimateFloor_"+id,Mathf.Min(w-3,w*min/scale),0,3,10,color,12,false);
         }
-
-        private void Glyph(Transform parent, string name, string key, float x, float y, float size)
+        private void Glyph(Transform parent,string name,string key,float x,float y,float size)
         {
-            var r = Rect(parent, name, x, y, size, size);
-            var icon = r.gameObject.AddComponent<DefenseGlyph>(); icon.SetKey(key); icon.raycastTarget = false;
+            var r=Rect(parent,name,x,y,size,size);var icon=r.gameObject.AddComponent<DefenseGlyph>();icon.SetKey(key);icon.raycastTarget=false;
         }
-
         private void IncidentEvidence()
         {
-            var d = Dialog("確認できたこと", State.Current.symptom + "\n\n" + (State.audited ? State.Current.finding :
-                "調査前のため、深刻度は未確認です。正常な活動の可能性も残ります。") +
-                "\n\n見積もりは公開情報に基づく幅です。発生確率や保証ではありません。\n抑制力の内訳は各対応案から確認できます。", 640);
-            Button(d, "IncidentKnowledge", "関連する知識を読む", 32, 554, 420, 48, () => Knowledge(State.Current.lesson), Accent);
+            var d=Dialog("確認できたこと",State.Current.symptom+"\n\n"+(State.audited?State.Current.finding:
+                "調査前のため、深刻度は未確認です。正常な活動の可能性も残ります。")+
+                "\n\n見積もりは公開情報に基づく幅です。発生確率や保証ではありません。\n抑制力の内訳は各対応案から確認できます。",640);
+            Button(d,"IncidentKnowledge","関連する知識を読む",32,554,420,48,()=>Knowledge(State.Current.lesson),Accent);
         }
     }
 }

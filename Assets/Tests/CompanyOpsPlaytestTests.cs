@@ -119,8 +119,8 @@ namespace PatchWorkSecure.Tests
             StringAssert.Contains("成立", Find<TextMeshProUGUI>("ChainStatusText").text); Capture("20-chain-ready", 1280, 720); CheckGrowthText();
             Click("CloseDialog"); yield return null;
             game.Buy(OpsCatalog.Index("runbook")); game.BeginIncident(); yield return null;
-            StringAssert.Contains("復元連携 Lv.1", Find<TextMeshProUGUI>("RecoveryReadiness").text);
-            CheckPointer("Respond_recover"); Click("Respond_recover"); yield return null;
+            Assert.IsNotNull(Find<RectTransform>("PreparedBadge_recover"));
+            CheckPointer("Respond_recover"); Click("Respond_recover"); yield return WaitForResolution(game);
             CheckPointer("EffectDetails"); Click("EffectDetails"); yield return null;
             StringAssert.Contains("復元連携が機能", Find<TextMeshProUGUI>("EffectChain").text);
             Capture("21-investment-effects", 1280, 720); CheckGrowthText(); CheckPointer("CloseDialog");

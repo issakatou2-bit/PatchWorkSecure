@@ -2,13 +2,14 @@ using UnityEngine;
 
 namespace PatchWorkSecure.CompanyOps
 {
-    public enum OpsCue { Click, Action, Purchase, Growth, Alert, Success, Damage, Month, Clear, Failure }
+    public enum OpsCue { Click, Action, Purchase, Growth, Alert, Success, Damage, Month, Clear, Failure, Prepared, StaffHelp }
 
     // 差し替え素材はここへ集約。未設定の効果音は試作用の合成音で動く。
     [CreateAssetMenu(menuName = "PatchWorkSecure/情シスの一年/サウンド素材")]
     public sealed class OpsSoundPalette : ScriptableObject
     {
         public AudioClip click, action, purchase, growth, alert, success, damage, month, clear, failure;
+        public AudioClip prepared, staffHelp;
         public AudioClip titleMusic, planningMusic, incidentMusic, reviewMusic;
         public AudioClip Clip(OpsCue cue)
         {
@@ -23,6 +24,8 @@ namespace PatchWorkSecure.CompanyOps
                 case OpsCue.Damage: return damage;
                 case OpsCue.Month: return month;
                 case OpsCue.Clear: return clear;
+                case OpsCue.Prepared: return prepared;
+                case OpsCue.StaffHelp: return staffHelp;
                 default: return failure;
             }
         }
@@ -43,6 +46,8 @@ namespace PatchWorkSecure.CompanyOps
                 case OpsCue.Click: Note(samples, 1100, 0, .055f, .12f, true); break;
                 case OpsCue.Action: Note(samples, 660, 0, .16f, .20f); Note(samples, 880, .065f, .20f, .14f); break;
                 case OpsCue.Purchase: Note(samples, 784, 0, .18f, .22f, true); Note(samples, 1175, .09f, .23f, .17f); break;
+                case OpsCue.Prepared: Note(samples, 392, 0, .10f, .20f, true); Note(samples, 784, .06f, .23f, .19f); Note(samples, 1175, .12f, .22f, .16f); break;
+                case OpsCue.StaffHelp: Note(samples, 880, 0, .14f, .18f); Note(samples, 1320, .08f, .25f, .16f); break;
                 case OpsCue.Growth:
                     Note(samples, 523, 0, .26f, .18f); Note(samples, 659, .10f, .26f, .18f);
                     Note(samples, 784, .20f, .35f, .19f); Note(samples, 1047, .29f, .30f, .13f); break;

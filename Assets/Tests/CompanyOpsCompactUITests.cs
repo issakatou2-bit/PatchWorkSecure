@@ -47,7 +47,7 @@ namespace PatchWorkSecure.Tests
                 CheckPointer("Respond_" + id);
             }
             Capture("43-compact-incident", 1280, 720); CheckText();
-            game.Resolve("scope"); yield return null;
+            game.Resolve("scope"); yield return WaitForResolution(game);
             Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t => t.name == "Causality"));
             string reason = game.State.Latest.explanation;
             CheckPointer("ReviewDetails"); Click("ReviewDetails"); yield return null;

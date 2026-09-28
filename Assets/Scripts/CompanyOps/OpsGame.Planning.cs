@@ -65,12 +65,7 @@ namespace PatchWorkSecure.CompanyOps
             stage.gameObject.AddComponent<Mask>().showMaskGraphic=false;
             PImage(stage,"OfficeArt",OfficeArt,0,0,900,900);
             PImage(stage,"StageShade",PlanningArt.stageShade,0,492,900,300);
-            if(State.month==4) PImage(stage,"SummerDaylight",PlanningArt.gradient,0,0,900,792,new Color(1,.94f,.8f,.08f));
-            if(State.month==0||State.month==8)
-            {
-                float[] xs={120,330,520,700,860,420}, periods={9,11,8,10,12,9.5f}, delays={0,2,4,1,5,6.5f};
-                for(int j=0;j<6;j++) Motion(PImage(stage,"SeasonParticle"+j,State.month==0?PlanningArt.petal:PlanningArt.snow,xs[j],0,State.month==0?14:9,10),"petal",periods[j],delays[j]);
-            }
+            SeasonLayer(stage,900,792,State.month);
             for(int j=0;j<3;j++)
             {
                 bool installed=State.Level(j==0?"backup":j==1?"monitor":"redundancy")>0;

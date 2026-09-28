@@ -18,11 +18,14 @@ namespace PatchWorkSecure.CompanyOps
         private void SituationCard(Transform map)
         {
             bool risk = State.Situation.stopLossCap > 0 || State.SituationFatigue > 0;
-            var b = Button(map, "OpenSituation", "", 18, 387, 628, 67, SituationDialog, Ink);
+            float width = State.eventRules > 0 ? 382 : 628;
+            var b = Button(map, "OpenSituation", "", 18, 387, width, 67, SituationDialog, Ink);
             var accent = Box(b.transform, "SituationRail", 0, 3, 4, 61, risk && !State.situationPrepared ? Coral : Sky);
             accent.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(b.transform, "SituationTitle", "社内事情 / " + (State.situationRules == 0 ? "通常運用" : State.Situation.title) + "   >", 16, 6, 595, 28, 20, risk && !State.situationPrepared ? Coral : Sky);
-            Text(b.transform, "SituationEffect", SituationEffect(), 16, 36, 595, 25, 16, Paper);
+            Text(b.transform, "SituationTitle", "社内事情 / " + (State.situationRules == 0 ? "通常運用" : State.Situation.title) + "   >", 16, 6, width-32, 28, 17, risk && !State.situationPrepared ? Coral : Sky);
+            Text(b.transform, "SituationEffect", SituationEffect(), 16, 36, width-32, 25, 14, Paper);
+            if (State.eventRules > 0) Button(map, "OpenTicket", "日常チケット >\n<size=14>" + (string.IsNullOrEmpty(State.ticketResolution) ? "未対応 / 社員にも任せられる" : "完了 / 工数と成長を確認") + "</size>",
+                412, 387, 234, 67, TicketDialog, string.IsNullOrEmpty(State.ticketResolution) ? Edge : Ink);
         }
         private void SituationDialog()
         {

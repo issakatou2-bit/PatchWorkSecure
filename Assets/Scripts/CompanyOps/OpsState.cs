@@ -12,6 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         public int avoidedLoss, avoidedDowntime;
         public bool hasInvestmentComparison;
         public string response, explanation, promise;
+        public string eventId, eventTitle, lessonId, ticketId, ticketMode;
         public bool benign;
         public string situationId;
         public bool situationPrepared;
@@ -50,7 +51,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public OpsState() { }
         public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; staffExperience = new int[3]; }
-        public OpsMonth Current => OpsCatalog.Months[month];
+        public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
         public OpsSituation SituationAt(int targetMonth)
         {
@@ -78,13 +79,13 @@ namespace PatchWorkSecure.CompanyOps
         public int Resilience => Clamp((Level("backup") + Level("drill") + Level("redundancy") + Level("runbook")) * 12);
         public int Organization => (culture + trust + 100 - fatigue) / 3;
         // 保存データの喪失と、性能・処理の停止を区別する。バックアップは混雑の解決には使わない。
-        public bool DataRecoveryApplies => OpsCatalog.DataRecoveryMonths.Contains(month);
-        public bool RestartApplies => OpsCatalog.RestartMonths.Contains(month);
+        public bool DataRecoveryApplies => CurrentProfile == null ? OpsCatalog.DataRecoveryMonths.Contains(month) : CurrentProfile.dataRecovery;
+        public bool RestartApplies => CurrentProfile == null ? OpsCatalog.RestartMonths.Contains(month) : CurrentProfile.restart;
         public int RestoreChain => Math.Min(Level("backup"), Level("drill"));
         public int RestartChain => Math.Min(Level("automation"), Level("runbook"));
         public string RecoveryReadiness => DataRecoveryApplies ? (RestoreChain > 0 ? "復元連携 Lv." + RestoreChain + " / バックアップ＋訓練" : "復元連携は未整備 / バックアップ＋訓練で成立") :
             RestartApplies ? (RestartChain > 0 ? "再開連携 Lv." + RestartChain + " / 自動化＋手順" : "再開連携は未整備 / 自動化＋手順で成立") : "今回はデータ復元・処理再開の連携対象外";
-        public string StaffVoice => Level("education") > 0 && culture >= 65 && (month == 2 || month == 8) ?
+        public string StaffVoice => Level("education") > 0 && culture >= 65 && (CurrentProfile == null ? Current.kind == "social" : CurrentProfile.id == "bec") ?
             "経理の森さん：「急ぎの依頼も、いつもの連絡先で確認してから相談しています」" : Current.staff;
         public int AnnualScore => Math.Max(0, 1000 - totalLoss * 7 - totalDowntime * 4 +
             MissionCount * 45 + milestones.Count * 30 + (Preparedness + Resilience + Organization) * 2 + Math.Max(0, Math.Min(200, budget)));
@@ -103,7 +104,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public void MissionProgress(bool equipment, out int done, out int total)
         {
-            var mission = OpsCatalog.Missions[month];
+            var mission = CurrentMission;
             done = 0; total = 0;
             if (equipment)
             {
@@ -243,12 +244,13 @@ namespace PatchWorkSecure.CompanyOps
                 if (completedMissions == null) completedMissions = new List<int>();
                 completedMissions.Add(month);
                 trust = Clamp(trust + 3);
-                Note("社内依頼「" + OpsCatalog.Missions[month].title + "」達成。経営の信頼 +3。");
+                Note("社内依頼「" + CurrentMission.title + "」達成。経営の信頼 +3。");
             }
             phase = OpsPhase.Incident; Note(Current.@event + "。先月までの整備と今月の確認を使って対応しよう。"); return true;
         }
         private int Prevention()
         {
+            if (CurrentProfile != null) return CurrentProfile.prevention.Select((weight, i) => weight * levels[i]).Sum() + CulturalPower;
             switch (Current.kind)
             {
                 case "identity": return 11 * Level("mfa") + 3 * Level("education");
@@ -276,7 +278,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (!new[] { "contain", "scope", "recover" }.Contains(response)) throw new ArgumentException("不明な対応");
             int prevention = Prevention();
-            int containment = (Current.kind == "ransom" || Current.kind == "supply" || Current.kind == "vulnerability") ? 6 * Level("segment") : 0;
+            int containment = ContainmentPower;
             var power = ResponsePower(response);
             int responsePower = power.Total - prevention - containment;
             int pressure = benign ? 0 : Math.Max(0, severity - power.Total + fatigue / 15);
@@ -296,13 +298,15 @@ namespace PatchWorkSecure.CompanyOps
             loss += businessLoss;
             int cost = response == "contain" ? 6 : response == "scope" ? 3 : 4;
             return new OpsOutcome { month = month, loss = loss, downtime = downtime, pressure = pressure,
+                eventId=CurrentEvent?.id, eventTitle=CurrentEvent?.title, lessonId=CurrentEvent==null ? null : Current.lesson,
+                ticketId=Ticket?.id, ticketMode=Ticket==null ? null : string.IsNullOrEmpty(ticketResolution) ? "defer" : ticketResolution,
                 prevention = prevention, containment = containment, recovery = recovery, cost = cost,
                 response = response, benign = benign, power = power,
                 situationId = situationRules == 0 ? null : Situation.id, situationPrepared = situationPrepared,
                 businessLoss = businessLoss, extraFatigue = SituationFatigue,
                 recoveryChain = chain == 0 ? "" : dataLoss ? "復元連携" : "再開連携",
                 chainLossReduction = chainLoss, chainDowntimeReduction = chainStop,
-                explanation = benign ? Current.calm : "予防で脅威 -" + prevention + " / 影響限定 -" + containment +
+                explanation = benign ? Current.calm : (eventRules == 1 ? "事前の備えで影響 -" : "予防で脅威 -") + prevention + " / 影響限定 -" + containment +
                     " / 対応力 " + responsePower + "。" + (dataLoss ? "復旧の備えでデータ被害 -" + recovery + "万円。" : "この出来事はバックアップだけでは防げない。") };
         }
         public bool Resolve(string response)
@@ -362,6 +366,7 @@ namespace PatchWorkSecure.CompanyOps
             capacity = MaxCapacity;
             audited = listened = mapped = rested = proposed = false; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
             situationPrepared = false;
+            ticketResolution = "";
             phase = budget < 0 ? OpsPhase.Ended : OpsPhase.Planning;
             Note("月次予算 +" + income + "万円 / 維持費 -" + upkeep + "万円。今月の工数 " + capacity + "。" +
                 (situationRules > 0 ? "社内事情「" + Situation.title + "」も確認しよう。" : "")); CheckMilestones(); return true;
@@ -375,7 +380,7 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
-            if (!ValidGrowth() || capacity > MaxCapacity) return false;
+            if (!ValidGrowth() || !ValidEvents() || capacity > MaxCapacity) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;

@@ -116,10 +116,10 @@ namespace PatchWorkSecure.CompanyOps
         public OpsResponsePower ResponsePower(string response)
         {
             if (!new[] { "contain", "scope", "recover" }.Contains(response)) throw new ArgumentException("不明な対応");
-            int cultural = Current.kind == "social" ? culture / 8 : Current.kind == "leak" ? culture / 12 : 0;
-            int containment = Current.kind == "ransom" || Current.kind == "supply" || Current.kind == "vulnerability" ? 6 * Level("segment") : 0;
+            int cultural = CulturalPower;
+            int containment = ContainmentPower;
             var p = new OpsResponsePower {
-                basic = response == "contain" ? Current.kind == "outage" ? 7 : 23 : 5,
+                basic = BasicResponsePower(response),
                 equipment = Prevention() - cultural + containment,
                 field = cultural,
                 player = growthRules == 0 ? 0 : (PlayerLevel - 1) * OpsGrowthCatalog.PlayerPowerPerLevel,

@@ -21,9 +21,10 @@ Claude Codeは起動時にこれを自動で読み込むので、毎回コピペ
 - 9/27配色改修：黄みのある白・金色の常用・大きなパステル色の面を廃止。チャコール＋白＋青の操作色、成果は緑・危険は赤。旧版の配色とアート原画像は変更していない。
 - 9/28書体・形状改修：新試作の本文はZen Kaku Gothic New Medium、見出し・数値・操作はM PLUS Rounded 1c Bold。既知文字は静的収録＋同梱書体の動的補完。標準Knobのテクスチャを共有した9-sliceで窓・カード・ボタンを角丸化。参考調査・ライセンス・生成方法は `Docs/CompanyYear-Typography-2026-09.md`。旧版のmeiryo設定は維持。
 - 専門観点のAI評価・仮想プレイ・最新更新の追加調査：`Docs/Playtest-Review-2026-09-26.md`（末尾に9/27の再計測を追記）。実在の専門家・人間の初見プレイとは区別する。
+- 9/28の3タイプ仮想方針：`Docs/Persona-Playtest-2026-09-28.md`。各5年度を画面で検証、各30組×5年度で計450年度を計算（446完走）。人間の試遊・学習測定ではなく、本体は変更していない。初学者の停止過多、限定対応への偏り、慣れた方針の余工数を確認。購入方針は主にLv.1なので、余工数を「できることがない」と断定しない。継続効果・偶発的成果・連携強化の追加案は未実装。
 - ゲーム体験・UI・音の調査と次の設計仮説：`Docs/Game-Experience-Research-2026-09.md`。
 - 本体：`Assets/Scripts/CompanyOps/`。純粋C#の状態と表示を分離。シーン生成は `CompanyOpsSceneBuilder`。
-- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（54件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
+- 検証：`Tools/Verify-CompanyOps.ps1`、`Tools/Verify-CompanyOps-Personas.ps1`、`Tools/Compile-Office.ps1`、Unity PlayModeテスト（57件）。旧記載の `balance_sim.js` / `verify_csharp_logic.py` は存在しない。
 - UI・効果音と4種の月次事情を追加済み。BGMは素材枠のみ、楽曲未投入。ひなたは暫定素材で手描き完成原画ではない。
 - v0.5は復元/再開連携、成長目標からの導入、3方針の購入前比較、設備別の効果表示を追加。追加予算未達時の返却と休暇の休息統合も実装。適用対象と連携値はOpsCatalog。過去の結果を書き換えず、旧記録の未保存項目は未記録と表示。
 - 自動完走と「面白い」は別。今後は設備・運用・社員の連携、会社の成長の可視化、状況で迷う選択を優先する。新しい設計案は実装済みと扱わない。
@@ -213,8 +214,8 @@ Playした瞬間に出るNullReferenceの類はここで捕まるので、UIや�
   -logFile "C:\Projects\PatchWorkSecure\batch_log.txt"
 ```
 
-`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-28時点で**54件**：
-新試作45件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
+`test_results.xml`の`total`/`passed`/`failed`を見る（2026-09-28時点で**57件**：
+新試作48件＋旧版の通し2件＋オフィス7件）。オフィス系・新試作のテストはスクリーンショットを撮るので、
 **`-nographics`を付けずに**実行すること。
 テストを足すときの注意：テスト用asmdefの`includePlatforms`は**空**にすること
 （`["Editor"]`にするとPlayModeテストの対象外になり、1件も実行されないまま成功扱いになる）。
@@ -280,7 +281,7 @@ Unity同梱のMonoでC#を直接コンパイルして動かす。**攻撃・防�
 
 ### 検証の状態
 
-- PlayModeテスト54件中54件成功（9/28）。40件の相談・対応画面、日常業務、保存、旧方式互換、効果差、文字の収まり・クリックを確認。更新したWindows版の12か月通し検証も成功。文字欠け警告・ゲーム例外なし。ビルドの既存ライセンス検証警告と、終了時のComputeBuffer解放警告は残る。
+- PlayModeテスト57件中57件成功（9/28、`Artifacts/company-persona-full-tests.xml`）。3タイプ各5年度・180か月の画面検証を追加。40件の相談・対応画面、日常業務、保存、旧方式互換、効果差、文字の収まり・クリックを確認。前回更新したWindows版の12か月通し検証も成功。今回は本体・ビルドを変更していない。文字欠け警告・ゲーム例外なし。ビルドの既存ライセンス検証警告と、終了時のComputeBuffer解放警告は残る。
 - `Tools/Verify-*.ps1` 3本とも成功（9/27）
 
 ## 5. 次にやってほしいこと（優先順位順）

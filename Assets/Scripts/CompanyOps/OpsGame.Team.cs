@@ -144,6 +144,8 @@ namespace PatchWorkSecure.CompanyOps
                 numbers[i].text = "+" + values[i]; sum += values[i]; total.text = sum.ToString();
                 if (values[i] > 0) PlayCue(OpsCue.Click);
             }
+            for(float t=0;t<.18f;t+=Time.unscaledDeltaTime){if(total==null)yield break;total.transform.localScale=Vector3.one*(ReducedMotion?1:1+.1f*Mathf.Sin(t/.18f*Mathf.PI));yield return null;}
+            if(total!=null)total.transform.localScale=Vector3.one;
         }
         private string GrowthResultText(OpsOutcome r)
         {

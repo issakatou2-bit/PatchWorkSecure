@@ -59,12 +59,11 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (!Application.isPlaying) return;
             var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay; reveal.Stamp = stamp;
-            if(stamp)StartCoroutine(StampSound(rect,delay));
+            reveal.Duration=RepeatDuration("reveal_"+rect.name,.45f,.27f);
         }
-        private IEnumerator StampSound(RectTransform target,float delay)
+        public void StampImpact()
         {
-            yield return new WaitForSecondsRealtime(delay);
-            if(target!=null&&target.gameObject.activeInHierarchy)PlayPresentationCue(OpsCue.Stamp);
+            PlayPresentationCue(OpsCue.Stamp);HoldPresentation();DuckMusic(.35f);
         }
         private string WindowCategory(string title) => title.Contains("設定") ? "SETTINGS" : title.Contains("知識") || OpsCatalog.Terms.Any(t => t.name == title) ? "KNOWLEDGE" : title.Contains("育成") || title.Contains("チーム") ? "TEAM" : title.Contains("記録") || title.Contains("評価") ? "REPORT" : title.Contains("導入") || title.Contains("Lv.") ? "PLANNING" : "PATCHWORK";
         private void WindowHeader(RectTransform card, string title, string category, float width)

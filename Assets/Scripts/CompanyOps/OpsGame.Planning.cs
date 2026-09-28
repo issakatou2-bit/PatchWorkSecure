@@ -139,6 +139,14 @@ namespace PatchWorkSecure.CompanyOps
             PText(coin,"CoinLabel","円",0,0,30,30,16,Hex("7a5a00"),true,true);
             PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
             PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
+            if(statChanges[0]<0)
+            {
+                int previous=State.budget-statChanges[0];
+                PCard(budget.transform,"BudgetFlowTrack",16,56,budgetWidth-32,4,PlanTrack,12,false);
+                LossTrail(budget.transform,"BudgetLossTrail",16,56,budgetWidth-32,4,previous,State.budget,previous);
+                PCard(budget.transform,"BudgetFlowFill",16,56,(budgetWidth-32)*Mathf.Clamp01(State.budget/(float)Math.Max(1,previous)),4,PlanBlue,12,false);
+                Hover(budget,"今回の支出前 "+previous+"万円 → "+State.budget+"万円");
+            }
             var work=PButton(screen,"Stat_1","",workX,24,workWidth,64,()=>StatusDetail(1),new Color(1,1,1,.92f),PlanInk,20);
             // ラベルと最初のコマの間を12px空ける。残数・回復量は押したときの詳細へ。
             PText(work.transform,"CapacityTitle","工数",16,0,36,64,14,PlanGray);
@@ -169,6 +177,7 @@ namespace PatchWorkSecure.CompanyOps
                 PText(rank,"RankValue",PlanningRank(values[j]),0,0,40,40,26,Color.white,true,true);
                 PText(row.transform,"MetricTitle",labels[j],62,7,150,28,16);
                 PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
+                if(j==0)LossTrail(row.transform,"StabilityLossTrail",62,37,150,6,State.stability-statChanges[2],State.stability,100);
                 if(values[j]>0) PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
                 PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
             }
@@ -199,6 +208,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(chip,"CategoryText",category,5,0,104,25,13,Hex("c23a60"),true,true);
             var reward=PCard(card,"RewardChip",140,142,148,25,Hex("e3f2ff"),12,false);
             PText(reward,"RewardText","達成で 信頼+3",4,0,140,25,13,Hex("1f6fb0"),true,true);
+            string near=MissionNearText();if(near!="")PText(card,"MissionNear",near,20,126,268,16,12,Hex("1a7c63"));
             var ring=PCard(card,"ConsultationPulse",20,177.2f,268,52,new Color(1,.435f,.569f,.4f),16,false);ring.pivot=new Vector2(.5f,.5f);ring.anchoredPosition+=new Vector2(134,-26);Motion(ring,"pulse",1.8f);
             var talk=PButton(card,"ConsultationDetails","話を聞く",20,177.2f,268,52,PlanningBriefDialog,PlanPink,Color.white,16,Hex("d94a70"));Shine(talk.transform,268,52);
             var goals=PCard(screen,"YearGoals",1268,359.2f,308,122.4f,null,20);
@@ -211,6 +221,8 @@ namespace PatchWorkSecure.CompanyOps
                 PImage(b.transform,"GoalStar",j==0||State.milestones.Contains("相談が集まる職場")?PlanningArt.star:PlanningArt.starMuted,4,2,26,26);
                 PText(b.transform,"GoalLabel",names[j],40,0,200,30,16,j==0?PlanInk:PlanGray);
                 PText(b.transform,"GoalProgress",progress[j],231,0,49,30,15,Hex("7c879c"),true,true);
+                bool last=j==0?(State.Level("backup")>0?1:0)+(State.Level("drill")>0?1:0)==1:State.Level("education")>0&&State.culture<65&&State.culture+7>=65&&State.ActionBlock("listen")=="";
+                if(last){b.transform.Find("GoalProgress").GetComponent<RectTransform>().sizeDelta=new Vector2(49,20);PText(b.transform,"GoalNear","あと1手",216,20,64,14,11,Hex("1a7c63"),true,true);}
             }
             PButton(screen,"AdvanceMonth","月を進める ▶",1268,660,308,60,AdvancePlanning,PlanInk,Color.white,20,Hex("0c1226"));
         }
@@ -223,7 +235,7 @@ namespace PatchWorkSecure.CompanyOps
         private void PlanningNavigator()
         {
             var stage=screen.Find("OfficeStage");
-            var character=Rect(stage,"PlanningCharacter",-64,363,347,430);Motion(character,"bob",3.2f);
+            var character=Rect(stage,"PlanningCharacter",-64,363,347,430);
             Portrait(character,"NavigatorPortrait",0,0,347,430,State.fatigue>=70?"pose_exhausted":"pose_fists");
             var speech=PCard(screen,"Navigator",600,580,420,129.2f,Color.white,24);
             PImage(speech,"SpeechTail",PlanningArt.tail,-13,36,14,20);

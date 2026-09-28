@@ -96,7 +96,33 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 656a4dc577996c4449db1ff8d0ec9e96, type: 3}
   - Id: pose_wave
     Sprite: {fileID: 21300000, guid: 748d87ef64181754ab01297f66175a2e, type: 3}
-  AnimationFrames: []
+  AnimationFrames:
+  - Expression: normal
+    PoseId: pose_fists
+    EyesHalf: {fileID: 21300000, guid: 87d94704a2016004a83c83ceab52c5e4, type: 3}
+    EyesClosed: {fileID: 21300000, guid: 5c2f015098a54994e90c194f8e749711, type: 3}
+    MouthOpen: {fileID: 21300000, guid: c6bc0e01dcba6484f92c2d9236ffef6c, type: 3}
+    MouthMid: {fileID: 0}
+    MouthClosed: {fileID: 21300000, guid: b545e12f64a9a134b819f22b3c5b1d17, type: 3}
+    EyeRegion:
+      serializedVersion: 2
+      x: 0.21774194
+      y: 0.5479675
+      width: 0.57459676
+      height: 0.299187
+    MouthRegion:
+      serializedVersion: 2
+      x: 0.46169356
+      y: 0.5349594
+      width: 0.13306452
+      height: 0.07317073
+  EmotionMarks:
+  - {fileID: 21300000, guid: 535f305ef6173c5448aeeb1b642471dc, type: 3}
+  - {fileID: 21300000, guid: 666bd1c1d5c983e429775fb4fc5ac273, type: 3}
+  - {fileID: 21300000, guid: f02bd77e8d16b094e87d7b9061151bd0, type: 3}
+  - {fileID: 21300000, guid: 4fc8555d8b4c57d46b79d4a86aff5db5, type: 3}
+  - {fileID: 21300000, guid: dadb9a855946da44d93d69bb6ed85d05, type: 3}
+  - {fileID: 21300000, guid: 05d1587567ade1a4ea05ba2408b9033d, type: 3}
   LineNormal: "\u4ECA\u65E5\u3082\u5E73\u548C\u3060\u306D\uFF01 \u4ECA\u306E\u3046\u3061\u306B\u5099\u3048\u3061\u3083\u304A\uFF01"
   LineNoDefense: "\u307E\u3060\u5BFE\u7B56\u30BC\u30ED\u3060\u3088\uFF01\uFF1F \u4F55\u304B\u3072\u3068\u3064\u5165\u308C\u3088\u3001\u306D\uFF1F"
   LineLowBudget: "\u304A\u8CA1\u5E03\u30D4\u30F3\u30C1\u2026\u2026\uFF01 \u3053\u3053\u306F\u6211\u6162\u306E\u3057\u3069\u3053\u308D\u3060\u306D"

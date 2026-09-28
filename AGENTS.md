@@ -23,7 +23,7 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 | `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.10。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
-- 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない（共有は`NavigatorPersona`のみ）。
+- 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない。キャラデータの共有は`NavigatorPersona`、表示用の`OpsPortraitAnimator`／`OpsPortraitMotion`も両版で再利用。
 - 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold。計画・事件・初回ガイド・月報・年間評価・設定を承認モックへ移行し、共通UIキットを適用。`Docs/UI-Kit-and-Next2-2026-09-28.md`。
 - Windows版：`Builds/CompanyYear/PatchWorkSecure-Year.exe`（gitでは追跡しない）。
 - 旧版は自動で新試作へ置き換えない。9/13の改修以降は機能追加をせず、回帰テストだけを続けている。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で106件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で111件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -88,17 +88,17 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-29）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.10：共通UI・初回ガイド・月報・年間評価・設定を移行し、事件の設備名／備え一覧／横並び単位、未導入の点線、発動中の設定非表示、6月の雨を仕上げた。PlayMode全103件実行（101成功、失敗2件は待機条件見直し後に個別成功）、最終対象3件各1/1、Verify系成功。報酬・難易度は変更なし。詳細は`Docs/Incident-Finish-and-Sfx-2026-09-29.md`。目と口の差分は仕組みだけ。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
+- 新試作v0.10：共通UI・初回ガイド・月報・年間評価・設定を移行し、事件の備え表示と6月の雨を仕上げた。新ひなた・ロゴ・質感も更新し、動き①②と演出調査◎9技法を実装。PlayMode111/111、最後の差分位置・感情マーク補正後も追加5件各1/1、Verify4系統・コンパイル成功。報酬・難易度は変更なし。詳細は`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
-- ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。ロゴ・質感・タイトルも更新。全106件実行105成功、撮影先修正後の1件も成功、Verify4系統成功。旧画像は`ArtSource/Hinata/legacy/`。詳細は`Docs/Hinata-Replacement-2026-09-29.md`。次は動き①②と演出◎。学生服は不可。ボイス台本は`Docs/Voice/`。
+- ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。旧画像は`ArtSource/Hinata/legacy/`。基本ポーズ`pose_fists`は4素材の目口差分、他17ポーズは1枚絵で動く。移動・拡縮・回転を減らしてもまばたきは残る。来歴は`Docs/Hinata-Replacement-2026-09-29.md`と`Docs/Reference-Asset-Provenance.md`。学生服は不可。ボイス台本は`Docs/Voice/`。
 - 音：SEは加藤さんの試聴後の指定でB-brightの11音を試遊用に登録（`Docs/Sfx-Candidates-2026-09-29.md`）。A案は未投入。BGMはGemini / Lyriaの生成2曲。声はLが基準案で未投入。目・口の差分は`NavigatorPersona.AnimationFrames`で設定する。
 - UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
 
 ## 7. 次にやること（優先順）
 
 1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
-2. `Docs/Mockups/Hinata-Motion.md`の①②と`Docs/Game-Feel-Research-2026-09-29.md`の◎を実装。基本ポーズの差分4枚は`ArtSource/Hinata/gen-20260929/final/`。他ポーズは1枚にフォールバック。各工程を検証後に別コミットする。
-3. `Docs/Mockups/Next-Screens.md`を正として承認済みの次画面を順に移行。①事件・④季節を実装済み、次は②依頼書・報酬、③タイトル・共通遷移、⑤部屋の操作、⑥ステータス恩恵。②と⑥の数値変更はVerify系で検証する。依頼報酬はまだ信頼+3・年間+45点のみ。
+2. 新ひなたの動き・差分・音のミックスを加藤さんが試遊で確認する。①②と演出◎は実装済み。追加ポーズの目口素材が届いたら同じキャンバス・基準点で登録し、差分のないポーズの1枚絵フォールバックは維持する。Live2D等の部品分けは未着手。
+3. `Docs/Mockups/Next-Screens.md`を正として承認済みの次画面を順に移行。①事件・④季節・③新タイトルと共通遷移は実装済み、次は②依頼書・報酬、⑤部屋の操作、⑥ステータス恩恵。②と⑥の数値変更はVerify系で検証する。依頼報酬はまだ信頼+3・年間+45点のみ。
 4. 生成BGM2曲の試聴・ループ調整、B案SEを実プレイで確認してミックスを詰める（別案は承認前に登録しない）。図鑑は年度内遭遇集計と枠まで、一覧画面・年度をまたぐ集計は未実装。商用本採用前に利用条件を再確認する。
 5. 難易度：限定対応を弱めるより、状況で選び分ける理由を増やす。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。
 6. Player Settings（Steam向け）、ブランチ整理。

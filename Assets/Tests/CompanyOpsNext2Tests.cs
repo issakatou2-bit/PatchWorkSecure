@@ -64,7 +64,7 @@ namespace PatchWorkSecure.Tests
             yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(OpsPhase.Ended,game.State.phase);Assert.AreEqual(12,game.State.history.Count);Assert.IsTrue(game.State.IsClear);
             Assert.AreEqual(12,game.Surface.GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("AnnualMonth")&&!t.name.StartsWith("AnnualMonthName")&&!t.name.StartsWith("AnnualMonthResult")));
             var summary=OpsAnnualSummary.From(game.State);Assert.AreEqual(summary.encountered.Count+" / 40",Find<TextMeshProUGUI>("CollectionValue").text);
-            var portraitPosition=Find<RectTransform>("NavigatorPortrait").anchoredPosition;
+            var portraitPosition=Find<RectTransform>("NavigatorPortrait").GetComponent<OpsPortraitMotion>().LayoutPosition;
             Assert.AreEqual(1275,portraitPosition.x);Assert.AreEqual(-630,portraitPosition.y,"成長目標の下に置き、足元を画面内に収める");
             CheckPointer("AnnualDetails");CheckPointer("EndingHistory");CheckPointer("BackHome");CheckPointer("ReplayYear");CheckText();Capture("77-annual-report");
             Click("ReplayYear");yield return null;Assert.AreEqual(0,game.State.month);Assert.AreEqual(OpsPhase.Planning,game.State.phase);LogAssert.NoUnexpectedReceived();
@@ -83,8 +83,9 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator ひなたは差分未設定なら一枚絵を保ちゲーム乱数に触れない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
-            var portrait=Find<Image>("NavigatorPortrait");var animator=portrait.GetComponent<OpsPortraitAnimator>();Assert.IsNotNull(animator);Assert.IsFalse(animator.HasFrames);string before=JsonUtility.ToJson(game.State);var original=portrait.sprite;
-            yield return new WaitForSecondsRealtime(5.2f);Assert.AreSame(original,portrait.sprite);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Assert.IsFalse(portrait.transform.Find("HinataEyes").GetComponent<Image>().enabled);Assert.IsFalse(portrait.transform.Find("HinataMouth").GetComponent<Image>().enabled);LogAssert.NoUnexpectedReceived();
+            var portrait=Find<Image>("NavigatorPortrait");var animator=portrait.GetComponent<OpsPortraitAnimator>();Assert.IsNotNull(animator);animator.ChangePose("pose_laptop");yield return new WaitForSecondsRealtime(.4f);
+            Assert.IsFalse(animator.HasFrames);string before=JsonUtility.ToJson(game.State);var original=portrait.sprite;
+            yield return new WaitForSecondsRealtime(5.2f);Assert.AreSame(original,portrait.sprite);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Assert.IsFalse(portrait.GetComponentsInChildren<Image>().First(i=>i.name=="HinataEyes").enabled);Assert.IsFalse(portrait.GetComponentsInChildren<Image>().First(i=>i.name=="HinataMouth").enabled);LogAssert.NoUnexpectedReceived();
         }
         [Test] public void 月報の見積もりと月初値は保存でき旧記録には捏造しない()
         {

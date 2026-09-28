@@ -60,7 +60,8 @@ namespace PatchWorkSecure.CompanyOps
             bool desks=State.Current.kind=="leak"||State.Current.kind=="identity";
             bool reception=State.CurrentProfile?.id=="bec";
             bool meeting=State.Current.kind=="social"&&!reception;
-            PImage(map,"OfficeArt",OfficeArt,desks?-40:reception?-450:meeting?-840:-440,desks||meeting?-140:reception?-560:-20,1500,1500,new Color(.55f,.55f,.55f,1));
+            var room=PImage(map,"OfficeArt",OfficeArt,desks?-40:reception?-450:meeting?-840:-440,desks||meeting?-140:reception?-560:-20,1500,1500,new Color(.55f,.55f,.55f,1));
+            if(Application.isPlaying)room.gameObject.AddComponent<OpsRoomZoom>().Owner=this;
             var alarm=IncidentShape(map,"AffectedRoom","alarm",110,16,380,390,IncidentRed);Motion(alarm,"alarm",1.2f);
             var mark=PButton(map,"IncidentLocation","!",270,150,64,64,IncidentEvidence,IncidentRed,Color.white,28);
             mark.GetComponent<Image>().sprite=PlanningArt.markerBubble;Border(mark,Color.white,4);
@@ -69,7 +70,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(symptom,"LocationName",desks?"社員の席・情報の扱い":reception?"受付・社外とのやりとり":meeting?"会議室・情報の確認":"サーバー室・システム",16,8,348,25,15,Hex("ff9fb5"));
             PText(symptom,"IncidentSymptom",State.Current.symptom,16,33,348,26,15,Color.white,false);
             PText(symptom,"UnknownScope","影響範囲は未確認",16,59,348,20,13,Color.white,false);
-            var portrait=Rect(map,"IncidentHinata",10,440,266,330);Portrait(portrait,"NavigatorPortrait",0,0,266,330,"pose_startled");Motion(portrait,"shake",2.4f);
+            var portrait=Rect(map,"IncidentHinata",10,440,266,330);Portrait(portrait,"NavigatorPortrait",0,0,266,330,"pose_startled");
             var navigator=PCard(map,"Navigator",250,560,320,126,Color.white,20,false);
             PImage(navigator,"SpeechTail",PlanningArt.tail,-20,20,26,36);
             var tag=PCard(navigator,"NavigatorTag",16,-13,78,23,PlanPink,12,false);

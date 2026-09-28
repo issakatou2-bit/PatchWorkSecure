@@ -67,12 +67,13 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     if(identity.name!="NavigatorPortrait")continue;
                     string pose=State.fatigue>=70?"pose_exhausted":string.IsNullOrEmpty(line.poseId)?"pose_fists":line.poseId;
-                    identity.PoseId=pose;identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Pose(pose);
+                    identity.GetComponent<OpsPortraitAnimator>().ChangePose(pose);
                 }
             foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
                 if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
             string expression=reaction==OpsReaction.Alert?"alert":reaction==OpsReaction.Success?"relieved":reaction==OpsReaction.Growth||reaction==OpsReaction.Clear?"proud":reaction==OpsReaction.Recover||reaction==OpsReaction.Failure?"sad":"normal";
             foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.SetExpression(expression);
+            if(line.faceId=="face_pout")foreach(var motion in screen.GetComponentsInChildren<OpsPortraitMotion>())motion.ShowEmotion(3);
         }
 
         private void StopVoice() { if (voiceAudio != null) voiceAudio.Stop(); }

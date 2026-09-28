@@ -51,6 +51,8 @@ namespace PatchWorkSecure.CompanyOps
             // 方針は残し、発動が多い時は直近3件を送る。全件を一度ずつ表示する。
             var cutin=IncidentShape(screen,"ResolutionCutin","cutin",380,300,1100,190,PlanPink);
             var cast=cutin.gameObject.AddComponent<Shadow>();cast.effectColor=Hex("d94a70");cast.effectDistance=new Vector2(0,-10);
+            var lines=IncidentShape(cutin,"CutinSpeedLines","rays",-50,-500,1200,1200,new Color(1,1,1,.18f));
+            cutin.gameObject.AddComponent<RectMask2D>();Motion(lines,"rotate",5);
             var shineMask=IncidentShape(cutin,"CutinShineMask","cutin",0,0,1100,190,Color.white);
             shineMask.gameObject.AddComponent<Mask>().showMaskGraphic=false;Shine(shineMask,1100,190);
             PText(cutin,"CutinCaption","備えが効いた！",60,21,980,30,20,Color.white);
@@ -59,6 +61,15 @@ namespace PatchWorkSecure.CompanyOps
             var titleShadow=cutin.Find("CutinTitle").gameObject.AddComponent<Shadow>();titleShadow.effectDistance=new Vector2(0,-5);titleShadow.effectColor=Hex("c23a60");
             PText(cutin,"CutinEffect","",60,139,980,32,20,Hex("7a1f3a"));
             cutin.gameObject.SetActive(false);
+            var resources=PCard(screen,"ResolutionResources",560,568,1016,32,new Color(1,1,1,.15f),12,false);
+            PText(resources,"ResolutionBudget","予算 "+(State.budget-statChanges[0])+" → "+State.budget+"万円",16,0,232,32,15,Color.white);
+            PCard(resources,"BudgetResourceTrack",258,12,214,7,new Color(1,1,1,.2f),12,false);
+            int budgetBefore=State.budget-statChanges[0];LossTrail(resources,"ResolutionBudgetLossTrail",258,12,214,7,budgetBefore,State.budget,budgetBefore);
+            PCard(resources,"BudgetResourceFill",258,12,214*Mathf.Clamp01(State.budget/(float)Math.Max(1,budgetBefore)),7,PlanBlue,12,false);
+            PText(resources,"ResolutionStability","業務の安定 "+(State.stability-statChanges[2])+" → "+State.stability,520,0,238,32,15,Color.white);
+            PCard(resources,"StabilityResourceTrack",770,12,230,7,new Color(1,1,1,.2f),12,false);
+            LossTrail(resources,"ResolutionStabilityLossTrail",770,12,230,7,State.stability-statChanges[2],State.stability,100);
+            PCard(resources,"StabilityResourceFill",770,12,230*State.stability/100f,7,PlanMint,12,false);
             var result=PCard(screen,"ResolutionResults",560,610,1016,180,new Color(1,1,1,.96f),24,false);
             var lossNeedle=ResolutionMeter(result,"Loss","被害",r.loss,Math.Max(r.loss,resolutionEstimate.lossMax),22,Hex("ff9f43"),"万円");
             var stopNeedle=ResolutionMeter(result,"Stop","業務停止",r.downtime,Math.Max(r.downtime,resolutionEstimate.stopMax),76,PlanPink,"時間");
@@ -106,13 +117,14 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ResolutionRoutine(List<ResolutionStep> steps,RectTransform flow,RectTransform cutin,RectTransform loss,RectTransform stop,RectTransform hinata,bool good,OpsOutcome outcome)
         {
-            float stepDuration=(ShortenInterruptions && resolutionCount>1 ? 1.15f : 3.2f)/steps.Count;
+            float stepDuration=(resolutionCount>1?(ShortenInterruptions?1.15f:2.3f):3.2f)/steps.Count;
             for(int index=0;index<steps.Count;index++)
             {
                 var step=steps[index];ResolutionFlow(flow,steps,index);
                 cutin.gameObject.SetActive(step.equipment||step.staff);
                 if(step.equipment||step.staff)
                 {
+                    DuckMusic(stepDuration+.25f);
                     cutin.Find("CutinCaption").GetComponent<TextMeshProUGUI>().text=step.staff?"社員が助けてくれた！":"備えが効いた！";
                     cutin.Find("CutinTitle").GetComponent<TextMeshProUGUI>().text=step.name;
                     cutin.Find("CutinEffect").GetComponent<TextMeshProUGUI>().text=step.detail;
@@ -124,13 +136,14 @@ namespace PatchWorkSecure.CompanyOps
                     }
                 }
                 else if(index>0&&!step.missing)PlayCue(OpsCue.Action);
-                float elapsed=0;
+                float elapsed=0;bool impact=false;
                 while(elapsed<stepDuration)
                 {
-                    elapsed+=Time.unscaledDeltaTime;
+                    elapsed+=PresentationDeltaTime;
                     float progress=elapsed/stepDuration;
                     float slide=progress<.2f?Mathf.Lerp(-1500,0,progress/.2f):progress>.8f?Mathf.Lerp(0,1700,(progress-.8f)/.2f):0;
                     cutin.anchoredPosition=new Vector2(380+(ReducedMotion?0:slide), -300);
+                    if(!impact&&progress>=.2f&&(step.equipment||step.staff)){impact=true;HoldPresentation();hinata.GetComponentInChildren<OpsPortraitMotion>()?.Celebrate();}
                     yield return null;
                 }
                 for(int j=cutin.childCount-1;j>=0;j--)if(cutin.GetChild(j).name.StartsWith("CutinSpark"))Destroy(cutin.GetChild(j).gameObject);
@@ -148,7 +161,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             loss.anchoredPosition=lossFinal;stop.anchoredPosition=stopFinal;
             Feedback(good?OpsCue.Success:outcome.loss>0?OpsCue.Damage:OpsCue.Action);
-            if(good)Motion(hinata,"hop",1.4f);else Motion(hinata,"shake",2.8f);
+            if(good)hinata.GetComponentInChildren<OpsPortraitMotion>()?.Celebrate();
             yield return new WaitForSecondsRealtime(.75f);
             FinishResolution();
         }

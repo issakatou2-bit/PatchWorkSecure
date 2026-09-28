@@ -36,7 +36,7 @@ namespace PatchWorkSecure.CompanyOps
             float started=Time.realtimeSinceStartup;
             yield return null;
             if(label==null)yield break;
-            if(Time.realtimeSinceStartup-started<.6f)PlayPresentationCue(OpsCue.Count);
+            if(value!=0&&Time.realtimeSinceStartup-started<.6f)PlayPresentationCue(OpsCue.Count);
             while(Time.realtimeSinceStartup-started<.6f)
             {
                 if(label==null)yield break;
@@ -44,6 +44,7 @@ namespace PatchWorkSecure.CompanyOps
                 label.text=Mathf.RoundToInt(value*Mathf.SmoothStep(0,1,t/.6f)).ToString("N0")+unit;yield return null;
             }
             if(label==null)yield break;label.text=value.ToString("N0")+unit;
+            StartCoroutine(FinishCountSound());
             for(float t=0;t<.18f;t+=Time.unscaledDeltaTime)
             {if(label==null)yield break;label.transform.localScale=Vector3.one*(ReducedMotion?1:1+.1f*Mathf.Sin(t/.18f*Mathf.PI));yield return null;}
             if(label!=null)label.transform.localScale=Vector3.one;
@@ -113,7 +114,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             else PText(team,"SupportNone",r.power==null?"社員の支援は未記録":"今月は支援なし",26,80,388,90,22,PlanGray);
             PButton(team,"ReviewPower","対応力の内訳を見る",26,190,388,44,()=>PowerReport(r.response,r),Color.white,PlanInk,16);
-            Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");Motion((RectTransform)screen.Find("NavigatorPortrait"),"bob",3);
+            Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
             PButton(screen,"NextMonth",State.QuarterRewardPending?"山場クリア / 報酬を選ぶ":State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
@@ -131,7 +132,8 @@ namespace PatchWorkSecure.CompanyOps
             PText(p,"GrowthName",names[index],86,62,190,34,17);
             ReportChip(p,"GrowthRankTag",(up?"RANK UP  ":after<before?"DOWN  ":"RANK  ")+PlanningRank(before)+"→"+PlanningRank(after),280,66,180,up?PlanPink:PlanTrack,up?Color.white:PlanGray);
             PText(p,"GrowthValues",before+" → "+after,476,64,198,34,17,null,true,true);
-            ReportGauge(p,"GrowthGauge",86,105,588,after/100f,PlanPink);
+            ReportGauge(p,"GrowthGauge",86,105,588,after/100f,PlanPink);LossTrail(p,"GrowthLossTrail",86,105,588,10,before,after,100);
+            var lossTrail=p.Find("GrowthLossTrail");if(lossTrail!=null)lossTrail.SetSiblingIndex(p.Find("GrowthGaugeTrack").GetSiblingIndex()+1);
             string[] benefits={"設備の予防力が対応に反映される","復元・再開の備えが停止の軽減に役立つ","相談文化は、詐欺や持ち出しの影響を抑える","信頼が上がると、月次予算の計算に反映される","疲労が下がると、対応の負担を軽くできる","現場の準備と社員の成長が対応を助ける"};
             PText(p,"GrowthBenefit",benefits[index],86,124,588,42,14,Hex("52607a"),false);
             var changes=Enumerable.Range(0,6).Where(i=>i!=index&&r.metricsAfter[i]!=r.metricsBefore[i]).Take(3).ToArray();

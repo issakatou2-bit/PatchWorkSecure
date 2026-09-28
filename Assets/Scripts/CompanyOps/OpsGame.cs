@@ -57,7 +57,7 @@ namespace PatchWorkSecure.CompanyOps
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
             if(action=="rest")foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
-            {identity.PoseId="pose_coffee";identity.GetComponent<Image>().sprite=Navigator?.Pose("pose_coffee");}
+            {identity.GetComponent<OpsPortraitAnimator>().ChangePose("pose_coffee");}
         }
         public void Buy(int index)
         {

@@ -46,3 +46,9 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 ## 2026-09-29 ロゴとアイコン
 
 `Assets/Art/UI/Logo/`はプロジェクト内のSVG（`ArtSource/Logo/*.html`）からClaude Codeが書き出した透過PNG。ツギハギの盾とプロジェクト名を組み合わせた独自図形。他作品のロゴ素材は使用していない。書体M PLUS Rounded 1cのOFL原文は同梱のものを保持。配置は`Docs/Mockups/Logo.md`。Default Iconは設定済み、製品名の案は未採用。
+
+## 2026-09-29 ひなたの差分と感情マーク
+
+- 基本ポーズの目口差分は、Claude Codeが用意した`ArtSource/Hinata/gen-20260929/final/pose_fists*.png`（`Mockups/Hinata-Motion.md`と`Tools/Make-FaceFrames.py`）をそのまま利用。新たな生成・顔の描き直しは行わず、目と口の範囲をUnityのマスクで重ねている。原画の生成由来・商用利用前の確認は上の記録を引き継ぐ。
+- `Assets/Art/UI/HinataEmotions/`の6PNGは`Tools/Generate-Hinata-Emotions.py`で、紺`#1d2a44`の輪郭の独自図形を描画。キャラクター画像・第三者素材・フォント・AI画像生成は使用していない。新たな素材ライセンスやクレジットはない。キャラの手描き完成原画とは扱わない。
+- 演出は既存のUnity UI・画像・B案SEを使用。音程差とBGMの音量変化を追加したが、原音・曲・未承認のA案は変更していない。実装と検証は`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。

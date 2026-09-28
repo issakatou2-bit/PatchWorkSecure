@@ -96,11 +96,13 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
             if (Application.isPlaying) {StopAllCoroutines();StopPresentationSounds();}
             Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
             if (PlanningArt != null) PImage(screen,"SharedBackground",PlanningArt.gradient,0,0,1600,900);
-            if (Application.isPlaying) StartCoroutine(ScreenWipe(screen));
+            foreach(var depart in departures)depart();
+            if (Application.isPlaying&&PortraitEntering) StartCoroutine(ScreenWipe(screen));
         }
         private void Bar(Transform parent, string title, int value, float x, float y, float w, Color color)
         {
@@ -121,6 +123,7 @@ namespace PatchWorkSecure.CompanyOps
             image.preserveAspect = true; image.raycastTarget = false;
             art.gameObject.AddComponent<OpsPortraitAnimator>().Owner=this;
             art.gameObject.AddComponent<OpsPortraitIdentity>().PoseId=pose;
+            if(Application.isPlaying){var motion=art.gameObject.AddComponent<OpsPortraitMotion>();motion.Owner=this;motion.Enter=PortraitEntering;}
         }
         private RectTransform Dialog(string heading, string body, int height = 480)
         {

@@ -47,8 +47,12 @@ namespace PatchWorkSecure
         [System.Serializable] public sealed class FaceAnimationFrames
         {
             public string Expression = "normal";
-            public Sprite EyesHalf, EyesClosed, MouthOpen, MouthMid;
+            public string PoseId;
+            public Sprite EyesHalf, EyesClosed, MouthOpen, MouthMid, MouthClosed;
+            public Rect EyeRegion = new Rect(0,0,1,1), MouthRegion = new Rect(0,0,1,1);
         }
+        [Header("感情マーク（驚き・汗・喜び・怒り・考える）")]
+        public Sprite[] EmotionMarks = new Sprite[0];
 
         [Header("日常フェーズのセリフ")]
         [TextArea] public string LineNormal;      // 特に問題がないとき

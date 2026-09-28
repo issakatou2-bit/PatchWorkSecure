@@ -79,6 +79,12 @@ namespace PatchWorkSecure.CompanyOps
             };
             var d = Dialog(StatNames[index] + " / " + ReadStats()[index] + (index == 0 ? "万円" : ""), descriptions[index], 550);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 248);
+            if(index==2&&statChanges[2]<0)
+            {
+                PCard(d,"StabilityDetailTrack",32,450,748,8,PlanTrack,12,false);
+                LossTrail(d,"StabilityDetailLossTrail",32,450,748,8,State.stability-statChanges[2],State.stability,100);
+                PCard(d,"StabilityDetailFill",32,450,748*State.stability/100f,8,PlanMint,12,false);
+            }
             var color = Box(d, "StatDetailColor", 0, 0, 820, 5, StatColor(index));
             color.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             Text(d, "StatDetailHint", "色は項目の種類、状態の文字は注意点を示します。\n上部の + / - は直前の行動による変化です。", 32, 373, 748, 68, 18, Ink);

@@ -11,12 +11,14 @@ namespace PatchWorkSecure.CompanyOps
         private CanvasGroup group;
         private float elapsed;
         private Quaternion rotation;
+        private bool impact;
         private void Awake() { group = gameObject.AddComponent<CanvasGroup>(); group.alpha = 0; rotation = transform.localRotation; }
         private void Update()
         {
-            elapsed += Time.unscaledDeltaTime;
+            elapsed += Owner!=null?Owner.PresentationDeltaTime:Time.unscaledDeltaTime;
             float t = Mathf.Clamp01((elapsed - Delay) / Duration);
             group.alpha = t;
+            if(Stamp&&!impact&&t>=.38f){impact=true;Owner?.StampImpact();}
             if (Owner != null && Owner.ReducedMotion) transform.localScale = Vector3.one;
             else
             {

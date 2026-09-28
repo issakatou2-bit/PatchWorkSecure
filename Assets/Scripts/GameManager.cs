@@ -292,6 +292,7 @@ namespace PatchWorkSecure
             _currentSpokenLine = line;
             if (_typeRoutine != null) StopCoroutine(_typeRoutine);
             _typeRoutine = StartCoroutine(Typewriter(navigatorLine, line));
+            navigatorPortrait?.GetComponent<CompanyOps.OpsPortraitAnimator>()?.Speak(navigatorLine,true);
         }
 
         private IEnumerator Typewriter(TextMeshProUGUI label, string text, float charsPerSecond = 42f)
@@ -318,18 +319,27 @@ namespace PatchWorkSecure
         /// </summary>
         private void ApplyFace(Sprite face)
         {
+            string selectedPose=null;
             if(_activePersona!=null&&_activePersona.Poses!=null&&_activePersona.Poses.Length>0)
             {
                 string pose=face==_activePersona.FaceAlert?"pose_startled":face==_activePersona.FaceProud?"pose_jump":
                     face==_activePersona.FaceSad?"pose_exhausted":face==_activePersona.FaceWorried?"pose_think":face==_activePersona.FaceRelieved?"pose_peace":"pose_fists";
-                face=_activePersona.Pose(pose);
+                selectedPose=pose;face=_activePersona.Pose(pose);
             }
             if (face == null) face = _activePersona?.FaceNormal;
             bool hasArt = face != null;
 
             if (navigatorPortrait != null)
             {
-                navigatorPortrait.sprite = face;
+                if(selectedPose!=null)
+                {
+                    var animator=navigatorPortrait.GetComponent<CompanyOps.OpsPortraitAnimator>();
+                    if(animator==null)animator=navigatorPortrait.gameObject.AddComponent<CompanyOps.OpsPortraitAnimator>();
+                    animator.Persona=_activePersona;
+                    if(navigatorPortrait.GetComponent<CompanyOps.OpsPortraitMotion>()==null)navigatorPortrait.gameObject.AddComponent<CompanyOps.OpsPortraitMotion>();
+                    animator.ChangePose(selectedPose);
+                }
+                else navigatorPortrait.sprite = face;
                 navigatorPortrait.color = Color.white;
                 navigatorPortrait.enabled = hasArt;
             }

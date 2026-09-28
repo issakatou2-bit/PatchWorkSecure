@@ -64,7 +64,7 @@ namespace PatchWorkSecure.CompanyOps
             var source = cue == OpsCue.Click ? buttonAudio : eventAudio;
             // 連打で同じ音が積み重ならない。操作と結果だけを別々に再生する。
             source.Stop(); source.clip = clip; source.volume = soundVolume * (cue == OpsCue.Click ? .65f : 1);
-            source.Play();
+            source.pitch=VariedPitch();source.Play();
         }
         private void PlayPresentationCue(OpsCue cue)
         {
@@ -79,7 +79,7 @@ namespace PatchWorkSecure.CompanyOps
             if(cue==OpsCue.Count){lastCount=Time.unscaledTime;if(countAudio==null)countAudio=NewAudioSource();source=countAudio;}
             else if(cue==OpsCue.Stamp){lastStamp=Time.unscaledTime;if(stampAudio==null)stampAudio=NewAudioSource();source=stampAudio;}
             else {if(transitionAudio==null)transitionAudio=NewAudioSource();source=transitionAudio;}
-            source.Stop();source.clip=clip;source.volume=soundVolume*.65f;source.Play();
+            source.Stop();source.clip=clip;source.volume=soundVolume*.65f;source.pitch=VariedPitch();source.Play();
         }
         private void SetPresentationVolume(float volume)
         {
@@ -106,7 +106,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (musicA == null || musicB == null) return;
             musicBlend = Mathf.Clamp01(musicBlend + Time.unscaledDeltaTime / .8f);
-            float duck = voiceAudio != null && voiceAudio.isPlaying ? .55f : 1;
+            float wanted=voiceAudio!=null&&voiceAudio.isPlaying||Time.unscaledTime<duckUntil?.55f:1;
+            duckLevel=Mathf.MoveTowards(duckLevel,wanted,Time.unscaledDeltaTime/(wanted<duckLevel?.08f:.3f));float duck=duckLevel;
             musicA.volume = muted ? 0 : musicVolume * .45f * musicBlend * duck;
             musicB.volume = muted ? 0 : previousMusicVolume * (1 - musicBlend) * duck;
             if (musicB.volume <= 0 && musicB.isPlaying) musicB.Stop();

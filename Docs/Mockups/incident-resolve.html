@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>事件画面 備えの発動</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;family=Zen+Kaku+Gothic+New:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+@keyframes cutin{0%{transform:translateX(-110%) skewX(-12deg)}12%,78%{transform:translateX(0) skewX(-12deg)}90%,100%{transform:translateX(110%) skewX(-12deg)}}
+@keyframes rays{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes hop{0%,100%{transform:translateY(0)}30%{transform:translateY(-28px)}55%{transform:translateY(0)}70%{transform:translateY(-10px)}}
+@keyframes needle{0%{left:10%}15%{left:80%}30%{left:22%}45%{left:58%}60%,100%{left:43%}}
+@keyframes needle2{0%{left:10%}15%{left:75%}30%{left:18%}45%{left:48%}60%,100%{left:36%}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 3px #2ec4a0,0 0 24px 4px rgba(46,196,160,.8)}50%{box-shadow:0 0 0 3px #2ec4a0,0 0 6px 0 rgba(46,196,160,.3)}}
+@keyframes spark{0%{transform:scale(0);opacity:1}70%{opacity:1}100%{transform:scale(1.6);opacity:0}}
+.cutin{animation:cutin 4s cubic-bezier(.2,.8,.2,1) infinite}
+.hop{animation:hop 1.4s ease-out infinite}
+.glow{animation:glow 1.2s ease-in-out infinite}
+.spark{position:absolute;width:18px;height:18px;border-radius:9px;background:#ffd23f;animation:spark 1.6s ease-out infinite}
+.step{display:flex;align-items:center;gap:12px;border-radius:16px;padding:12px 16px}
+.meter{height:16px;border-radius:8px;background:#e6eaf2;position:relative}
+</style>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: #1b2340">
+<img src="../../Assets/Art/Office/office-topdown.png" alt="" style="position: absolute; left: -100px; top: -450px; width: 1800px; height: 1800px; filter: blur(16px) brightness(.55); opacity: .8">
+<div style="position: absolute; left: 700px; top: 150px; width: 1400px; height: 1400px; margin: -700px 0 0 -700px; background: repeating-conic-gradient(rgba(255,255,255,.07) 0 10deg, transparent 10deg 20deg); animation: rays 30s linear infinite"></div>
+
+<div style="position: absolute; left: 24px; top: 24px; width: 480px; display: flex; flex-direction: column; gap: 12px">
+  <span class="r" style="font-size: 22px; color: #ffffff">対応の流れ</span>
+  <div class="step" style="background: rgba(255,255,255,.95)">
+    <span class="r" style="width: 36px; height: 36px; border-radius: 18px; background: #1d2a44; color: #ffffff; font-size: 16px; display: flex; align-items: center; justify-content: center">1</span>
+    <div style="display: flex; flex-direction: column"><span class="r" style="font-size: 17px">方針：復旧を急ぐ</span><span style="font-size: 14px; color: #6b7894">安全確認と復旧に人を配分</span></div>
+    <svg style="margin-left: auto" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2ec4a0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg>
+  </div>
+  <div class="step glow" style="background: #ffffff">
+    <span class="r" style="width: 36px; height: 36px; border-radius: 18px; background: #2ec4a0; color: #ffffff; font-size: 16px; display: flex; align-items: center; justify-content: center">2</span>
+    <div style="display: flex; flex-direction: column"><span class="r" style="font-size: 17px">分離バックアップ Lv.1 発動</span><span style="font-size: 14px; color: #1a7c63">データ被害 −5万円</span></div>
+  </div>
+  <div class="step" style="background: rgba(255,255,255,.7)">
+    <span class="r" style="width: 36px; height: 36px; border-radius: 18px; background: #3fa9f5; color: #ffffff; font-size: 16px; display: flex; align-items: center; justify-content: center">3</span>
+    <div style="display: flex; flex-direction: column"><span class="r" style="font-size: 17px">佐伯の支援</span><span style="font-size: 14px; color: #1f6fb0">抑制力 +4 / 記録の整理</span></div>
+  </div>
+  <div class="step" style="background: rgba(255,255,255,.25); border: 2px dashed rgba(255,255,255,.5)">
+    <span class="r" style="width: 36px; height: 36px; border-radius: 18px; background: rgba(255,255,255,.3); color: #ffffff; font-size: 16px; display: flex; align-items: center; justify-content: center">?</span>
+    <div style="display: flex; flex-direction: column"><span class="r" style="font-size: 17px; color: #ffffff">復元訓練 未導入</span><span style="font-size: 14px; color: #e0e6f0">あれば、業務停止をさらに短くできた</span></div>
+  </div>
+</div>
+
+<div class="cutin" style="position: absolute; left: 380px; top: 300px; width: 1100px; height: 190px; background: linear-gradient(90deg, #ff6f91, #ff9fb5 60%, #ffd3de); box-shadow: 0 10px 0 #d94a70; display: flex; align-items: center; padding: 0 60px; box-sizing: border-box; overflow: hidden">
+  <div style="transform: skewX(12deg); display: flex; flex-direction: column; gap: 6px">
+    <span class="r" style="font-size: 20px; color: #ffffff; letter-spacing: .2em">備えが効いた！</span>
+    <span class="r" style="font-size: 64px; color: #ffffff; line-height: 1.05; text-shadow: 0 5px 0 #c23a60">分離バックアップ 発動！</span>
+    <span class="r" style="font-size: 20px; color: #7a1f3a">暗号化の前のデータから戻せる</span>
+  </div>
+</div>
+<span class="spark" style="left: 1380px; top: 280px"></span>
+<span class="spark" style="left: 1440px; top: 470px; animation-delay: .5s"></span>
+<span class="spark" style="left: 420px; top: 500px; animation-delay: .9s; background: #ffffff"></span>
+
+<div style="position: absolute; left: 560px; top: 610px; width: 1016px; border-radius: 24px; background: rgba(255,255,255,.96); padding: 22px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+  <div style="display: flex; align-items: center; gap: 20px">
+    <span class="r" style="width: 110px; font-size: 18px">被害</span>
+    <div class="meter" style="flex-grow: 1"><div style="position: absolute; left: 0; top: 0; width: 100%; height: 16px; border-radius: 8px; background: linear-gradient(90deg,#ffe0c2,#ff9f43)"></div><div style="position: absolute; top: -10px; width: 6px; height: 36px; border-radius: 3px; background: #1d2a44; margin-left: -3px; animation: needle 4s ease-out infinite"></div></div>
+    <span class="r" style="width: 130px; text-align: right; font-size: 30px">6<span style="font-size: 16px">万円</span></span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 20px">
+    <span class="r" style="width: 110px; font-size: 18px">業務停止</span>
+    <div class="meter" style="flex-grow: 1"><div style="position: absolute; left: 0; top: 0; width: 100%; height: 16px; border-radius: 8px; background: linear-gradient(90deg,#ffd3de,#ff6f91)"></div><div style="position: absolute; top: -10px; width: 6px; height: 36px; border-radius: 3px; background: #1d2a44; margin-left: -3px; animation: needle2 4s ease-out infinite"></div></div>
+    <span class="r" style="width: 130px; text-align: right; font-size: 30px">6<span style="font-size: 16px">時間</span></span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 14px">
+    <span class="r" style="font-size: 15px; color: #6b7894">見積もり 0〜15万円・0〜17時間の中で確定</span>
+    <span class="r" style="margin-left: auto; font-size: 15px; color: #1a7c63; background: #e3faf3; border-radius: 10px; padding: 4px 12px">備えなしなら 被害11万円</span>
+  </div>
+</div>
+
+<img class="hop" src="../../Assets/Sprites/Hinata/hinata_normal.png" alt="ひなた" style="position: absolute; left: 30px; top: 470px; width: 440px; height: 440px">
+<div style="position: absolute; left: 330px; top: 520px; width: 230px; border-radius: 20px; background: #ffffff; padding: 12px 16px; box-sizing: border-box">
+  <p class="r" style="margin: 0; font-size: 20px; line-height: 1.4; color: #d94a70">やった、<br>戻せたよ！</p>
+</div>
+</div>
+</body>
+</html>

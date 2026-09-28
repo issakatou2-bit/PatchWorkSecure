@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>社内依頼の依頼書</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;family=Zen+Kaku+Gothic+New:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.btn{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;cursor:pointer;border:0}
+@keyframes in{0%{transform:translateY(40px) scale(.94);opacity:0}100%{transform:none;opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shine{0%{left:-40%}60%,100%{left:120%}}
+.in{animation:in .45s cubic-bezier(.2,.8,.2,1) both}
+.bob{animation:bob 3s ease-in-out infinite}
+.shine{position:absolute;top:0;width:30%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 2.8s ease-in-out infinite}
+.task{display:flex;align-items:center;gap:12px;border-radius:14px;background:#f3f6fb;padding:12px 14px}
+.box{width:26px;height:26px;border-radius:8px;border:3px solid #b8c1d3;background:#ffffff;flex-shrink:0}
+.reward{display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:18px;padding:14px 10px;flex:1}
+</style>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: linear-gradient(160deg, #cfe9ff 0%, #ffe3ec 100%)">
+<img src="../../Assets/Art/Office/office-topdown.png" alt="" style="position: absolute; left: -100px; top: -450px; width: 1800px; height: 1800px; filter: blur(14px) saturate(1.2); opacity: .45">
+<div style="position: absolute; inset: 0; background: rgba(27,35,64,.45)"></div>
+
+<div class="in" style="position: absolute; left: 330px; top: 60px; width: 940px; height: 780px; border-radius: 30px; background: #ffffff; box-shadow: 0 20px 60px rgba(27,35,64,.45); overflow: hidden; display: flex; flex-direction: column">
+  <div style="display: flex; align-items: center; justify-content: space-between; background: #ff6f91; padding: 0 28px; height: 64px">
+    <span class="r" style="font-size: 22px; color: #ffffff; letter-spacing: .08em">社内依頼　4月</span>
+    <span class="r" style="font-size: 16px; color: #d94a70; background: #ffffff; border-radius: 12px; padding: 5px 14px">期限：今月中</span>
+  </div>
+  <div style="padding: 24px 32px; display: flex; flex-direction: column; gap: 18px; flex-grow: 1">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <span class="r" style="flex-shrink: 0; width: 72px; height: 72px; border-radius: 36px; background: #1d2a44; color: #ffd23f; font-size: 22px; display: flex; align-items: center; justify-content: center">社長</span>
+      <div style="position: relative; flex-grow: 1; border-radius: 18px; background: #f3f6fb; padding: 14px 18px">
+        <span style="font-size: 14px; color: #6b7894">社長・加藤</span>
+        <p style="margin: 2px 0 0; font-size: 19px; font-weight: 700; line-height: 1.5">「ソフトを入れるだけじゃなく、本当に戻せるか確かめてほしい」</p>
+      </div>
+    </div>
+    <span class="r" style="font-size: 34px; line-height: 1.25">納品データを戻す手段を示す</span>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span class="r" style="font-size: 15px; color: #6b7894">どちらかの道で達成</span>
+      <span style="flex-grow: 1; height: 2px; background: #e6eaf2"></span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+      <div style="border-radius: 20px; border: 3px solid #3fa9f5; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 8px"><span class="r" style="font-size: 14px; color: #ffffff; background: #3fa9f5; border-radius: 9px; padding: 3px 10px">A</span><span class="r" style="font-size: 19px">設備で示す</span><span class="r" style="margin-left: auto; font-size: 15px; color: #1f6fb0">0 / 2</span></div>
+        <div class="task"><span class="box"></span><div style="display: flex; flex-direction: column"><span class="r" style="font-size: 16px">分離バックアップを導入</span><span style="font-size: 13px; color: #6b7894">20万円・2工数</span></div></div>
+        <div class="task"><span class="box"></span><div style="display: flex; flex-direction: column"><span class="r" style="font-size: 16px">復元・連絡の訓練を導入</span><span style="font-size: 13px; color: #6b7894">7万円・1工数／バックアップの後</span></div></div>
+      </div>
+      <div style="border-radius: 20px; border: 3px solid #2ec4a0; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 8px"><span class="r" style="font-size: 14px; color: #ffffff; background: #2ec4a0; border-radius: 9px; padding: 3px 10px">B</span><span class="r" style="font-size: 19px">現場で確かめる</span><span class="r" style="margin-left: auto; font-size: 15px; color: #1a7c63">1 / 2</span></div>
+        <div class="task" style="background: #e3faf3"><span class="box" style="border-color: #2ec4a0; background: #2ec4a0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg></span><div style="display: flex; flex-direction: column"><span class="r" style="font-size: 16px">現状を調べる</span><span style="font-size: 13px; color: #1a7c63">済み</span></div></div>
+        <div class="task"><span class="box"></span><div style="display: flex; flex-direction: column"><span class="r" style="font-size: 16px">重要業務を確認する</span><span style="font-size: 13px; color: #6b7894">1工数</span></div></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span class="r" style="font-size: 15px; color: #6b7894">達成すると</span>
+      <span style="flex-grow: 1; height: 2px; background: #e6eaf2"></span>
+    </div>
+    <div style="display: flex; gap: 12px">
+      <div class="reward" style="background: #fff6d6"><svg width="36" height="36" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ffd23f" stroke="#e0a800" stroke-width="2"></circle><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="800" fill="#7a5a00">円</text></svg><span class="r" style="font-size: 20px">臨時予算 +5万円</span></div>
+      <div class="reward" style="background: #f0ecfb"><svg width="36" height="36" viewBox="0 0 24 24" fill="#8e7cc3"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.2 3.4 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.6 0 6 3.7 4.5 7.3C19.5 16.4 12 21 12 21z"></path></svg><span class="r" style="font-size: 20px">経営の信頼 +3</span></div>
+      <div class="reward" style="background: #ffe3ec"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff6f91" stroke-width="2.6" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"></path></svg><span class="r" style="font-size: 20px">ひなたの会話</span></div>
+      <div class="reward" style="background: #e3f2ff"><svg width="36" height="36" viewBox="0 0 24 24" fill="#ffd23f" stroke="#e0a800" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg><span class="r" style="font-size: 20px">年間評価 +45</span></div>
+    </div>
+    <div style="margin-top: auto; display: flex; gap: 14px">
+      <button class="btn" style="flex: 1; height: 60px; border-radius: 18px; background: #eef2f8; box-shadow: 0 5px 0 #c7d0e0; color: #1d2a44; font-size: 19px">閉じる</button>
+      <button class="btn" style="position: relative; overflow: hidden; flex: 2; height: 60px; border-radius: 18px; background: #ff6f91; box-shadow: 0 5px 0 #d94a70; color: #ffffff; font-size: 19px"><span class="shine"></span>引き受ける</button>
+    </div>
+  </div>
+</div>
+
+<img class="bob" src="../../Assets/Sprites/Hinata/hinata_normal.png" alt="ひなた" style="position: absolute; left: 1150px; top: 430px; width: 470px; height: 470px">
+<div style="position: absolute; left: 1290px; top: 330px; width: 290px; border-radius: 20px; background: #ffffff; padding: 12px 16px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(27,35,64,.25)">
+  <span class="r" style="position: absolute; left: 16px; top: -13px; background: #ff6f91; color: #ffffff; font-size: 13px; border-radius: 9px; padding: 2px 10px">ひなた</span>
+  <p style="margin: 4px 0 0; font-size: 17px; line-height: 1.55; font-weight: 700">Bの道なら、あと1つで<br>今月中にいけそう！</p>
+</div>
+</div>
+</body>
+</html>

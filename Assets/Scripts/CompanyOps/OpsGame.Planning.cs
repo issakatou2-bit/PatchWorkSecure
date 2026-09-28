@@ -137,7 +137,8 @@ namespace PatchWorkSecure.CompanyOps
             PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
             PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
             var work=PButton(screen,"Stat_1","",workX,24,workWidth,64,()=>StatusDetail(1),new Color(1,1,1,.92f),PlanInk,20);
-            // 工数はコマで示し、押したときの詳細で残数・回復量を確認する。
+            // ラベルと最初のコマの間を12px空ける。残数・回復量は押したときの詳細へ。
+            PText(work.transform,"CapacityTitle","工数",16,0,36,64,14,PlanGray);
             for(int j=0;j<slots;j++)
             {
                 var token=PCard(work.transform,"WorkToken"+j,64+j*30,15,22,34,j<State.capacity?PlanBlue:PlanTrack,12,false);

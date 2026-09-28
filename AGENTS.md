@@ -62,14 +62,14 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で83件（新試作74＋旧版の通し2＋オフィス7）
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で84件（新試作75＋旧版の通し2＋オフィス7）
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
 ```
 
 Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流す。**
-`./Tools/Verify-Core.ps1`（旧版）、`./Tools/Verify-CompanyOps.ps1`（新試作）、`./Tools/Verify-CompanyOps-Personas.ps1`（3タイプの仮想方針）、`./Tools/Compile-Office.ps1`（3アセンブリのコンパイル）。
+`./Tools/Verify-Core.ps1`（旧版）、`./Tools/Verify-CompanyOps.ps1`（新試作）、`./Tools/Verify-CompanyOps-Personas.ps1`（3タイプの仮想方針）、`./Tools/Verify-CompanyOps-Depths.ps1`（3視点×3深度・900年度）、`./Tools/Compile-Office.ps1`（3アセンブリのコンパイル）。
 `.ps1`は**BOM付きUTF-8**で保存する（PowerShell 5.1はBOMなしをShift-JISとして読み、構文エラーになる。`.editorconfig`で固定済み）。
 
 | 置き場所 | アセンブリ | 注意 |
@@ -88,7 +88,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-28）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.9：ルールは維持し、文字量・通知・ランク表示を整理、生成BGM2曲を投入。計画画面は承認モックへ移行後、加藤さんの4点の仕上げ指示を反映。PlayMode83/83、最終UI再確認1/1、Verify系が成功。再試遊・計測は`Docs/Planning-Finish-Review-2026-09-28.md`。
+- 新試作v0.9：生成BGM2曲、承認モックの計画画面と仕上げを反映。工数ラベルはコマの左へ12px離して復帰。PlayMode84/84、Verify系成功。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。9方針900年度の評価は`Docs/Planning-Label-and-Depths-2026-09-28.md`。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：`Assets/Sprites/Hinata/hinata_normal.png`の暫定1表情だけ（生成画像を加工したもの）。加藤さんの希望は、アニメ／萌え寄り・かわいい仕事着・表情とポーズの差分。学生服は不可。旧顔を保持する案、A/B/C線画、コードで顔を描き直す案はいずれも不採用。仕様は`Docs/Hinata-Art-Brief.md`。
 - 音：SEは簡易合成音（`OpsSoundDesign`）。BGMはGemini / Lyriaの生成2曲（`Docs/CompanyYear-Music-2026-09-28.md`）。声はLが基準案で、ゲームへは未投入（`Docs/Hinata-Voice-2026-09-28.md`）。

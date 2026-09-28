@@ -34,7 +34,7 @@ namespace PatchWorkSecure.Tests
             for(int i=0;i<6;i++) Assert.AreEqual(values[i].ToString(),Find<TextMeshProUGUI>(labels[i]+"Value").text);
             Assert.AreEqual("総合 "+OpsGame.PlanningRank(values.Sum()/6),Find<TextMeshProUGUI>("CompanyRank").text);
             Assert.AreEqual("達成で 信頼+3",Find<TextMeshProUGUI>("RewardText").text);
-            Assert.IsNull(Find<Button>("Stat_1").transform.Find("CapacityTitle"),"工数コマの小ラベルは表示しない");
+            CheckCapacityLabel();
             Assert.AreEqual(game.State.capacity,Object.FindObjectsByType<Image>().Count(i=>i.name.StartsWith("WorkToken")&&i.color==new Color(63/255f,169/255f,245/255f)));
             Assert.AreEqual(game.State.Current.title.Replace("、","、\n"),Find<TextMeshProUGUI>("CaseTitle").text);
             foreach(string marker in new[]{"OfficeConsultation","OfficeTicket"})
@@ -79,12 +79,56 @@ namespace PatchWorkSecure.Tests
                 var title=Find<TextMeshProUGUI>("CaseTitle");title.ForceMeshUpdate();
                 Assert.AreEqual(game.State.Current.title.Replace("、","、\n"),title.text);
                 Assert.IsFalse(title.isTextOverflowing,game.State.Current.name+" / "+title.text);
-                Assert.IsNull(Find<Button>("Stat_1").transform.Find("CapacityTitle"));
+                CheckCapacityLabel();
             }
-            game.State.month=0;game.State.capacity=8;game.OpenTab(0);yield return null;
+            game.State.month=0;
+            for(int capacity=0;capacity<=8;capacity++)
+            {
+                game.State.capacity=capacity;game.OpenTab(0);yield return null;CheckCapacityLabel();
+                Assert.AreEqual(capacity,Object.FindObjectsByType<Image>().Count(i=>i.name.StartsWith("WorkToken")&&i.color==new Color(63/255f,169/255f,245/255f)));
+            }
             Assert.AreEqual(8,Find<Button>("Stat_1").GetComponentsInChildren<Image>().Count(i=>i.name.StartsWith("WorkToken")));
             foreach(string id in new[]{"Stat_0","Stat_1","Menu","Action_audit","AdvanceMonth"})CheckPointer(id);
             CheckText();Capture("49-planning-finish-max-work",1600,900);
+            Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
+        }
+        private static void CheckCapacityLabel()
+        {
+            var label=Find<TextMeshProUGUI>("CapacityTitle");label.ForceMeshUpdate();
+            Assert.AreEqual("工数",label.text);Assert.IsFalse(label.isTextOverflowing);
+            var labelRect=label.rectTransform;var token=Find<RectTransform>("WorkToken0");
+            float right=labelRect.anchoredPosition.x+(1-labelRect.pivot.x)*labelRect.rect.width;
+            float left=token.anchoredPosition.x-token.pivot.x*token.rect.width;
+            Assert.GreaterOrEqual(left-right,12,"工数ラベルとコマが重ならない");
+        }
+        [UnityTest] public IEnumerator 自然な社員成長後の支援対象と画面を照合する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
+            var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
+            var memory=new PersonaMemory{role=2,cycle=1};var state=game.State;
+            // レベルや設備の値を直接盛らず、既存の合法な行動で支援可能になるまで進める。
+            while(state.month<11&&state.ResponsePower("scope").staff==0)
+            {
+                var turn=new PersonaTurn();PersonaCommand command;
+                while((command=CompanyOpsPersonaPolicy.Next(state,memory,turn))!=null)
+                {Assert.IsTrue(CompanyOpsPersonaPolicy.ApplyRule(state,command));CompanyOpsPersonaPolicy.Applied(turn,command);}
+                Assert.IsTrue(state.BeginIncident());Assert.IsTrue(state.Resolve(CompanyOpsPersonaPolicy.Response(state,memory)));
+                if(state.QuarterRewardPending)Assert.IsTrue(state.ClaimQuarterReward("budget"));
+                Assert.IsTrue(state.NextMonth());Assert.IsTrue(state.Valid());
+            }
+            Assert.Greater(state.ResponsePower("scope").staff,0,"自然な育成で実際の事件支援が成立する");
+            game.OpenTab(0);yield return null;CheckCapacityLabel();CheckText();
+            foreach(string action in new[]{"audit","listen","map","rest"})
+                Assert.IsNull(Find<Button>("Action_"+action).transform.Find("StaffSupport"),"計画行動に未実装の加算を示さない");
+            Capture("50-supported-month-planning",1600,900);
+            Click("OpenTeam");yield return null;CheckText();Capture("51-supported-month-team",1600,900);
+            Click("CloseDialog");yield return null;
+            Click("AdvanceMonth");yield return null;
+            if(state.phase==OpsPhase.Planning){Click("ConfirmAdvance");yield return null;}
+            Assert.AreEqual(OpsPhase.Incident,state.phase);Click("Power_scope");yield return new WaitForSecondsRealtime(.8f);
+            Assert.AreEqual("+"+state.ResponsePower("scope").staff,Find<TextMeshProUGUI>("PowerStepValue2").text);
+            StringAssert.Contains(state.SupportSummary,Find<TextMeshProUGUI>("PowerSupport").text);
+            CheckText();Capture("52-actual-incident-staff-support",1600,900);
             Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
         }
         private static void CheckRect(string name,float x,float y,float w,float h,float tolerance=.1f)

@@ -34,8 +34,9 @@ namespace PatchWorkSecure.Tests
             var panel = Find<UnityEngine.UI.Image>("Navigator");
             var button = Find<UnityEngine.UI.Button>("Action_audit").GetComponent<UnityEngine.UI.Image>();
             Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, panel.type);
-            Assert.Greater(button.pixelsPerUnitMultiplier, panel.pixelsPerUnitMultiplier);
-            CheckText(); CheckPointer("Action_audit"); CheckPointer("OpenTeam");
+            Assert.AreEqual(game.PlanningArt.round20, button.sprite);
+            Assert.AreEqual(game.PlanningArt.round24, panel.sprite);
+            CheckText(); CheckPointer("Action_audit"); yield return PreparePointer("OpenTeam");
             Capture("33-typography-rounded", 1280, 720);
             Click("OpenTeam"); yield return null; CheckTeamText(); CheckPointer("CloseDialog");
             Capture("34-typography-team");

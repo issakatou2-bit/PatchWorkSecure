@@ -20,26 +20,24 @@ namespace PatchWorkSecure.Tests
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
             Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t => t.name == "Staff" || t.name == "NewsBody"));
             StringAssert.Contains("山場", Find<TextMeshProUGUI>("PeakLegend").text);
-            var lastGoal = Find<RectTransform>("Goal2");
-            Assert.Less(-lastGoal.anchoredPosition.y + lastGoal.rect.height, -Find<RectTransform>("PeakLegend").anchoredPosition.y);
-            foreach (string goalName in new[] { "Goal0", "Goal1", "Goal2" })
+            foreach (string goalName in new[] { "Goal0", "Goal2" })
             {
                 var label = Find<Button>(goalName).GetComponentInChildren<TextMeshProUGUI>();
                 label.ForceMeshUpdate(); Assert.IsFalse(label.isTextOverflowing, goalName);
             }
-            Assert.AreNotEqual("FF7E88", ColorUtility.ToHtmlStringRGB(Find<Image>("StatCategory").color));
+            Assert.AreEqual("2EC4A0", ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatHint5").color));
             CheckPointer("ConsultationDetails"); Click("ConsultationDetails"); yield return null;
-            StringAssert.Contains(game.State.StaffVoice, Find<TextMeshProUGUI>("DialogBody").text);
             StringAssert.Contains(game.State.Current.news, Find<TextMeshProUGUI>("DialogBody").text);
+            Click("EmployeeConsultation"); yield return null;
+            StringAssert.Contains(game.State.StaffVoice, Find<TextMeshProUGUI>("DialogBody").text);
             CheckText(); Click("CloseDialog"); yield return null;
             game.ChooseAction("listen"); yield return null;
             Assert.AreEqual("Navigator", Find<RectTransform>("Feedback").parent.name);
-            Assert.AreEqual(0, Find<TextMeshProUGUI>("StatDelta3").alpha);
             var change = Find<RectTransform>("StatChangeEffect3");
-            Assert.Less(-change.anchoredPosition.y + change.rect.height, 73, "差分がカード下端の補助文を覆う");
+            Assert.Less(-change.anchoredPosition.y + change.rect.height, 429, "差分が相談文化の行からはみ出す");
             Capture("42-compact-planning", 1280, 720); CheckText();
             yield return new WaitForSecondsRealtime(.8f);
-            Assert.AreEqual(1, Find<TextMeshProUGUI>("StatDelta3").alpha);
+            Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(r=>r.name=="StatChangeEffect3"));
             game.BeginIncident(); yield return null;
             foreach (string id in new[] { "contain", "scope", "recover" })
             {

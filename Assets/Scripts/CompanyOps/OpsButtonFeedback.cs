@@ -8,6 +8,9 @@ namespace PatchWorkSecure.CompanyOps
         IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler, ISubmitHandler
     {
         public OpsGame Owner;
+        public float PressDepth;
+        private Vector2 origin;
+        private bool capturedOrigin;
         private UnityEngine.UI.Button button;
         private UnityEngine.UI.Outline focus;
         private bool hovered, selected, pressed;
@@ -22,17 +25,26 @@ namespace PatchWorkSecure.CompanyOps
         private bool Available => button != null && button.IsInteractable();
         private void Update()
         {
+            if (!capturedOrigin) { origin = ((RectTransform)transform).anchoredPosition; capturedOrigin = true; }
             bool active = Available && (hovered || selected);
             if (focus != null) focus.enabled = active;
             float target = !Available || Owner == null || Owner.ReducedMotion ? 1 :
                 pressed || Time.unscaledTime < submittedUntil ? .977f : active ? 1.009f : 1;
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * target, 1 - Mathf.Exp(-35 * Time.unscaledDeltaTime));
+            if (GetComponent<OpsPlanningMotion>() == null)
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * target, 1 - Mathf.Exp(-35 * Time.unscaledDeltaTime));
             if (Owner != null && Owner.ReducedMotion) transform.localScale = Vector3.one;
+            if (PressDepth > 0 && GetComponent<OpsPlanningMotion>() == null)
+            {
+                transform.localScale = Vector3.one;
+                ((RectTransform)transform).anchoredPosition = origin + Vector2.down *
+                    (Available && Owner != null && !Owner.ReducedMotion && (pressed || Time.unscaledTime < submittedUntil) ? PressDepth : 0);
+            }
         }
         private void OnDisable()
         {
             hovered = selected = pressed = false; submittedUntil = 0; transform.localScale = Vector3.one;
             if (focus != null) focus.enabled = false;
+            if (capturedOrigin && PressDepth > 0) ((RectTransform)transform).anchoredPosition = origin;
         }
         public void OnPointerEnter(PointerEventData e) { hovered = Available; }
         public void OnPointerExit(PointerEventData e) { hovered = pressed = false; }

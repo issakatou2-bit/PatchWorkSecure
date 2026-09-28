@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace PatchWorkSecure.CompanyOps
@@ -103,7 +104,8 @@ namespace PatchWorkSecure.CompanyOps
             var fx = Rect(screen, "ResultEffects", 0, 0, 1600, 900);
             var group = fx.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false; group.interactable = false;
             bool incident = State != null && State.phase == OpsPhase.Incident;
-            var stripe = Box(fx, "ResultAccent", incident ? 656 : 980, 121, incident ? 918 : 594, 5, color);
+            bool planning = State != null && State.phase == OpsPhase.Planning;
+            var stripe = Box(fx, "ResultAccent", planning ? 600 : incident ? 656 : 980, planning ? 669 : 121, planning ? 420 : incident ? 918 : 594, 5, color);
             stripe.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
             var panel = screen.Find("DecisionPanel") as RectTransform;
             Vector2 origin = panel == null ? Vector2.zero : panel.anchoredPosition;
@@ -114,14 +116,15 @@ namespace PatchWorkSecure.CompanyOps
             for (int i = 0; i < statChanges.Length; i++)
             {
                 if (statChanges[i] == 0) continue;
-                var card = screen.Find("Stat_" + i) as RectTransform;
+                var card = screen.GetComponentsInChildren<RectTransform>().FirstOrDefault(r => r.name == "Stat_" + i);
                 if (card != null) changed.Add(card.Find(StatNames[i] + "Value") as RectTransform);
                 if (card == null) continue;
                 int delta = statChanges[i];
                 var small = card.Find("StatDelta" + i)?.GetComponent<TMPro.TextMeshProUGUI>();
                 if (small != null) { small.alpha = 0; hiddenDeltas.Add(small); }
                 // 差分はカード内の同じ場所で一度だけ。下端の補助文を覆わない。
-                var tag = Rect(fx, "StatChangeEffect" + i, card.anchoredPosition.x + 111, 20, 60, 25);
+                Vector3 position = screen.InverseTransformPoint(card.TransformPoint(new Vector3(card.rect.width-65,-8,0)));
+                var tag = Rect(fx, "StatChangeEffect" + i, position.x, -position.y, 60, 25);
                 var text = Text(tag, "StatChangeAmount" + i, (delta > 0 ? "+" : "") + delta + (i == 0 ? "万円" : i == 1 ? "工数" : ""),
                     0, 0, 60, 25, 14, DeltaColor(i, delta));
                 text.alignment = TMPro.TextAlignmentOptions.Center;

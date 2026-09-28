@@ -161,7 +161,7 @@ namespace PatchWorkSecure.Tests
             game.StartYear(14); yield return null;
             Assert.AreEqual(OpsPhase.Planning, game.State.phase);
             Assert.IsNotNull(Find<Image>("NavigatorPortrait").sprite, "プレイ中にひなたが表示されていない");
-            Assert.IsNotNull(Find<TextMeshProUGUI>("MissionTitle"));
+            Assert.IsNotNull(Find<TextMeshProUGUI>("CaseTitle"));
             Capture("02-april"); CheckText();
             Click("Pin_backup"); yield return null;
             CheckPointer("OpenProjectFromOffice");
@@ -212,7 +212,9 @@ namespace PatchWorkSecure.Tests
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
             Capture("10-mission-start");
             Click("Action_audit"); yield return null;
-            StringAssert.Contains("1/2", Find<TextMeshProUGUI>("MissionField").text);
+            Click("ConsultationDetails"); yield return null;
+            StringAssert.Contains("現場 1/2", Find<TextMeshProUGUI>("MissionProgress").text);
+            Click("CloseDialog"); yield return null;
             Click("Action_map"); yield return null;
             Assert.IsTrue(game.State.MissionReady);
             Capture("11-mission-ready"); CheckText();
@@ -237,11 +239,13 @@ namespace PatchWorkSecure.Tests
         }
         private static void Click(string name)
         {
+            NavigatePlanningControl(name);
             var b = Find<Button>(name); Assert.IsTrue(b.interactable, "押せないボタン: " + name);
             b.onClick.Invoke();
         }
         private static void CheckPointer(string name)
         {
+            NavigatePlanningControl(name);
             Canvas.ForceUpdateCanvases();
             var button = Find<Button>(name); var rect = button.GetComponent<RectTransform>();
             var center = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
@@ -251,6 +255,22 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(button, hits[0].gameObject.GetComponentInParent<Button>(), "別のUIにクリックを遮られている: " + name);
         }
         private static T Find<T>(string name) where T : Component => Object.FindObjectsByType<T>().First(t => t.name == name);
+        // 常設をやめた情報は、実際に表示されているメニュー／相談から辿る。
+        // Findは純粋な検索のままにして、存在・配置の検証を隠さない。
+        private static void NavigatePlanningControl(string name)
+        {
+            if (Object.FindObjectsByType<Button>().Any(b=>b.name==name)) return;
+            var game=Object.FindAnyObjectByType<OpsGame>();
+            if(game==null||game.State==null||game.State.phase!=OpsPhase.Planning) return;
+            if(name=="Tab0") {var close=Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="ClosePlanner");if(close!=null)close.onClick.Invoke();return;}
+            if(name=="Tab1") {Find<Button>("OpenProjects").onClick.Invoke();return;}
+            if(new[]{"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"}.Contains(name))
+                Find<Button>("Menu").onClick.Invoke();
+            else if(name=="OpenEventBrief"||name=="EmployeeConsultation") Find<Button>("ConsultationDetails").onClick.Invoke();
+            Canvas.ForceUpdateCanvases();
+        }
+        private static IEnumerator PreparePointer(string name)
+        { NavigatePlanningControl(name); yield return null; CheckPointer(name); }
         private static void CheckText()
         {
             foreach (var text in Object.FindObjectsByType<TextMeshProUGUI>())

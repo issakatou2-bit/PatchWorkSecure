@@ -141,7 +141,9 @@ namespace PatchWorkSecure.CompanyOps
             homeVisible = false;
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
                 State.phase == OpsPhase.Incident ? Sounds.incidentMusic : Sounds.reviewMusic);
-            NewScreen(); Header();
+            NewScreen();
+            if (State.phase == OpsPhase.Planning) { PlanningScreen(); return; }
+            Header();
             if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
@@ -449,6 +451,7 @@ namespace PatchWorkSecure.CompanyOps
                 ReactionBank != null && ReactionBank.HasAudio && VoiceEnabled && !muted && voiceVolume > 0);
             Text(d, "VoicePreviewCaption", LastReactionCaption == "" ? "試聴の字幕はここに表示" : LastReactionCaption, 32, 631, 748, 42, 22, Ink);
             if (!homeVisible) Button(d, "Home", "保存してタイトルへ", 32, 685, 420, 48, () => { Save(); RenderHome(); }, Accent);
+            if (!homeVisible && State != null && State.phase == OpsPhase.Planning) PlanningMenuLinks(d);
         }
         private void History()
         {

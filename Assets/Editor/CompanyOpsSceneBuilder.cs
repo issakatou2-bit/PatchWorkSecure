@@ -49,6 +49,7 @@ namespace PatchWorkSecure.EditorTools
                 EditorUtility.SetDirty(controller.Navigator);
             }
             controller.PanelSprite = RoundedPanel();
+            controller.PlanningArt = CompanyOpsPlanningAssets.LoadPalette();
             if (controller.PanelSprite == null) throw new System.InvalidOperationException("角丸UIスプライトがありません。");
             Directory.CreateDirectory("Assets/CompanyOps");
             controller.Sounds = AssetDatabase.LoadAssetAtPath<OpsSoundPalette>("Assets/CompanyOps/YearSounds.asset");

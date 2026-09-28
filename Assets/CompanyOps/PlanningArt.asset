@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d305be21a5e9b564699f412ab2b8ebee, type: 3}
+  m_Name: PlanningArt
+  m_EditorClassIdentifier: PatchWorkSecure::PatchWorkSecure.CompanyOps.OpsPlanningArt
+  round12: {fileID: 21300000, guid: ed543573589210a4790b3d8097a8198c, type: 3}
+  round16: {fileID: 21300000, guid: dc53146955758054395e3ef8676aeb61, type: 3}
+  round20: {fileID: 21300000, guid: d2fbc89a8c7312549840ad912fe460f1, type: 3}
+  round24: {fileID: 21300000, guid: 85e881ad437fc2a4e98b96dea8222ac3, type: 3}
+  round28: {fileID: 21300000, guid: 18ec7f1bd35daf040b5415969c9bcb51, type: 3}
+  stageTop: {fileID: 21300000, guid: bdc2cef97e27f7343a53fc5889db9bd5, type: 3}
+  shadow: {fileID: 21300000, guid: da544957719a1764bb82b2a0aa3177f5, type: 3}
+  officeBlur: {fileID: 21300000, guid: aa8d83b936bd0bd4e86f0e1c8f5a3804, type: 3}
+  gradient: {fileID: 21300000, guid: a1e56c5b403d0134fbb2ea5ad5d38f7b, type: 3}
+  stageShade: {fileID: 21300000, guid: 54de189f287e4604a861ee674da746b0, type: 3}
+  shine: {fileID: 21300000, guid: 44fcfa11a3f2f134586f260cdb562652, type: 3}
+  ribbon: {fileID: 21300000, guid: 29fe1e6b7bcf4164eb4462a480ef3043, type: 3}
+  tail: {fileID: 21300000, guid: 7e166b31b25fe9e4a94c567288b36ebc, type: 3}
+  petal: {fileID: 21300000, guid: 589d1a05e2beca746b6adff8b618fa30, type: 3}
+  snow: {fileID: 21300000, guid: 72f8acdde3ff5634093b81989beeeaa7, type: 3}
+  hinataShadow: {fileID: 21300000, guid: c414cedce5b5cd343b681e3c56a0424d, type: 3}
+  audit: {fileID: 21300000, guid: 341d5fac9505711418c986fe07d5d761, type: 3}
+  listen: {fileID: 21300000, guid: dc42cdf1501703b4fafd25e6e08c37fe, type: 3}
+  map: {fileID: 21300000, guid: 2c73f594717ddd043b8ef3bf8ea8fb66, type: 3}
+  rest: {fileID: 21300000, guid: 3e81866180ceb54429af36a8c692b22b, type: 3}
+  upgrade: {fileID: 21300000, guid: 69110aad1e97a0941ae6ae1088599230, type: 3}
+  menu: {fileID: 21300000, guid: cb217fc0270965d4382e96da41018980, type: 3}
+  tool: {fileID: 21300000, guid: 8517b32a1431db240b6834d37c05b701, type: 3}
+  star: {fileID: 21300000, guid: e293169e5e0bf034c9bf8a48e9bbf0f3, type: 3}
+  starMuted: {fileID: 21300000, guid: 8e6db94519dcfd849810e3081500aabd, type: 3}
+  morale: {fileID: 21300000, guid: a76b25e6606a60b4ca02771dacccfb0e, type: 3}
+  markerBubble: {fileID: 21300000, guid: 1340a5ac320883b498dcb2a70272b038, type: 3}

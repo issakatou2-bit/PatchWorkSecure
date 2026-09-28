@@ -113,18 +113,19 @@ namespace PatchWorkSecure.Tests
             Find<TextMeshProUGUI>("DialogBody").ForceMeshUpdate(); Assert.IsFalse(Find<TextMeshProUGUI>("DialogBody").isTextOverflowing);
             Capture("13-status-detail"); CheckText(); Click("CloseDialog"); yield return null;
             var action = Find<Button>("Action_listen");
+            var actionOrigin=action.GetComponent<RectTransform>().anchoredPosition;
             Assert.IsNotNull(action.GetComponent<OpsButtonFeedback>());
             var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerEnterHandler);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerDownHandler);
-            yield return new WaitForSeconds(.12f); Assert.Less(action.transform.localScale.x, .995f);
+            yield return new WaitForSeconds(.12f); Assert.AreEqual(actionOrigin.y-6,action.GetComponent<RectTransform>().anchoredPosition.y,.01f);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerUpHandler);
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerExitHandler);
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(null);
-            yield return new WaitForSeconds(.15f); Assert.AreEqual(1, action.transform.localScale.x, .004f);
+            yield return new WaitForSeconds(.15f); Assert.AreEqual(actionOrigin,action.GetComponent<RectTransform>().anchoredPosition);
             Click("Action_listen"); yield return null; Assert.AreEqual(OpsCue.Action, game.LastCue);
-            StringAssert.Contains("+7", Find<TextMeshProUGUI>("StatDelta3").text);
+            StringAssert.Contains("+7", Find<TextMeshProUGUI>("StatChangeAmount3").text);
             CheckPointer("Action_audit"); Capture("14-action-feedback"); CheckText();
             Click("Menu"); yield return null; Click("ReduceMotion"); yield return null;
             Assert.IsTrue(game.ReducedMotion); Capture("15-feedback-settings"); CheckText();
@@ -139,7 +140,8 @@ namespace PatchWorkSecure.Tests
             game.State.fatigue = 80; game.State.budget = 5; game.State.stability = 20; game.OpenTab(0); yield return null;
             Capture("17-danger-status", 1280, 720); CheckText();
             StringAssert.Contains("要休息", Find<TextMeshProUGUI>("StatHint5").text);
-            StringAssert.Contains("要注意", Find<TextMeshProUGUI>("StatHint0").text);
+            Click("Stat_0"); yield return null;
+            StringAssert.Contains("予算", Find<TextMeshProUGUI>("DialogHeading").text);
             Assert.IsEmpty(glyphWarnings, string.Join("\n", glyphWarnings)); LogAssert.NoUnexpectedReceived();
         }
     }

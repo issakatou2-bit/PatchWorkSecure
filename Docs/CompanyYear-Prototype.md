@@ -191,6 +191,8 @@ SCレベルの学習へ広げる入口は用意したが、現時点でSC試験�
 
 ## 開発上の分離
 
+2026-09-28：計画画面だけを承認済みHTMLモックへ移行。手順・実データの対応・82件のPlayMode結果・比較画像は[移行記録](Planning-Mock-Migration-2026-09-28.md)。ゲームのルールと他フェーズのデザインは維持。更新したWindows版も12か月とBGM2曲の確認が成功。
+
 `OpsCatalog` → `OpsState` → `OpsGame`、保存は `OpsSaveStore`。旧版の `GameState` は変更しない。
 `CompanyOpsSceneBuilder` が別のシーンとButtonプレハブを保存して生成する。
 `Prototype/CompanyOps/data.js` は初期資料。現在のマスタはC#側。二重編集しない。

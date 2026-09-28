@@ -1,0 +1,279 @@
+using System;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace PatchWorkSecure.CompanyOps
+{
+    public partial class OpsGame
+    {
+        public OpsPlanningArt PlanningArt;
+        private static readonly Color PlanInk=Hex("1d2a44"), PlanGray=Hex("6b7894"), PlanPink=Hex("ff6f91"),
+            PlanBlue=Hex("3fa9f5"), PlanMint=Hex("2ec4a0"), PlanPurple=Hex("8e7cc3"), PlanTrack=Hex("dfe5f0");
+        public static string PlanningRank(int v) => v>=95?"S":v>=80?"A":v>=65?"B":v>=50?"C":v>=35?"D":v>=20?"E":v>=10?"F":"G";
+        private static Color RankColor(int v) => v>=95?Hex("e0a800"):v>=80?PlanPink:v>=65?Hex("ff9a45"):v>=50?PlanMint:v>=35?PlanBlue:v>=20?PlanPurple:Hex("a6afc0");
+        private RectTransform PImage(Transform p,string name,Sprite sprite,float x,float y,float w,float h,Color? c=null,bool sliced=false)
+        {
+            var r=Rect(p,name,x,y,w,h); var i=r.gameObject.AddComponent<Image>(); i.sprite=sprite; i.color=c??Color.white;
+            i.raycastTarget=false; if(sliced) i.type=Image.Type.Sliced; return r;
+        }
+        private RectTransform PCard(Transform p,string name,float x,float y,float w,float h,Color? color=null,float radius=24,bool shadow=true)
+        {
+            if(shadow) PImage(p,name+"Shadow",PlanningArt.shadow,x-24,y-16,w+48,h+48,Color.white,true);
+            var sprite=radius>=28?PlanningArt.round28:radius>=24?PlanningArt.round24:radius>=20?PlanningArt.round20:radius>=16?PlanningArt.round16:PlanningArt.round12;
+            return PImage(p,name,sprite,x,y,w,h,color??new Color(1,1,1,.94f),true);
+        }
+        private TextMeshProUGUI PText(Transform p,string name,string value,float x,float y,float w,float h,float size=20,Color? c=null,bool heading=true,bool center=false)
+        {
+            var t=Text(p,name,value,x,y,w,h,size,c??PlanInk); t.font=heading&&HeadingFont!=null?HeadingFont:Font;
+            t.alignment=center?TextAlignmentOptions.Midline:TextAlignmentOptions.MidlineLeft;
+            if(heading) t.fontStyle=FontStyles.Bold; return t;
+        }
+        private Button PButton(Transform p,string id,string label,float x,float y,float w,float h,Action action,Color bg,Color fg,float radius=20,Color? shadow=null,bool enabled=true)
+        {
+            var b=Button(p,id,label,x,y,w,h,action,bg,enabled); var i=b.GetComponent<Image>();
+            i.sprite=radius>=20?PlanningArt.round20:PlanningArt.round16; i.pixelsPerUnitMultiplier=1; i.type=Image.Type.Sliced;
+            var t=b.GetComponentInChildren<TextMeshProUGUI>(); t.color=fg; t.alignment=TextAlignmentOptions.Midline; t.margin=Vector4.zero;
+            t.rectTransform.offsetMin=Vector2.zero;t.rectTransform.offsetMax=Vector2.zero;
+            if(shadow.HasValue) { var s=b.gameObject.AddComponent<Shadow>(); s.effectDistance=new Vector2(0,-6); s.effectColor=shadow.Value; s.useGraphicAlpha=true; }
+            var feedback=b.GetComponent<OpsButtonFeedback>(); feedback.PressDepth=shadow.HasValue?6:0; return b;
+        }
+        private void Motion(RectTransform r,string kind,float period,float delay=0)
+        {
+            var m=r.gameObject.AddComponent<OpsPlanningMotion>();m.Owner=this;m.Kind=kind;m.Period=period;m.Delay=delay;
+        }
+        private void Shine(Transform p,float w,float h)
+        {
+            var clip=Rect(p,"ShineClip",0,0,w,h);clip.gameObject.AddComponent<RectMask2D>();
+            var shine=PImage(clip,"ButtonShine",PlanningArt.shine,-w*.4f,0,w*.3f,h);Motion(shine,"shine",2.8f);
+        }
+        private void PlanningScreen()
+        {
+            if(PlanningArt==null) throw new InvalidOperationException("計画画面の承認済みUI素材を設定してください。");
+            PImage(screen,"PlanningBackground",PlanningArt.gradient,0,0,1600,900);
+            PImage(screen,"OfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,new Color(1,1,1,.45f));
+            PlanningStage(); PlanningHeader(); PlanningCompany(); PlanningConsultation(); PlanningNavigator(); PlanningActions();
+            if(tab!=0) PlanningOverlay();
+            if(SaveWarning!="") PText(screen,"SaveWarning",SaveWarning,24,866,600,28,15,Hex("c23a60"),false);
+        }
+        private void PlanningStage()
+        {
+            PImage(screen,"OfficeStageShadow",PlanningArt.shadow,322,88,960,844,new Color(1,1,1,1),true);
+            PImage(screen,"StageWhiteBorder",PlanningArt.stageTop,346,102,912,804,Color.white,true);
+            var stage=PImage(screen,"OfficeStage",PlanningArt.stageTop,352,108,900,792,Color.white,true);
+            stage.gameObject.AddComponent<Mask>().showMaskGraphic=false;
+            PImage(stage,"OfficeArt",OfficeArt,0,0,900,900);
+            PImage(stage,"StageShade",PlanningArt.stageShade,0,492,900,300);
+            if(State.month==4) PImage(stage,"SummerDaylight",PlanningArt.gradient,0,0,900,792,new Color(1,.94f,.8f,.08f));
+            if(State.month==0||State.month==8)
+            {
+                float[] xs={120,330,520,700,860,420}, periods={9,11,8,10,12,9.5f}, delays={0,2,4,1,5,6.5f};
+                for(int j=0;j<6;j++) Motion(PImage(stage,"SeasonParticle"+j,State.month==0?PlanningArt.petal:PlanningArt.snow,xs[j],0,State.month==0?14:9,10),"petal",periods[j],delays[j]);
+            }
+            for(int j=0;j<3;j++)
+            {
+                bool installed=State.Level(j==0?"backup":j==1?"monitor":"redundancy")>0;
+                var lamp=PCard(stage,"ServerLamp"+j,372+j*18,118,8,8,installed?(j<2?Hex("5dff9c"):Hex("ffcf4a")):Hex("8b93a3"),12,false);
+                if(installed) Motion(lamp,"blink",1.1f,j*.4f);
+            }
+            PlanningPin(stage,"Pin_backup","復旧基盤",430,190,52,State.Level("backup")+State.Level("drill"),()=>OfficePinDialog("復旧基盤",State.Level("backup")+State.Level("drill"),"backup","recover"));
+            PlanningPin(stage,"Pin_culture","相談できる現場",650,365,42,State.Level("education"),()=>OfficePinDialog("相談できる現場",State.Level("education"),"culture","people"));
+            PlanningPin(stage,"Pin_change","運用のしくみ",74,415,42,State.Level("automation")+State.Level("runbook"),()=>OfficePinDialog("運用のしくみ",State.Level("automation")+State.Level("runbook"),"change","operations"));
+            var consultation=PButton(stage,"OfficeConsultation","!",700,36,56,56,PlanningBriefDialog,PlanPink,Color.white,20,Hex("c1536c"));
+            var mark=consultation.GetComponentInChildren<TextMeshProUGUI>();mark.fontSize=mark.fontSizeMax=34;mark.fontSizeMin=34;
+            consultation.GetComponent<Image>().sprite=PlanningArt.markerBubble;consultation.GetComponent<Image>().type=Image.Type.Simple;
+            Border(consultation,Color.white,4);Motion((RectTransform)consultation.transform,"pop",1.6f);
+            Hover(consultation,"今月の相談 / "+State.Current.person);
+            if(State.Ticket!=null&&string.IsNullOrEmpty(State.ticketResolution))
+            {
+                var ticket=PButton(stage,"OfficeTicket","?",150,250,44,44,TicketDialog,Color.white,PlanBlue,20);
+                var question=ticket.GetComponentInChildren<TextMeshProUGUI>();question.fontSize=question.fontSizeMax=26;question.fontSizeMin=26;
+                ticket.GetComponent<Image>().sprite=PlanningArt.markerBubble;ticket.GetComponent<Image>().type=Image.Type.Simple;
+                Border(ticket,PlanBlue,3); Motion((RectTransform)ticket.transform,"pop",1.6f,.7f);Hover(ticket,State.Ticket.title);
+            }
+        }
+        private void Border(Button b,Color color,float size)
+        { var edge=b.gameObject.AddComponent<Outline>();edge.effectColor=color;edge.effectDistance=new Vector2(size,-size); }
+        private void Hover(Button b,string caption)
+        {
+            var r=PCard(b.transform,"HoverLabel",-64,-46,240,34,PlanInk,12,false);
+            PText(r,"HoverCaption",caption,8,0,224,34,13,Color.white,false,true);r.gameObject.SetActive(false);
+            b.gameObject.AddComponent<OpsPlanningHover>().Tooltip=r.gameObject;
+        }
+        private void PlanningPin(Transform p,string id,string title,float x,float y,float size,int level,Action action)
+        {
+            var b=PButton(p,id,"",x,y,size,size,action,level>0?PlanMint:new Color(.35f,.39f,.47f,.85f),Color.white,24);
+            b.GetComponent<Image>().sprite=PlanningArt.round28; Border(b,Color.white,3);
+            if(level==0) PImage(b.transform,"ToolIcon",PlanningArt.tool,(size-26)/2,(size-26)/2,26,26);
+            else PCard(b.transform,"InstalledLamp",size/2-6,size/2-6,12,12,Hex("5dff9c"),12,false);
+            Hover(b,title+" / "+(level>0?"整備 Lv."+level:"未整備"));
+        }
+        private void PlanningHeader()
+        {
+            var medal=PCard(screen,"MonthMedal",24,16,120,80,PlanPink,24,false);
+            var shadow=medal.gameObject.AddComponent<Shadow>();shadow.effectDistance=new Vector2(0,-5);shadow.effectColor=Hex("d94a70");
+            PText(medal,"YearLabel","1年目",0,9,120,22,13,Color.white,true,true);
+            PText(medal,"Month",State.Current.name,0,30,120,45,38,Color.white,true,true);
+            int slots=Math.Max(State.MaxCapacity,State.capacity);
+            float workWidth=Math.Max(192,72+slots*30), workX=1496-workWidth, budgetWidth=Math.Max(170,142+Math.Max(0,State.budget.ToString().Length-2)*20), budgetX=workX-16-budgetWidth;
+            var timeline=PCard(screen,"YearTimeline",160,24,budgetX-176,64,null,20,false);
+            PText(timeline,"TimelineTitle","一年の歩み",20,0,84,64,14,PlanGray);
+            float x=118;
+            for(int j=0;j<12;j++)
+            {
+                bool current=j==State.month,peak=j%3==2;float size=j==11?30:peak||current?26:18;
+                if(current) PCard(timeline,"CurrentMonthRing",x-4,32-size/2-4,size+8,size+8,Hex("ffd3de"),20,false);
+                var dot=PCard(timeline,"Month"+j,x,32-size/2,size,size,current?PlanPink:j==11?PlanBlue:peak?Hex("ffd23f"):j<State.month?Hex("b8dbea"):PlanTrack,12,false);
+                if(peak) PText(dot,"PeakMark",j==11?"決":"山",0,0,size,size,13,current||j==11?Color.white:Hex("7a5a00"),true,true);
+                x+=size+8;
+            }
+            int next=Math.Min(11,State.month+(2-State.month%3));
+            string hint=State.growthRules==0?"旧年度の記録":State.month==next?(next==11?"年度末の総力対応":"今月は山場！"):"次の山場 "+OpsCatalog.Months[next].name+"まで あと"+(next-State.month)+"か月";
+            PText(timeline,"PeakLegend",hint,x+14,0,Math.Max(120,timeline.rect.width-x-34),64,16,Hex("d94a70"));
+            var budget=PButton(screen,"Stat_0","",budgetX,24,budgetWidth,64,()=>StatusDetail(0),new Color(1,1,1,.92f),PlanInk,20);
+            var coin=PCard(budget.transform,"BudgetCoin",22,17,30,30,Hex("ffd23f"),20,false);
+            PText(coin,"CoinLabel","円",0,0,30,30,16,Hex("7a5a00"),true,true);
+            PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
+            PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
+            var work=PButton(screen,"Stat_1","",workX,24,workWidth,64,()=>StatusDetail(1),new Color(1,1,1,.92f),PlanInk,20);
+            PText(work.transform,"CapacityTitle","工数",20,0,38,64,14,PlanGray);
+            for(int j=0;j<slots;j++)
+            {
+                var token=PCard(work.transform,"WorkToken"+j,64+j*30,15,22,34,j<State.capacity?PlanBlue:PlanTrack,12,false);
+                token.GetComponent<Image>().pixelsPerUnitMultiplier=12f/7;
+                token.gameObject.AddComponent<Mask>().showMaskGraphic=true;
+                PImage(token,"TokenBase",null,0,29,22,5,j<State.capacity?Hex("2381c9"):Hex("c7d0e0"));
+            }
+            var menu=PButton(screen,"Menu","",1512,24,64,64,Menu,new Color(1,1,1,.92f),PlanInk,20);
+            PImage(menu.transform,"MenuIcon",PlanningArt.menu,18,18,28,28);
+        }
+        private void PlanningCompany()
+        {
+            var left=PCard(screen,"CompanyGrowth",24,108,312,612);
+            PText(left,"CompanyTitle","会社の力",18,18,178,30,20);
+            int[] values={State.stability,State.Organization,State.trust,State.culture,State.Preparedness,State.Resilience};
+            string[] labels={"業務の安定","チームの力","経営の信頼","相談文化","備え","立て直す力"};
+            Color[] colors={PlanMint,PlanBlue,PlanPurple,PlanPink,PlanBlue,PlanBlue};
+            var total=PCard(left,"CompanyRankPill",224,22,70,24,PlanInk,12,false);
+            PText(total,"CompanyRank","総合 "+PlanningRank(values.Sum()/6),0,0,70,24,13,Color.white,true,true);
+            for(int j=0;j<6;j++)
+            {
+                int metric=j;string id=j==0?"Stat_2":j==2?"Stat_4":j==3?"Stat_3":"CompanyMetric"+j;
+                var row=PButton(left,id,"",18,57.6f+j*68,276,58,()=>PlanningMetric(metric),Hex("f3f6fb"),PlanInk,16);
+                var rank=PCard(row.transform,"RankBadge",12,9,40,40,RankColor(values[j]),12,false);
+                PText(rank,"RankValue",PlanningRank(values[j]),0,0,40,40,26,Color.white,true,true);
+                PText(row.transform,"MetricTitle",labels[j],62,7,150,28,16);
+                PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
+                if(values[j]>0) PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
+                PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
+            }
+            int spare=Mathf.Clamp(100-State.fatigue,0,100); Color tone=spare>=70?PlanMint:spare>=40?PlanBlue:Hex("c23a60");
+            var rest=PButton(left,"Stat_5","",18,520,276,74,()=>StatusDetail(5),Hex("e9fbf5"),PlanInk,16);
+            PImage(rest.transform,"MoraleIcon",PlanningArt.morale,12,11,30,30);
+            PText(rest.transform,"SpareTitle","チームの余力",52,10,140,30,15);
+            PText(rest.transform,"StatHint5",spare>=70?"好調":spare>=40?"ふつう":"要休息",201,10,63,30,15,tone);
+            PCard(rest.transform,"SpareTrack",12,50,252,12,Hex("c8ece4"),12,false);
+            if(spare>0)PCard(rest.transform,"SpareFill",12,50,252*spare/100f,12,tone,12,false);
+            Hover(rest,"余力 "+spare+" / 100（疲労 "+State.fatigue+"）");
+        }
+        private void PlanningMetric(int metric)
+        {
+            if(metric==0){StatusDetail(2);return;} if(metric==2){StatusDetail(4);return;} if(metric==3){StatusDetail(3);return;}
+            Dialog(metric==1?"チームの力":metric==4?"備え":"立て直す力",metric==1?"相談文化・経営の信頼・チームの余力（100−疲労）の平均。\n\n運用チームの習熟・支援方針はメニューから確認できます。":metric==4?"資産台帳・多要素認証・更新運用・監視・分離の導入段階で増えます。\n\n今月の出来事に対する効果は、導入計画の比較で確認できます。":"分離バックアップ・復元訓練・冗長化・引継ぎ手順で増えます。\n\n対応効果は事件の種類と設備の連携によって変わります。",420);
+        }
+        private void PlanningConsultation()
+        {
+            var card=PCard(screen,"ConsultationCard",1268,108,308,237.2f);
+            PImage(card,"ConsultationRibbon",PlanningArt.ribbon,0,0,225,38,PlanPink);
+            PText(card,"ConsultationHeading","今月の相談",20,0,190,38,15,Color.white);
+            var caller=PCard(card,"CallerBadge",20,66,50,50,PlanInk,28,false);
+            string person=State.Current.person.Split('・')[0].Trim(); PText(caller,"CallerRole",person,2,0,46,50,17,Hex("ffd23f"),true,true);
+            PText(card,"CaseTitle",State.Current.title,82,58,206,68,24);
+            string category=State.CurrentProfile==null?"今月の相談":State.CurrentProfile.category;
+            var chip=PCard(card,"CategoryChip",20,142,114,25,Hex("ffe3ec"),12,false);
+            PText(chip,"CategoryText",category,5,0,104,25,13,Hex("c23a60"),true,true);
+            var reward=PCard(card,"RewardChip",140,142,148,25,Hex("e3f2ff"),12,false);
+            PText(reward,"RewardText","達成で 信頼+3",4,0,140,25,13,Hex("1f6fb0"),true,true);
+            var ring=PCard(card,"ConsultationPulse",20,177.2f,268,52,new Color(1,.435f,.569f,.4f),16,false);ring.pivot=new Vector2(.5f,.5f);ring.anchoredPosition+=new Vector2(134,-26);Motion(ring,"pulse",1.8f);
+            var talk=PButton(card,"ConsultationDetails","話を聞く",20,177.2f,268,52,PlanningBriefDialog,PlanPink,Color.white,16,Hex("d94a70"));Shine(talk.transform,268,52);
+            var goals=PCard(screen,"YearGoals",1268,359.2f,308,122.4f,null,20);
+            PText(goals,"GoalsTitle","今年の目標",18,10,260,24,15,PlanGray);
+            string[] names={"戻せることを確かめる","相談が集まる職場"}; int[] ids={0,2};
+            string[] progress={(State.Level("backup")>0?1:0)+(State.Level("drill")>0?1:0)+"/2",State.culture+"/65"};
+            for(int j=0;j<2;j++)
+            {
+                int goal=ids[j];var b=PButton(goals,"Goal"+goal,"",14,40+j*36,280,30,()=>GrowthPlan(goal),new Color(1,1,1,0),PlanInk,16);
+                PImage(b.transform,"GoalStar",j==0||State.milestones.Contains("相談が集まる職場")?PlanningArt.star:PlanningArt.starMuted,4,2,26,26);
+                PText(b.transform,"GoalLabel",names[j],40,0,200,30,16,j==0?PlanInk:PlanGray);
+                PText(b.transform,"GoalProgress",progress[j],231,0,49,30,15,Hex("7c879c"),true,true);
+            }
+            PButton(screen,"AdvanceMonth","月を進める ▶",1268,660,308,60,AdvancePlanning,PlanInk,Color.white,20,Hex("0c1226"));
+        }
+        private void AdvancePlanning()
+        {
+            if(State.capacity==0){BeginIncident();return;}
+            var d=Dialog("工数を残して進みますか？","残り "+State.capacity+" 工数は翌月に繰り越せません。\n調査・対話・改善・休息に使うこともできます。",360);
+            Button(d,"ConfirmAdvance","この計画で進む",32,290,420,48,BeginIncident,Accent);
+        }
+        private void PlanningNavigator()
+        {
+            var character=Rect(screen,"PlanningCharacter",230,450,470,470);Motion(character,"bob",3.2f);
+            PImage(character,"HinataShadow",PlanningArt.hinataShadow,0,10,470,470);
+            Portrait(character,"NavigatorPortrait",0,0,470,470);
+            var speech=PCard(screen,"Navigator",600,540,420,129.2f,Color.white,24);
+            PImage(speech,"SpeechTail",PlanningArt.tail,-13,36,14,20);
+            var tag=PCard(speech,"NavigatorTag",18,-14,82,28,PlanPink,12,false);
+            PText(tag,"NavigatorName",Navigator!=null?Navigator.DisplayName:"ひなた",0,0,82,28,14,Color.white,true,true);
+            var line=PText(speech,"NavigatorSpeech",State.Current.person.Split('・')[0].Trim()+"から相談が来てるよ！\n今月の備え、一緒に確認しよう。",20,22,380,85,19,null,false);
+            line.fontStyle=FontStyles.Bold;
+        }
+        private void PlanningActions()
+        {
+            string[] ids={"audit","listen","map","rest"},titles={"調べる","話す","優先順位","休む"},effects={"見積もり精度 UP","相談文化 +7","信頼 +4","余力 +18"};
+            Sprite[] icons={PlanningArt.audit,PlanningArt.listen,PlanningArt.map,PlanningArt.rest};Color[] colors={Hex("1f6fb0"),Hex("c23a60"),Hex("6f5fb0"),Hex("1a7c63")};
+            for(int j=0;j<5;j++)
+            {
+                bool upgrade=j==4;string id=upgrade?"OpenProjects":"Action_"+ids[j], action=upgrade?"":ids[j];float w=upgrade?204.4f:165.9f;
+                string block=upgrade?"":State.ActionBlock(action);
+                var b=PButton(screen,id,"",660+j*177.9f,740,w,144,upgrade?(Action)(()=>OpenTab(1)):(()=>ChooseAction(action)),upgrade?Hex("ffc02e"):Color.white,PlanInk,20,upgrade?Hex("d18a00"):Hex("c7d0e0"),block=="");
+                if(upgrade)Shine(b.transform,w,144);
+                PImage(b.transform,"ActionIcon",upgrade?PlanningArt.upgrade:icons[j],(w-44)/2,22,44,44);
+                PText(b.transform,"ActionTitle",upgrade?"設備を導入":titles[j],8,71,w-16,30,20,upgrade?Hex("4a3200"):PlanInk,true,true);
+                int count=Enumerable.Range(0,OpsCatalog.Projects.Length).Count(i=>State.UpgradeBlock(i)=="");
+                PText(b.transform,"ActionEffect",upgrade?"導入できる "+count+"件":block!=""?block:effects[j],6,107,w-12,22,13,upgrade?Hex("5c4000"):colors[j],true,true);
+                // 計画行動に社員の追加効果はないため、経験獲得を「支援」として表示しない。
+                if(!upgrade) Hover(b,titles[j]+" / 1工数");
+            }
+        }
+        private void PlanningOverlay()
+        {
+            screen.Find("AdvanceMonth").name="AdvanceFromDashboard";
+            modal=Box(screen,"ModalBlocker",0,0,1600,900,new Color(.02f,.025f,.035f,.72f));
+            var p=Box(modal,"PlanningDetails",501,78,598,744,Panel,true);
+            Planning(p); // 既存の導入比較・知識・操作条件をそのまま利用する。
+            var close=Button(modal,"ClosePlanner","×",1120,78,52,52,()=>OpenTab(0),Paper);
+            close.GetComponentInChildren<TextMeshProUGUI>().color=Ink;
+        }
+        private void PlanningBriefDialog()
+        {
+            var d=Dialog(State.Current.title,State.Current.person+"\n「"+State.Current.boss+"」\n\n"+State.Current.news,780);
+            d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta=new Vector2(748,210);
+            PText(d,"MissionTitle","社内依頼 / "+State.CurrentMission.title,32,333,748,45,22);
+            State.MissionProgress(true,out int a,out int at);State.MissionProgress(false,out int b,out int bt);
+            PText(d,"MissionProgress","設備 "+a+"/"+at+"  または現場 "+b+"/"+bt+"  / 達成：信頼+3・年間+45点",32,385,748,40,19);
+            PText(d,"MissionRoutes","設備："+State.CurrentMission.equipmentRoute+"\n現場："+State.CurrentMission.fieldRoute,32,438,748,100,20,null,false);
+            Button(d,"OpenEventBrief","題材・根拠・関連知識",32,568,350,48,EventBriefDialog,Accent);
+            Button(d,"EmployeeConsultation","社員の声",410,568,350,48,ConsultationDetails,Edge);
+        }
+        private void PlanningMenuLinks(RectTransform d)
+        {
+            var nav=PCard(d,"PlanningMenuLinks",-274,0,250,760);
+            PText(nav,"LinksTitle","会社の情報",20,25,210,38,24);
+            string[] ids={"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"},labels={"運用チーム・育成","日常チケット","運用ノート","仕事を分担する目標","今月の社内事情","遊び方"};
+            Action[] actions={TeamDialog,TicketDialog,()=>OpenTab(2),()=>GrowthPlan(1),SituationDialog,Guide};
+            for(int j=0;j<ids.Length;j++)PButton(nav,ids[j],labels[j],16,92+j*72,218,58,actions[j],Hex("f3f6fb"),PlanInk,16,null,j!=1||State.Ticket!=null);
+            PText(nav,"SavingNotice",SaveWarning==""?"行動ごとに自動保存":"保存について確認が必要",20,654,210,65,16,PlanGray,false);
+        }
+    }
+}

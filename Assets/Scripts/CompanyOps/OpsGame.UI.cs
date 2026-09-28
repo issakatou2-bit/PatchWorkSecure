@@ -121,7 +121,13 @@ namespace PatchWorkSecure.CompanyOps
             Button(card, "CloseDialog", "閉じる", 604, height - 70, 180, 48, CloseDialog, Edge);
             return card;
         }
-        private void CloseDialog() { if (modal == null) return; modal.gameObject.SetActive(false); Destroy(modal.gameObject); modal = null; }
+        private void CloseDialog()
+        {
+            if (modal == null) return;
+            modal.gameObject.SetActive(false); Destroy(modal.gameObject); modal = null;
+            // 導入画面から開いた詳細を閉じると、背後の導入一覧と操作を再表示する。
+            if (!homeVisible && State != null && State.phase == OpsPhase.Planning && tab != 0) Render();
+        }
         private void Toast(string message, bool good = true, OpsCue cue = OpsCue.Action)
         {
             // 対応開始の通知は案件表示・キャラの反応で伝える。比較の数値をポップアップで遮らない。
@@ -135,6 +141,14 @@ namespace PatchWorkSecure.CompanyOps
             if (navigator == null) { Feedback(cue); return; }
             toastSpeech = navigator.GetComponentsInChildren<TextMeshProUGUI>().FirstOrDefault(t => t.name == "NavigatorSpeech");
             if (toastSpeech != null) toastSpeech.enabled = false;
+            if (State != null && State.phase == OpsPhase.Planning)
+            {
+                toast = Rect(navigator,"Feedback",20,22,380,85);
+                toastGroup = toast.gameObject.AddComponent<CanvasGroup>(); toastGroup.blocksRaycasts = false;
+                PText(toast,"FeedbackTitle",heading,0,0,380,36,22,good?Hex("1a7c63"):Hex("c23a60"));
+                PText(toast,"FeedbackDetail",detail,0,40,380,45,16,PlanInk,false);
+                toastUntil = Time.unscaledTime + 2.7f; Feedback(cue); return;
+            }
             toast = Box(navigator, "Feedback", 208, 52, 438, 84, Ink);
             toastGroup = toast.gameObject.AddComponent<CanvasGroup>();
             toastGroup.blocksRaycasts = false; toastGroup.interactable = false;

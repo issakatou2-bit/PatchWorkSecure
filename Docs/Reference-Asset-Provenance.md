@@ -16,3 +16,16 @@ Use case: stylized-concept. Asset type: top-down pixel-art office background for
 Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigator game sprite. Image 1 is the character identity and art-style reference. Isolate and faithfully recreate ONLY the small pink/salmon-haired girl at the BOTTOM LEFT underneath the pink label, NOT the large right-side portrait and not the blue or purple girls. Keep her recognizable design: short salmon pink twin-tails with dark ribbons, side-swept bangs, large reddish-brown eyes, tiny body about 2 heads tall, pink blazer with dark piping over white shirt and dark red bow, pink skirt, dark shoes. Same friendly cheerful expression and little hands raised close to her chest. Thick slightly irregular dark outline, simple flat cel colors and small highlights, cute hand-drawn game mascot feel, NOT glossy AI anime rendering, no realistic skin, no 3D. Full body including shoes, centered, with 8% empty padding all around. Preserve face shape, hair silhouette, outfit and tiny proportions from reference. Output ONLY this single character on genuinely TRANSPARENT background with real alpha. No checkerboard painted into background, no white rectangular background, no floor or shadow, no text, no speech bubble, no badge, no other characters, no extra props. 1024x1024 PNG.
 
 この出力は実際にはRGB画像にチェック柄が描かれていたため、そのまま透過済みとして採用しなかった。`Tools/Prepare-Hinata.cjs` でアルファを作り、元の学生服風衣装を `Tools/Hinata-workwear.svg` で置き換えた。
+
+## 2026-09-28 承認済み計画モックのUI素材
+
+`Assets/Art/UI/`は加藤さん承認済みの`Docs/Mockups/planning-screen.html`のCSS・SVG図形を、`Tools/Generate-PlanningUI.py`（Pillow）でPNG化したもの。外部の素材サイト・既存ゲームの画像は使用していない。形状・色・線幅はリポジトリ内モックから制作したプロジェクト用素材で、新たな第三者ライセンスやクレジットはない。人間が描いたキャラクター原画とは扱わない。
+
+- `round-*`／`stage-top`：白い角丸と上だけ丸いマスク。EditorのSpriteDataProviderで9-slice境界を設定。
+- `soft-shadow`：半透明の紺の角丸にぼかし。標準Imageで描画し、独自シェーダーは不使用。
+- `planning-gradient`／`stage-shade`／`button-shine`／`ribbon`／`speech-tail`／`petal`／`snow`：モックのグラデーション・帯・吹き出し・季節・光。
+- `icon-*`：モック内の24単位SVGを同じ太さの図形として書き出し。
+- `office-blur`：既存オフィス画像の彩度1.2・ぼかし（900pxで7px、画面で2倍になり14px）。元画像は変更しない。
+- `hinata-shadow`：既存ひなたのアルファから作った影。ひなたの元画像・顔・衣装は変更しない。
+
+画像・参照設定は`OpsPlanningArt`にまとめ、シーン再生成でも同じ設定を読み込む。既存アートの生成由来については上の記録を引き継ぐ。

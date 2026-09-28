@@ -45,8 +45,8 @@ namespace PatchWorkSecure.Tests
                     }
                     Assert.LessOrEqual(turn.steps,24);
                     CheckText(); CollectPersonaOverflow(overflow); int unused=state.capacity;
-                    PersonaClick("AdvanceMonth"); yield return null; clicks++;
-                    if(state.phase==OpsPhase.Planning) { PersonaClick("ConfirmAdvance"); yield return null; clicks++; }
+                    yield return PersonaClick("AdvanceMonth"); yield return null; clicks++;
+                    if(state.phase==OpsPhase.Planning) { yield return PersonaClick("ConfirmAdvance"); yield return null; clicks++; }
                     Assert.AreEqual(OpsPhase.Incident,state.phase);
                     foreach(string response in CompanyOpsPersonaPolicy.Responses)
                     {
@@ -61,24 +61,24 @@ namespace PatchWorkSecure.Tests
                     if((cycle==0 || cycle==4) && (state.month==2 || state.month==11))
                         Capture("Persona/"+role+"-"+(cycle+1)+"-incident-"+(state.month+1),1280,720);
                     string chosen=CompanyOpsPersonaPolicy.Response(state,memory);
-                    PersonaClick("Respond_"+chosen); yield return null; clicks++;
+                    yield return PersonaClick("Respond_"+chosen); yield return null; clicks++;
                     Assert.AreEqual(OpsPhase.Review,state.phase); CheckText(); CollectPersonaOverflow(overflow);
                     // 画面数は露出の記録。開くことを知識習得とみなさない。
                     bool read=CompanyOpsPersonaPolicy.ReadLesson(state,memory);
-                    if(read) { PersonaClick("MonthlyLesson"); yield return null; clicks++; CollectPersonaOverflow(overflow);
-                        memory.readTerms.Add(state.Current.lesson); PersonaClick("CloseDialog"); yield return null; clicks++; }
+                    if(read) { yield return PersonaClick("MonthlyLesson"); yield return null; clicks++; CollectPersonaOverflow(overflow);
+                        memory.readTerms.Add(state.Current.lesson); yield return PersonaClick("CloseDialog"); yield return null; clicks++; }
                     transcript.AppendLine(string.Join(",",new object[]{memory.Label,cycle+1,state.month+1,state.CurrentEvent.id,string.Join(" > ",turn.actions),
                         chosen,state.Latest.loss,state.Latest.downtime,state.budget,unused,state.Latest.ticketMode,state.CurrentMissionCompleted,read}.Select(PersonaCell)));
-                    months++; PersonaClick("NextMonth"); yield return null; clicks++;
+                    months++; yield return PersonaClick("NextMonth"); yield return null; clicks++;
                     if(state.QuarterRewardPending)
-                    { PersonaClick("Reward_"+CompanyOpsPersonaPolicy.Reward(state,memory)); yield return null; clicks++; }
+                    { yield return PersonaClick("Reward_"+CompanyOpsPersonaPolicy.Reward(state,memory)); yield return null; clicks++; }
                     Assert.IsTrue(state.Valid());
                 }
                 CheckText(); CollectPersonaOverflow(overflow);
                 if(cycle==0 || cycle==4) Capture("Persona/"+role+"-"+(cycle+1)+"-ending",1280,720);
-                PersonaClick("EndingHistory"); yield return null; clicks++; CheckText(); CollectPersonaOverflow(overflow);
+                yield return PersonaClick("EndingHistory"); yield return null; clicks++; CheckText(); CollectPersonaOverflow(overflow);
                 var history=Find<ScrollRect>("ProjectScroll"); history.verticalNormalizedPosition=0; yield return null;
-                CollectPersonaOverflow(overflow); PersonaClick("CloseDialog"); yield return null; clicks++;
+                CollectPersonaOverflow(overflow); yield return PersonaClick("CloseDialog"); yield return null; clicks++;
             }
             File.WriteAllText(Path.Combine(directory,"ui-role-"+role+".csv"),transcript.ToString(),new UTF8Encoding(true));
             File.WriteAllLines(Path.Combine(directory,"overflow-role-"+role+".txt"),overflow.OrderBy(x=>x),new UTF8Encoding(true));
@@ -88,7 +88,14 @@ namespace PatchWorkSecure.Tests
                 memory.Label+" / "+months+"か月 / "+clicks+"主要操作 / 追加の文字収まり指摘 "+overflow.Count,new UTF8Encoding(true));
         }
         private static string PersonaCell(object value) => "\""+(value??"").ToString().Replace("\"","\"\"")+"\"";
-        private static void PersonaClick(string name) { CheckPointer(name); Click(name); }
+        private static IEnumerator PersonaClick(string name)
+        {
+            NavigatePlanningControl(name); yield return null;
+            if(name=="Tab0"&&!Object.FindObjectsByType<Button>().Any(b=>b.name=="Tab0"))
+            {Assert.IsNotNull(Find<Button>("Action_audit"));yield break;}
+            Assert.IsTrue(Object.FindObjectsByType<Button>().Any(b=>b.name==name),"移行後の操作が見つからない："+name);
+            CheckPointer(name);Click(name);
+        }
         private static void CollectPersonaOverflow(HashSet<string> target)
         {
             string[] watched={"Boss","Staff","EmployeeGrowth","NavigatorSpeech","MonthlyHint","DialogBody","EventCategory","EventMapping",
@@ -101,28 +108,28 @@ namespace PatchWorkSecure.Tests
         {
             if(c.kind=="act")
             {
-                if(c.id=="prepare") { PersonaClick("OpenSituation"); yield return null; PersonaClick("PrepareSituation"); yield return null; }
-                else { PersonaClick("Tab0"); yield return null; PersonaClick("Action_"+c.id); yield return null; }
+                if(c.id=="prepare") { yield return PersonaClick("OpenSituation"); yield return null; yield return PersonaClick("PrepareSituation"); yield return null; }
+                else { yield return PersonaClick("Tab0"); yield return null; yield return PersonaClick("Action_"+c.id); yield return null; }
             }
             else if(c.kind=="proposal")
-            { PersonaClick("Tab1"); yield return null; PersonaClick("Proposal"); yield return null; PersonaClick("Propose_"+c.id); yield return null; }
+            { yield return PersonaClick("Tab1"); yield return null; yield return PersonaClick("Proposal"); yield return null; yield return PersonaClick("Propose_"+c.id); yield return null; }
             else if(c.kind=="buy")
             {
-                PersonaClick("Tab1"); yield return null;
+                yield return PersonaClick("Tab1"); yield return null;
                 var details=Find<Button>("Details_"+c.id); var scroll=details.GetComponentInParent<ScrollRect>();
                 Canvas.ForceUpdateCanvases();
                 var rect=details.GetComponent<RectTransform>(); var content=scroll.content;
                 float localY=content.InverseTransformPoint(rect.TransformPoint(rect.rect.center)).y;
                 var pos=content.anchoredPosition; pos.y=Mathf.Clamp(-localY-scroll.viewport.rect.height*.5f,0,
                     Mathf.Max(0,content.rect.height-scroll.viewport.rect.height)); content.anchoredPosition=pos;
-                yield return null; PersonaClick("Details_"+c.id); yield return null;
-                PersonaClick("Buy_"+c.id); yield return null;
+                yield return null; yield return PersonaClick("Details_"+c.id); yield return null;
+                yield return PersonaClick("Buy_"+c.id); yield return null;
             }
             else if(c.kind=="support" || c.kind=="practice")
-            { PersonaClick("OpenTeam"); yield return null; PersonaClick((c.kind=="support"?"Support_":"Practice_")+c.id); yield return null;
-                PersonaClick("CloseDialog"); yield return null; }
+            { yield return PersonaClick("OpenTeam"); yield return null; yield return PersonaClick((c.kind=="support"?"Support_":"Practice_")+c.id); yield return null;
+                yield return PersonaClick("CloseDialog"); yield return null; }
             else
-            { PersonaClick("OpenTicket"); yield return null; PersonaClick(c.id=="delegate"?"DelegateTicket":"ResolveTicket"); yield return null; }
+            { yield return PersonaClick("OpenTicket"); yield return null; yield return PersonaClick(c.id=="delegate"?"DelegateTicket":"ResolveTicket"); yield return null; }
         }
     }
 }

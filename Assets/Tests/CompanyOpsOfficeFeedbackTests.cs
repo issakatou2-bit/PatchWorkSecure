@@ -21,7 +21,7 @@ namespace PatchWorkSecure.Tests
             game.Buy(OpsCatalog.Index("backup")); yield return null;
             StringAssert.Contains("分離バックアップ", Find<TextMeshProUGUI>("InstallationLabel").text);
             StringAssert.Contains("Lv.1", Find<TextMeshProUGUI>("InstallationLabel").text);
-            Assert.AreEqual("#70B4FF", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatDelta0").color));
+            Assert.AreEqual("#70B4FF", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatChangeAmount0").color));
             Assert.AreEqual((game.State.budget - oldBudget) + "万円", Find<TextMeshProUGUI>("StatChangeAmount0").text);
             CheckPointer("Action_listen");
             Capture("40-installation-feedback", 1280, 720);
@@ -29,7 +29,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(Vector3.one, Find<UnityEngine.UI.Button>("Pin_backup").transform.localScale);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t => t.name == "StatChangeEffect0"));
             game.State.fatigue = 50; game.ChooseAction("rest"); yield return null;
-            Assert.AreEqual("#47D7A0", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatDelta5").color));
+            Assert.AreEqual("#47D7A0", "#" + ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatChangeAmount5").color));
             Assert.AreEqual("-18", Find<TextMeshProUGUI>("StatChangeAmount5").text);
             game.State.staffExperience[1] = OpsGrowthCatalog.StaffThresholds[1];
             game.State.supportOrder = "investigate";

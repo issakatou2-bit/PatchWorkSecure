@@ -24,7 +24,7 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない（共有は`NavigatorPersona`のみ）。
-- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold（`Docs/CompanyYear-Typography-2026-09.md`）。現行はチャコール＋白＋青の操作色（参考作品寄せのモックで見直し中）。
+- 新試作の見た目：本文 Zen Kaku Gothic New Medium、見出し・数値・操作 M PLUS Rounded 1c Bold。計画画面は承認モックへ移行済み（`Docs/Planning-Mock-Migration-2026-09-28.md`）。事件・月報・年間評価はチャコール＋白＋青のまま。
 - Windows版：`Builds/CompanyYear/PatchWorkSecure-Year.exe`（gitでは追跡しない）。
 - 旧版は自動で新試作へ置き換えない。9/13の改修以降は機能追加をせず、回帰テストだけを続けている。
 - 旧版の主なファイル：`GameData`(マスターデータ) / `GameState`(純粋C#のルール) / `GameManager`(UIとフェーズ進行) / `AudioManager` / `UIEffects`(フラッシュ・シェイク・バナー・浮遊テキスト等) / `NavigatorPersona` / `EducationTracker`(クイズ・CSV) / `GamePresentation` / `DefenseGlyph` / `DefenseDetailsTrigger`。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で65件（新試作56＋旧版の通し2＋オフィス7）
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で82件（新試作73＋旧版の通し2＋オフィス7）
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -88,7 +88,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-28）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.9：v0.8のルールは維持し、文字量・通知の重なり・ランク表示を整理。生成BGM2曲を投入。65個のテストは全体実行＋対象の再検証で通過（内訳はDev-Status）。Verify系、Windows版のBGM切替・12か月検証もPASSED。
+- 新試作v0.9：ルールは維持し、文字量・通知・ランク表示を整理、生成BGM2曲を投入。計画画面は承認モック通りの配置・色・動きへ移行。最終版のPlayMode82/82、Verify系、Windows版のBGM切替・12か月検証が成功。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：`Assets/Sprites/Hinata/hinata_normal.png`の暫定1表情だけ（生成画像を加工したもの）。加藤さんの希望は、アニメ／萌え寄り・かわいい仕事着・表情とポーズの差分。学生服は不可。旧顔を保持する案、A/B/C線画、コードで顔を描き直す案はいずれも不採用。仕様は`Docs/Hinata-Art-Brief.md`。
 - 音：SEは簡易合成音（`OpsSoundDesign`）。BGMはGemini / Lyriaの生成2曲（`Docs/CompanyYear-Music-2026-09-28.md`）。声はLが基準案で、ゲームへは未投入（`Docs/Hinata-Voice-2026-09-28.md`）。
@@ -98,7 +98,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
 2. ひなたの原画（6表情：`hinata_normal / proud / worried / alert / relieved / sad`）を`Assets/Sprites/Hinata/`へ置く。「PatchWorkSecure → キャラ立ち絵を取り込む」で反映する（透過も検査される）。
-3. 承認済み計画画面モックへの移行（`Docs/Mockups/README.md`）。UI・UX評価の不具合6件はv0.9で修正済み。
+3. 移行済み計画画面の試遊（`Docs/Planning-Mock-Migration-2026-09-28.md`）。他の画面のデザイン移行は感想を見てから。UI・UX評価の不具合6件はv0.9で修正済み。
 4. 生成BGM2曲の試聴・ループ調整、SEの音色改善。商用本採用前に利用条件を再確認する。
 5. 難易度：限定対応を弱めるより、状況で選び分ける理由を増やす。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。
 6. Player Settings（Steam向け）、ブランチ整理。

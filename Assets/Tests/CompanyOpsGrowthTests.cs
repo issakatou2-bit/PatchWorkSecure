@@ -130,13 +130,13 @@ namespace PatchWorkSecure.Tests
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
             // 白い会話面と無彩色の画面地を確認。角丸は新しい標準9-sliceを使う。
             var speechSurface = Find<UnityEngine.UI.Image>("Navigator");
-            Assert.Greater(speechSurface.color.b, speechSurface.color.r);
+            Assert.AreEqual(speechSurface.color.b, speechSurface.color.r);
             Assert.Greater(speechSurface.color.r, .95f);
             Assert.IsNotNull(speechSurface.sprite);
             Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, speechSurface.type);
             var backdrop = Find<UnityEngine.UI.Image>("OpsScreen").color;
             Assert.Less(Mathf.Abs(backdrop.r - backdrop.g), .03f);
-            CheckPointer("OpenTeam"); Click("OpenTeam"); yield return null;
+            yield return PreparePointer("OpenTeam"); Click("OpenTeam"); yield return null;
             Capture("24-team-new"); CheckTeamText();
             Assert.IsFalse(Find<Button>("Support_routine").interactable);
             Click("CloseDialog"); game.Buy(OpsCatalog.Index("education")); game.ChooseAction("listen"); yield return null;

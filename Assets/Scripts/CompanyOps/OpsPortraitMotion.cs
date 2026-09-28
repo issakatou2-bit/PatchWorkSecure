@@ -27,6 +27,7 @@ namespace PatchWorkSecure.CompanyOps
             if(started&&animator?.ActivePersona!=null)Mark(act=="joy"?2:act=="startle"?0:act=="sad"?1:act=="think"?4:-1);
         }
         public void Celebrate(){act="joy";actTime=0;landed=false;Mark(2);}
+        public void SmallCelebrate(){act="smalljoy";actTime=0;landed=false;Mark(2);}
         public void ShowEmotion(int type){Mark(type);}
         private void Update()
         {
@@ -51,6 +52,7 @@ namespace PatchWorkSecure.CompanyOps
                 else if(actTime<.32f){scale*=new Vector2(1.05f,.94f);if(!landed){landed=true;Mark(5);}}
                 else scale*=Vector2.Lerp(new Vector2(1.05f,.94f),Vector2.one,(actTime-.32f)/.08f);
             }
+            if(act=="smalljoy"&&actTime<.35f)offset.y+=12*Mathf.Sin(actTime/.35f*Mathf.PI);
             if(act=="startle"&&actTime<.4f){float t=actTime;offset.x+=t<.1f?12*t/.1f:12*(1-Mathf.Clamp01((t-.1f)/.3f))+Mathf.Sin((t-.1f)/.25f*Mathf.PI*8)*2;angle=3*(1-Mathf.Clamp01(t/.4f));}
             if(act=="sad"){float t=Mathf.Clamp01(actTime/.4f);offset.y-=10*t;scale.y*=Mathf.Lerp(1,.97f,t);}
             var foot=Vector2.Scale(new Vector2(.5f,0)-rect.pivot,rect.rect.size);

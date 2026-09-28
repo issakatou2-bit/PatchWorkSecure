@@ -14,6 +14,23 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins3_工数を使い切った月だけ一度光り省演出で動かない()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
+                foreach(string action in new[]{"audit","listen","map"})game.ChooseAction(action);
+                Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());game.ChooseAction("rest");yield return null;
+                Assert.AreEqual(0,game.State.capacity);var effect=Find<OpsWorkComplete>("Stat_1");Assert.AreEqual(4,effect.Tokens.Length);
+                string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.16f);Capture(reduced?"113-quickwins3-reduced":"113-quickwins3-work");
+                if(reduced){Assert.AreEqual(effect.Portrait.LayoutPosition,effect.Portrait.GetComponent<RectTransform>().anchoredPosition);Assert.AreEqual(Vector3.one,effect.Portrait.transform.localScale);}
+                yield return new WaitForSecondsRealtime(.6f);Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+                game.OpenTab(0);yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());
+                game.State.capacity=1;game.State.audited=false;game.ChooseAction("audit");yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any(),"同月で回復して使い切っても再生しない");
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins2_実際の昇格で文字を切り替え降格と省演出は回さない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

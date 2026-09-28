@@ -59,6 +59,7 @@ namespace PatchWorkSecure.CompanyOps
             PImage(screen,"PlanningBackground",PlanningArt.gradient,0,0,1600,900);
             PImage(screen,"OfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,new Color(1,1,1,.45f));
             PlanningStage(); PlanningHeader(); PlanningCompany(); PlanningConsultation(); PlanningNavigator(); PlanningActions();
+            WorkCompleteEffect();
             if(tab!=0) PlanningOverlay();
             if(SaveWarning!="") PText(screen,"SaveWarning",SaveWarning,24,866,600,28,15,Hex("c23a60"),false);
         }

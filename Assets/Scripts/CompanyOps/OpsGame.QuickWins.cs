@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 namespace PatchWorkSecure.CompanyOps
 {
@@ -8,6 +9,14 @@ namespace PatchWorkSecure.CompanyOps
     {
         private bool budgetGainPending;
         private int[] rankBefore,rankAfter;
+        private bool workCompletePending;private int workCompleteMonth=-1;
+        private void WorkCompleteEffect()
+        {
+            if(!Application.isPlaying||!workCompletePending)return;workCompletePending=false;workCompleteMonth=State.month;
+            var effect=screen.Find("Stat_1").gameObject.AddComponent<OpsWorkComplete>();effect.Owner=this;
+            effect.Tokens=screen.Find("Stat_1").GetComponentsInChildren<Image>().Where(i=>i.name.StartsWith("WorkToken")).ToArray();
+            effect.Portrait=screen.GetComponentsInChildren<OpsPortraitMotion>().FirstOrDefault();
+        }
         private int[] CompanyRankMetrics()=>new[]{State.stability,State.Organization,State.trust,State.culture,State.Preparedness,State.Resilience};
         private void RankChangeEffect(TextMeshProUGUI label,Image badge,int before,int after)
         {
@@ -27,6 +36,23 @@ namespace PatchWorkSecure.CompanyOps
                 coin.gameObject.AddComponent<CanvasGroup>().blocksRaycasts=false;
                 effect.Coins[i]=coin;
             }
+        }
+    }
+    public sealed class OpsWorkComplete : MonoBehaviour
+    {
+        public OpsGame Owner;public Image[] Tokens;public OpsPortraitMotion Portrait;
+        private Color[] colors;private float started;private bool reacted;
+        private void Start(){started=Time.realtimeSinceStartup;colors=Tokens.Select(t=>t.color).ToArray();}
+        private void Update()
+        {
+            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.5f);
+            if(!reacted&&t>=.28f){reacted=true;Portrait?.SmallCelebrate();}
+            for(int i=0;i<Tokens.Length;i++)
+            {
+                float local=Mathf.Clamp01((t-i*.5f/Tokens.Length)*2),pulse=Mathf.Sin(local*Mathf.PI);
+                Tokens[i].color=Owner.ReducedMotion?new Color(colors[i].r,colors[i].g,colors[i].b,1-.4f*pulse):Color.Lerp(colors[i],new Color(.25f,.75f,1),pulse);
+            }
+            if(t>=1){for(int i=0;i<Tokens.Length;i++)Tokens[i].color=colors[i];Destroy(this);}
         }
     }
     public sealed class OpsRankChange : MonoBehaviour

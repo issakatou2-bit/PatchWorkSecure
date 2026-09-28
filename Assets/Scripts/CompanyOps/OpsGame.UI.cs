@@ -96,7 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
-            if (Application.isPlaying) StopAllCoroutines();
+            if (Application.isPlaying) {StopAllCoroutines();StopPresentationSounds();}
             Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
             if (PlanningArt != null) PImage(screen,"SharedBackground",PlanningArt.gradient,0,0,1600,900);

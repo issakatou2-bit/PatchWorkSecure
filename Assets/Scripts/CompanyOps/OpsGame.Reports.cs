@@ -33,10 +33,14 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ReportCount(TextMeshProUGUI label,int value,string unit)
         {
+            float started=Time.realtimeSinceStartup;
             yield return null;
-            for(float t=0;t<.6f;t+=Time.unscaledDeltaTime)
+            if(label==null)yield break;
+            if(Time.realtimeSinceStartup-started<.6f)PlayPresentationCue(OpsCue.Count);
+            while(Time.realtimeSinceStartup-started<.6f)
             {
                 if(label==null)yield break;
+                float t=Time.realtimeSinceStartup-started;
                 label.text=Mathf.RoundToInt(value*Mathf.SmoothStep(0,1,t/.6f)).ToString("N0")+unit;yield return null;
             }
             if(label==null)yield break;label.text=value.ToString("N0")+unit;

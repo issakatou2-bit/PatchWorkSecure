@@ -13,6 +13,8 @@ namespace PatchWorkSecure.CompanyOps
         private bool muted;
         private float soundVolume = .6f, musicVolume = .4f, lastClick = -1;
         private AudioSource buttonAudio, eventAudio, musicA, musicB;
+        private AudioSource countAudio, stampAudio, transitionAudio;
+        private float lastCount=-1, lastStamp=-1;
         private AudioClip targetMusic;
         private float musicBlend, previousMusicVolume;
         private readonly Dictionary<OpsCue, AudioClip> generatedSounds = new Dictionary<OpsCue, AudioClip>();
@@ -63,6 +65,30 @@ namespace PatchWorkSecure.CompanyOps
             // 連打で同じ音が積み重ならない。操作と結果だけを別々に再生する。
             source.Stop(); source.clip = clip; source.volume = soundVolume * (cue == OpsCue.Click ? .65f : 1);
             source.Play();
+        }
+        private void PlayPresentationCue(OpsCue cue)
+        {
+            if(!Application.isPlaying||muted||soundVolume<=0)return;
+            // 同じフレームの複数の数値・印は一音にまとめ、成功音や発動音を止めない。
+            if(cue==OpsCue.Count && Time.unscaledTime-lastCount<.08f)return;
+            if(cue==OpsCue.Stamp && Time.unscaledTime-lastStamp<.08f)return;
+            var clip=Sounds==null?null:Sounds.Clip(cue);if(clip==null)return;
+            // 月替わりの結果音と共通遷移は同じWAV。同時の二重再生を避ける。
+            if(cue==OpsCue.Transition&&eventAudio!=null&&eventAudio.clip==clip&&eventAudio.isPlaying)return;
+            AudioSource source;
+            if(cue==OpsCue.Count){lastCount=Time.unscaledTime;if(countAudio==null)countAudio=NewAudioSource();source=countAudio;}
+            else if(cue==OpsCue.Stamp){lastStamp=Time.unscaledTime;if(stampAudio==null)stampAudio=NewAudioSource();source=stampAudio;}
+            else {if(transitionAudio==null)transitionAudio=NewAudioSource();source=transitionAudio;}
+            source.Stop();source.clip=clip;source.volume=soundVolume*.65f;source.Play();
+        }
+        private void SetPresentationVolume(float volume)
+        {
+            foreach(var source in new[]{countAudio,stampAudio,transitionAudio})
+                if(source!=null){source.volume=volume*.65f;if(volume<=0)source.Stop();}
+        }
+        private void StopPresentationSounds()
+        {
+            foreach(var source in new[]{countAudio,stampAudio,transitionAudio})if(source!=null)source.Stop();
         }
         private void SetMusic(AudioClip clip)
         {

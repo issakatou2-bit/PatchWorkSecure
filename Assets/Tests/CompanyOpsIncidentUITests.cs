@@ -53,7 +53,7 @@ namespace PatchWorkSecure.Tests
             string before = JsonUtility.ToJson(game.State);
             Click("IncidentEvidence"); yield return null; CheckText(); CheckPointer("IncidentKnowledge");
             Click("CloseDialog"); yield return null;
-            Click("Power_scope"); yield return new WaitForSeconds(.8f);
+            Click("Power_scope"); yield return WaitForPowerCount(game.State.ResponsePower("scope").Total);
             Assert.AreEqual(game.State.ResponsePower("scope").Total.ToString(), Find<TextMeshProUGUI>("PowerTotalValue").text);
             Click("CloseDialog"); yield return null; Assert.AreEqual(before, JsonUtility.ToJson(game.State));
             Capture("36-incident-1080", 1920, 1080); CheckIncidentText();
@@ -65,7 +65,7 @@ namespace PatchWorkSecure.Tests
         {
             CheckText();
             foreach (var text in Object.FindObjectsByType<TextMeshProUGUI>())
-                if (text.name.StartsWith("Estimate") || text.name.StartsWith("Response") ||
+                if (text.name.StartsWith("Estimate") || text.name.StartsWith("Response") || text.name.StartsWith("PreparedText_") || text.name.StartsWith("Working") ||
                     new[] { "IncidentSymptom", "RecoveryReadiness", "NoTimer", "NavigatorSpeech", "SupportStatus" }.Contains(text.name))
                 {
                     text.ForceMeshUpdate(); Assert.IsFalse(text.isTextOverflowing, text.name + " / " + text.text);

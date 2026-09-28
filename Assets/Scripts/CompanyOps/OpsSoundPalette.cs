@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace PatchWorkSecure.CompanyOps
 {
-    public enum OpsCue { Click, Action, Purchase, Growth, Alert, Success, Damage, Month, Clear, Failure, Prepared, StaffHelp }
+    public enum OpsCue { Click, Action, Purchase, Growth, Alert, Success, Damage, Month, Clear, Failure, Prepared, StaffHelp, Count, Stamp, Transition }
 
     // 差し替え素材はここへ集約。未設定の効果音は試作用の合成音で動く。
     [CreateAssetMenu(menuName = "PatchWorkSecure/情シスの一年/サウンド素材")]
@@ -10,6 +10,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         public AudioClip click, action, purchase, growth, alert, success, damage, month, clear, failure;
         public AudioClip prepared, staffHelp;
+        public AudioClip count, stamp, transition;
         public AudioClip titleMusic, planningMusic, incidentMusic, reviewMusic;
         public AudioClip Clip(OpsCue cue)
         {
@@ -26,6 +27,9 @@ namespace PatchWorkSecure.CompanyOps
                 case OpsCue.Clear: return clear;
                 case OpsCue.Prepared: return prepared;
                 case OpsCue.StaffHelp: return staffHelp;
+                case OpsCue.Count: return count;
+                case OpsCue.Stamp: return stamp;
+                case OpsCue.Transition: return transition;
                 default: return failure;
             }
         }
@@ -55,6 +59,9 @@ namespace PatchWorkSecure.CompanyOps
                 case OpsCue.Success: Note(samples, 659, 0, .24f, .18f); Note(samples, 988, .09f, .25f, .19f); break;
                 case OpsCue.Damage: Note(samples, 164, 0, .30f, .25f, true); Note(samples, 123, .07f, .27f, .18f, true); break;
                 case OpsCue.Month: Note(samples, 392, 0, .25f, .17f); Note(samples, 587, .08f, .26f, .16f); break;
+                case OpsCue.Count: Note(samples, 740, 0, .08f, .10f, true); Note(samples, 932, .11f, .08f, .10f, true); Note(samples, 1175, .22f, .08f, .10f, true); break;
+                case OpsCue.Stamp: Note(samples, 220, 0, .12f, .24f, true); Note(samples, 1047, .04f, .25f, .12f); break;
+                case OpsCue.Transition: Note(samples, 330, 0, .20f, .12f); Note(samples, 494, .07f, .26f, .12f); break;
                 case OpsCue.Clear:
                     Note(samples, 523, 0, .34f, .18f); Note(samples, 659, .14f, .34f, .18f);
                     Note(samples, 784, .28f, .60f, .18f); Note(samples, 1047, .40f, .52f, .15f); break;

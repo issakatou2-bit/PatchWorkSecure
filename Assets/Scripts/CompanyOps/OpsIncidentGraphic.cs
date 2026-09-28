@@ -12,7 +12,16 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="stripes")
+            if(Kind=="ripple")
+            {
+                for(int i=0;i<40;i++)
+                {
+                    float a=i*Mathf.PI*2/40,b=(i+1)*Mathf.PI*2/40;
+                    Line(vh,r.center+new Vector2(Mathf.Cos(a)*w*.47f,Mathf.Sin(a)*h*.4f),
+                        r.center+new Vector2(Mathf.Cos(b)*w*.47f,Mathf.Sin(b)*h*.4f),1.5f);
+                }
+            }
+            else if(Kind=="stripes")
             {
                 for(float x=-h;x<w;x+=24)
                     Polygon(vh,new[]{new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+x+10,r.yMin),new Vector2(r.xMin+x+h+10,r.yMax),new Vector2(r.xMin+x+h,r.yMax)},color);

@@ -97,6 +97,7 @@ namespace PatchWorkSecure.Tests
                 Assert.IsTrue(Object.FindObjectsByType<RectTransform>().Any(r=>r.name.StartsWith("SeasonLayer_")));
                 Assert.AreEqual(before,JsonUtility.ToJson(game.State));CheckPointer("Action_listen");
                 if(month==9)CheckRect("SeasonOrnament",513,380.16f,44,54);
+                if(month==2)yield return new WaitForSecondsRealtime(.6f);
                 if(month==2||month==9)Capture(month==2?"64-season-rain":"65-season-newyear");
             }
             game.State.month=2;game.OpenTab(0);yield return null;

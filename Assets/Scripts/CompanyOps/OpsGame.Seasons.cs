@@ -11,10 +11,10 @@ namespace PatchWorkSecure.CompanyOps
             var layer=Rect(parent,"SeasonLayer_"+SeasonNames[month],0,0,width,height);
             layer.gameObject.AddComponent<RectMask2D>();
             var group=layer.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;
-            Color tint=month==1?new Color(.24f,.8f,.47f,.055f):month==2?new Color(.18f,.37f,.72f,.07f):
+            Color tint=month==1?new Color(.24f,.8f,.47f,.055f):month==2?new Color(.2f,.32f,.43f,.2f):
                 month==3||month==4?new Color(1,.86f,.66f,.065f):month==6||month==7?new Color(1,.44f,.27f,.055f):new Color(1,1,1,0);
             PImage(layer,"SeasonTint",null,0,0,width,height,tint);
-            for(int j=0;j<8;j++)
+            for(int j=0;j<(month==2?48:8);j++)
             {
                 float x=width*(.1f+j*.115f),period=8+j*.4f;RectTransform particle;
                 if(month==0||month==5||month==6||month==7)
@@ -26,9 +26,23 @@ namespace PatchWorkSecure.CompanyOps
                 else if(month==8||month==10)
                 {particle=PImage(layer,"SeasonParticle"+j,PlanningArt.snow,x,0,8,8);Motion(particle,"snow",period+2,j*.7f);}
                 else if(month==2)
-                {particle=PImage(layer,"SeasonParticle"+j,null,x,0,2,36,new Color(.7f,.84f,1,.35f));Motion(particle,"rain",1.2f+j*.07f,j*.2f);}
+                {
+                    x=width*Mathf.Repeat(.07f+j*.1618f,1);
+                    particle=PImage(layer,"SeasonParticle"+j,null,x,0,2.5f,46+(j%4)*8,new Color(.75f,.85f,.94f,.6f));
+                    particle.localEulerAngles=new Vector3(0,0,-12);Motion(particle,"rain",1.05f+(j%5)*.09f,j*.2f);
+                }
                 else if(month==1)
                 {particle=PCard(layer,"SeasonParticle"+j,x,height*.68f,6,6,new Color(.8f,1,.77f,.45f),12,false);Motion(particle,"mote",period,j*.8f);}
+            }
+            if(month==2)
+            {
+                // 波紋は建物ではなく、下側の道路・駐車場の地面に置く。
+                for(int j=0;j<8;j++)
+                {
+                    var ripple=IncidentShape(layer,"SeasonRipple"+j,"ripple",width*(.07f+j*.12f),height*(.84f+(j%3)*.055f),42,14,new Color(.8f,.9f,1,.65f));
+                    ripple.pivot=new Vector2(.5f,.5f);ripple.anchoredPosition+=new Vector2(21,-7);
+                    Motion(ripple,"ripple",1.3f+(j%3)*.12f,j*.29f);
+                }
             }
             if(month==3||month==4)
             {

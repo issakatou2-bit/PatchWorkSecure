@@ -429,7 +429,7 @@ namespace PatchWorkSecure.CompanyOps
             Button(d, "ToggleSound", muted ? "音声 / 消音中" : "音声 / 有効", 32, 211, 350, 48, () =>
             {
                 muted = !muted;
-                if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); StopVoice(); }
+                if (muted) { if (buttonAudio != null) buttonAudio.Stop(); if (eventAudio != null) eventAudio.Stop(); SetPresentationVolume(0); StopVoice(); }
                 StoreFeedbackSettings(); DiagnosticMenu();
             });
             Button(d, "ReduceMotion", ReducedMotion ? "動きを減らす / 有効" : "動きを減らす / 無効", 410, 211, 350, 48,

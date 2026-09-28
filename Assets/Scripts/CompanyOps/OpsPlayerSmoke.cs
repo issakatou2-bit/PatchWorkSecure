@@ -29,6 +29,15 @@ namespace PatchWorkSecure.CompanyOps
             var game = FindAnyObjectByType<OpsGame>();
             if (game == null) { Debug.LogError("[CompanyOps Player] 試作が見つかりません"); Application.Quit(1); yield break; }
             game.StartYear(14); yield return null;
+            if(Environment.GetCommandLineArgs().Contains("-ops-sfx-smoke-test"))
+            {
+                foreach(OpsCue cue in Enum.GetValues(typeof(OpsCue)))
+                {
+                    var clip=game.Sounds==null?null:game.Sounds.Clip(cue);
+                    if(clip==null||clip.samples<1000||clip.frequency!=48000)failed=true;
+                }
+                Debug.Log("[CompanyOps Player] B案SEの全15用途の読込確認 "+(failed?"FAILED":"PASSED"));
+            }
             if (Environment.GetCommandLineArgs().Contains("-ops-audio-smoke-test"))
             {
                 yield return new WaitForSecondsRealtime(1);

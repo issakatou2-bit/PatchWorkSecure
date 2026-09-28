@@ -53,6 +53,12 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (!Application.isPlaying) return;
             var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay; reveal.Stamp = stamp;
+            if(stamp)StartCoroutine(StampSound(rect,delay));
+        }
+        private IEnumerator StampSound(RectTransform target,float delay)
+        {
+            yield return new WaitForSecondsRealtime(delay);
+            if(target!=null&&target.gameObject.activeInHierarchy)PlayPresentationCue(OpsCue.Stamp);
         }
         private string WindowCategory(string title) => title.Contains("設定") ? "SETTINGS" : title.Contains("知識") || OpsCatalog.Terms.Any(t => t.name == title) ? "KNOWLEDGE" : title.Contains("育成") || title.Contains("チーム") ? "TEAM" : title.Contains("記録") || title.Contains("評価") ? "REPORT" : title.Contains("導入") || title.Contains("Lv.") ? "PLANNING" : "PATCHWORK";
         private void WindowHeader(RectTransform card, string title, string category, float width)
@@ -102,6 +108,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             yield return null;
             if (target == null) yield break;
+            PlayPresentationCue(OpsCue.Transition);
             var cover = IncidentShape(Surface, "ScreenWipe", "cutin", -1900, 0, 1900, 900, PlanPink);
             var group = cover.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
             for (float t = 0; t < .3f; t += Time.unscaledDeltaTime)

@@ -36,7 +36,8 @@ namespace PatchWorkSecure.CompanyOps
                 string task=parts.Length>1?parts[1].Split(new[]{" / "},StringSplitOptions.None)[0]:"対応を助力";
                 steps.Add(new ResolutionStep{name=member+"の支援",detail="抑制力 +"+result.power.staff+" / "+task,color=PlanBlue,staff=true});
             }
-            var missing=result.potentialInvestmentEffects?.OrderByDescending(e=>e.avoidedLoss+e.avoidedDowntime).FirstOrDefault();
+            var missing=result.potentialInvestmentEffects?.Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0)
+                .OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault();
             if(missing!=null)steps.Add(new ResolutionStep{name=OpsCatalog.Projects[OpsCatalog.Index(missing.projectId)].name+" 未導入",detail="あれば、"+EffectLine(missing),color=PlanGray,missing=true});
             return steps;
         }
@@ -74,7 +75,6 @@ namespace PatchWorkSecure.CompanyOps
             var speech=PCard(screen,"ResolutionSpeech",330,520,230,85,Color.white,20,false);
             PImage(speech,"SpeechTail",PlanningArt.tail,-22,20,28,38);
             PText(speech,"ResolutionReaction",good?"やった、\n守れたよ！":r.benign?"正常な操作だったね。":"対応できたね。\n次の備えを考えよう！",16,10,198,65,20,Hex("d94a70"));
-            PButton(screen,"ResolutionMenu","設定",24,414,98,36,Menu,PlanInk,Color.white,16);
             if(CanSkipResolution)PButton(screen,"SkipResolution","演出をスキップ",1320,822,256,48,SkipResolution,Color.white,PlanInk,16);
             PText(screen,"ResolutionComparisonNote","各設備を一つ外した場合との比較。連携があるため、削減値は足し合わせません。",560,798,1016,25,14,Color.white,false);
             if(Application.isPlaying)StartCoroutine(ResolutionRoutine(steps,flow,cutin,lossNeedle,stopNeedle,hinata,good,r));
@@ -97,8 +97,8 @@ namespace PatchWorkSecure.CompanyOps
             {
                 if(index>0&&index<current-2)continue;
                 var step=steps[index];float y=rowIndex++*72;
-                var row=PCard(flow,"ResolutionStep_"+index,0,y,480,60,step.missing?new Color(1,1,1,.25f):new Color(1,1,1,.95f),16,false);
-                if(step.missing)IncidentShape(row,"MissingDashedFrame","dashed",0,0,480,60,new Color(1,1,1,.5f));
+                var row=PCard(flow,"ResolutionStep_"+index,0,y,480,60,step.missing?new Color(1,1,1,.12f):new Color(1,1,1,.95f),16,false);
+                if(step.missing)IncidentShape(row,"MissingDashedFrame","dashed",0,0,480,60,new Color(1,1,1,.9f));
                 var number=PCard(row,"StepNumber",16,12,36,36,step.color,20,false);
                 PText(number,"StepIndex",step.missing?"?":(index+1).ToString(),0,0,36,36,16,Color.white,true,true);
                 PText(row,"StepName",step.name,64,7,378,24,17,step.missing?Color.white:PlanInk);

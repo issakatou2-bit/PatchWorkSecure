@@ -18,9 +18,10 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
-        [UnityTest] public IEnumerator ゲーマー役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(0);
-        [UnityTest] public IEnumerator IT初学者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(1);
-        [UnityTest] public IEnumerator FE取得者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(2);
+        // 60か月・約700操作を含むため通常の180秒では余裕がない。各操作の期限は維持する。
+        [UnityTest,Timeout(300000)] public IEnumerator ゲーマー役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(0);
+        [UnityTest,Timeout(300000)] public IEnumerator IT初学者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(1);
+        [UnityTest,Timeout(300000)] public IEnumerator FE取得者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(2);
         private IEnumerator PlayPersona(int role)
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

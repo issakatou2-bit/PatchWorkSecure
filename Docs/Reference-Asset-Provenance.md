@@ -30,11 +30,11 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 
 画像・参照設定は`OpsPlanningArt`にまとめ、シーン再生成でも同じ設定を読み込む。既存アートの生成由来については上の記録を引き継ぐ。
 
-## 2026-09-29 効果音の試聴候補（未投入）
+## 2026-09-29 効果音の試聴候補（B案を試遊用に投入）
 
 `ArtSource/SfxCandidates/`の22音と連続試聴2本は、`Tools/Generate-Sfx-Candidates.py`によるプロジェクト用の独自プロシージャル生成。倍音・ノイズ・短い残響から作り、第三者の録音・サンプル・音楽素材・学習モデルは使用していない。AIサービスで生成した音とは扱わない。
 
-新たな第三者素材ライセンスや追加クレジットはない。採用は加藤さんの試聴・承認後。詳細と場面対応は`Docs/Sfx-Candidates-2026-09-29.md`。現段階では`Assets/`、`YearSounds.asset`、実行時の効果音に登録していない。
+新たな第三者素材ライセンスや追加クレジットはない。加藤さんの「B案かなぁ。一旦そのSEでやってみて」の回答に基づき、B-brightの11音だけを`Assets/Audio/CompanyYear/SFX/B-bright/`と`YearSounds.asset`へ登録した。原音は変更せず保持。最終ミックスの承認ではない。詳細と場面対応は`Docs/Sfx-Candidates-2026-09-29.md`。
 
 ## 2026-09-29 ひなたの新デザイン（生成・未投入）
 

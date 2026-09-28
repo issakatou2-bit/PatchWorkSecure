@@ -147,7 +147,7 @@ namespace PatchWorkSecure.Tests
             Click("CloseDialog"); game.ChooseAction("audit"); game.BeginIncident(); game.Resolve("scope"); game.Next(); yield return null;
             Click("OpenTeam"); yield return null; Click("Practice_1"); yield return null; Click("Support_investigate"); yield return null;
             Click("CloseDialog"); game.Buy(OpsCatalog.Index("mfa")); game.ChooseAction("map"); game.BeginIncident(); yield return null;
-            Capture("26-staff-assistance"); CheckText(); CheckPointer("Power_scope"); Click("Power_scope"); yield return new WaitForSeconds(.7f);
+            Capture("26-staff-assistance"); CheckText(); CheckPointer("Power_scope"); Click("Power_scope"); yield return WaitForPowerCount(game.State.ResponsePower("scope").Total);
             Assert.AreEqual(game.State.ResponsePower("scope").Total.ToString(), Find<TextMeshProUGUI>("PowerTotalValue").text);
             Capture("27-additive-power", 1280, 720); CheckTeamText(); Click("CloseDialog"); yield return null;
             var predicted = game.State.Preview("scope"); CheckPointer("Respond_scope"); Click("Respond_scope"); yield return WaitForResolution(game);

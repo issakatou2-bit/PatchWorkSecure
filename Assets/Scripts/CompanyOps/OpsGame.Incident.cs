@@ -107,17 +107,23 @@ namespace PatchWorkSecure.CompanyOps
                 staff.GetComponentInChildren<TextMeshProUGUI>().margin=new Vector4(30,0,0,0);
             }
             var estimates=ResponseIds.Select(State.Estimate).ToArray();int lossScale=Math.Max(1,estimates.Max(e=>e.lossMax)),stopScale=Math.Max(1,estimates.Max(e=>e.stopMax));
-            string[] caution={"広がりを抑える一方、正常な業務も止まる","業務を続けやすいが、範囲を絞る備えが重要","安全確認の後に再開。戻せる備えが重要"};
+            string[] caution={"正常な業務も止め、\n広がりを抑える","業務を続けやすいが、\n範囲を絞る備えが重要","安全確認の後に再開。\n戻せる備えが重要"};
             for(int i=0;i<3;i++)
             {
                 string id=ResponseIds[i];var e=estimates[i];float w=896f/3,xCard=i*(w+16);
-                bool prepared=Enumerable.Range(0,State.levels.Length).Any(j=>EquipmentHelps(j,id));
+                var working=Enumerable.Range(0,State.levels.Length).Where(j=>EquipmentHelps(j,id)).ToArray();
+                bool prepared=working.Length>0;
                 if(prepared) PCard(p,"PreparedOutline_"+id,xCard-4,125,w+8,584,PlanMint,28,false);
                 var card=PCard(p,"ResponseCard_"+id,xCard,129,w,576,Color.white,24,false);
                 if(prepared)
                 {
-                    var badge=PCard(card,"PreparedBadge_"+id,w-121,-14,105,27,PlanMint,12,false);
-                    PText(badge,"PreparedText_"+id,"備えが効く",0,0,105,27,13,Color.white,true,true);
+                    // 公開見積もりに効く設備だけを表示。未確定の結果は参照しない。
+                    int best=working.OrderByDescending(j=>State.EstimateWithoutProject(j,id).lossMax-e.lossMax)
+                        .ThenByDescending(j=>State.EstimateWithoutProject(j,id).stopMax-e.stopMax).First();
+                    string label=OpsCatalog.Projects[best].name+"が効く";
+                    float badgeWidth=Mathf.Min(w-32,24+label.Length*13);
+                    var badge=PCard(card,"PreparedBadge_"+id,w-badgeWidth-16,-14,badgeWidth,27,PlanMint,12,false);
+                    PText(badge,"PreparedText_"+id,label,8,0,badgeWidth-16,27,13,Color.white,true,true);
                 }
                 var icon=PCard(card,"ResponseIcon_"+id,20,20,56,56,Hex(i==0?"ffe3ec":i==1?"e3f2ff":"e3faf3"),20,false);
                 if(i==1) PImage(icon,"ResponseGlyph_"+id,PlanningArt.audit,12,12,32,32);
@@ -125,23 +131,55 @@ namespace PatchWorkSecure.CompanyOps
                 PText(card,"ResponseName_"+id,ResponseTitles[i],88,18,w-108,32,22);
                 PText(card,"ResponseType_"+id,State.CurrentProfile==null?ResponseLines[i]:State.ResponseName(id),88,51,w-108,37,14,PlanGray,false);
                 PText(card,"CostLabel_"+id,"対応費",20,105,98,38,15,PlanGray);
-                PText(card,"ResponseCost_"+id,e.cost.ToString(),127,105,w-147,38,26,State.budget<e.cost?IncidentRed:PlanInk,true,true);
-                PText(card,"CostUnit_"+id,"万円",w-59,122,39,24,14,PlanGray);
+                PText(card,"ResponseCost_"+id,e.cost.ToString(),112,105,w-174,38,26,State.budget<e.cost?IncidentRed:PlanInk,true,true).alignment=TextAlignmentOptions.MidlineRight;
+                PText(card,"CostUnit_"+id,"万円",w-57,105,37,38,14,PlanGray).alignment=TextAlignmentOptions.MidlineLeft;
                 EstimateMetric(card,"Stop_"+id,"業務停止",e.stopMin,e.stopMax,stopScale,159,PlanPink,w);
                 EstimateMetric(card,"Loss_"+id,"被害",e.lossMin,e.lossMax,lossScale,227,Hex("ff9f43"),w);
                 PText(card,"ResponseCaution_"+id,State.budget<e.cost?"手元予算が対応費に不足\n"+caution[i]:caution[i],20,305,w-40,70,14,PlanInk,false);
+                WorkingEquipment(card,id,working,w);
                 // 詳細はアイコンから開く。モックにない説明列は常設しない。
                 var details=PButton(card,"Power_"+id,"",20,20,56,56,()=>PowerReport(id),Color.clear,Color.clear,20);Hover(details,"抑制力の内訳を見る");
                 PButton(card,"Respond_"+id,"この方針で対応",20,500,w-40,56,()=>Resolve(id),PlanInk,Color.white,16,Hex("0c1226"));
             }
-            PText(p,"NoTimer","見積もりは目安の幅で、確率ではありません。「備えが効く」は導入済みの設備がこの方針で働くことを示します。",0,724,928,43,14,Hex("e8c9d3"),false);
+            PText(p,"NoTimer","見積もりは目安の幅で、確率ではありません。札と一覧は、この方針に効く導入済みの備えです。",0,724,928,43,14,Hex("e8c9d3"),false);
+        }
+        private void WorkingEquipment(Transform card,string response,int[] working,float width)
+        {
+            PText(card,"WorkingHeading_"+response,"この方針で働く備え",20,380,width-40,24,13,PlanGray);
+            if(working.Length==0)
+            {
+                PText(card,"WorkingNone_"+response,"導入済みの備えなし",20,413,width-40,56,14,PlanGray,false);
+                return;
+            }
+            int count=Math.Min(working.Length,6);float chipWidth=(width-48)/2;
+            for(int j=0;j<count;j++)
+            {
+                bool more=j==5&&working.Length>6;
+                string text=more?"ほか "+(working.Length-5)+"件":OpsCatalog.Projects[working[j]].name;
+                string key=more?"WorkingMore_"+response:"Working_"+response+"_"+OpsCatalog.Projects[working[j]].id;
+                var chip=PButton(card,key,text,20+(j%2)*(chipWidth+8),410+(j/2)*27,chipWidth,23,
+                    ()=>WorkingEquipmentDetails(response,working),Hex("e3faf3"),Hex("1a7c63"),12);
+                chip.GetComponentInChildren<TextMeshProUGUI>().fontSizeMin=10;
+            }
+        }
+        private void WorkingEquipmentDetails(string response,int[] working)
+        {
+            var actual=State.Estimate(response);
+            string body=string.Join("\n\n",working.Select(j=>
+            {
+                var absent=State.EstimateWithoutProject(j,response);
+                return OpsCatalog.Projects[j].name+" Lv."+State.levels[j]+"\n外すと見積もり上限：被害 +"+(absent.lossMax-actual.lossMax)+"万円 / 停止 +"+(absent.stopMax-actual.stopMax)+"時間";
+            }));
+            var dialog=Dialog("この方針で働く備え",body+"\n\n設備を一つずつ外した比較です。連携があるため、差は足し合わせません。",Mathf.Min(820,300+working.Length*64));
+            var text=dialog.Find("DialogBody").GetComponent<TextMeshProUGUI>();text.fontSize=15;text.fontSizeMin=12;text.fontSizeMax=15;
+            text.GetComponent<OpsTextPreference>()?.Initialize(text,TextScale);
         }
         private void EstimateMetric(Transform parent,string id,string title,int min,int max,int scale,float y,Color color,float width)
         {
             float w=width-40;
             PText(parent,"EstimateLabel_"+id,title,20,y,95,30,15,PlanGray);
-            PText(parent,"EstimateValue_"+id,min==max?min.ToString():min+"～"+max,115,y,width-135,30,18,PlanInk,true,true);
-            PText(parent,"EstimateUnit_"+id,id.StartsWith("Stop")?"時間":"万円",width-57,y+23,37,18,11,PlanGray);
+            PText(parent,"EstimateValue_"+id,min==max?min.ToString():min+"～"+max,112,y,width-174,30,18,PlanInk,true,true).alignment=TextAlignmentOptions.MidlineRight;
+            PText(parent,"EstimateUnit_"+id,id.StartsWith("Stop")?"時間":"万円",width-57,y,37,30,13,PlanGray).alignment=TextAlignmentOptions.MidlineLeft;
             var track=PCard(parent,"EstimateTrack_"+id,20,y+44,w,10,Hex("e6eaf2"),12,false);
             // 帯は下限から上限まで。3方針の尺度は同一で、確率に見える塗り分けはしない。
             PCard(track,"EstimateBand_"+id,w*min/scale,0,w*(max-min)/scale,10,color,12,false);

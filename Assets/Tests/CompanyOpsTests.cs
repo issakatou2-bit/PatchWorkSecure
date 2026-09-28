@@ -292,6 +292,12 @@ namespace PatchWorkSecure.Tests
             }
             Assert.IsFalse(game.ResolutionActive,"発動演出が完了しない");yield return new WaitForSecondsRealtime(.85f);
         }
+        private static IEnumerator WaitForPowerCount(int expected)
+        {
+            float deadline=Time.realtimeSinceStartup+2;
+            while(Find<TextMeshProUGUI>("PowerTotalValue").text!=expected.ToString()&&Time.realtimeSinceStartup<deadline)yield return null;
+            Assert.AreEqual(expected.ToString(),Find<TextMeshProUGUI>("PowerTotalValue").text,"抑制力の数え上げが完了しない");
+        }
         private static void CheckText()
         {
             foreach (var text in Object.FindObjectsByType<TextMeshProUGUI>())

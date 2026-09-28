@@ -12,16 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3891a6043acc0ee4197bd438b4b21496, type: 3}
   m_Name: YearSounds
   m_EditorClassIdentifier: PatchWorkSecure::PatchWorkSecure.CompanyOps.OpsSoundPalette
-  click: {fileID: 0}
-  action: {fileID: 0}
-  purchase: {fileID: 0}
-  growth: {fileID: 0}
-  alert: {fileID: 0}
-  success: {fileID: 0}
-  damage: {fileID: 0}
-  month: {fileID: 0}
-  clear: {fileID: 0}
-  failure: {fileID: 0}
+  click: {fileID: 8300000, guid: 449b6fe617007314ba5c7662691c4405, type: 3}
+  action: {fileID: 8300000, guid: 7383f97a9f4621b4f83af04171f2319c, type: 3}
+  purchase: {fileID: 8300000, guid: 7630eda407530bb48bdaa5cf54f992f6, type: 3}
+  growth: {fileID: 8300000, guid: 19927dd3f20380340a2241415948da53, type: 3}
+  alert: {fileID: 8300000, guid: 24337de2c2e18164cb18d4e422a6295d, type: 3}
+  success: {fileID: 8300000, guid: 7383f97a9f4621b4f83af04171f2319c, type: 3}
+  damage: {fileID: 8300000, guid: f02e3cc2465eca5429d16e83161971a5, type: 3}
+  month: {fileID: 8300000, guid: 62dbad6d7a7e2b742a232dfffb08706c, type: 3}
+  clear: {fileID: 8300000, guid: 1b8cfb763ef10424d8a836ceaa99e697, type: 3}
+  failure: {fileID: 8300000, guid: f02e3cc2465eca5429d16e83161971a5, type: 3}
+  prepared: {fileID: 8300000, guid: 14254d42a9c544947aebf80e299516f8, type: 3}
+  staffHelp: {fileID: 8300000, guid: 7383f97a9f4621b4f83af04171f2319c, type: 3}
+  count: {fileID: 8300000, guid: f18391e4a73e2c3499514c1142662f2f, type: 3}
+  stamp: {fileID: 8300000, guid: 9340971cde3d08c42bfd4a3b51f58b5d, type: 3}
+  transition: {fileID: 8300000, guid: 62dbad6d7a7e2b742a232dfffb08706c, type: 3}
   titleMusic: {fileID: 8300000, guid: bea024826ce5f9048b5b80e6921b8a6d, type: 3}
   planningMusic: {fileID: 8300000, guid: bea024826ce5f9048b5b80e6921b8a6d, type: 3}
   incidentMusic: {fileID: 8300000, guid: c09e51ea36b77664e9a24c5148eabe2e, type: 3}

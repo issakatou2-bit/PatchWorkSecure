@@ -31,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
             var d=Box(modal,"SettingsWindow",330,50,940,800,Color.white,true);KitPanel(d,Color.white,true);WindowHeader(d,"設定","SETTINGS",940);Reveal(d);
             SettingsSection(d,"SOUND",30,100,PlanPink);
             SettingsSlider(d,"MusicVolume","BGM",130,musicVolume,v=>{musicVolume=v;StoreFeedbackSettings();TickMusic();});
-            SettingsSlider(d,"SoundVolume","効果音",204,soundVolume,v=>{soundVolume=v;StoreFeedbackSettings();if(buttonAudio!=null)buttonAudio.volume=v*.65f;if(eventAudio!=null)eventAudio.volume=v;});
+            SettingsSlider(d,"SoundVolume","効果音",204,soundVolume,v=>{soundVolume=v;StoreFeedbackSettings();if(buttonAudio!=null)buttonAudio.volume=v*.65f;if(eventAudio!=null)eventAudio.volume=v;SetPresentationVolume(v);});
             SettingsSlider(d,"VoiceVolume","ひなたの声",278,voiceVolume,v=>{voiceVolume=v;StoreFeedbackSettings();if(voiceAudio!=null)voiceAudio.volume=v;if(v<=0)StopVoice();});
             SettingsSection(d,"DISPLAY",30,358,PlanBlue);
             var text=SettingsRow(d,"TextSizeRow","文字の大きさ",388);

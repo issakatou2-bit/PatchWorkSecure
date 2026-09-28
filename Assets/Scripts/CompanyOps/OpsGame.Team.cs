@@ -135,9 +135,11 @@ namespace PatchWorkSecure.CompanyOps
             total.text = sum.ToString();
             foreach (var n in numbers) n.text = "+0";
             int[] values = { p.equipment, p.player, p.staff };
+            float started=Time.realtimeSinceStartup;
             for (int i = 0; i < values.Length; i++)
             {
-                yield return new WaitForSecondsRealtime(.18f);
+                // 待ち時間を積み上げず、開始時刻からの期限にする。低FPSでも途中値を残さない。
+                while(Time.realtimeSinceStartup-started<(i+1)*.18f)yield return null;
                 if (total == null || !total.gameObject.activeInHierarchy || numbers[i] == null) yield break;
                 numbers[i].text = "+" + values[i]; sum += values[i]; total.text = sum.ToString();
                 if (values[i] > 0) PlayCue(OpsCue.Click);

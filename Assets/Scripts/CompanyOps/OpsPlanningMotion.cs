@@ -26,7 +26,7 @@ namespace PatchWorkSecure.CompanyOps
             if (Owner == null || Owner.ReducedMotion)
             {
                 rect.anchoredPosition = origin; rect.localScale = Vector3.one; rect.localRotation = Quaternion.identity;
-                if (image != null) image.color = Kind == "petal" || Kind == "snow" || Kind == "rain" || Kind == "mote" || Kind == "haze" || Kind == "shine" || Kind == "pulse" ? new Color(color.r,color.g,color.b,0) : color;
+                if (image != null) image.color = Kind == "petal" || Kind == "snow" || Kind == "rain" || Kind == "ripple" || Kind == "mote" || Kind == "haze" || Kind == "shine" || Kind == "pulse" ? new Color(color.r,color.g,color.b,0) : color;
                 return;
             }
             float t = Mathf.Repeat((Time.unscaledTime - started + Delay) / Period, 1);
@@ -59,6 +59,11 @@ namespace PatchWorkSecure.CompanyOps
                 if(image!=null)image.color=new Color(color.r,color.g,color.b,color.a*Mathf.Min(t*10,(1-t)*6));
             }
             if (Kind == "haze" && image != null) image.color=new Color(color.r,color.g,color.b,color.a*(.5f+.5f*Mathf.Sin(t*Mathf.PI*2)));
+            if (Kind == "ripple")
+            {
+                rect.localScale=Vector3.one*Mathf.Lerp(.3f,1.7f,t);
+                if(image!=null)image.color=new Color(color.r,color.g,color.b,color.a*Mathf.Min(1,t*8)*(1-t));
+            }
         }
     }
 }

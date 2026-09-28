@@ -20,7 +20,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private Color DeltaColor(int index, int delta) => index == 1 || index == 0 && delta < 0 && expectedResourceSpend ? Sky :
             (index == 5 ? delta < 0 : delta > 0) ? Mint : Coral;
-        private Color StatColor(int index) => new[] { Paper, Sky, Mint, Rose, Lavender, Coral }[index];
+        private Color StatColor(int index) => new[] { Paper, Sky, Mint, Rose, Lavender, State.fatigue >= 60 ? Coral : Sky }[index];
         private Color GroupColor(string group) => group == "protect" ? Sky : group == "recover" ? Mint : group == "people" ? Rose : Lavender;
         private bool StatWarning(int index) => index == 0 ? State.budget < 6 : index == 2 ? State.stability < 35 : index == 5 && State.fatigue >= 60;
         private string StatHint(int index)
@@ -28,11 +28,11 @@ namespace PatchWorkSecure.CompanyOps
             switch (index)
             {
                 case 0: return State.budget < 6 ? "要注意 / 対応費が不足" : "維持 " + State.Upkeep + "万円 / 月";
-                case 1: return State.capacity == 0 ? "使い切り / 翌月に回復" : "残り " + State.capacity + "工数 / 今月限り";
-                case 2: return State.stability < 35 ? "要注意 / 0で運営終了" : "安定 / 高いほど良い";
-                case 3: return State.culture >= 65 ? "相談が定着 / 育成中" : "相談の習慣を育成中";
+                case 1: return State.capacity == 0 ? "使い切り" : "今月の行動回数";
+                case 2: return State.stability < 35 ? "要注意 / 0で終了" : "安定";
+                case 3: return State.culture >= 65 ? "相談が定着" : "";
                 case 4: return "次の月次予算 " + State.MonthlyGrant + "万円";
-                default: return State.fatigue >= 60 ? "要休息 / 対応に影響" : "余裕あり / 低いほど良い";
+                default: return State.fatigue >= 60 ? "要休息 / 対応に影響" : "";
             }
         }
         private void StatusCard(int index, float x)

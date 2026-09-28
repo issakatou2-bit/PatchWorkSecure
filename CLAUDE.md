@@ -20,7 +20,7 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 
 | シーン | 中身 | コード | 詳細 |
 |---|---|---|---|
-| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.8。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
+| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.9。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない（共有は`NavigatorPersona`のみ）。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で63件（新試作54＋旧版の通し2＋オフィス7）
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/28時点で65件（新試作56＋旧版の通し2＋オフィス7）
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -88,18 +88,18 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-28）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.8：出来事40件・日常業務18件、社員育成・季節負荷、3列の対応比較、浮遊する増減値、反応台詞36候補。PlayMode 63/63、Verify系も成功。Windows版の12か月通し検証もPASSED。
+- 新試作v0.9：v0.8のルールは維持し、文字量・通知の重なり・ランク表示を整理。生成BGM2曲を投入。65個のテストは全体実行＋対象の再検証で通過（内訳はDev-Status）。Verify系、Windows版のBGM切替・12か月検証もPASSED。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：`Assets/Sprites/Hinata/hinata_normal.png`の暫定1表情だけ（生成画像を加工したもの）。加藤さんの希望は、アニメ／萌え寄り・かわいい仕事着・表情とポーズの差分。学生服は不可。旧顔を保持する案、A/B/C線画、コードで顔を描き直す案はいずれも不採用。仕様は`Docs/Hinata-Art-Brief.md`。
-- 音：SEは簡易合成音（`OpsSoundDesign`）。BGMと声は未投入（声の試聴は`Docs/Hinata-Voice-2026-09-28.md`）。
+- 音：SEは簡易合成音（`OpsSoundDesign`）。BGMはGemini / Lyriaの生成2曲（`Docs/CompanyYear-Music-2026-09-28.md`）。声はLが基準案で、ゲームへは未投入（`Docs/Hinata-Voice-2026-09-28.md`）。
 - UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
 
 ## 7. 次にやること（優先順）
 
 1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
 2. ひなたの原画（6表情：`hinata_normal / proud / worried / alert / relieved / sad`）を`Assets/Sprites/Hinata/`へ置く。「PatchWorkSecure → キャラ立ち絵を取り込む」で反映する（透過も検査される）。
-3. UI・UX評価の不具合6件（重なり、用語の不統一、孤立した改行など）。
-4. BGMとSEを実素材にする（ライセンスを確認してから）。
+3. 承認済み計画画面モックへの移行（`Docs/Mockups/README.md`）。UI・UX評価の不具合6件はv0.9で修正済み。
+4. 生成BGM2曲の試聴・ループ調整、SEの音色改善。商用本採用前に利用条件を再確認する。
 5. 難易度：限定対応を弱めるより、状況で選び分ける理由を増やす。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。
 6. Player Settings（Steam向け）、ブランチ整理。
 

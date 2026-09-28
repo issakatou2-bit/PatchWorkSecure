@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ namespace PatchWorkSecure.CompanyOps
             Paper = Hex("F5F7FA"), Muted = Hex("AFBBCB"), Accent = Hex("70B4FF"), Mint = Hex("47D7A0"), Coral = Hex("FF7E88");
         private RectTransform screen, modal, toast;
         private CanvasGroup toastGroup;
+        private TextMeshProUGUI toastSpeech;
         private float toastUntil;
         private static Color Hex(string code) { ColorUtility.TryParseHtmlString("#" + code, out var c); return c; }
         private RectTransform Rect(Transform parent, string name, float x, float y, float w, float h)
@@ -88,7 +90,7 @@ namespace PatchWorkSecure.CompanyOps
         private void NewScreen()
         {
             if (Application.isPlaying) StopAllCoroutines();
-            Clear(Surface); modal = null; toast = null; toastGroup = null;
+            Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
         }
         private void Bar(Transform parent, string title, int value, float x, float y, float w, Color color)
@@ -128,14 +130,17 @@ namespace PatchWorkSecure.CompanyOps
             int split = message.IndexOf(" / ", StringComparison.Ordinal);
             string heading = split < 0 ? message : message.Substring(0, split);
             string detail = split < 0 ? "今月の運用に反映しました" : message.Substring(split + 3);
-            toast = Box(screen, "Feedback", 312, 466, 628, 112, good ? Mint : Coral, true);
+            // 通知はひなたの吹き出し内へ。オフィスの設備・月次事情を覆わない。
+            var navigator = screen.Find("Navigator");
+            if (navigator == null) { Feedback(cue); return; }
+            toastSpeech = navigator.GetComponentsInChildren<TextMeshProUGUI>().FirstOrDefault(t => t.name == "NavigatorSpeech");
+            if (toastSpeech != null) toastSpeech.enabled = false;
+            toast = Box(navigator, "Feedback", 208, 52, 438, 84, Ink);
             toastGroup = toast.gameObject.AddComponent<CanvasGroup>();
             toastGroup.blocksRaycasts = false; toastGroup.interactable = false;
-            var plate = Box(toast, "FeedbackPlate", 6, 6, 616, 100, Ink);
-            plate.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(plate, "FeedbackKicker", good ? "行動・成長の記録" : "状況と結果の報告", 18, 6, 576, 22, 14, good ? Mint : Coral);
-            Text(plate, "FeedbackTitle", heading, 18, 27, 576, 40, 28, Paper);
-            Text(plate, "FeedbackDetail", detail, 18, 68, 576, 27, 18, Muted);
+            toast.GetComponent<Image>().raycastTarget = false;
+            Text(toast, "FeedbackTitle", heading, 12, 7, 414, 32, 22, good ? Mint : Coral);
+            Text(toast, "FeedbackDetail", detail, 12, 42, 414, 36, 16, Paper);
             toastUntil = Time.unscaledTime + 2.7f;
             Feedback(cue);
         }
@@ -151,7 +156,7 @@ namespace PatchWorkSecure.CompanyOps
                 float t = toastUntil - Time.unscaledTime;
                 toast.localScale = Vector3.one * (ReducedMotion ? 1 : 1f + 0.06f * Mathf.Clamp01((t - 2.45f) / 0.25f));
                 if (toastGroup != null) toastGroup.alpha = Mathf.Clamp01(t / 0.35f);
-                if (t < 0) { Destroy(toast.gameObject); toast = null; }
+                if (t < 0) { if (toastSpeech != null) toastSpeech.enabled = true; Destroy(toast.gameObject); toast = null; }
             }
         }
         private RectTransform Scroll(Transform parent, float x, float y, float w, float h)

@@ -50,7 +50,10 @@ namespace PatchWorkSecure.CompanyOps
             Text(p, "IncidentTitle", State.Current.@event, 24, 71, 874, 69, 33);
             Text(p, "IncidentSymptom", State.Current.symptom, 24, 149, 874, 52, 21, Muted);
             Button(p, "IncidentEvidence", State.audited ? "調査済み / 根拠を見る >" : "未確認 / 正常な活動の可能性もあり >", 24, 215, 486, 44, IncidentEvidence, Ink);
-            Text(p, "RecoveryReadiness", State.RecoveryReadiness, 530, 207, 367, 60, 18, Accent);
+            string recovery = State.DataRecoveryApplies ?
+                (State.RestoreChain > 0 ? "復元連携 Lv." + State.RestoreChain : "復元連携 / 未整備") + "\nバックアップ + 復元訓練" :
+                State.RestartApplies ? (State.RestartChain > 0 ? "再開連携 Lv." + State.RestartChain : "再開連携 / 未整備") + "\n自動化 + 引継ぎ手順" : "今回は復元・再開連携の対象外";
+            Text(p, "RecoveryReadiness", recovery, 530, 207, 367, 60, 18, Accent);
 
             var estimates = ResponseIds.Select(State.Estimate).ToArray();
             int lossScale = Math.Max(1, estimates.Max(e => e.lossMax));
@@ -60,7 +63,8 @@ namespace PatchWorkSecure.CompanyOps
             for (int i = 0; i < ResponseIds.Length; i++)
             {
                 string id = ResponseIds[i]; var estimate = estimates[i]; float x = 24 + i * 298;
-                var card = Button(p, "Respond_" + id, "", x, 282, 278, 353, () => Resolve(id), Ink);
+                var card = Box(p, "ResponseCard_" + id, x, 282, 278, 382, Ink);
+                card.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
                 Glyph(card.transform, "ResponseGlyph_" + id, glyphs[i], 16, 16, 36);
                 Text(card.transform, "ResponseType_" + id, "0" + (i + 1) + " / " + (i == 0 ? "停止・隔離" : i == 1 ? "範囲を限定" : "復旧に配分"), 63, 18, 199, 30, 20, Accent);
                 Text(card.transform, "ResponseName_" + id, State.ResponseName(id), 16, 62, 246, 59, 21);
@@ -68,12 +72,10 @@ namespace PatchWorkSecure.CompanyOps
                 EstimateMetric(card.transform, "Loss_" + id, "被害見積もり / 万円", estimate.lossMin, estimate.lossMax, lossScale, 162);
                 EstimateMetric(card.transform, "Stop_" + id, "停止見積もり / 時間", estimate.stopMin, estimate.stopMax, stopScale, 232);
                 Text(card.transform, "ResponseCaution_" + id, State.budget < estimate.cost ? "手元予算が対応費に不足" : caution[i], 16, 303, 246, 24, 17, State.budget < estimate.cost ? Coral : Muted);
-                var action = Box(card.transform, "ResponseAction", 10, 332, 258, 21, Edge);
-                action.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(action, "ResponseActionLabel", "この対応で進む >", 7, 0, 242, 20, 16);
-                Button(p, "Power_" + id, "抑制力 " + State.ResponsePower(id).Total + " / 内訳 >", x, 650, 278, 43, () => PowerReport(id), Edge);
+                Button(card, "Respond_" + id, "この対応で進む", 10, 334, 258, 44, () => Resolve(id), Accent);
+                Button(p, "Power_" + id, "抑制力 " + State.ResponsePower(id).Total + " / 内訳 >", x, 674, 278, 32, () => PowerReport(id), Ink);
             }
-            Text(p, "NoTimer", "幅は目安・確率ではありません。被害に対応費は含みません。\n封じ込め・安全確認は共通。重点配分を選びます。", 24, 699, 874, 44, 16, Muted);
+            Text(p, "NoTimer", "見積もりの幅 ≠ 確率 / 対応費は被害と別 / 時間制限なし", 24, 714, 874, 26, 16, Muted);
         }
 
         private void EstimateMetric(Transform parent, string id, string title, int min, int max, int scale, float y)

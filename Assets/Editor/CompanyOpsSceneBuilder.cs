@@ -93,6 +93,8 @@ namespace PatchWorkSecure.EditorTools
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
                 throw new System.InvalidOperationException("試遊版のビルドに失敗: " + report.summary.result);
             CompanyOpsTypography.CopyLicenses("Builds/CompanyYear");
+            const string musicRecord = "Docs/CompanyYear-Music-2026-09-28.md";
+            if (File.Exists(musicRecord)) File.Copy(musicRecord, "Builds/CompanyYear/BGM制作記録.md", true);
             Debug.Log("[CompanyOps] Windows試遊版のビルド成功");
         }
         public static void BuildRelease() { BuildScene(); BuildPlayer(); }

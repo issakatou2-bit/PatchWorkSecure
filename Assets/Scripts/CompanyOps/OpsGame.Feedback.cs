@@ -110,6 +110,7 @@ namespace PatchWorkSecure.CompanyOps
             var changed = new List<RectTransform>();
             var deltaTags = new List<RectTransform>();
             var deltaOrigins = new List<Vector2>();
+            var hiddenDeltas = new List<TMPro.TextMeshProUGUI>();
             for (int i = 0; i < statChanges.Length; i++)
             {
                 if (statChanges[i] == 0) continue;
@@ -117,15 +118,18 @@ namespace PatchWorkSecure.CompanyOps
                 if (card != null) changed.Add(card.Find(StatNames[i] + "Value") as RectTransform);
                 if (card == null) continue;
                 int delta = statChanges[i];
-                var tag = Box(fx, "StatChangeEffect" + i, card.anchoredPosition.x + 6, 104, 162, 33, Ink);
-                tag.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
+                var small = card.Find("StatDelta" + i)?.GetComponent<TMPro.TextMeshProUGUI>();
+                if (small != null) { small.alpha = 0; hiddenDeltas.Add(small); }
+                // 差分はカード内の同じ場所で一度だけ。下端の補助文を覆わない。
+                var tag = Rect(fx, "StatChangeEffect" + i, card.anchoredPosition.x + 111, 20, 60, 25);
                 var text = Text(tag, "StatChangeAmount" + i, (delta > 0 ? "+" : "") + delta + (i == 0 ? "万円" : i == 1 ? "工数" : ""),
-                    9, 2, 144, 28, 21, DeltaColor(i, delta));
+                    0, 0, 60, 25, 14, DeltaColor(i, delta));
                 text.alignment = TMPro.TextAlignmentOptions.Center;
                 deltaTags.Add(tag); deltaOrigins.Add(tag.anchoredPosition);
             }
             var sparks = new List<RectTransform>();
-            if (!ReducedMotion && celebration)
+            // 年度結果では粒子を出さず、ランクと実数値を読みやすくする。
+            if (!ReducedMotion && celebration && State != null && State.phase != OpsPhase.Ended)
             {
                 for (int i = 0; i < 12; i++)
                 {
@@ -144,7 +148,7 @@ namespace PatchWorkSecure.CompanyOps
                 foreach (var value in changed) if (value != null)
                     value.localScale = Vector3.one * (ReducedMotion ? 1 : 1 + Mathf.Sin(t * Mathf.PI) * .08f);
                 for (int i = 0; i < deltaTags.Count; i++)
-                    deltaTags[i].anchoredPosition = deltaOrigins[i] + Vector2.up * (ReducedMotion ? 0 : t * 20);
+                    deltaTags[i].anchoredPosition = deltaOrigins[i] + Vector2.up * (ReducedMotion ? 0 : t * 4);
                 for (int i = 0; i < sparks.Count; i++)
                 {
                     float angle = i * Mathf.PI * 2 / sparks.Count;
@@ -155,6 +159,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             if (panel != null) panel.anchoredPosition = origin;
             foreach (var value in changed) if (value != null) value.localScale = Vector3.one;
+            foreach (var value in hiddenDeltas) if (value != null) value.alpha = 1;
             if (fx != null) Destroy(fx.gameObject);
         }
         private void OnDestroy()

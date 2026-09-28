@@ -129,7 +129,8 @@ namespace PatchWorkSecure.Tests
             scroll.verticalNormalizedPosition = 0; yield return null; Capture("22-effects-scrolled");
             Click("CloseDialog"); yield return null; CheckPointer("NextMonth");
             game.StartYear(14); game.State.month = 8; SetEvent(game.State, "bec-invoice"); game.State.culture = 65; game.State.levels[OpsCatalog.Index("education")] = 1; game.OpenTab(0); yield return null;
-            StringAssert.Contains("いつもの連絡先", Find<TextMeshProUGUI>("Staff").text); Capture("23-staff-growth"); CheckGrowthText();
+            CheckPointer("ConsultationDetails"); Click("ConsultationDetails"); yield return null;
+            StringAssert.Contains("いつもの連絡先", Find<TextMeshProUGUI>("DialogBody").text); Capture("23-staff-growth"); CheckGrowthText();
             Assert.IsEmpty(glyphWarnings, string.Join("\n", glyphWarnings)); LogAssert.NoUnexpectedReceived();
         }
         private static void CheckGrowthText()

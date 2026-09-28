@@ -22,7 +22,7 @@ MonoBehaviour:
   month: {fileID: 0}
   clear: {fileID: 0}
   failure: {fileID: 0}
-  titleMusic: {fileID: 0}
-  planningMusic: {fileID: 0}
-  incidentMusic: {fileID: 0}
-  reviewMusic: {fileID: 0}
+  titleMusic: {fileID: 8300000, guid: bea024826ce5f9048b5b80e6921b8a6d, type: 3}
+  planningMusic: {fileID: 8300000, guid: bea024826ce5f9048b5b80e6921b8a6d, type: 3}
+  incidentMusic: {fileID: 8300000, guid: c09e51ea36b77664e9a24c5148eabe2e, type: 3}
+  reviewMusic: {fileID: 8300000, guid: bea024826ce5f9048b5b80e6921b8a6d, type: 3}

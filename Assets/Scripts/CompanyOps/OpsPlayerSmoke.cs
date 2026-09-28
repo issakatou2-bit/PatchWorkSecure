@@ -13,6 +13,8 @@ namespace PatchWorkSecure.CompanyOps
         private static void Initialize()
         {
             if (Application.isEditor || !Environment.GetCommandLineArgs().Contains("-ops-smoke-test")) return;
+            // 隠した検証用ウィンドウでも進行する。通常プレイの設定は変更しない。
+            Application.runInBackground = true;
             OpsGame.TestMode = true;
             var go = new GameObject("試遊版の自動検証"); DontDestroyOnLoad(go); go.AddComponent<OpsPlayerSmoke>();
         }
@@ -27,6 +29,17 @@ namespace PatchWorkSecure.CompanyOps
             var game = FindAnyObjectByType<OpsGame>();
             if (game == null) { Debug.LogError("[CompanyOps Player] 試作が見つかりません"); Application.Quit(1); yield break; }
             game.StartYear(14); yield return null;
+            if (Environment.GetCommandLineArgs().Contains("-ops-audio-smoke-test"))
+            {
+                yield return new WaitForSecondsRealtime(1);
+                CheckMusic(game, game.Sounds == null ? null : game.Sounds.planningMusic);
+                game.BeginIncident(); yield return new WaitForSecondsRealtime(1);
+                CheckMusic(game, game.Sounds == null ? null : game.Sounds.incidentMusic);
+                game.Resolve("scope"); yield return new WaitForSecondsRealtime(1);
+                CheckMusic(game, game.Sounds == null ? null : game.Sounds.reviewMusic);
+                Debug.Log("[CompanyOps Player] BGM二曲の再生確認 " + (failed ? "FAILED" : "PASSED"));
+                game.StartYear(14); yield return null;
+            }
             for (int month = 0; month < 12 && game.State.phase != OpsPhase.Ended; month++)
             {
                 if (!Advance(game)) { failed = true; break; }
@@ -56,6 +69,13 @@ namespace PatchWorkSecure.CompanyOps
                 return s.Valid();
             }
             catch (Exception e) { Debug.LogException(e); return false; }
+        }
+        private void CheckMusic(OpsGame game, AudioClip expected)
+        {
+            var active = game.GetComponents<AudioSource>().Where(s => s.loop && s.isPlaying).ToArray();
+            if (expected == null || active.Length != 1 || active[0].clip != expected || active[0].timeSamples <= 0 ||
+                active[0].volume <= 0 || active[0].spatialBlend != 0 || FindObjectsByType<AudioListener>().Length != 1)
+                failed = true;
         }
     }
 }

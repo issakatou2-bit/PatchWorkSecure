@@ -15,6 +15,24 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins6_行動と方針カードはマウスとキーボードで四ピクセル浮く()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.4f);
+                var action=Find<Button>("Action_listen");var pos=((RectTransform)action.transform).anchoredPosition;
+                ExecuteEvents.Execute(action.gameObject,new PointerEventData(EventSystem.current),ExecuteEvents.pointerEnterHandler);yield return new WaitForSecondsRealtime(.2f);
+                Assert.AreEqual(pos+Vector2.up*(reduced?0:4),((RectTransform)action.transform).anchoredPosition);CheckPointer("Action_listen");Capture(reduced?"116-quickwins6-action-reduced":"116-quickwins6-action");
+                ExecuteEvents.Execute(action.gameObject,new PointerEventData(EventSystem.current),ExecuteEvents.pointerExitHandler);yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(pos,((RectTransform)action.transform).anchoredPosition);
+                EventSystem.current.SetSelectedGameObject(action.gameObject);yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(pos+Vector2.up*(reduced?0:4),((RectTransform)action.transform).anchoredPosition);
+                game.BeginIncident();yield return new WaitForSecondsRealtime(.5f);var card=Find<RectTransform>("ResponseCard_scope");pos=card.anchoredPosition;var shadow=card.GetComponents<Shadow>().Last();float alpha=shadow.effectColor.a;
+                ExecuteEvents.Execute(card.gameObject,new PointerEventData(EventSystem.current),ExecuteEvents.pointerEnterHandler);yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(pos+Vector2.up*(reduced?0:4),card.anchoredPosition);Assert.Greater(shadow.effectColor.a,alpha);CheckPointer("Respond_scope");
+                Capture(reduced?"116-quickwins6-card-reduced":"116-quickwins6-card");ExecuteEvents.Execute(card.gameObject,new PointerEventData(EventSystem.current),ExecuteEvents.pointerExitHandler);yield return new WaitForSecondsRealtime(.2f);
+                EventSystem.current.SetSelectedGameObject(Find<Button>("Respond_scope").gameObject);yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(pos+Vector2.up*(reduced?0:4),card.anchoredPosition);EventSystem.current.SetSelectedGameObject(null);yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(pos,card.anchoredPosition);
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins5_無効ボタンは理由だけ示し操作や資源を変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

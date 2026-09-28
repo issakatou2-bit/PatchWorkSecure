@@ -257,6 +257,7 @@ namespace PatchWorkSecure.CompanyOps
                 bool upgrade=j==4;string id=upgrade?"OpenProjects":"Action_"+ids[j], action=upgrade?"":ids[j];float w=upgrade?204.4f:165.9f;
                 string block=upgrade?"":State.ActionBlock(action);
                 var b=PButton(screen,id,"",660+j*177.9f,740,w,144,upgrade?(Action)(()=>OpenTab(1)):(()=>ChooseAction(action)),upgrade?Hex("ffc02e"):Color.white,PlanInk,20,upgrade?Hex("d18a00"):Hex("c7d0e0"),block=="");
+                b.GetComponent<OpsButtonFeedback>().LiftOnFocus=true;
                 if(upgrade)Shine(b.transform,w,144);
                 PImage(b.transform,"ActionIcon",upgrade?PlanningArt.upgrade:icons[j],(w-44)/2,22,44,44);
                 PText(b.transform,"ActionTitle",upgrade?"設備を導入":titles[j],8,71,w-16,30,20,upgrade?Hex("4a3200"):PlanInk,true,true);

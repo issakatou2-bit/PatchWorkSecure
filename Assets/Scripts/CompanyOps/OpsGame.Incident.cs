@@ -117,6 +117,7 @@ namespace PatchWorkSecure.CompanyOps
                 bool prepared=working.Length>0;
                 if(prepared) PCard(p,"PreparedOutline_"+id,xCard-4,125,w+8,584,PlanMint,28,false);
                 var card=PCard(p,"ResponseCard_"+id,xCard,129,w,576,Color.white,24,false);
+                card.GetComponent<Image>().raycastTarget=true;card.gameObject.AddComponent<OpsCardLift>().Owner=this;
                 if(prepared)
                 {
                     // 公開見積もりに効く設備だけを表示。未確定の結果は参照しない。

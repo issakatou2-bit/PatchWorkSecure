@@ -1,11 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
         private bool budgetGainPending;
+        private int[] rankBefore,rankAfter;
+        private int[] CompanyRankMetrics()=>new[]{State.stability,State.Organization,State.trust,State.culture,State.Preparedness,State.Resilience};
+        private void RankChangeEffect(TextMeshProUGUI label,Image badge,int before,int after)
+        {
+            if(!Application.isPlaying||PlanningRank(before)==PlanningRank(after))return;
+            var effect=label.gameObject.AddComponent<OpsRankChange>();effect.Owner=this;effect.Before=PlanningRank(before);effect.After=PlanningRank(after);effect.Up=after>before;effect.Badge=badge;
+        }
         private void BudgetGainEffect(RectTransform target)
         {
             if(!Application.isPlaying||!budgetGainPending)return;budgetGainPending=false;
@@ -19,6 +27,20 @@ namespace PatchWorkSecure.CompanyOps
                 coin.gameObject.AddComponent<CanvasGroup>().blocksRaycasts=false;
                 effect.Coins[i]=coin;
             }
+        }
+    }
+    public sealed class OpsRankChange : MonoBehaviour
+    {
+        public OpsGame Owner;public string Before,After;public bool Up;public Image Badge;
+        private TextMeshProUGUI label;private Color original;private float started;
+        private void Start(){started=Time.realtimeSinceStartup;label=GetComponent<TextMeshProUGUI>();original=Badge.color;label.text=Up?Before:After;}
+        private void Update()
+        {
+            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.4f);label.text=Up&&t<.5f?Before:After;
+            label.transform.localScale=new Vector3(Up&&!Owner.ReducedMotion?Mathf.Abs(1-2*t):1,1,1);
+            label.alpha=Owner.ReducedMotion?Mathf.Abs(1-2*t)*.65f+.35f:1;
+            Badge.color=Color.Lerp(original,Up?Color.white:Color.gray,Mathf.Sin(t*Mathf.PI)*.6f);
+            if(t>=1){label.text=After;label.alpha=1;label.transform.localScale=Vector3.one;Badge.color=original;Destroy(this);}
         }
     }
     // 表示専用。Unity/ゲームの抽選乱数や資源には触れない。

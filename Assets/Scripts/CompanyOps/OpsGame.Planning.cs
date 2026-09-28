@@ -175,13 +175,14 @@ namespace PatchWorkSecure.CompanyOps
                 int metric=j;string id=j==0?"Stat_2":j==2?"Stat_4":j==3?"Stat_3":"CompanyMetric"+j;
                 var row=PButton(left,id,"",18,57.6f+j*68,276,58,()=>PlanningMetric(metric),Hex("f3f6fb"),PlanInk,16);
                 var rank=PCard(row.transform,"RankBadge",12,9,40,40,RankColor(values[j]),12,false);KitBadge(rank,RankColor(values[j]));
-                PText(rank,"RankValue",PlanningRank(values[j]),0,0,40,40,26,Color.white,true,true);
+                RankChangeEffect(PText(rank,"RankValue",PlanningRank(values[j]),0,0,40,40,26,Color.white,true,true),rank.GetComponent<Image>(),rankBefore==null?values[j]:rankBefore[j],rankAfter==null?values[j]:rankAfter[j]);
                 PText(row.transform,"MetricTitle",labels[j],62,7,150,28,16);
                 PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
                 if(j==0)LossTrail(row.transform,"StabilityLossTrail",62,37,150,6,State.stability-statChanges[2],State.stability,100);
                 if(values[j]>0) PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
                 PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
             }
+            rankBefore=rankAfter=null;
             int spare=Mathf.Clamp(100-State.fatigue,0,100); Color tone=spare>=70?PlanMint:spare>=40?PlanBlue:Hex("c23a60");
             var rest=PButton(left,"Stat_5","",18,520,276,74,()=>StatusDetail(5),Hex("e9fbf5"),PlanInk,16);
             PImage(rest.transform,"MoraleIcon",PlanningArt.morale,12,11,30,30);

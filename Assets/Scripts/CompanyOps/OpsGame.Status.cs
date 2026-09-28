@@ -9,12 +9,19 @@ namespace PatchWorkSecure.CompanyOps
         private static readonly string[] StatNames = { "予算", "工数", "業務の安定", "相談文化", "経営の信頼", "疲労" };
         private int[] statChanges = new int[6];
         private bool expectedResourceSpend;
-        private int[] ReadStats() => new[] { State.budget, State.capacity, State.stability, State.culture, State.trust, State.fatigue };
+        private int[] ReadStats()
+        {
+            rankBefore=CompanyRankMetrics();
+            return new[] { State.budget, State.capacity, State.stability, State.culture, State.trust, State.fatigue };
+        }
         private void RecordStatChanges(int[] before)
         {
+            var previousRanks=rankBefore;
             var after = ReadStats();
+            rankBefore=previousRanks;
             for (int i = 0; i < after.Length; i++) statChanges[i] = after[i] - before[i];
             budgetGainPending=statChanges[0]>0;
+            rankAfter=CompanyRankMetrics();
             // 購入・作業の支出と、事件の損失を同じ「失敗の赤」にしない。
             expectedResourceSpend = State.phase == OpsPhase.Planning ||
                 State.phase == OpsPhase.Review && State.Latest != null && State.Latest.loss == 0;

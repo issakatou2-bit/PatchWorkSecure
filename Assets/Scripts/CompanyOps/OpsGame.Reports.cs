@@ -130,6 +130,7 @@ namespace PatchWorkSecure.CompanyOps
             int before=r.metricsBefore[index],after=r.metricsAfter[index];bool up=after>before&&PlanningRank(before)!=PlanningRank(after);
             var rank=PCard(p,"GrowthRank",26,68,46,46,RankColor(after),16,false);KitGradient(rank.GetComponent<Image>(),Color.Lerp(RankColor(after),Color.white,.3f),RankColor(after));PText(rank,"GrowthRankValue",PlanningRank(after),0,0,46,46,28,Color.white,true,true);if(up)Reveal(rank,.08f,true);
             PText(p,"GrowthName",names[index],86,62,190,34,17);
+            RankChangeEffect(rank.Find("GrowthRankValue").GetComponent<TextMeshProUGUI>(),rank.GetComponent<Image>(),before,after);
             ReportChip(p,"GrowthRankTag",(up?"RANK UP  ":after<before?"DOWN  ":"RANK  ")+PlanningRank(before)+"→"+PlanningRank(after),280,66,180,up?PlanPink:PlanTrack,up?Color.white:PlanGray);
             PText(p,"GrowthValues",before+" → "+after,476,64,198,34,17,null,true,true);
             ReportGauge(p,"GrowthGauge",86,105,588,after/100f,PlanPink);LossTrail(p,"GrowthLossTrail",86,105,588,10,before,after,100);

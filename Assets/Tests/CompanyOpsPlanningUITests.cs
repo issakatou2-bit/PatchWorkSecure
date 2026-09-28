@@ -25,7 +25,7 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
             CheckRect("OfficeStage",352,108,900,792);CheckRect("CompanyGrowth",24,108,312,612);
-            CheckRect("ConsultationCard",1268,108,308,237.2f);CheckRect("PlanningCharacter",260,450,470,470,10);
+            CheckRect("ConsultationCard",1268,108,308,237.2f);CheckRect("PlanningCharacter",-64,363,347,430,10);
             CheckRect("Navigator",600,580,420,129.2f);CheckRect("Action_audit",660,740,165.9f,144);
             CheckRect("AdvanceMonth",1268,660,308,60);
             Assert.AreEqual(game.State.budget.ToString(),Find<TextMeshProUGUI>("予算Value").text);

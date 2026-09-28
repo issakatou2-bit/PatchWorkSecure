@@ -54,19 +54,21 @@ namespace PatchWorkSecure.CompanyOps
             if(ratio<=0)return;var fill=PCard(p,id+"Fill",x,y,w*Mathf.Clamp01(ratio),10,color,12,false);KitGradient(fill.GetComponent<Image>(),Color.Lerp(color,Color.white,.3f),color,true);
             PImage(fill,"GaugeLight",null,2,1,Mathf.Max(0,fill.rect.width-4),2,new Color(1,1,1,.5f));
         }
-        private void ReportSpeech(string line,float x,float y,float w)
+        private void ReportSpeech(string line,float x,float y,float w,string face="face_normal")
         {
             var bubble=PCard(screen,"Navigator",x,y,w,120,Color.white,20);
             var tag=PCard(bubble,"NameTag",16,-13,90,27,PlanPink,12,false);PText(tag,"NavigatorName","ひなた",0,0,90,27,13,Color.white,true,true);
-            PText(bubble,"NavigatorSpeech",line,18,15,w-36,92,18,null,false);
+            var icon=PImage(bubble,"HinataFaceIcon",Navigator?.Face(face),12,24,52,52);icon.GetComponent<Image>().preserveAspect=true;icon.gameObject.AddComponent<OpsPortraitIdentity>().FaceIcon=true;
+            PText(bubble,"NavigatorSpeech",line,76,15,w-94,92,18,null,false);
         }
         private void MonthlyScreen()
         {
             var r=State.Latest;ReportBackground(false);
-            var medal=PCard(screen,"MonthMedal",40,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
+            PImage(screen,"MonthlyLogoIcon",PlanningArt.logoIcon,40,30,80,80);
+            var medal=PCard(screen,"MonthMedal",136,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
             PText(medal,"YearNumber","1年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
-            PText(screen,"MonthlyCategory","MONTHLY REPORT",176,26,800,28,12,PlanPink);
-            PText(screen,"ReviewTitle","今月のふりかえり",176,52,800,62,40);
+            PText(screen,"MonthlyCategory","MONTHLY REPORT",272,26,800,28,12,PlanPink);
+            PText(screen,"ReviewTitle","今月のふりかえり",272,52,800,62,40);
             PButton(screen,"Menu","設定",1370,38,180,52,Menu,Color.white,PlanInk);
             var incident=ReportPanel("MonthlyIncident",40,140,700,330);
             PText(incident,"ReviewEvent","事件："+(r.eventTitle??State.Current.title),26,20,648,36,18,PlanGray);
@@ -111,8 +113,8 @@ namespace PatchWorkSecure.CompanyOps
             }
             else PText(team,"SupportNone",r.power==null?"社員の支援は未記録":"今月は支援なし",26,80,388,90,22,PlanGray);
             PButton(team,"ReviewPower","対応力の内訳を見る",26,190,388,44,()=>PowerReport(r.response,r),Color.white,PlanInk,16);
-            Portrait(screen,"NavigatorPortrait",1180,300,460,460);Motion((RectTransform)screen.Find("NavigatorPortrait"),"bob",3);
-            ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320);
+            Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");Motion((RectTransform)screen.Find("NavigatorPortrait"),"bob",3);
+            ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
             PButton(screen,"NextMonth",State.QuarterRewardPending?"山場クリア / 報酬を選ぶ":State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
         }

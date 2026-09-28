@@ -113,13 +113,14 @@ namespace PatchWorkSecure.CompanyOps
             var r = Rect(parent, "OfficeArt", x, y, w, h); var image = r.gameObject.AddComponent<Image>();
             image.sprite = OfficeArt; image.preserveAspect = true; image.raycastTarget = false;
         }
-        private void Portrait(Transform parent, string name, float x, float y, float w, float h)
+        private void Portrait(Transform parent, string name, float x, float y, float w, float h, string pose="pose_fists")
         {
             var art = Rect(parent, name, x, y, w, h);
             var image = art.gameObject.AddComponent<UnityEngine.UI.Image>();
-            image.sprite = Navigator != null ? Navigator.FaceNormal : null;
+            image.sprite = Navigator != null ? Navigator.Pose(pose) : null;
             image.preserveAspect = true; image.raycastTarget = false;
             art.gameObject.AddComponent<OpsPortraitAnimator>().Owner=this;
+            art.gameObject.AddComponent<OpsPortraitIdentity>().PoseId=pose;
         }
         private RectTransform Dialog(string heading, string body, int height = 480)
         {

@@ -41,7 +41,7 @@ namespace PatchWorkSecure.CompanyOps
             if(screen!=null)
             {
                 var nav=screen.Find("Navigator");if(nav!=null)nav.gameObject.SetActive(true);
-                var character=screen.Find("PlanningCharacter");if(character!=null)character.gameObject.SetActive(true);
+                var character=screen.Find("OfficeStage/PlanningCharacter");if(character!=null)character.gameObject.SetActive(true);
                 var portrait=screen.Find("NavigatorPortrait");if(portrait!=null)portrait.gameObject.SetActive(true);
             }
             if (tutorialRoot != null) { tutorialRoot.gameObject.SetActive(false); Destroy(tutorialRoot.gameObject); }
@@ -94,7 +94,7 @@ namespace PatchWorkSecure.CompanyOps
             float x=Mathf.Clamp(a.x-8,0,1600), y=Mathf.Clamp(-a.y-8,0,900), w=Mathf.Min(1600-x,btm.x-a.x+16), h=Mathf.Min(900-y,a.y-btm.y+16);
             tutorialRoot = Rect(screen,"TutorialGuide",0,0,1600,900);
             var normalNav=screen.Find("Navigator");if(normalNav!=null)normalNav.gameObject.SetActive(false);
-            var normalCharacter=screen.Find("PlanningCharacter");if(normalCharacter!=null)normalCharacter.gameObject.SetActive(false);
+            var normalCharacter=screen.Find("OfficeStage/PlanningCharacter");if(normalCharacter!=null)normalCharacter.gameObject.SetActive(false);
             var normalPortrait=screen.Find("NavigatorPortrait");if(normalPortrait!=null)normalPortrait.gameObject.SetActive(false);
             TutorialShade(0,0,1600,y); TutorialShade(0,y+h,1600,900-y-h); TutorialShade(0,y,x,h); TutorialShade(x+w,y,1600-x-w,h);
             var glow=IncidentShape(tutorialRoot,"TutorialPulse","dashed",x,y,w,h,Hex("ffd85c")); Motion(glow,"pulse",1.2f);
@@ -109,9 +109,9 @@ namespace PatchWorkSecure.CompanyOps
             var medal=PCard(header,"StepMedal",24,17,48,48,PlanPink,24,false);PText(medal,"StepNumber",(tutorialStep+1).ToString(),0,0,48,48,26,Color.white,true,true);
             PText(header,"StepLabel","STEP "+(tutorialStep+1)+" / 6",90,8,660,24,11,Hex("d94a70"));
             PText(header,"StepTitle",titles[tutorialStep],90,29,660,43,22);
-            float bubbleY = tutorialStep==5 ? 160 : 400;
-            Portrait(tutorialRoot,"TutorialPortrait",-30,330,560,560);
-            var bubble=PCard(tutorialRoot,"TutorialSpeech",400,bubbleY,560,280,Color.white,28);
+            float bubbleY = tutorialStep==5 ? 160 : 380;
+            Portrait(tutorialRoot,"TutorialPortrait",240,340,408,560,"pose_point");
+            var bubble=PCard(tutorialRoot,"TutorialSpeech",660,bubbleY,560,280,Color.white,28);
             var outline=bubble.gameObject.AddComponent<Outline>();outline.effectColor=PlanPink;outline.effectDistance=new Vector2(3,-3);
             PText(bubble,"TutorialName","ひなた  /  TUTORIAL",26,16,480,30,16,PlanPink);
             PText(bubble,"TutorialLine",tutorialAwaitClose?"内容を確認できたら「閉じる」を押してね！":lines[tutorialStep],26,62,508,138,22,null,false);

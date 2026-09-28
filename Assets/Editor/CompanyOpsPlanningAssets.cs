@@ -19,6 +19,11 @@ namespace PatchWorkSecure.EditorTools
             if(palette==null) {palette=ScriptableObject.CreateInstance<OpsPlanningArt>();AssetDatabase.CreateAsset(palette,path);}
             foreach(var field in typeof(OpsPlanningArt).GetFields(BindingFlags.Public|BindingFlags.Instance))
             {
+                if(field.Name=="logoIcon"||field.Name=="logoWordmark")
+                {
+                    field.SetValue(palette,AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/UI/Logo/"+(field.Name=="logoIcon"?"icon":"wordmark")+".png"));
+                    continue;
+                }
                 string name=field.Name.StartsWith("round")?"round-"+field.Name.Substring(5):field.Name=="stageTop"?"stage-top":
                     field.Name=="shadow"?"soft-shadow":field.Name=="officeBlur"?"office-blur":field.Name=="gradient"?"planning-gradient":
                     field.Name=="stageShade"?"stage-shade":field.Name=="shine"?"button-shine":field.Name=="tail"?"speech-tail":

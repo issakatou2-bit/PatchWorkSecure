@@ -36,9 +36,13 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 
 新たな第三者素材ライセンスや追加クレジットはない。加藤さんの「B案かなぁ。一旦そのSEでやってみて」の回答に基づき、B-brightの11音だけを`Assets/Audio/CompanyYear/SFX/B-bright/`と`YearSounds.asset`へ登録した。原音は変更せず保持。最終ミックスの承認ではない。詳細と場面対応は`Docs/Sfx-Candidates-2026-09-29.md`。
 
-## 2026-09-29 ひなたの新デザイン（生成・未投入）
+## 2026-09-29 ひなたの新デザイン（生成・承認後に投入）
 
 - 生成：ChatGPT（加藤さんのログイン済みアカウント、アプリ内ブラウザからClaude Codeが操作）。指示文の原型は`Docs/Hinata-Sheet-Prompts.md`。
 - 経緯：8頭身の設定画 → 2〜5頭身の比較 → デフォルメ強め（色付き・線画）→ **加藤さんが3頭身の線画を選択** → 色鉛筆塗り → アニメ塗り → **太い輪郭線のアニメ塗りに決定**。表情18種・ポーズ18種を3×2のシートで生成。
 - 原画：`ArtSource/Hinata/gen-20260929/hinata-*.png`（ChatGPTの生成物をそのまま保存）。切り抜き：同`cut/`（`Tools/Cut-CharacterSheet.py`で外周の白だけを透過）。一覧：同`contact-sheet.png`。
-- 指の本数は「5本」と指定したが、原寸での全数確認は未実施。**ゲームへの投入・採用は加藤さんの確認後**。販売物への利用可否は生成サービスの規約を確認すること。
+- 加藤さんの全面置き換え指示に基づき、共通キャンバスの`final/`から表情18・ポーズ18を新試作と旧版へ投入。今回は再生成・描き直しをしていない。旧暫定絵は`ArtSource/Hinata/legacy/`へ退避。手の見える5ポーズを原寸確認したが、隠れた指までの全数保証はできない。詳細は`Docs/Hinata-Replacement-2026-09-29.md`。販売物への利用可否は生成サービスの規約を確認すること。
+
+## 2026-09-29 ロゴとアイコン
+
+`Assets/Art/UI/Logo/`はプロジェクト内のSVG（`ArtSource/Logo/*.html`）からClaude Codeが書き出した透過PNG。ツギハギの盾とプロジェクト名を組み合わせた独自図形。他作品のロゴ素材は使用していない。書体M PLUS Rounded 1cのOFL原文は同梱のものを保持。配置は`Docs/Mockups/Logo.md`。Default Iconは設定済み、製品名の案は未採用。

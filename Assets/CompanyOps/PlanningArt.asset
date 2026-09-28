@@ -39,3 +39,5 @@ MonoBehaviour:
   starMuted: {fileID: 21300000, guid: 8e6db94519dcfd849810e3081500aabd, type: 3}
   morale: {fileID: 21300000, guid: a76b25e6606a60b4ca02771dacccfb0e, type: 3}
   markerBubble: {fileID: 21300000, guid: 1340a5ac320883b498dcb2a70272b038, type: 3}
+  logoIcon: {fileID: 21300000, guid: 091baccbd643c3b4ea45daa240edbee1, type: 3}
+  logoWordmark: {fileID: 21300000, guid: d566bfb9ba57e8d4ea675630b72448eb, type: 3}

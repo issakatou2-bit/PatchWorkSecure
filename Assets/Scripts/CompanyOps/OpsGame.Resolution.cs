@@ -69,9 +69,7 @@ namespace PatchWorkSecure.CompanyOps
                 PText(baseline,"ResolutionBaselineValue","備えなしなら 被害 "+(r.loss+r.avoidedLoss)+"万円",8,0,365,32,15,Hex("1a7c63"),true,true);
             }
             bool good=r.loss==0&&r.downtime<=4;
-            var hinata=Rect(screen,"ResolutionHinata",30,470,440,440);Portrait(hinata,"NavigatorPortrait",0,0,440,440);
-            var face=Navigator==null?null:good?Navigator.FaceRelieved:Navigator.FaceWorried;
-            if(face!=null)hinata.Find("NavigatorPortrait").GetComponent<Image>().sprite=face;
+            var hinata=Rect(screen,"ResolutionHinata",20,500,307,380);Portrait(hinata,"NavigatorPortrait",0,0,307,380,good?"pose_jump":"pose_exhausted");
             var speech=PCard(screen,"ResolutionSpeech",330,520,230,85,Color.white,20,false);
             PImage(speech,"SpeechTail",PlanningArt.tail,-22,20,28,38);
             PText(speech,"ResolutionReaction",good?"やった、\n守れたよ！":r.benign?"正常な操作だったね。":"対応できたね。\n次の備えを考えよう！",16,10,198,65,20,Hex("d94a70"));

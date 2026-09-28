@@ -18,7 +18,8 @@ namespace PatchWorkSecure.CompanyOps
             }
             PText(screen,"AnnualCategory","ANNUAL REPORT",60,32,900,26,12,PlanPink);
             PText(screen,"EndingTitle",State.IsClear?"一年の記録　年度クリア":"一年の記録　運営終了",60,59,1300,66,44);
-            PButton(screen,"Menu","設定",1370,38,180,52,Menu,Color.white,PlanInk);
+            var logo=PImage(screen,"AnnualLogoWordmark",PlanningArt.logoWordmark,1250,18,300,115);logo.localEulerAngles=new Vector3(0,0,-2);
+            PButton(screen,"Menu","設定",1460,836,90,40,Menu,Color.white,PlanInk);
             var rank=PCard(screen,"RankBadge",150,150,360,360,PlanPink,28);rank.localEulerAngles=new Vector3(0,0,-6);KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
             rank.GetComponent<Image>().pixelsPerUnitMultiplier=Mathf.Max(.01f,PlanningArt.round28.border.x/60);
             var border=rank.gameObject.AddComponent<Outline>();border.effectColor=Color.white;border.effectDistance=new Vector2(8,-8);
@@ -53,9 +54,9 @@ namespace PatchWorkSecure.CompanyOps
             PText(collection,"CollectionScope","この一年の遭遇 / 図鑑画面は準備中",20,139,260,25,12,PlanGray,false);
             var goals=ReportPanel("AnnualGoals",610,560,940,72,.24f);PText(goals,"GoalsCategory","GOALS",22,18,76,34,12,Hex("ca8900"));PText(goals,"GoalsCount","成長目標 "+State.milestones.Count+" / 3",108,18,164,34,17);
             for(int i=0;i<3;i++){string[] names={"戻せることを確かめた","ひとりで抱えない運用","相談が集まる職場"};bool achieved=State.milestones.Contains(names[i]);ReportChip(goals,"AnnualGoal"+i,(achieved?"":"未達：")+names[i],282+i*214,20,204,achieved?Hex("fff6d6"):Hex("eef2f8"),achieved?Hex("7a5a00"):PlanGray);}
-            // 成長目標への髪の重なりを避ける、加藤さん承認済みの70px下への調整。
-            Portrait(screen,"NavigatorPortrait",1210,630,400,400);if(State.IsClear)Motion((RectTransform)screen.Find("NavigatorPortrait"),"hop",1.4f);
-            ReportSpeech(State.IsClear?"一年、おつかれさま！\n会社の成長を振り返ってみよう。":"ここまでの対応、おつかれさま。\n次は何を備えるか、記録を見よう。",950,650,300);
+            // 目標の下へ。新素材は330px高で足元も画面内に収める。
+            Portrait(screen,"NavigatorPortrait",1275,630,266,260,State.IsClear?"pose_jump":"pose_exhausted");
+            ReportSpeech(State.IsClear?"一年、おつかれさま！\n会社の成長を振り返ってみよう。":"ここまでの対応、おつかれさま。\n次は何を備えるか、記録を見よう。",950,650,300,State.IsClear?"face_crying":"face_sad");
             PButton(screen,"EndingHistory","一年を振り返る",110,780,232.73f,62,History,Color.white,PlanInk,20);
             PButton(screen,"BackHome","タイトルへ",358.73f,780,232.73f,62,()=>{SkipTutorialVisual();tutorialStep=-1;RenderHome();},Color.white,PlanInk,20);
             PButton(screen,"ReplayYear","もう一年挑戦",607.46f,780,302.54f,62,()=>StartYear(Environment.TickCount),PlanPink,Color.white,20);

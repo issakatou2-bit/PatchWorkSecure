@@ -22,7 +22,7 @@ namespace PatchWorkSecure.CompanyOps
             var image = panel.GetComponent<Image>();
             if (image == null) return;
             image.color = Color.white;
-            KitGradient(image, color, Color.Lerp(color, Hex("f6f8fc"), .25f));
+            KitGradient(image, color, Hex("f4f7fb"));
             if (color.r < .85f || color.g < .85f) return;
             foreach(var existing in panel.GetComponents<Outline>())DestroyImmediate(existing);
             var edge = panel.gameObject.AddComponent<Outline>(); edge.effectColor = window ? Hex("ffc4d3") : Hex("e2e7f0"); edge.effectDistance = new Vector2(window ? 5 : 4, window ? -5 : -4);
@@ -44,10 +44,16 @@ namespace PatchWorkSecure.CompanyOps
             else { top = Color.Lerp(requested, Color.white, .2f); bottom = requested; baseColor = Color.Lerp(requested, PlanInk, .2f); }
             var image = button.GetComponent<Image>(); image.color = Color.white; KitGradient(image, top, bottom);
             var depth = button.GetComponent<Shadow>(); if(depth == null) depth=button.gameObject.AddComponent<Shadow>(); depth.effectColor = baseColor; depth.effectDistance = new Vector2(0, -6);
-            var shine = Rect(button.transform, "KitTopLight", 8, 3, Mathf.Max(0, ((RectTransform)button.transform).rect.width - 16), 2);
-            shine.anchorMax = new Vector2(1,1); shine.offsetMin = new Vector2(8,-5); shine.offsetMax = new Vector2(-8,-3);
-            var light = shine.gameObject.AddComponent<Image>(); light.color = new Color(1, 1, 1, navy ? .2f : .55f); light.raycastTarget = false;
+            var shine = Rect(button.transform, "KitTopLight", 8, 4, Mathf.Max(0, ((RectTransform)button.transform).rect.width - 16), ((RectTransform)button.transform).rect.height*.38f);
+            var light = shine.gameObject.AddComponent<Image>();light.sprite=PlanningArt?.round12;light.type=Image.Type.Sliced;light.raycastTarget=false;
+            KitGradient(light,new Color(1,1,1,.42f),new Color(1,1,1,0));
             button.GetComponent<OpsButtonFeedback>().PressDepth = 4;
+        }
+        private void KitBadge(RectTransform badge,Color tone)
+        {
+            KitGradient(badge.GetComponent<Image>(),Color.Lerp(tone,Color.white,.38f),tone);
+            var edge=badge.gameObject.AddComponent<Outline>();edge.effectColor=Color.white;edge.effectDistance=new Vector2(3,-3);
+            var shade=badge.gameObject.AddComponent<Shadow>();shade.effectColor=new Color(.11f,.16f,.27f,.22f);shade.effectDistance=new Vector2(0,-3);
         }
         private void Reveal(RectTransform rect, float delay = 0, bool stamp = false)
         {
@@ -67,8 +73,9 @@ namespace PatchWorkSecure.CompanyOps
             KitGradient(band.GetComponent<Image>(), Hex("ff94ae"), PlanPink, true);
             var stripes = IncidentShape(band, "HeaderStripes", "stripes", width - 220, 6, 150, 64, new Color(1, 1, 1, .2f));
             stripes.gameObject.AddComponent<RectMask2D>();
-            var en = PText(band, "WindowCategory", category, 26, 10, width - 110, 20, 11, new Color(1, 1, 1, .85f)); en.characterSpacing = 3;
-            PText(band, "DialogHeading", title, 26, 29, width - 110, 44, 26, Color.white);
+            PImage(band,"WindowLogoIcon",PlanningArt.logoIcon,26,13,54,54);
+            var en = PText(band, "WindowCategory", category, 94, 10, width - 178, 20, 11, new Color(1, 1, 1, .85f)); en.characterSpacing = 3;
+            PText(band, "DialogHeading", title, 94, 29, width - 178, 44, 26, Color.white);
             var close = PButton(band, "HeaderClose", "×", width - 68, 17, 46, 46, CloseDialog, Color.white, Hex("d94a70"), 24);
             close.GetComponent<OpsButtonFeedback>().PressDepth = 3;
         }

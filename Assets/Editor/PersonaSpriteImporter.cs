@@ -142,6 +142,8 @@ namespace PatchWorkSecure.EditorTools
             {
                 var persona = AssetDatabase.LoadAssetAtPath<NavigatorPersona>(personaPath.Replace('\\', '/'));
                 if (persona == null) continue;
+                // v2は明示割当の一覧を正とする。旧式のキーワード検索で上書きしない。
+                if(persona.Poses!=null&&persona.Poses.Length>0)continue;
 
                 // Persona_Hinata.asset → Assets/Sprites/Hinata/
                 string folderName = Path.GetFileNameWithoutExtension(personaPath).Replace("Persona_", "");

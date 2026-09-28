@@ -111,13 +111,16 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void PlanningHeader()
         {
-            var medal=PCard(screen,"MonthMedal",24,16,120,80,PlanPink,24,false);
+            PImage(screen,"PlanningLogoIcon",PlanningArt.logoIcon,24,18,76,76);
+            var medal=PCard(screen,"MonthMedal",116,16,120,80,PlanPink,24,false);
+            KitGradient(medal.GetComponent<Image>(),Hex("ff9ab3"),Hex("f2557c"));
+            IncidentShape(medal,"MonthStitch","dashed",5,5,110,70,new Color(1,1,1,.65f));
             var shadow=medal.gameObject.AddComponent<Shadow>();shadow.effectDistance=new Vector2(0,-5);shadow.effectColor=Hex("d94a70");
             PText(medal,"YearLabel","1年目",0,9,120,22,13,Color.white,true,true);
             PText(medal,"Month",State.Current.name,0,30,120,45,38,Color.white,true,true);
             int slots=Math.Max(State.MaxCapacity,State.capacity);
             float workWidth=Math.Max(192,72+slots*30), workX=1496-workWidth, budgetWidth=Math.Max(170,142+Math.Max(0,State.budget.ToString().Length-2)*20), budgetX=workX-16-budgetWidth;
-            var timeline=PCard(screen,"YearTimeline",160,24,budgetX-176,64,null,20,false);
+            var timeline=PCard(screen,"YearTimeline",252,24,budgetX-268,64,null,20,false);
             PText(timeline,"TimelineTitle","一年の歩み",20,0,84,64,14,PlanGray);
             float x=118;
             for(int j=0;j<12;j++)
@@ -162,7 +165,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 int metric=j;string id=j==0?"Stat_2":j==2?"Stat_4":j==3?"Stat_3":"CompanyMetric"+j;
                 var row=PButton(left,id,"",18,57.6f+j*68,276,58,()=>PlanningMetric(metric),Hex("f3f6fb"),PlanInk,16);
-                var rank=PCard(row.transform,"RankBadge",12,9,40,40,RankColor(values[j]),12,false);
+                var rank=PCard(row.transform,"RankBadge",12,9,40,40,RankColor(values[j]),12,false);KitBadge(rank,RankColor(values[j]));
                 PText(rank,"RankValue",PlanningRank(values[j]),0,0,40,40,26,Color.white,true,true);
                 PText(row.transform,"MetricTitle",labels[j],62,7,150,28,16);
                 PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
@@ -219,9 +222,9 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void PlanningNavigator()
         {
-            var character=Rect(screen,"PlanningCharacter",260,450,470,470);Motion(character,"bob",3.2f);
-            PImage(character,"HinataShadow",PlanningArt.hinataShadow,0,10,470,470);
-            Portrait(character,"NavigatorPortrait",0,0,470,470);
+            var stage=screen.Find("OfficeStage");
+            var character=Rect(stage,"PlanningCharacter",-64,363,347,430);Motion(character,"bob",3.2f);
+            Portrait(character,"NavigatorPortrait",0,0,347,430,State.fatigue>=70?"pose_exhausted":"pose_fists");
             var speech=PCard(screen,"Navigator",600,580,420,129.2f,Color.white,24);
             PImage(speech,"SpeechTail",PlanningArt.tail,-13,36,14,20);
             var tag=PCard(speech,"NavigatorTag",18,-14,82,28,PlanPink,12,false);

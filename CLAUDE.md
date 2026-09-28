@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で103件（新試作94＋旧版の通し2＋オフィス7）
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で106件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -90,14 +90,14 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 - 新試作v0.10：共通UI・初回ガイド・月報・年間評価・設定を移行し、事件の設備名／備え一覧／横並び単位、未導入の点線、発動中の設定非表示、6月の雨を仕上げた。PlayMode全103件実行（101成功、失敗2件は待機条件見直し後に個別成功）、最終対象3件各1/1、Verify系成功。報酬・難易度は変更なし。詳細は`Docs/Incident-Finish-and-Sfx-2026-09-29.md`。目と口の差分は仕組みだけ。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
-- ひなた：**9/29に新デザインを決定**（太い輪郭線のアニメ塗り・3頭身、表情18種・ポーズ18種、`ArtSource/Hinata/gen-20260929/final/`）。旧暫定絵はモック・ゲームともすべて置き換える（`Docs/Mockups/Hinata-Replace.md`）。学生服は不可。ボイス台本は`Docs/Voice/`。
+- ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。ロゴ・質感・タイトルも更新。全106件実行105成功、撮影先修正後の1件も成功、Verify4系統成功。旧画像は`ArtSource/Hinata/legacy/`。詳細は`Docs/Hinata-Replacement-2026-09-29.md`。次は動き①②と演出◎。学生服は不可。ボイス台本は`Docs/Voice/`。
 - 音：SEは加藤さんの試聴後の指定でB-brightの11音を試遊用に登録（`Docs/Sfx-Candidates-2026-09-29.md`）。A案は未投入。BGMはGemini / Lyriaの生成2曲。声はLが基準案で未投入。目・口の差分は`NavigatorPersona.AnimationFrames`で設定する。
 - UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
 
 ## 7. 次にやること（優先順）
 
 1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
-2. ひなたの原画（6表情：`hinata_normal / proud / worried / alert / relieved / sad`）を`Assets/Sprites/Hinata/`へ置く。「PatchWorkSecure → キャラ立ち絵を取り込む」で反映する（透過も検査される）。
+2. `Docs/Mockups/Hinata-Motion.md`の①②と`Docs/Game-Feel-Research-2026-09-29.md`の◎を実装。基本ポーズの差分4枚は`ArtSource/Hinata/gen-20260929/final/`。他ポーズは1枚にフォールバック。各工程を検証後に別コミットする。
 3. `Docs/Mockups/Next-Screens.md`を正として承認済みの次画面を順に移行。①事件・④季節を実装済み、次は②依頼書・報酬、③タイトル・共通遷移、⑤部屋の操作、⑥ステータス恩恵。②と⑥の数値変更はVerify系で検証する。依頼報酬はまだ信頼+3・年間+45点のみ。
 4. 生成BGM2曲の試聴・ループ調整、B案SEを実プレイで確認してミックスを詰める（別案は承認前に登録しない）。図鑑は年度内遭遇集計と枠まで、一覧画面・年度をまたぐ集計は未実装。商用本採用前に利用条件を再確認する。
 5. 難易度：限定対応を弱めるより、状況で選び分ける理由を増やす。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。

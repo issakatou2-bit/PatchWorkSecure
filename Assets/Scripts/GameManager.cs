@@ -318,6 +318,12 @@ namespace PatchWorkSecure
         /// </summary>
         private void ApplyFace(Sprite face)
         {
+            if(_activePersona!=null&&_activePersona.Poses!=null&&_activePersona.Poses.Length>0)
+            {
+                string pose=face==_activePersona.FaceAlert?"pose_startled":face==_activePersona.FaceProud?"pose_jump":
+                    face==_activePersona.FaceSad?"pose_exhausted":face==_activePersona.FaceWorried?"pose_think":face==_activePersona.FaceRelieved?"pose_peace":"pose_fists";
+                face=_activePersona.Pose(pose);
+            }
             if (face == null) face = _activePersona?.FaceNormal;
             bool hasArt = face != null;
 

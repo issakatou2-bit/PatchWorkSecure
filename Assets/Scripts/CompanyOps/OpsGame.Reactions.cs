@@ -51,21 +51,26 @@ namespace PatchWorkSecure.CompanyOps
                     if(!CaptionsEnabled){if(label.name=="VoicePreviewCaption")label.text="字幕はOFF";continue;}
                     label.text = line.caption; PortraitSpeech(label);
                 }
-            ApplyReactionFace(reaction);
+            ApplyReactionFace(reaction,line);
             if (!VoiceEnabled || muted || voiceVolume <= 0 || line.clip == null) return;
             if (voiceAudio == null) voiceAudio = NewAudioSource();
             voiceAudio.Stop(); voiceAudio.clip = line.clip; voiceAudio.volume = voiceVolume;
             speakingPriority = OpsReactionDirector.Priority(reaction); voiceAudio.Play();
         }
 
-        private void ApplyReactionFace(OpsReaction reaction)
+        private void ApplyReactionFace(OpsReaction reaction,OpsReactionLine line)
         {
             if (Navigator == null || screen == null) return;
-            Sprite face = reaction == OpsReaction.Alert ? Navigator.FaceAlert :
-                reaction == OpsReaction.Success ? Navigator.FaceRelieved : reaction == OpsReaction.Growth || reaction == OpsReaction.Clear ? Navigator.FaceProud :
-                reaction == OpsReaction.Recover || reaction == OpsReaction.Failure ? Navigator.FaceSad : Navigator.FaceNormal;
-            foreach (var image in screen.GetComponentsInChildren<UnityEngine.UI.Image>())
-                if (image.name == "NavigatorPortrait") image.sprite = face != null ? face : Navigator.FaceNormal;
+            // 場面固定の事件・月報・年間評価は台詞抽選でポーズを上書きしない。
+            if(State!=null&&State.phase==OpsPhase.Planning)
+                foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
+                {
+                    if(identity.name!="NavigatorPortrait")continue;
+                    string pose=State.fatigue>=70?"pose_exhausted":string.IsNullOrEmpty(line.poseId)?"pose_fists":line.poseId;
+                    identity.PoseId=pose;identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Pose(pose);
+                }
+            foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
+                if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
             string expression=reaction==OpsReaction.Alert?"alert":reaction==OpsReaction.Success?"relieved":reaction==OpsReaction.Growth||reaction==OpsReaction.Clear?"proud":reaction==OpsReaction.Recover||reaction==OpsReaction.Failure?"sad":"normal";
             foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.SetExpression(expression);
         }

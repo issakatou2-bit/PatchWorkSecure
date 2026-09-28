@@ -12,6 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         public string id, caption;
         public OpsReaction reaction;
         public AudioClip clip;
+        public string faceId, poseId;
     }
 
     // 音声は制作時に収録・生成して取り込む。プレイ中の外部通信・APIキーは不要。

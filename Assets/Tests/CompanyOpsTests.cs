@@ -307,9 +307,9 @@ namespace PatchWorkSecure.Tests
                     Assert.IsFalse(text.isTextOverflowing, "重要な文字が欠ける: " + text.name + " / " + text.text);
             }
         }
-        private static void Capture(string name, int width = 1600, int height = 900)
+        private static void Capture(string name, int width = 1600, int height = 900, string canvasName = "CompanyOpsCanvas")
         {
-            var canvas = Find<Canvas>("CompanyOpsCanvas");
+            var canvas = Find<Canvas>(canvasName);
             var cameraObject = new GameObject("検証用カメラ", typeof(Camera)); var camera = cameraObject.GetComponent<Camera>();
             camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.04f, .12f, .14f);
             var target = new RenderTexture(width, height, 24); var old = RenderTexture.active;

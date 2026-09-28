@@ -8,5 +8,6 @@ namespace PatchWorkSecure.CompanyOps
         public Sprite round12, round16, round20, round24, round28, stageTop, shadow;
         public Sprite officeBlur, gradient, stageShade, shine, ribbon, tail, petal, snow, hinataShadow;
         public Sprite audit, listen, map, rest, upgrade, menu, tool, star, starMuted, morale, markerBubble;
+        public Sprite logoIcon, logoWordmark;
     }
 }

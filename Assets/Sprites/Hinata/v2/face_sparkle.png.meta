@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 67d31562b50117543b1c2de8dc6ce439
+guid: afe0cf9e644eff84bb72f5df082bb2c9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7129317930449635462
-    second: hinata_normal_0
+      213: 6907481211172556000
+    second: face_sparkle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,8 +48,8 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 1
-  alignment: 0
+  spriteMeshType: 0
+  alignment: 9
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
@@ -72,11 +72,11 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
+    textureCompression: 2
+    compressionQuality: 100
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: hinata_normal_0
+      name: face_sparkle_0
       rect:
         serializedVersion: 2
-        x: 167
-        y: 76
-        width: 924
-        height: 1092
+        x: 24
+        y: 8
+        width: 495
+        height: 516
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 688064f82ec60f260800000000000000
-      internalID: 7129317930449635462
+      spriteID: 0ec00ac609d4cdf50800000000000000
+      internalID: 6907481211172556000
       vertices: []
       indices: 
       edges: []
@@ -139,7 +139,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      hinata_normal_0: 7129317930449635462
+      face_sparkle_0: 6907481211172556000
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

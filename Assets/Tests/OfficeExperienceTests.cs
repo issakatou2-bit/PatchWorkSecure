@@ -225,7 +225,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(portrait.enabled && portrait.sprite!=null,"暫定ひなたの画像が未割当");
             Assert.IsFalse(Find<Transform>("PortraitPlaceholder").gameObject.activeSelf);
             var texture=new Texture2D(2,2);
-            Assert.IsTrue(texture.LoadImage(File.ReadAllBytes(Path.Combine(Application.dataPath,"Sprites/Hinata/hinata_normal.png"))));
+            Assert.IsTrue(texture.LoadImage(File.ReadAllBytes(Path.Combine(Application.dataPath,"Sprites/Hinata/v2/pose_fists.png"))));
             var pixels=texture.GetPixels32();
             Assert.Greater(pixels.Count(p=>p.a==0),pixels.Length/10,"背景が真に透明ではありません");
             Object.DestroyImmediate(texture);

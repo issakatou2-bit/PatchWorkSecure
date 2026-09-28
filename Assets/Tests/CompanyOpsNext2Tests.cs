@@ -65,7 +65,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(12,game.Surface.GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("AnnualMonth")&&!t.name.StartsWith("AnnualMonthName")&&!t.name.StartsWith("AnnualMonthResult")));
             var summary=OpsAnnualSummary.From(game.State);Assert.AreEqual(summary.encountered.Count+" / 40",Find<TextMeshProUGUI>("CollectionValue").text);
             var portraitPosition=Find<RectTransform>("NavigatorPortrait").anchoredPosition;
-            Assert.AreEqual(1210,portraitPosition.x);Assert.That(portraitPosition.y,Is.InRange(-630f,-602f),"70px下の基準位置から、喜ぶ動きの28pxだけ上がる");
+            Assert.AreEqual(1275,portraitPosition.x);Assert.AreEqual(-630,portraitPosition.y,"成長目標の下に置き、足元を画面内に収める");
             CheckPointer("AnnualDetails");CheckPointer("EndingHistory");CheckPointer("BackHome");CheckPointer("ReplayYear");CheckText();Capture("77-annual-report");
             Click("ReplayYear");yield return null;Assert.AreEqual(0,game.State.month);Assert.AreEqual(OpsPhase.Planning,game.State.phase);LogAssert.NoUnexpectedReceived();
         }

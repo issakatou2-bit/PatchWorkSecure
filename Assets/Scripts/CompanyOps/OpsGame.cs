@@ -56,6 +56,8 @@ namespace PatchWorkSecure.CompanyOps
             bool growth = State.milestones.Count > before;
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
+            if(action=="rest")foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
+            {identity.PoseId="pose_coffee";identity.GetComponent<Image>().sprite=Navigator?.Pose("pose_coffee");}
         }
         public void Buy(int index)
         {
@@ -104,6 +106,7 @@ namespace PatchWorkSecure.CompanyOps
             StopVoice();
             resolutionActive = false;
             homeVisible = true; NewScreen(); SetMusic(Sounds == null ? null : Sounds.titleMusic);
+            if(PlanningArt!=null){TitleScreen();return;}
             Art(screen, 615, -95, 1030, 1030);
             if(PlanningArt!=null) SeasonLayer(Rect(screen,"TitleSeason",615,0,985,900),985,900,saved==null?0:saved.month);
             var intro = Box(screen, "Welcome", 44, 54, 580, 786, Ink, true);

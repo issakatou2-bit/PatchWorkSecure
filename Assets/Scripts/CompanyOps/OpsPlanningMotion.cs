@@ -31,6 +31,12 @@ namespace PatchWorkSecure.CompanyOps
             }
             float t = Mathf.Repeat((Time.unscaledTime - started + Delay) / Period, 1);
             if (Kind == "bob") rect.anchoredPosition = origin + Vector2.up * (5 - 5 * Mathf.Cos(t * Mathf.PI * 2));
+            if (Kind == "drift")
+            {
+                float drift=.5f-.5f*Mathf.Cos(t*Mathf.PI*2);
+                rect.anchoredPosition=origin+new Vector2(-14,-8)*drift;
+                rect.localScale=Vector3.one*Mathf.Lerp(1.04f,1.08f,drift);
+            }
             if (Kind == "shake") rect.anchoredPosition = origin + Vector2.right * (t < .35f ? Mathf.Sin(t * Mathf.PI * 18) * 3 : 0);
             if (Kind == "alarm" && image != null) image.color = new Color(color.r,color.g,color.b,.7f+.3f*Mathf.Sin(t*Mathf.PI*2));
             if (Kind == "rotate") rect.localEulerAngles = new Vector3(0,0,-360*t);

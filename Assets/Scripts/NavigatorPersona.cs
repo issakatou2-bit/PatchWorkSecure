@@ -31,6 +31,17 @@ namespace PatchWorkSecure
         public Sprite FaceProud;
         public Sprite FaceSad;
 
+        [Header("IDで選ぶ表情・全身ポーズ")]
+        public NamedSprite[] Faces = new NamedSprite[0], Poses = new NamedSprite[0];
+        [System.Serializable] public sealed class NamedSprite { public string Id; public Sprite Sprite; }
+        public Sprite Face(string id) => FindSprite(Faces,id) ?? FaceNormal;
+        public Sprite Pose(string id) => FindSprite(Poses,id) ?? FindSprite(Poses,"pose_fists") ?? FaceNormal;
+        private static Sprite FindSprite(NamedSprite[] entries,string id)
+        {
+            if(entries!=null)foreach(var entry in entries)if(entry!=null&&entry.Id==id)return entry.Sprite;
+            return null;
+        }
+
         [Header("表情ごとの目・口の差分（未設定なら立ち絵のまま）")]
         public FaceAnimationFrames[] AnimationFrames = new FaceAnimationFrames[0];
         [System.Serializable] public sealed class FaceAnimationFrames

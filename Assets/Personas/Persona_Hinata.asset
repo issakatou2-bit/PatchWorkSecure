@@ -16,12 +16,87 @@ MonoBehaviour:
   Description: "\u660E\u308B\u304F\u5143\u6C17\u306A\u30CA\u30D3\u30B2\u30FC\u30BF\u30FC\u3002\u96E3\u3057\u3044\u8A71\u3082\u52E2\u3044\u3088\u304F\u565B\u307F\u7815\u3044\u3066\u3001\u80CC\u4E2D\u3092\u62BC\u3057\u3066\u304F\u308C\u308B\u3002"
   ThemeColor: {r: 0.96, g: 0.55, b: 0.7, a: 1}
   Reactions: {fileID: 11400000, guid: 29aac21b9e0a49d4b8f0bfbcdbc113b6, type: 2}
-  FaceNormal: {fileID: 21300000, guid: 67d31562b50117543b1c2de8dc6ce439, type: 3}
-  FaceWorried: {fileID: 0}
-  FaceAlert: {fileID: 0}
-  FaceRelieved: {fileID: 0}
-  FaceProud: {fileID: 0}
-  FaceSad: {fileID: 0}
+  FaceNormal: {fileID: 21300000, guid: ad1ed41ede7285c40b9f183584cd4ac2, type: 3}
+  FaceWorried: {fileID: 21300000, guid: f2dd0f2f6db6ba24ba51cc18088233cf, type: 3}
+  FaceAlert: {fileID: 21300000, guid: 8e07f49978952f644bf9f1c5249a1713, type: 3}
+  FaceRelieved: {fileID: 21300000, guid: 1ac1ae3c733e81f43a66058cb314e107, type: 3}
+  FaceProud: {fileID: 21300000, guid: c8924500db61fe64c99f716f3bd3f722, type: 3}
+  FaceSad: {fileID: 21300000, guid: c76c1aec00facb24990040d70f1ab586, type: 3}
+  Faces:
+  - Id: face_akire
+    Sprite: {fileID: 21300000, guid: 60d176429508bd6419eb87a93201ff35, type: 3}
+  - Id: face_akire_niyake
+    Sprite: {fileID: 21300000, guid: 00c7a5414e5c60348b8ad66b1067c1e8, type: 3}
+  - Id: face_alert
+    Sprite: {fileID: 21300000, guid: 8e07f49978952f644bf9f1c5249a1713, type: 3}
+  - Id: face_crying
+    Sprite: {fileID: 21300000, guid: 79a03003ad3849841ad08a8c37d22c35, type: 3}
+  - Id: face_determined
+    Sprite: {fileID: 21300000, guid: fce05fbc4f9d8f9408bc05497a1be94e, type: 3}
+  - Id: face_doya
+    Sprite: {fileID: 21300000, guid: 806cb23954c0d1a40a585fc3f8c03379, type: 3}
+  - Id: face_embarrassed
+    Sprite: {fileID: 21300000, guid: 49d2ebe79c89f1f498c5475895ccf880, type: 3}
+  - Id: face_normal
+    Sprite: {fileID: 21300000, guid: ad1ed41ede7285c40b9f183584cd4ac2, type: 3}
+  - Id: face_panic
+    Sprite: {fileID: 21300000, guid: c7d0c08be4eb21f47afa51bcbbe2236c, type: 3}
+  - Id: face_pout
+    Sprite: {fileID: 21300000, guid: 0871b2ded4e7b2c4dace21843162c6d7, type: 3}
+  - Id: face_proud
+    Sprite: {fileID: 21300000, guid: c8924500db61fe64c99f716f3bd3f722, type: 3}
+  - Id: face_relieved
+    Sprite: {fileID: 21300000, guid: 1ac1ae3c733e81f43a66058cb314e107, type: 3}
+  - Id: face_sad
+    Sprite: {fileID: 21300000, guid: c76c1aec00facb24990040d70f1ab586, type: 3}
+  - Id: face_shocked
+    Sprite: {fileID: 21300000, guid: 7de38bde9bbe8de4b96cb6177c9f2a86, type: 3}
+  - Id: face_sleepy
+    Sprite: {fileID: 21300000, guid: a538f7d7f23b3104a8342e3ca57ae92e, type: 3}
+  - Id: face_sparkle
+    Sprite: {fileID: 21300000, guid: afe0cf9e644eff84bb72f5df082bb2c9, type: 3}
+  - Id: face_tease
+    Sprite: {fileID: 21300000, guid: a9a8be4de4a42f842915b2c96ac8163b, type: 3}
+  - Id: face_worried
+    Sprite: {fileID: 21300000, guid: f2dd0f2f6db6ba24ba51cc18088233cf, type: 3}
+  Poses:
+  - Id: pose_armscross
+    Sprite: {fileID: 21300000, guid: 637fe4179fbe7114b8f4d5e92a69d2c3, type: 3}
+  - Id: pose_bow
+    Sprite: {fileID: 21300000, guid: 841148cd6eb3a304998f5a9fdb9bc9a8, type: 3}
+  - Id: pose_coffee
+    Sprite: {fileID: 21300000, guid: bbe85e47be9be994a940187bb266e489, type: 3}
+  - Id: pose_exhausted
+    Sprite: {fileID: 21300000, guid: cccedef1129134f4d8c31239d3a6fc34, type: 3}
+  - Id: pose_fists
+    Sprite: {fileID: 21300000, guid: c6bc0e01dcba6484f92c2d9236ffef6c, type: 3}
+  - Id: pose_jump
+    Sprite: {fileID: 21300000, guid: b97bf5c8111e8984bb0e517551ed4d48, type: 3}
+  - Id: pose_laptop
+    Sprite: {fileID: 21300000, guid: dc0a22283c4e40c4ebcfa9fb79128bc4, type: 3}
+  - Id: pose_magnifier
+    Sprite: {fileID: 21300000, guid: 327e30ed28d2dff4a9d5ad19158bd9be, type: 3}
+  - Id: pose_peace
+    Sprite: {fileID: 21300000, guid: 6bced0b70f26b71469426ffee824cf12, type: 3}
+  - Id: pose_please
+    Sprite: {fileID: 21300000, guid: 412fd6609b4f7ea41b74d7dfe9df4a77, type: 3}
+  - Id: pose_point
+    Sprite: {fileID: 21300000, guid: 86d91145d150e304db10d14abc446448, type: 3}
+  - Id: pose_run
+    Sprite: {fileID: 21300000, guid: daffbd0a007f5e2479639d07fbef64e8, type: 3}
+  - Id: pose_salute
+    Sprite: {fileID: 21300000, guid: 74a02ead9952b3545ab9c466f80dd671, type: 3}
+  - Id: pose_shield
+    Sprite: {fileID: 21300000, guid: d154cb6914346ef4aa8677acbb66b6d3, type: 3}
+  - Id: pose_startled
+    Sprite: {fileID: 21300000, guid: 295bcc9d9ccc4b443ab9c1343cbbe7ab, type: 3}
+  - Id: pose_think
+    Sprite: {fileID: 21300000, guid: 62d580ba999b0f14fa4656a0213a8639, type: 3}
+  - Id: pose_typing
+    Sprite: {fileID: 21300000, guid: 656a4dc577996c4449db1ff8d0ec9e96, type: 3}
+  - Id: pose_wave
+    Sprite: {fileID: 21300000, guid: 748d87ef64181754ab01297f66175a2e, type: 3}
+  AnimationFrames: []
   LineNormal: "\u4ECA\u65E5\u3082\u5E73\u548C\u3060\u306D\uFF01 \u4ECA\u306E\u3046\u3061\u306B\u5099\u3048\u3061\u3083\u304A\uFF01"
   LineNoDefense: "\u307E\u3060\u5BFE\u7B56\u30BC\u30ED\u3060\u3088\uFF01\uFF1F \u4F55\u304B\u3072\u3068\u3064\u5165\u308C\u3088\u3001\u306D\uFF1F"
   LineLowBudget: "\u304A\u8CA1\u5E03\u30D4\u30F3\u30C1\u2026\u2026\uFF01 \u3053\u3053\u306F\u6211\u6162\u306E\u3057\u3069\u3053\u308D\u3060\u306D"

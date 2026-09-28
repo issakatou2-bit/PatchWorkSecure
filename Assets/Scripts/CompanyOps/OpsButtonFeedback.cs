@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace PatchWorkSecure.CompanyOps
 {
-    // 操作の受付はButton側。演出の終了を待たせず、無効ボタンには反応しない。
+    // 操作の受付はButton側。無効時は理由だけを示し、onClickやルールを実行しない。
     public sealed class OpsButtonFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler, ISubmitHandler
     {
@@ -15,6 +15,7 @@ namespace PatchWorkSecure.CompanyOps
         private UnityEngine.UI.Outline focus;
         private bool hovered, selected, pressed;
         private float submittedUntil;
+        private float rejectedAt=-10;
         private void Awake()
         {
             button = GetComponent<UnityEngine.UI.Button>();
@@ -38,6 +39,11 @@ namespace PatchWorkSecure.CompanyOps
                 ((RectTransform)transform).anchoredPosition = origin + Vector2.down *
                     (Available && Owner != null && !Owner.ReducedMotion && (pressed || Time.unscaledTime < submittedUntil) ? PressDepth : 0);
             }
+            if(!Available&&Time.realtimeSinceStartup-rejectedAt<.25f)
+            {
+                float t=(Time.realtimeSinceStartup-rejectedAt)/.25f;
+                ((RectTransform)transform).anchoredPosition=origin+Vector2.right*(Owner!=null&&!Owner.ReducedMotion?Mathf.Sin(t*Mathf.PI*8)*4*(1-t):0);
+            }
         }
         private void OnDisable()
         {
@@ -47,10 +53,16 @@ namespace PatchWorkSecure.CompanyOps
         }
         public void OnPointerEnter(PointerEventData e) { hovered = Available; }
         public void OnPointerExit(PointerEventData e) { hovered = pressed = false; }
-        public void OnPointerDown(PointerEventData e) { if (e.button == PointerEventData.InputButton.Left) pressed = Available; }
+        public void OnPointerDown(PointerEventData e) { if (e.button == PointerEventData.InputButton.Left){pressed=Available;if(!Available)Reject();} }
         public void OnPointerUp(PointerEventData e) { pressed = false; }
         public void OnSelect(BaseEventData e) { selected = Available; }
         public void OnDeselect(BaseEventData e) { selected = pressed = false; }
-        public void OnSubmit(BaseEventData e) { if (Available) submittedUntil = Time.unscaledTime + .085f; }
+        public void OnSubmit(BaseEventData e) { if (Available) submittedUntil = Time.unscaledTime + .085f;else Reject(); }
+        private void Reject()
+        {
+            if(Owner==null||Time.realtimeSinceStartup-rejectedAt<.25f)return;
+            if(!capturedOrigin){origin=((RectTransform)transform).anchoredPosition;capturedOrigin=true;}
+            rejectedAt=Time.realtimeSinceStartup;Owner.RejectButton(button);
+        }
     }
 }

@@ -13,6 +13,35 @@ namespace PatchWorkSecure.CompanyOps
         private bool workCompletePending;private int workCompleteMonth=-1;
         private int lastDanger=100;private OpsState dangerState;private AudioSource dangerAudio;
         public int DangerPulseCount {get;private set;}
+        private RectTransform blockedTag;private AudioSource rejectAudio;
+        public int RejectedPressCount {get;private set;}
+        private string ButtonBlockReason(string id)
+        {
+            if(id=="ContinueYear")return saved==null?"続きの記録はありません":"記録を確認してください";
+            if(State!=null)
+            {
+                if(id.StartsWith("Action_"))return State.ActionBlock(id.Substring(7));
+                if(id.StartsWith("Buy_")){int index=OpsCatalog.Index(id.Substring(4));if(index>=0)return State.UpgradeBlock(index);}
+                if(id=="Proposal"||id.StartsWith("Propose_"))return State.ActionBlock("proposal");
+                if(id=="ChainTalk")return State.ActionBlock("listen");
+            }
+            return "今は選べません";
+        }
+        public void RejectButton(UnityEngine.UI.Button button)
+        {
+            if(button==null||button.IsInteractable())return;
+            RejectedPressCount++;if(blockedTag!=null)Destroy(blockedTag.gameObject);
+            var rect=(RectTransform)button.transform;var point=screen.InverseTransformPoint(rect.TransformPoint(new Vector3(rect.rect.width/2,0,0)));
+            blockedTag=PCard(Surface,"BlockedReason",Mathf.Clamp(point.x-130,12,1328),Mathf.Clamp(-point.y-48,12,840),260,40,PlanInk,16,false);
+            PText(blockedTag,"BlockedReasonText",ButtonBlockReason(button.name),10,0,240,40,14,Color.white,true,true);
+            blockedTag.gameObject.AddComponent<OpsBlockedTag>();StartCoroutine(RejectedSound());
+        }
+        private IEnumerator RejectedSound()
+        {
+            if(muted||soundVolume<=0||Sounds?.damage==null)yield break;
+            if(rejectAudio==null)rejectAudio=NewAudioSource();
+            for(int i=0;i<2;i++){rejectAudio.clip=Sounds.damage;rejectAudio.volume=soundVolume*.25f;rejectAudio.pitch=.8f;rejectAudio.Play();yield return new WaitForSecondsRealtime(.07f);rejectAudio.Stop();if(i==0)yield return new WaitForSecondsRealtime(.05f);}
+        }
         private void CheckDangerSignal()
         {
             if(!Application.isPlaying)return;
@@ -66,6 +95,12 @@ namespace PatchWorkSecure.CompanyOps
                 effect.Coins[i]=coin;
             }
         }
+    }
+    public sealed class OpsBlockedTag : MonoBehaviour
+    {
+        private CanvasGroup group;private float started;
+        private void Start(){started=Time.realtimeSinceStartup;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;}
+        private void Update(){float t=Time.realtimeSinceStartup-started;group.alpha=1-Mathf.Clamp01((t-1.1f)/.2f);if(t>=1.3f)Destroy(gameObject);}
     }
     public sealed class OpsDangerPulse : MonoBehaviour
     {

@@ -8,12 +8,30 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using Object=UnityEngine.Object;
 
 namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins5_無効ボタンは理由だけ示し操作や資源を変えない()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
+                game.State.capacity=0;game.OpenTab(0);yield return null;var button=Find<Button>("Action_listen");CheckPointer("Action_listen");Assert.IsFalse(button.interactable);
+                string state=JsonUtility.ToJson(game.State);var pos=((RectTransform)button.transform).anchoredPosition;int count=game.RejectedPressCount;
+                ExecuteEvents.Execute(button.gameObject,new PointerEventData(EventSystem.current){button=PointerEventData.InputButton.Left},ExecuteEvents.pointerDownHandler);
+                yield return new WaitForSecondsRealtime(.08f);Assert.AreEqual(count+1,game.RejectedPressCount);StringAssert.Contains("工数",Find<TextMeshProUGUI>("BlockedReasonText").text);
+                if(reduced)Assert.AreEqual(pos,((RectTransform)button.transform).anchoredPosition);
+                Capture(reduced?"115-quickwins5-reduced":"115-quickwins5-disabled");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual(pos,((RectTransform)button.transform).anchoredPosition);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+                ExecuteEvents.Execute(button.gameObject,new BaseEventData(EventSystem.current),ExecuteEvents.submitHandler);Assert.AreEqual(count+2,game.RejectedPressCount);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+                yield return new WaitForSecondsRealtime(1.5f);Assert.IsFalse(Object.FindObjectsByType<OpsBlockedTag>().Any());
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins4_危険域の最初と悪化だけ心音を鳴らし点滅は動かない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

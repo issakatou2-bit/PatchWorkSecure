@@ -15,6 +15,26 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator QuickWins8_前月末の実数と比較し疲労減少を緑で示す()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
+            game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.7f);
+            Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name.StartsWith("MonthlyTrend")));StringAssert.Contains("初月",Find<TextMeshProUGUI>("GrowthTrendHeading").text);
+            var first=game.State.Latest;game.Next();game.ChooseAction("rest");game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);
+            var second=game.State.Latest;var values=new[]{second.loss-first.loss,second.downtime-first.downtime,second.cost-first.cost};string state=JsonUtility.ToJson(game.State);
+            for(int i=0;i<3;i++)
+            {
+                Assert.AreEqual(System.Math.Abs(values[i]).ToString(),Find<TextMeshProUGUI>("MonthlyTrend"+i+"Amount").text);
+                Assert.AreEqual(values[i]>0?"trend-up":values[i]<0?"trend-down":"trend-flat",Find<OpsIncidentGraphic>("MonthlyTrend"+i+"Arrow").Kind);
+                var number=Find<TextMeshProUGUI>(i==0?"MonthlyLossValue":i==1?"MonthlyStopValue":"MonthlyCostValue");number.ForceMeshUpdate();Assert.IsFalse(number.isTextOverflowing);
+            }
+            int fatigueDelta=first.metricsAfter[4]-second.metricsAfter[4];Assert.AreEqual(System.Math.Abs(fatigueDelta).ToString(),Find<TextMeshProUGUI>("GrowthTrend4Amount").text);
+            Assert.IsTrue(OpsGame.IsGoodMonthlyChange(-5,false));Assert.IsFalse(OpsGame.IsGoodMonthlyChange(5,false));Assert.IsTrue(OpsGame.IsGoodMonthlyChange(5,true));
+            var color=Find<TextMeshProUGUI>("GrowthTrend4Amount").color;if(fatigueDelta<0)Assert.Greater(color.g,color.r);
+            Capture("118-quickwins8-monthly");Assert.AreEqual(state,JsonUtility.ToJson(game.State));Click("Menu");if(!game.ReducedMotion)Click("ReduceMotion");Click("CloseDialog");game.OpenTab(0);yield return new WaitForSecondsRealtime(.8f);Capture("118-quickwins8-reduced");Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+            first.metricsAfter=null;game.OpenTab(0);yield return null;StringAssert.Contains("未記録",Find<TextMeshProUGUI>("GrowthTrendHeading").text);Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="GrowthTrend4"));
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator QuickWins7_実際に働いた社員だけ顔マークが跳ねる()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

@@ -12,7 +12,14 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="ripple")
+            if(Kind=="trend-up"||Kind=="trend-down")
+            {
+                bool up=Kind=="trend-up";float tip=up?r.yMax:r.yMin,baseY=up?r.yMin:r.yMax,head=up?r.yMax-h*.4f:r.yMin+h*.4f;
+                Line(vh,new Vector2(r.center.x,baseY),new Vector2(r.center.x,head),2.5f);
+                Polygon(vh,new[]{new Vector2(r.xMin,head),new Vector2(r.center.x,tip),new Vector2(r.xMax,head)},color);
+            }
+            else if(Kind=="trend-flat")Line(vh,new Vector2(r.xMin,r.center.y),new Vector2(r.xMax,r.center.y),2.5f);
+            else if(Kind=="ripple")
             {
                 for(int i=0;i<40;i++)
                 {

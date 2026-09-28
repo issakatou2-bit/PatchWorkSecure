@@ -64,7 +64,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void MonthlyScreen()
         {
-            var r=State.Latest;ReportBackground(false);
+            var r=State.Latest;var previous=PreviousReport(r);ReportBackground(false);
             PImage(screen,"MonthlyLogoIcon",PlanningArt.logoIcon,40,30,80,80);
             var medal=PCard(screen,"MonthMedal",136,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
             PText(medal,"YearNumber","1年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
@@ -79,7 +79,13 @@ namespace PatchWorkSecure.CompanyOps
             {
                 var c=PCard(incident,"ResultCard"+i,26+i*220.67f,68,206.67f,146,bg[i],20,false);Reveal(c,.04f*i);
                 PText(c,"ResultLabel"+i,names[i],16,12,176,30,15,fg[i]);
-                ReportNumber(c,ids[i],values[i],"<size=17>"+(i==1?"時間":"万円")+"</size>",16,44,176,40,PlanInk);
+                ReportNumber(c,ids[i],values[i],"<size=17>"+(i==1?"時間":"万円")+"</size>",16,44,previous==null?176:118,40,PlanInk);
+                if(previous!=null)
+                {
+                    int last=i==0?previous.loss:i==1?previous.downtime:previous.cost;
+                    MonthTrend(c,"MonthlyTrend"+i,values[i]-last,false,138,54);
+                    PText(c,"PreviousMonthLabel"+i,"前月比",140,82,52,18,10,PlanGray);
+                }
                 string hint=i==0?r.hasInvestmentComparison?"備えなしなら"+(r.loss+r.avoidedLoss)+"万円":"備え比較は未記録":i==1?r.forecast==null?"見積もりは未記録":"見積もり "+r.forecast.stopMin+"〜"+r.forecast.stopMax+"時間":"方針："+(r.response=="contain"?"広範囲を停止":r.response=="scope"?"対象を限定":"復旧を優先");
                 PText(c,"ResultHint"+i,hint,16,108,176,26,13,i==0?Hex("1a7c63"):PlanGray);
             }
@@ -137,9 +143,17 @@ namespace PatchWorkSecure.CompanyOps
             var lossTrail=p.Find("GrowthLossTrail");if(lossTrail!=null)lossTrail.SetSiblingIndex(p.Find("GrowthGaugeTrack").GetSiblingIndex()+1);
             string[] benefits={"設備の予防力が対応に反映される","復元・再開の備えが停止の軽減に役立つ","相談文化は、詐欺や持ち出しの影響を抑える","信頼が上がると、月次予算の計算に反映される","疲労が下がると、対応の負担を軽くできる","現場の準備と社員の成長が対応を助ける"};
             PText(p,"GrowthBenefit",benefits[index],86,124,588,42,14,Hex("52607a"),false);
-            var changes=Enumerable.Range(0,6).Where(i=>i!=index&&r.metricsAfter[i]!=r.metricsBefore[i]).Take(3).ToArray();
-            for(int j=0;j<changes.Length;j++){int i=changes[j],delta=r.metricsAfter[i]-r.metricsBefore[i];ReportChip(p,"GrowthDelta"+i,names[i]+" "+(delta>0?"+":"")+delta,26+j*216,186,206,Hex("eef2f8"),PlanInk);}
-            if(changes.Length==0 && r.growth!=null)ReportChip(p,"PlayerExperience","あなた 経験 +"+r.growth.playerXp,26,186,248,Hex("eef2f8"),PlanInk);
+            var previous=PreviousReport(r);bool recorded=previous?.metricsAfter!=null;
+            PText(p,"GrowthTrendHeading",r.month==0?"初月：前月との比較なし":recorded?"前月末との比較":"前月末の値は未記録",26,164,648,20,12,PlanGray,false);
+            // 月初差分（上段）と前月末差分（下段）を混同しない。疲労を必ず含める。
+            var changes=Enumerable.Range(0,6).Where(i=>i!=4).OrderByDescending(i=>recorded?System.Math.Abs(r.metricsAfter[i]-previous.metricsAfter[i]):System.Math.Abs(r.metricsAfter[i]-r.metricsBefore[i])).Take(2).Concat(new[]{4}).ToArray();
+            for(int j=0;j<changes.Length;j++)
+            {
+                int i=changes[j],value=i==4?100-r.metricsAfter[i]:r.metricsAfter[i];
+                var chip=PCard(p,"GrowthDelta"+i,26+j*216,186,206,32,Hex("eef2f8"),16,false);
+                PText(chip,"GrowthDelta"+i+"Text",(i==4?"疲労":names[i])+" "+value,8,0,recorded?128:190,32,14,PlanInk);
+                if(recorded){int old=i==4?100-previous.metricsAfter[i]:previous.metricsAfter[i];MonthTrend(chip,"GrowthTrend"+i,value-old,i!=4,136,4);}
+            }
         }
         private void MonthlyRecordDialog(OpsOutcome r)
         {

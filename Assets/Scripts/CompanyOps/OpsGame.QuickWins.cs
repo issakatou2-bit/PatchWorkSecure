@@ -9,6 +9,15 @@ namespace PatchWorkSecure.CompanyOps
     public partial class OpsGame
     {
         private bool budgetGainPending;
+        private OpsOutcome PreviousReport(OpsOutcome current)=>State.history.FirstOrDefault(r=>r.month==current.month-1);
+        public static bool IsGoodMonthlyChange(int delta,bool higherIsBetter)=>higherIsBetter?delta>0:delta<0;
+        private void MonthTrend(Transform parent,string id,int delta,bool higherIsBetter,float x,float y)
+        {
+            Color tone=delta==0?PlanGray:IsGoodMonthlyChange(delta,higherIsBetter)?Hex("168368"):IncidentRed;
+            var row=Rect(parent,id,x,y,62,24);
+            IncidentShape(row,id+"Arrow",delta>0?"trend-up":delta<0?"trend-down":"trend-flat",0,5,12,14,tone);
+            PText(row,id+"Amount",System.Math.Abs(delta).ToString(),17,0,45,24,14,tone);
+        }
         private int[] rankBefore,rankAfter;
         private bool workCompletePending;private int workCompleteMonth=-1;
         private int lastDanger=100;private OpsState dangerState;private AudioSource dangerAudio;

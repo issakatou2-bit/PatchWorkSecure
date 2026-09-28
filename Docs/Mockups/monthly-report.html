@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>月報</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;family=Zen+Kaku+Gothic+New:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.en{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:12px;letter-spacing:.32em}
+.panel{position:relative;border-radius:24px;background:linear-gradient(180deg,#ffffff,#f6f8fc);box-shadow:0 0 0 3px #ffffff,0 0 0 4px #e2e7f0,0 14px 34px rgba(27,35,64,.16);box-sizing:border-box}
+.btn{position:relative;overflow:hidden;border:0;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:20px;height:62px;border-radius:18px;padding:0 26px}
+.navy{color:#ffffff;background:linear-gradient(180deg,#34456e,#1d2a44);box-shadow:inset 0 2px 0 rgba(255,255,255,.2),0 6px 0 #0c1226,0 10px 16px rgba(12,18,38,.35)}
+.white{color:#1d2a44;background:linear-gradient(180deg,#ffffff,#eef2f8);box-shadow:inset 0 2px 0 #ffffff,0 0 0 2px #dfe5ef,0 6px 0 #c3ccdc}
+.rank{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:28px;color:#ffffff;box-shadow:0 0 0 3px #ffffff,0 4px 10px rgba(27,35,64,.25),inset 0 -4px 0 rgba(0,0,0,.12)}
+@keyframes stamp{0%{transform:scale(2.4) rotate(-14deg);opacity:0}55%{transform:scale(.92) rotate(-8deg);opacity:1}75%{transform:scale(1.04) rotate(-8deg)}100%{transform:scale(1) rotate(-8deg)}}
+@keyframes up{0%,30%{transform:scale(1)}45%{transform:scale(1.35)}60%,100%{transform:scale(1)}}
+@keyframes fill{from{width:20%}to{width:35%}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+</style>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: linear-gradient(160deg, #cfe9ff 0%, #ffe3ec 100%)">
+<img src="../../Assets/Art/Office/office-topdown.png" alt="" style="position: absolute; left: -100px; top: -450px; width: 1800px; height: 1800px; filter: blur(14px) saturate(1.2); opacity: .4">
+
+<div style="position: absolute; left: 40px; top: 30px; display: flex; align-items: center; gap: 16px">
+  <div class="r" style="width: 120px; height: 80px; border-radius: 22px; background: linear-gradient(180deg, #ff94ae, #f45a80); box-shadow: 0 5px 0 #c9486c; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-size: 13px">1年目</span><span style="font-size: 36px; line-height: 1">4月</span></div>
+  <div style="display: flex; flex-direction: column"><span class="en" style="color: #ff6f91">MONTHLY REPORT</span><span class="r" style="font-size: 40px">今月のふりかえり</span></div>
+</div>
+
+<div class="panel" style="position: absolute; left: 40px; top: 140px; width: 700px; height: 330px; padding: 22px 26px; display: flex; flex-direction: column; gap: 14px">
+  <span class="r" style="font-size: 18px; color: #6b7894">事件：うちのデータ、戻せる？</span>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+    <div style="border-radius: 18px; background: #fff1e4; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span class="r" style="font-size: 15px; color: #b35c00">被害</span><span class="r" style="font-size: 40px; line-height: 1">6<span style="font-size: 17px">万円</span></span><span class="r" style="font-size: 13px; color: #1a7c63">備えなしなら11万円</span></div>
+    <div style="border-radius: 18px; background: #ffe9ee; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span class="r" style="font-size: 15px; color: #c23a60">業務停止</span><span class="r" style="font-size: 40px; line-height: 1">6<span style="font-size: 17px">時間</span></span><span class="r" style="font-size: 13px; color: #6b7894">見積もり 0〜17時間</span></div>
+    <div style="border-radius: 18px; background: #eef2f8; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span class="r" style="font-size: 15px; color: #52607a">対応費</span><span class="r" style="font-size: 40px; line-height: 1">4<span style="font-size: 17px">万円</span></span><span class="r" style="font-size: 13px; color: #6b7894">方針：復旧を急ぐ</span></div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; border-radius: 16px; background: #e3faf3; padding: 12px 16px">
+    <span class="r" style="font-size: 14px; color: #ffffff; background: #2ec4a0; border-radius: 9px; padding: 3px 10px">効いた備え</span>
+    <span class="r" style="font-size: 17px">分離バックアップ Lv.1</span>
+    <span class="r" style="margin-left: auto; font-size: 17px; color: #1a7c63">被害 −5万円</span>
+  </div>
+</div>
+
+<div class="panel" style="position: absolute; left: 40px; top: 494px; width: 700px; height: 250px; padding: 20px 26px; display: flex; flex-direction: column; gap: 12px">
+  <div style="display: flex; align-items: center"><span class="en" style="color: #3fa9f5">GROWTH</span><span class="r" style="font-size: 20px; margin-left: 12px">今月の成長</span></div>
+  <div style="display: flex; align-items: center; gap: 14px">
+    <span class="rank" style="background: linear-gradient(160deg, #7cc6ff, #2f97e8); animation: up 2.4s ease-out infinite">D</span>
+    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="r" style="font-size: 17px">相談文化</span><span class="r" style="font-size: 13px; color: #ffffff; background: linear-gradient(90deg, #ff6f91, #ffb020); border-radius: 9px; padding: 2px 10px">RANK UP  E→D</span><span class="r" style="margin-left: auto; font-size: 17px">28 → 35</span></div>
+      <div style="height: 10px; border-radius: 5px; background: #e6eaf2; overflow: hidden"><div style="height: 10px; border-radius: 5px; background: linear-gradient(90deg, #ff94ae, #ff6f91); animation: fill 1.2s ease-out both"></div></div>
+      <span style="font-size: 14px; color: #52607a">社員が相談に来やすくなった</span>
+    </div>
+  </div>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap">
+    <span class="r" style="font-size: 14px; background: #eef2f8; border-radius: 999px; padding: 5px 14px">立て直す力 +12</span>
+    <span class="r" style="font-size: 14px; background: #eef2f8; border-radius: 999px; padding: 5px 14px">経営の信頼 +3</span>
+    <span class="r" style="font-size: 14px; background: #eef2f8; border-radius: 999px; padding: 5px 14px">あなた 経験 +1</span>
+  </div>
+</div>
+
+<div class="panel" style="position: absolute; left: 770px; top: 140px; width: 440px; height: 330px; padding: 22px 26px; display: flex; flex-direction: column; gap: 10px; overflow: hidden">
+  <div style="display: flex; align-items: center"><span class="en" style="color: #ff6f91">MISSION</span><span class="r" style="font-size: 20px; margin-left: 12px">社内依頼</span></div>
+  <span class="r" style="font-size: 22px; line-height: 1.35">納品データを戻す<br>手段を示す</span>
+  <span style="font-size: 15px; color: #52607a">B 現場で確かめる　2 / 2</span>
+  <div style="display: flex; gap: 8px; margin-top: auto"><span class="r" style="font-size: 14px; background: #fff6d6; color: #7a5a00; border-radius: 999px; padding: 5px 12px">臨時予算 +5万円</span><span class="r" style="font-size: 14px; background: #f0ecfb; color: #5a4a9a; border-radius: 999px; padding: 5px 12px">信頼 +3</span></div>
+  <div style="position: absolute; right: 26px; top: 70px; width: 150px; height: 150px; border-radius: 26px; background: rgba(255,111,145,.12); animation: stamp 2.4s cubic-bezier(.2,.8,.2,1) infinite">
+    <span style="position: absolute; inset: 7px; border: 4px dashed #ff6f91; border-radius: 20px"></span>
+    <span class="r" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 42px; color: #ff4f7b">達成</span>
+  </div>
+</div>
+
+<div class="panel" style="position: absolute; left: 770px; top: 494px; width: 440px; height: 250px; padding: 20px 26px; display: flex; flex-direction: column; gap: 12px">
+  <div style="display: flex; align-items: center"><span class="en" style="color: #2ec4a0">TEAM</span><span class="r" style="font-size: 20px; margin-left: 12px">活躍した社員</span></div>
+  <div style="display: flex; align-items: center; gap: 14px">
+    <span class="r" style="width: 64px; height: 64px; border-radius: 32px; background: #1a9c7c; border: 4px solid #ffffff; box-shadow: 0 4px 10px rgba(27,35,64,.2); color: #ffffff; font-size: 26px; display: flex; align-items: center; justify-content: center">佐</span>
+    <div style="display: flex; flex-direction: column; gap: 4px"><span class="r" style="font-size: 19px">佐伯　Lv.1</span><span style="font-size: 15px; color: #52607a">記録の整理で調査を支えた</span><span class="r" style="font-size: 15px; color: #1f6fb0">抑制力 +4</span></div>
+  </div>
+  <span style="font-size: 14px; color: #7c879c">支援がなかった月は「今月は支援なし」と表示する</span>
+</div>
+
+<img src="../../Assets/Sprites/Hinata/hinata_normal.png" alt="ひなた" style="position: absolute; left: 1180px; top: 300px; width: 460px; height: 460px; animation: bob 3s ease-in-out infinite">
+<div style="position: absolute; left: 1250px; top: 180px; width: 320px; border-radius: 20px; background: #ffffff; padding: 14px 18px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(27,35,64,.2)">
+  <span class="r" style="position: absolute; left: 16px; top: -13px; background: #ff6f91; color: #ffffff; font-size: 13px; border-radius: 9px; padding: 2px 10px">ひなた</span>
+  <p style="margin: 4px 0 0; font-size: 18px; line-height: 1.55; font-weight: 700">バックアップ、入れておいて<br>本当によかったね！</p>
+</div>
+
+<div style="position: absolute; left: 40px; top: 772px; width: 1170px; display: flex; gap: 16px">
+  <button class="btn white" style="flex: 1">記録を見る</button>
+  <button class="btn navy" style="flex: 2">5月へ　▶</button>
+</div>
+</div>
+</body>
+</html>

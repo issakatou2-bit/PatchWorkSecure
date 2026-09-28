@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>設定</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;family=Zen+Kaku+Gothic+New:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.en{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:11px;letter-spacing:.32em}
+.row{display:flex;align-items:center;gap:16px;height:62px;border-radius:16px;background:#f3f6fb;padding:0 18px}
+.lab{font-family:'M PLUS Rounded 1c';font-weight:800;font-size:18px;width:150px}
+.track{position:relative;flex-grow:1;height:12px;border-radius:6px;background:#dfe5f0}
+.fill{position:absolute;left:0;top:0;height:12px;border-radius:6px;background:linear-gradient(90deg,#ff94ae,#ff6f91);box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
+.knob{position:absolute;top:-10px;width:32px;height:32px;margin-left:-16px;border-radius:16px;background:linear-gradient(180deg,#ffffff,#eef2f8);box-shadow:0 0 0 3px #ff6f91,0 4px 8px rgba(27,35,64,.25)}
+.val{font-family:'M PLUS Rounded 1c';font-weight:800;font-size:18px;width:50px;text-align:right}
+.seg{display:flex;gap:6px;background:#dfe5f0;border-radius:14px;padding:4px}
+.seg span{font-family:'M PLUS Rounded 1c';font-weight:800;font-size:16px;padding:8px 20px;border-radius:11px;color:#52607a}
+.seg .on{background:linear-gradient(180deg,#ff94ae,#f45a80);color:#ffffff;box-shadow:0 3px 0 #c9486c}
+.tog{position:relative;width:64px;height:36px;border-radius:18px}
+.tog i{position:absolute;top:4px;width:28px;height:28px;border-radius:14px;background:#ffffff;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.btn{position:relative;overflow:hidden;border:0;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:18px;height:54px;border-radius:17px;padding:0 24px}
+.white{color:#1d2a44;background:linear-gradient(180deg,#ffffff,#eef2f8);box-shadow:inset 0 2px 0 #ffffff,0 0 0 2px #dfe5ef,0 6px 0 #c3ccdc}
+@keyframes win{0%{transform:scale(.9) translateY(16px);opacity:0}70%{transform:scale(1.02)}100%{transform:none;opacity:1}}
+</style>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: #1b2340">
+<img src="../../Artifacts/CompanyOps/42-compact-planning.png" alt="" style="position: absolute; left: 0; top: 0; width: 1600px; height: 900px; filter: blur(10px) brightness(.55)">
+
+<div style="position: absolute; left: 330px; top: 50px; width: 940px; height: 800px; border-radius: 28px; background: #ffffff; box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #ffc4d3, 0 20px 50px rgba(0,0,0,.45); overflow: hidden; display: flex; flex-direction: column; animation: win .45s cubic-bezier(.2,.8,.2,1) both">
+  <div style="position: relative; height: 80px; background: linear-gradient(90deg, #ff6f91, #ff94ae); display: flex; align-items: center; padding: 0 26px; overflow: hidden; flex-shrink: 0">
+    <div style="position: absolute; right: -20px; top: 0; width: 220px; height: 80px; background: repeating-linear-gradient(-60deg, rgba(255,255,255,.18) 0 10px, transparent 10px 22px)"></div>
+    <div style="display: flex; flex-direction: column; position: relative"><span class="en" style="color: rgba(255,255,255,.85)">SETTINGS</span><span class="r" style="font-size: 26px; color: #ffffff; text-shadow: 0 2px 0 rgba(160,40,80,.35)">設定</span></div>
+    <button aria-label="閉じる" style="position: relative; margin-left: auto; width: 46px; height: 46px; border: 0; border-radius: 23px; background: #ffffff; box-shadow: 0 3px 0 #d94a70; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d94a70" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+  </div>
+  <div style="padding: 22px 30px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1">
+    <span class="en" style="color: #ff6f91">SOUND</span>
+    <div class="row"><span class="lab">BGM</span><div class="track"><div class="fill" style="width: 70%"></div><span class="knob" style="left: 70%"></span></div><span class="val">70</span></div>
+    <div class="row"><span class="lab">効果音</span><div class="track"><div class="fill" style="width: 85%"></div><span class="knob" style="left: 85%"></span></div><span class="val">85</span></div>
+    <div class="row"><span class="lab">ひなたの声</span><div class="track"><div class="fill" style="width: 60%"></div><span class="knob" style="left: 60%"></span></div><span class="val">60</span></div>
+    <span class="en" style="color: #3fa9f5; margin-top: 8px">DISPLAY</span>
+    <div class="row"><span class="lab">文字の大きさ</span><div class="seg"><span>小</span><span class="on">標準</span><span>大</span></div><span style="margin-left: auto; font-size: 16px; color: #52607a">あいうえお　ABC 123</span></div>
+    <div class="row"><span class="lab">字幕</span><div class="tog" style="background: #2ec4a0"><i style="left: 32px"></i></div><span style="font-size: 15px; color: #52607a">ひなたの声を文字でも表示</span></div>
+    <span class="en" style="color: #2ec4a0; margin-top: 8px">MOTION</span>
+    <div class="row"><span class="lab">動きを減らす</span><div class="tog" style="background: #c9d1de"><i style="left: 4px"></i></div><span style="font-size: 15px; color: #52607a">揺れ・粒子・画面の揺れを止める</span></div>
+    <div class="row"><span class="lab">演出の短縮</span><div class="tog" style="background: #2ec4a0"><i style="left: 32px"></i></div><span style="font-size: 15px; color: #52607a">2回目以降の割り込み演出を短くする</span></div>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 14px">
+      <button class="btn" style="background: transparent; color: #c23a60; font-size: 15px; padding: 0 6px; height: 40px">記録を消す…</button>
+      <button class="btn white" style="margin-left: auto; width: 220px">閉じる</button>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

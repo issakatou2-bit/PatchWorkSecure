@@ -18,11 +18,13 @@ BLOBS = {
     "553ac7d2802c35c19a04df1cdb3593c2": CUT + "pose_peace.png",
     "ffb718e7f7376e46a628aa80e882b502": CUT + "base_fullbody.png",
     "a13f4b69db6398d38d0be206ad9b0d05": "../../ArtSource/Hinata/gen-20260929/contact-sheet.png",
+    "821782da42bb0ef7c0141c6b60e9b794": "../../Assets/Art/UI/Logo/icon.png",
+    "69e55b73f0389d3731fd1b8aa79a350e": "../../Assets/Art/UI/Logo/wordmark.png",
 }
 NAMES = {
     "Main": "planning-screen", "Before": "current-planning-v0.8", "Hinata": "hinata-outfit-a", "Title": "title-screen",
     "Mission": "mission-brief", "Incident": "incident-choose", "Resolve": "incident-resolve", "Tutorial": "tutorial",
-    "Report": "monthly-report", "Annual": "annual-report", "Settings": "settings", "UIKit": "ui-kit", "HinataSheet": "hinata-sheet",
+    "Report": "monthly-report", "Annual": "annual-report", "Settings": "settings", "UIKit": "ui-kit", "HinataSheet": "hinata-sheet", "Logo": "logo",
 }
 src = Path(sys.argv[1])
 out = Path(__file__).resolve().parent.parent / "Docs" / "Mockups"

@@ -198,7 +198,7 @@ function render(){
   document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${BASE[S.m+1]}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">決算の月。ここが最後</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
   const cards=document.getElementById('cards'),acts=document.getElementById('actions');
   if(S.phase==='draft'){
-    document.getElementById('draftTitle').textContent=S.picked?'今月の施策をえらんだ':'今月の施策（1枚えらぶ）';
+    document.getElementById('draftTitle').innerHTML=S.picked?'<span style="color:#2bb673">① 施策をえらんだ</span>　→　右下の「事件に向かう」を押す':'<span style="background:#ff6f91;color:#fff;border-radius:8px;padding:2px 10px">①</span> 施策を1枚えらぶ（コインで買う）　…えらばず「見送る」もできる';
     cards.innerHTML=S.draft.map((c,k)=>{const l=lv(c.id);const combo=COMBOS.find(x=>x.need.includes(c.id)&&!x.need.every(has)&&x.need.filter(id=>id!==c.id).every(has));const eff=c.t.includes(i.kind);return `<div class="card ${S.picked||S.coins<c.cost?'cant':''}" style="animation-delay:${k*.08}s" data-k="${k}"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span><span class="cost r"><span class="coin">${c.cost}</span></span><h4 class="r">${c.name}</h4><div class="desc">${c.d}</div>${combo?`<div class="hint r">そろうと「${combo.name}」！</div>`:''}${l?`<div class="lv r">Lv${l} → Lv${l+1}</div>`:''}<div class="targets">${c.t.map(x=>`<span style="${x===i.kind?'background:#ffe3ec;color:#d23a5e;font-weight:700':''}">${x} +${c.p}</span>`).join('')}</div></div>`}).join('');
     cards.querySelectorAll('.card').forEach(el=>el.onclick=()=>pick(+el.dataset.k,el));
     acts.innerHTML=`<button id="reroll" ${S.picked||S.coins<1?'disabled':''}>引き直す（1）</button><button id="skip" ${S.picked?'disabled':''}>見送る（+1コイン）</button><div style="flex:1"></div><button class="pri" id="go">事件に向かう ▶</button>`;
@@ -206,7 +206,7 @@ function render(){
     document.getElementById('skip').onclick=()=>{S.coins+=1;S.picked=true;render()};
     document.getElementById('go').onclick=()=>{S.phase='respond';render();say(PEAK.includes(S.m)?'山場だよ！　どの対応でいく？':'どう対応する？　守りの数字を見て決めよ！','pose_think')};
   } else if(S.phase==='respond'){
-    cards.innerHTML='';document.getElementById('draftTitle').textContent='対応を選ぶ（結果は数字どおり。運ではない）';
+    cards.innerHTML='';document.getElementById('draftTitle').innerHTML='<span style="background:#1d2a44;color:#fff;border-radius:8px;padding:2px 10px">②</span> 事件への対応を1つえらぶ（カードを押す）　緑の数字なら防げる';
     const rs=responses();
     cards.innerHTML=rs.map((r,k)=>{const ok=r.total>=t,can=S.coins>=r.cost;return `<div class="card ${can?'':'cant'}" style="animation-delay:${k*.08}s" data-id="${r.id}"><h4 class="r" style="margin-top:0">${r.name}</h4>${r.cost?`<span class="cost r"><span class="coin">${r.cost}</span></span>`:'<span class="cost r" style="font-size:12px;color:var(--gray)">費用なし</span>'}<div class="r" style="font-size:14px;color:var(--gray);margin-top:10px">守り</div><div class="r" style="font-size:54px;line-height:1;color:${ok?'#2bb673':'#d23a5e'}">${r.total}<span style="font-size:18px;color:var(--gray)"> / ${t}</span></div><div class="r" style="margin-top:6px;font-size:15px;color:${ok?'#2bb673':'#d23a5e'}">${ok?'防げる':'被害 '+(t-r.total)}</div><div class="desc" style="margin-top:10px">${r.note}</div></div>`}).join('');
     cards.querySelectorAll('.card').forEach(el=>el.onclick=()=>{const r=rs.find(x=>x.id===el.dataset.id);if(S.coins>=r.cost&&S.phase==='respond'){S.phase='busy';resolve(r)}});
@@ -246,6 +246,7 @@ function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
 function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
 addEventListener('resize',fit);fit();
 newRun();
+modal(`<h2 class="r">遊び方（試作A）</h2><div style="font-size:15px;line-height:1.9">1年（12か月）で会社を守る。毎月2ステップ。<br><b>① 施策を1枚えらぶ</b>：3枚から1枚をコインで買う。持っている施策は、ずっと守りに加わる。2枚そろうと<b>コンボ</b>で大きく強くなる。<br><b>② 事件への対応をえらぶ</b>：「広く止める／範囲を絞る／復旧を急ぐ」。守りが脅威を上回れば防げる。足りない分だけ<b>信頼</b>が減る。<br>コインは毎月+3。信頼が0になると終わり。山場（6・9・12・3月）を越えると<b>社内ルール</b>がもらえる。来月の事件は右上に予告される。</div><div style="margin-top:14px"><button class="pri" onclick="closeModal()">はじめる</button></div>`);
 </script>
 </body>
 </html>

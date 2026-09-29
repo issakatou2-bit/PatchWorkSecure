@@ -62,3 +62,4 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - `Assets/Art/KeyVisual/title-kv.png`（タイトルの集合絵）、`focus-secretary.png`（秘書の主役絵）、`focus-hinata.png`（ひなたの主役絵＝`focus-hinata-14.png`）、`focus-engineer.png`（エンジニアの主役絵＝`focus-engineer-8.png`）は、ChatGPT（加藤さんのログイン済みアカウント、アプリ内ブラウザからClaude Codeが操作）で生成したもの。原画と試行の履歴は`ArtSource/Characters/ideas-20260929/`（`title-kv-1〜3`、`focus-*`）。加藤さんが4枚を本採用と判断（ひなた・エンジニアは基準の絵を添付し、範囲の編集で細部を直した版）。
 - 追加キャラ（社長秘書・金髪エンジニア）はオリジナルの設定。実在の人物・他作品のキャラの名前や画像は指示に使っていない（金髪エンジニアの方向性は加藤さんの参考作品の雰囲気を言葉で伝えただけ）。
 - 生成サービスの規約上の商用利用の可否は、販売前に確認すること。
+- `Assets/Art/UI/Bubbles/`の4PNG（困りごとの泡の青・ピンク・金と、金の点線の輪）は、`ArtSource/UI/bubbles.html`のCSS（放射グラデーション・縁・影）をClaude CodeがEdgeで背景透明のまま書き出したもの。AI画像生成・第三者素材は使っていない。

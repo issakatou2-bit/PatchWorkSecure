@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>泡の素材</title>
+<style>
+/* 計画画面の「困りごとの泡」を、モック（Docs/Mockups/planning-bubbles.html）と同じ見た目で書き出す。
+   2倍の大きさ（直径140px＋余白）で描き、背景透明のPNGに切り出す。中身のアイコンはUnity側で重ねるので描かない */
+html,body{margin:0;background:transparent}
+.cell{position:absolute;top:0;width:200px;height:200px}
+.b{position:absolute;left:30px;top:26px;width:140px;height:140px;border-radius:50%;border:6px solid rgba(255,255,255,.95);box-sizing:border-box}
+.n{background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.98) 0 14%,rgba(255,255,255,.75) 30%,rgba(210,236,255,.55) 70%,rgba(255,255,255,.9) 100%);box-shadow:0 0 0 4px #3fa9f5,0 16px 36px rgba(27,35,64,.28),inset 0 -12px 24px rgba(63,169,245,.18)}
+.c{background:radial-gradient(circle at 32% 28%,#ffffff 0 14%,rgba(255,255,255,.8) 30%,rgba(255,214,226,.7) 70%,#ffffff 100%);box-shadow:0 0 0 4px #ff6f91,0 0 0 14px rgba(255,111,145,.25),0 16px 36px rgba(27,35,64,.28)}
+.g{background:radial-gradient(circle at 32% 28%,#ffffff 0 14%,#fff4c4 35%,#ffd65a 80%,#fff2b0 100%);box-shadow:0 0 0 4px #e0a100,0 0 36px 8px rgba(255,200,40,.7),0 16px 36px rgba(27,35,64,.28)}
+.ring{position:absolute;left:12px;top:8px;width:176px;height:176px;border-radius:50%;border:6px dotted #ffc02e;box-sizing:border-box}
+</style>
+</head>
+<body>
+<div class="cell" style="left:0"><div class="b n"></div></div>
+<div class="cell" style="left:200px"><div class="b c"></div></div>
+<div class="cell" style="left:400px"><div class="b g"></div></div>
+<div class="cell" style="left:600px"><div class="ring"></div></div>
+</body>
+</html>

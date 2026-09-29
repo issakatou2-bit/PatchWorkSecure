@@ -25,7 +25,7 @@ namespace PatchWorkSecure.CompanyOps
         public OpsReactionLine[] lines = Array.Empty<OpsReactionLine>();
         public bool HasAudio => lines != null && lines.Any(l => l != null && l.clip != null);
         public OpsReactionLine Find(string id) => lines?.FirstOrDefault(l => l!=null && l.id==id);
-        public static OpsReactionLine[] Defaults() => ScriptV2().Where(l => !l.fullSpeech && !l.extra).ToArray();
+        public static OpsReactionLine[] Defaults() => ScriptV2().Where(l => !l.fullSpeech && !l.extra && !(l.id??"").StartsWith("mg_")).ToArray();
         // 台本v2の字幕・表情・ポーズ。音声が無い取得直後の環境でも同じ内容を使う。
         public static OpsReactionLine[] ScriptV2() => new[] {
             new OpsReactionLine { id="think_01", caption="う〜ん……", scene="考える", reaction=OpsReaction.Think, faceId="face_normal", poseId="pose_think", fullSpeech=false, extra=false },

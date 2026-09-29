@@ -50,7 +50,7 @@ namespace PatchWorkSecure.CompanyOps
                     var glow=pc.gameObject.AddComponent<Outline>();glow.effectColor=Hex("e0405f");glow.effectDistance=new Vector2(4,-4);glow.enabled=false;
                 }
             }
-            containmentDanger=IncidentShape(office,"MinigameDanger","vignette",0,0,900,560,new Color(.88f,.25f,.37f,.45f));
+            containmentDanger=MinigameShape(office,"MinigameDanger","danger-edge",0,0,900,560,new Color(.88f,.25f,.37f,.45f));
             MinigameVisual(containmentDanger,"danger",.8f);containmentDanger.gameObject.SetActive(false);
             game.Spread+=(from,to)=>MinigameSpreadLine(from,to);
         }
@@ -97,7 +97,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsContainmentMinigame;if(game==null||!game.Scan())return;
             MinigameTone(880);StartCoroutine(DelayedMinigameTone(1175,.08f));
-            FindMinigameText("NavigatorSpeech").text=OpsCatalog.ContainmentRoomNames[game.SelectedRoom]+"を調べたよ。3秒だけ感染が見える！";RefreshMinigameBoard();
+            FindMinigameText("NavigatorSpeech").text=CaptionsEnabled?OpsCatalog.ContainmentRoomNames[game.SelectedRoom]+"を調べたよ。3秒だけ感染が見える！":"";RefreshMinigameBoard();
         }
         private void StopMinigameRoom()
         {

@@ -26,6 +26,9 @@ namespace PatchWorkSecure.Tests
             }
             foreach(int month in OpsCatalog.PeakMonths){game.StartYear(14);game.State.month=month;game.OpenTab(0);Assert.AreEqual("peak_goal_"+(((month+3)%12)+1).ToString("00"),game.LastReactionId);}
             game.StartYear(14);game.State.budget=0;game.State.culture=100;game.State.trust=80;game.State.fatigue=0;for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;
+            // 閾値の更新後も、予算の得点加算上限200に収まる差で試験用の状態を作る。
+            for(int attempt=0;attempt<100&&(game.State.NextRankPoints<40||game.State.NextRankPoints>200);attempt++)game.State.totalLoss++;
+            Assert.That(game.State.NextRankPoints,Is.InRange(40,200));
             game.State.budget+=game.State.NextRankPoints-40;Assert.AreEqual(40,game.State.NextRankPoints);game.StopVoice();yield return new WaitForSecondsRealtime(.5f);
             Assert.AreEqual("next_rank",game.LastReactionId);Assert.IsTrue(game.State.nextRankVoicePlayed);
             var loaded=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(game.State));Assert.IsTrue(loaded.Valid());Assert.IsTrue(loaded.nextRankVoicePlayed);

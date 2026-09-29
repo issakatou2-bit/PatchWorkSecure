@@ -54,7 +54,7 @@ namespace PatchWorkSecure.CompanyOps
             DrawMinigameTools(side);
             var speech=PCard(side,"MinigameSpeech",18,268,328,86,Color.white,16);
             var outline=speech.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ffd3de");outline.effectDistance=new Vector2(2,-2);
-            PText(speech,"NavigatorSpeech","備えと判断を活かして対応しよう。",12,8,304,70,15,null,false);
+            PText(speech,"NavigatorSpeech",CaptionsEnabled?"備えと判断を活かして対応しよう。":"",12,8,304,70,15,null,false);
             Portrait(side,"NavigatorPortrait",156,344,198,210,"pose_startled");
             MinigameBrief();return true;
         }
@@ -78,7 +78,7 @@ namespace PatchWorkSecure.CompanyOps
         private string MinigameEquipment()=>"事件の前にそろえた備え\n"+
             (Minigame.Monitor?"導入済み":"未導入")+"：監視と通知 / 感染がすぐ見える\n"+
             (Minigame.Segment?"導入済み":"未導入")+"：ネットワーク分離 / 部屋をまたがない\n"+
-            (Minigame.Backup?"導入済み":"未導入")+"：分離バックアップ / 結果の復旧に反映済み";
+            (Minigame.Backup?"導入済み：分離バックアップ / 結果の復旧に反映済み":"未導入：分離バックアップ / 導入すると結果の復旧に働く");
         public void StartMinigame()
         {
             if(Minigame==null||!Minigame.Start())return;

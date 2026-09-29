@@ -131,6 +131,7 @@ namespace PatchWorkSecure.Tests
             var fixture=ContainmentFixture(false,0,true,true);game.StartYear(fixture.seed);game.State.levels[OpsCatalog.Index("inventory")]=1;game.State.levels[OpsCatalog.Index("monitor")]=1;game.State.levels[OpsCatalog.Index("segment")]=1;
             game.BeginIncident();while(game.PhasePresentationRunning)yield return null;Find<Button>("Respond_scope").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);
             Assert.IsTrue(game.MinigameActive);Assert.AreEqual(OpsPhase.Incident,game.State.phase);CheckPointer("MinigameStart");CheckPointer("MinigameDelegate");Capture("150-minigame-start");
+            StringAssert.Contains("未導入：分離バックアップ / 導入すると結果の復旧に働く",Find<TextMeshProUGUI>("MinigameEquipment").text);
             var expected=game.State.Preview("scope");Click("MinigameDelegate");yield return null;Capture("153-minigame-delegated");CheckPointer("MinigameContinue");Click("MinigameContinue");
             Assert.AreEqual(expected.loss,game.State.Latest.loss);Assert.AreEqual(expected.downtime,game.State.Latest.downtime);Assert.IsTrue(game.State.Latest.delegated);yield return WaitForResolution(game);
             game.StartYear(fixture.seed);game.State.levels[OpsCatalog.Index("inventory")]=1;game.State.levels[OpsCatalog.Index("monitor")]=1;game.State.levels[OpsCatalog.Index("segment")]=1;
@@ -157,9 +158,32 @@ namespace PatchWorkSecure.Tests
             fixture=ContainmentFixture(true);game.StartYear(fixture.seed);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
             Find<Button>("Respond_scope").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);Click("MinigameStart");session=(OpsContainmentMinigame)game.Minigame;
             yield return new WaitForSecondsRealtime(1.3f);Assert.AreEqual("",session.Finding);Assert.AreEqual(0,session.VisibleCount);Capture("157-minigame-benign-suspect");
-            Click("MinigamePC_0");game.TickMinigame(13);yield return null;Assert.IsTrue(Find<RectTransform>("MinigameDanger").gameObject.activeInHierarchy);Capture("158-minigame-danger");
+            Click("MinigamePC_0");game.TickMinigame(13);yield return null;Assert.IsTrue(Find<RectTransform>("MinigameDanger").gameObject.activeInHierarchy);AssertMinigameDangerBounds();Capture("158-minigame-danger");
             game.TickMinigame(10);yield return new WaitForSecondsRealtime(2.3f);Assert.AreEqual(Vector3.one*(900f/760f),Find<RectTransform>("MinigameCanvas").localScale,"揺れた後も画面の拡大率を保つ");Assert.AreEqual(96,session.Score);Assert.AreEqual(0,session.TotalInfected);StringAssert.Contains("感染ではありません",Find<TextMeshProUGUI>("MinigameResultDetail").text);Capture("154-minigame-benign-result");
             Click("MinigameContinue");yield return WaitForResolution(game);Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
+        [UnityTest] public IEnumerator Next5Access_消音字幕なし省演出でも操作と結果を保つ()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            var fixture=ContainmentFixture(true);game.StartYear(fixture.seed);Click("Menu");yield return null;
+            Find<Slider>("MusicVolume").value=0;Find<Slider>("SoundVolume").value=0;Find<Slider>("VoiceVolume").value=0;
+            Click("CaptionToggle");Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.4f);
+            Assert.IsTrue(game.ReducedMotion);Assert.IsFalse(game.CaptionsEnabled);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
+            Find<Button>("Respond_scope").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual("",Find<TextMeshProUGUI>("NavigatorSpeech").text);
+            Click("MinigameStart");Click("MinigameScan");Click("MinigamePC_0");yield return new WaitForSecondsRealtime(.4f);
+            Assert.AreEqual("",Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.IsFalse(game.PortraitVoicePlaying);Assert.AreEqual(Vector3.one*(900f/760f),Find<RectTransform>("MinigameCanvas").localScale);
+            game.TickMinigame(15);yield return null;
+            foreach(var mote in Object.FindObjectsByType<OpsMinigameVisual>().Where(v=>v.Kind=="mote"))Assert.AreEqual(0,mote.GetComponent<Image>().color.a);
+            Assert.IsFalse(game.GetComponents<AudioSource>().Any(a=>a.isPlaying&&a.volume>0));AssertMinigameDangerBounds();Capture("159-minigame-reduced-motion");
+            game.TickMinigame(6);yield return new WaitForSecondsRealtime(1.3f);Assert.IsFalse(game.MinigameCounting);Assert.AreEqual("96点",Find<TextMeshProUGUI>("MinigameScore").text);
+            Click("MinigameContinue");yield return WaitForResolution(game);Assert.IsTrue(game.State.Valid());Assert.AreEqual(96,game.State.Latest.EffectiveMinigameScore);LogAssert.NoUnexpectedReceived();
+        }
+        private void AssertMinigameDangerBounds()
+        {
+            Canvas.ForceUpdateCanvases();var danger=Find<OpsMinigameGraphic>("MinigameDanger");var mesh=danger.GetComponent<CanvasRenderer>().GetMesh();
+            Assert.IsNotNull(mesh);Assert.Greater(mesh.vertexCount,0);var rect=danger.rectTransform.rect;
+            foreach(var v in mesh.vertices){Assert.That(v.x,Is.InRange(rect.xMin-.01f,rect.xMax+.01f));Assert.That(v.y,Is.InRange(rect.yMin-.01f,rect.yMax+.01f));}
+            Assert.IsTrue(mesh.colors32.Any(c=>c.a==0),"内側へ透明になる発光");Assert.IsTrue(mesh.colors32.Any(c=>c.a>0),"危険の縁が描画される");
         }
         [UnityTest] public IEnumerator Next5Foundation_共通開始結果と十六行は音源なしでも進む()
         {

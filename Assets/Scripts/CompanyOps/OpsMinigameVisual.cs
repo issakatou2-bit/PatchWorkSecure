@@ -74,6 +74,11 @@ namespace PatchWorkSecure.CompanyOps
                 for(float x=r.xMin+Progress-48;x<=r.xMax;x+=48)Line(vh,new Vector2(x,r.yMin),new Vector2(x,r.yMax),1);
                 for(float y=r.yMin+Progress-48;y<=r.yMax;y+=48)Line(vh,new Vector2(r.xMin,y),new Vector2(r.xMax,y),1);
             }
+            else if(Kind=="danger-edge")
+            {
+                // 手本の内側の影。中央は透明、丸い縁から内側だけへ発光する。
+                EdgeBand(vh,r,0,20,1,.65f);EdgeBand(vh,r,20,90,.65f,0);
+            }
             else if(Kind=="line")Line(vh,From,Vector2.Lerp(From,To,Progress),4);
             else if(Kind=="slash")Line(vh,new Vector2(r.xMin,r.center.y-6),new Vector2(r.xMax,r.center.y+6),4);
             else if(Kind=="ring")
@@ -88,6 +93,26 @@ namespace PatchWorkSecure.CompanyOps
                 Line(vh,new Vector2(r.xMin+r.width*.33f,r.yMin+r.height*.17f),new Vector2(r.xMax-r.width*.33f,r.yMin+r.height*.17f),2.5f);
             }
         }
+        private static Vector2 EdgePoint(Rect r,float inset,int index)
+        {
+            int corner=index/9,step=index%9;float radius=Mathf.Max(0,22-inset);
+            var center=new Vector2(corner==0||corner==3?r.xMax-inset-radius:r.xMin+inset+radius,
+                corner<2?r.yMax-inset-radius:r.yMin+inset+radius);
+            float angle=(corner*90+step*90f/8)*Mathf.Deg2Rad;
+            return center+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*radius;
+        }
+        private void EdgeBand(VertexHelper vh,Rect r,float outer,float inner,float outerAlpha,float innerAlpha)
+        {
+            for(int i=0;i<36;i++)
+            {
+                int start=vh.currentVertCount,j=(i+1)%36;
+                EdgeVertex(vh,EdgePoint(r,outer,i),outerAlpha);EdgeVertex(vh,EdgePoint(r,outer,j),outerAlpha);
+                EdgeVertex(vh,EdgePoint(r,inner,j),innerAlpha);EdgeVertex(vh,EdgePoint(r,inner,i),innerAlpha);
+                vh.AddTriangle(start,start+1,start+2);vh.AddTriangle(start,start+2,start+3);
+            }
+        }
+        private void EdgeVertex(VertexHelper vh,Vector2 point,float alpha)
+        {var v=UIVertex.simpleVert;v.position=point;v.color=new Color(color.r,color.g,color.b,color.a*alpha);vh.AddVert(v);}
         private void Line(VertexHelper vh,Vector2 a,Vector2 b,float width)
         {
             var n=new Vector2(-(b-a).y,(b-a).x).normalized*(width*.5f);int start=vh.currentVertCount;

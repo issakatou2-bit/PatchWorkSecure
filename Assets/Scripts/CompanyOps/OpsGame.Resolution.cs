@@ -102,6 +102,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ResolutionFlow(Transform flow,List<ResolutionStep> steps,int current)
         {
+            var supportMap=screen.Find("SupportRoom");if(supportMap!=null)supportMap.gameObject.SetActive(false);
             Clear(flow);int rowIndex=0;
             for(int index=0;index<=current;index++)
             {
@@ -114,7 +115,7 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     PImage(number,"StaffFaceGlyph",PlanningArt.morale,5,3,26,26,Color.white);
                     PText(number,"StaffInitial",step.member.Substring(0,1),20,21,16,15,11,Color.white,true,true);
-                    if(index==current){var bounce=number.gameObject.AddComponent<OpsStaffBounce>();bounce.Owner=this;bounce.Member=step.member;}
+                    if(index==current){var bounce=number.gameObject.AddComponent<OpsStaffBounce>();bounce.Owner=this;bounce.Member=step.member;RoomSupportMarker(step.member);}
                 }
                 else PText(number,"StepIndex",step.missing?"?":(index+1).ToString(),0,0,36,36,16,Color.white,true,true);
                 PText(row,"StepName",step.name,64,7,378,24,17,step.missing?Color.white:PlanInk);

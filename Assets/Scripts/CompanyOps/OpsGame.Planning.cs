@@ -72,6 +72,7 @@ namespace PatchWorkSecure.CompanyOps
             PImage(stage,"OfficeArt",OfficeArt,0,0,900,900);
             PImage(stage,"StageShade",PlanningArt.stageShade,0,492,900,300);
             SeasonLayer(stage,900,792,State.month);
+            PlanningRooms(stage);
             for(int j=0;j<3;j++)
             {
                 bool installed=State.Level(j==0?"backup":j==1?"monitor":"redundancy")>0;

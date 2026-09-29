@@ -57,9 +57,9 @@ namespace PatchWorkSecure.CompanyOps
             var map=PCard(screen,"OfficeStage",24,120,600,770,Color.white,28,false);
             map.gameObject.AddComponent<Mask>().showMaskGraphic=false;
             // 確認対象の場所であり、侵害や犯人を確定した描写ではない。
-            bool desks=State.Current.kind=="leak"||State.Current.kind=="identity";
-            bool reception=State.CurrentProfile?.id=="bec";
-            bool meeting=State.Current.kind=="social"&&!reception;
+            bool desks=CurrentRoom=="office";
+            bool reception=CurrentRoom=="reception";
+            bool meeting=CurrentRoom=="meeting";
             var room=PImage(map,"OfficeArt",OfficeArt,desks?-40:reception?-450:meeting?-840:-440,desks||meeting?-140:reception?-560:-20,1500,1500,new Color(.55f,.55f,.55f,1));
             if(Application.isPlaying)room.gameObject.AddComponent<OpsRoomZoom>().Owner=this;
             var alarm=IncidentShape(map,"AffectedRoom","alarm",110,16,380,390,IncidentRed);Motion(alarm,"alarm",1.2f);

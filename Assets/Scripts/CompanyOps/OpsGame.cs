@@ -40,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
             SaveWarning = warning;
         }
         public void StartYear(int seed) { resolutionActive = false; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
-        public void OpenTab(int next) { tab = next; Render(); }
+        public void OpenTab(int next) { roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
             var previous = ReadStats();
@@ -300,13 +300,13 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Projects(RectTransform p)
         {
-            Text(p, "ProjectIntro", "設備・運用の導入と強化", 24, 78, 554, 32, 20);
+            Text(p, "ProjectIntro", roomFilter==""?"設備・運用の導入と強化":RoomName(roomFilter)+"の設備・運用", 24, 78, 554, 32, 20);
             string[] keys = { "all", "protect", "recover", "people", "operations" }, titles = { "すべて", "防御", "復旧", "組織", "運用" };
-            for (int i = 0; i < keys.Length; i++) { string key = keys[i]; Button(p, "Filter_" + key, titles[i], 24 + i * 111, 120, 103, 38, () => { filter = key; Render(); }, filter == key ? Mint : Edge); }
+            for (int i = 0; i < keys.Length; i++) { string key = keys[i]; Button(p, "Filter_" + key, titles[i], 24 + i * 111, 120, 103, 38, () => { roomFilter="";filter = key; Render(); }, filter == key ? Mint : Edge); }
             var list = Scroll(p, 24, 174, 550, 368);
             for (int i = 0; i < OpsCatalog.Projects.Length; i++)
             {
-                int index = i; var project = OpsCatalog.Projects[i]; if (filter != "all" && project.group != filter) continue;
+                int index = i; var project = OpsCatalog.Projects[i]; if (roomFilter!=""&&ProjectRoom(project.id)!=roomFilter||filter != "all" && project.group != filter) continue;
                 var card = Box(list, "Project_" + project.id, 0, 0, 532, 147, Panel, true); card.gameObject.AddComponent<LayoutElement>().preferredHeight = 147;
                 Text(card, "ProjectName", project.name + "  <color=#70B4FF>Lv." + State.levels[i] + "</color>", 16, 12, 502, 36, 21);
                 Text(card, "ProjectDescription", project.desc, 16, 51, 502, 34, 16, Muted);

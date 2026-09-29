@@ -280,14 +280,61 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void PlanningBriefDialog()
         {
-            var d=Dialog(State.Current.title,State.Current.person+"\n「"+State.Current.boss+"」\n\n"+State.Current.news,780);
-            d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta=new Vector2(748,210);
-            PText(d,"MissionTitle","社内依頼 / "+State.CurrentMission.title,32,333,748,45,22);
+            CloseDialog();
+            modal=Box(screen,"ModalBlocker",0,0,1600,900,new Color(.106f,.137f,.251f,.45f));
+            PImage(modal,"MissionBackground",PlanningArt.gradient,0,0,1600,900);PImage(modal,"MissionOfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,new Color(1,1,1,.45f));
+            Box(modal,"MissionShade",0,0,1600,900,new Color(.106f,.137f,.251f,.45f));
+            var d=PCard(modal,"MissionBrief",330,60,940,780,Color.white,28);Reveal(d);
+            var header=PCard(d,"MissionHeader",0,0,940,64,PlanPink,28,false);KitGradient(header.GetComponent<Image>(),Hex("ff94ae"),PlanPink);
+            PImage(header,"MissionLogo",PlanningArt.logoIcon,28,10,44,44);PText(header,"MissionHeading","社内依頼  "+State.Current.name,84,0,650,64,22,Color.white);
+            var deadline=PCard(header,"MissionDeadline",764,16,148,32,Color.white,12,false);PText(deadline,"MissionDeadlineText","期限：今月中",0,0,148,32,16,Coral,true,true);
+            var caller=PCard(d,"MissionCaller",32,88,72,72,PlanInk,28,false);PText(caller,"MissionRole",State.Current.person.Split('・')[0].Trim(),0,0,72,72,22,Hex("ffd23f"),true,true);
+            var quote=PCard(d,"MissionQuote",122,88,786,90,Hex("f3f6fb"),20,false);PText(quote,"MissionPerson",State.Current.person,18,8,750,22,14,PlanGray,false);
+            PText(quote,"MissionBoss","「"+State.Current.boss+"」",18,32,750,50,19,PlanInk,false);
+            PText(d,"MissionTitle",State.CurrentMission.title,32,196,876,72,34);
+            State.MissionProgress(true,out int equipDone,out int equipTotal);State.MissionProgress(false,out int fieldDone,out int fieldTotal);
+            PText(d,"MissionProgress","どちらかの道で達成  / 設備 "+equipDone+"/"+equipTotal+"  または現場 "+fieldDone+"/"+fieldTotal,32,280,876,28,15,PlanGray);
+            MissionRoute(d,true,32,322);MissionRoute(d,false,478,322);
+            PText(d,"MissionRewardsHeading","達成すると",32,548,876,26,15,PlanGray);
+            Color[] colors={Hex("fff6d6"),Hex("f0ecfb"),Hex("ffe3ec"),Hex("e3f2ff")};
+            string[] rewards={State.MissionBudgetOffer>0?"臨時予算 +"+State.MissionBudgetOffer+"万円":"旧年度：予算加算なし","経営の信頼 +3","ひなたの会話","年間評価 +45"};
+            Sprite[] icons={PlanningArt.upgrade,PlanningArt.morale,PlanningArt.listen,PlanningArt.star};
+            for(int i=0;i<4;i++)
+            {
+                var reward=PCard(d,"BriefReward"+i,32+i*222,586,210,94,colors[i],20,false);
+                if(i==0){var coin=PCard(reward,"RewardCoin",87,12,36,36,Hex("ffd23f"),28,false);PText(coin,"RewardYen","円",0,0,36,36,16,Hex("7a5a00"),true,true);}
+                else if(i==1)IncidentShape(reward,"RewardHeart","heart",87,12,36,36,PlanPurple);
+                else PImage(reward,"RewardIcon",icons[i],87,12,36,36);
+                PText(reward,"RewardCaption"+i,rewards[i],4,52,202,34,18,null,true,true);
+            }
+            PButton(d,"OpenEventBrief","題材・根拠",500,548,200,26,EventBriefDialog,new Color(1,1,1,0),PlanGray,16);
+            PButton(d,"EmployeeConsultation","社員の声",710,548,170,26,ConsultationDetails,new Color(1,1,1,0),PlanGray,16);
+            PButton(d,"CloseDialog","閉じる",32,696,286,60,CloseDialog,Hex("eef2f8"),PlanInk,20);
+            var accept=PButton(d,"AcceptMission",State.acceptedMissionMonth==State.month?"引き受け済み":"引き受ける",332,696,576,60,()=>{State.acceptedMissionMonth=State.month;Save();CloseDialog();Toast("依頼を確認 / 条件を満たして今月を進めよう",true,OpsCue.Action);},PlanPink,Color.white);Shine(accept.transform,576,60);
+            Portrait(modal,"MissionPortrait",1255,455,320,440,"pose_point");
+            var hint=PCard(modal,"MissionHint",1290,330,290,104,Color.white,20);PText(hint,"MissionHintName","ひなた",16,-13,90,26,13,PlanPink);
             State.MissionProgress(true,out int a,out int at);State.MissionProgress(false,out int b,out int bt);
-            PText(d,"MissionProgress","設備 "+a+"/"+at+"  または現場 "+b+"/"+bt+"  / 達成：信頼+3・年間+45点",32,385,748,40,19);
-            PText(d,"MissionRoutes","設備："+State.CurrentMission.equipmentRoute+"\n現場："+State.CurrentMission.fieldRoute,32,438,748,100,20,null,false);
-            Button(d,"OpenEventBrief","題材・根拠・関連知識",32,568,350,48,EventBriefDialog,Accent);
-            Button(d,"EmployeeConsultation","社員の声",410,568,350,48,ConsultationDetails,Edge);
+            string near=State.MissionReady?"もう条件を満たしてるよ！\n今月を進めると達成だね。":at-a<=bt-b?"Aの道は、あと"+(at-a)+"つ。\n費用と工数も確認しよう！":"Bの道は、あと"+(bt-b)+"つ。\n今月の工数を使って確かめよう！";
+            PText(hint,"MissionHintLine",near,16,12,258,80,17,null,false);
+        }
+        private void MissionRoute(Transform parent,bool equipment,float x,float y)
+        {
+            var mission=State.CurrentMission;Color tone=equipment?PlanBlue:PlanMint;
+            var route=PCard(parent,equipment?"MissionRouteA":"MissionRouteB",x,y,430,202,Color.white,20,false);var outline=route.gameObject.AddComponent<Outline>();outline.effectColor=tone;outline.effectDistance=new Vector2(3,-3);
+            var tag=PCard(route,"RouteLetter",14,14,32,26,tone,12,false);PText(tag,"RouteLetterText",equipment?"A":"B",0,0,32,26,14,Color.white,true,true);
+            PText(route,"RouteHeading",equipment?"設備で示す":"現場で確かめる",54,12,250,30,19);
+            State.MissionProgress(equipment,out int done,out int total);PText(route,equipment?"MissionProgressA":"MissionProgressB",done+" / "+total,322,12,94,30,15,tone,true,true);
+            string[] ids=equipment?new[]{mission.projectA,mission.projectB}:new[]{mission.actionA,mission.actionB};int row=0;
+            foreach(string id in ids.Where(s=>!string.IsNullOrEmpty(s)))
+            {
+                int index=equipment?OpsCatalog.Index(id):-1;bool complete=equipment?State.Level(id)>0:id=="audit"?State.audited:id=="listen"?State.listened:id=="map"?State.mapped:State.rested;
+                var task=PCard(route,"MissionTask"+(equipment?"A":"B")+row,14,54+row*68,402,58,complete?Hex("e3faf3"):Hex("f3f6fb"),16,false);
+                var check=PCard(task,"TaskCheck",14,16,26,26,complete?tone:Color.white,12,false);var edge=check.gameObject.AddComponent<Outline>();edge.effectColor=complete?tone:Hex("b8c1d3");edge.effectDistance=new Vector2(3,-3);
+                if(complete)IncidentShape(check,"TaskTick","check",5,5,16,16,Color.white);
+                string title=equipment?OpsCatalog.Projects[index].name+"を導入":OpsEventCatalog.ActionName(id);
+                string cost=complete?"済み":equipment?State.Cost(index)+"万円・"+State.WorkCost(index)+"工数"+(string.IsNullOrEmpty(OpsCatalog.Projects[index].requires)?"":" / 前提設備あり"):"1工数";
+                PText(task,"TaskTitle",title,52,4,336,28,16);PText(task,"TaskCost",cost,52,32,336,22,13,complete?tone:PlanGray,false);row++;
+            }
         }
         private void PlanningMenuLinks(RectTransform d)
         {

@@ -107,6 +107,8 @@ namespace PatchWorkSecure.CompanyOps
                 var stamp=PCard(mission,"MissionStamp",264,70,150,150,new Color(1,.435f,.569f,.12f),28,false);stamp.localEulerAngles=new Vector3(0,0,-8);Reveal(stamp,.12f,true);
                 IncidentShape(stamp,"StampStitch","dashed",7,7,136,136,PlanPink);PText(stamp,"StampText","達成",0,0,150,150,42,PlanPink,true,true);
                 ReportChip(mission,"MissionReward","信頼 +3",26,267,164,Hex("f0ecfb"),Hex("5a4a9a"));ReportChip(mission,"MissionPoints","年間 +45点",200,267,214,Hex("e4f3ff"),Hex("1f6fb0"));
+                if(r.missionBonus>0)PText(mission,"MissionBudgetPaid","臨時予算 +"+r.missionBonus+"万円（受領済み）",26,230,224,26,14,Hex("7a5a00"));
+                PButton(mission,"MissionConversation","ひなたの会話",26,304,388,22,MissionConversation,new Color(1,1,1,0),PlanPink,16);
             }
             else PText(mission,"MissionNoReward","報酬なし / 来月の計画に活かそう",26,260,388,48,15,PlanGray);
             var team=ReportPanel("MonthlyTeam",770,494,440,250,.12f);ReportHeading(team,"TEAM","活躍した社員",PlanMint);
@@ -126,6 +128,13 @@ namespace PatchWorkSecure.CompanyOps
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
             PButton(screen,"NextMonth",State.QuarterRewardPending?"山場クリア / 報酬を選ぶ":State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
+        }
+        private void MissionConversation()
+        {
+            string id=State.CurrentMission.projectA;
+            string[] ids={"backup","mfa","education","redundancy","automation","patch","monitor","inventory","runbook","drill","segment"};
+            string[] lines={"戻す手段を考える材料がそろったね。実際に復元できるかも確かめていこう！","ログインを守る準備が進んだね。困った社員への案内も一緒に整えよう！","相談しやすい職場に近づいたね。変だと思ったら聞けるって大切！","止まったときの選択肢が増えたね。切り替えの練習もしておこう！","仕事を分ける準備が進んだね。担当者ひとりに抱えさせないのがいいね！","更新する対象を考えられたね。影響の確認と、戻す手順も忘れずに！","気づくための準備が進んだね。見つけた後の連絡先も大切だよ！","何を守るか確認できたね。台帳も実態に合わせて育てていこう！","手順を考えられたね。誰かが休んでも引き継げると安心だね！","復元の準備が進んだね。練習の結果を手順へ戻すところまでやろう！","影響を広げない準備が進んだね。必要な業務の通信は残せるかも確認しよう！"};
+            int i=Array.IndexOf(ids,id);Dialog("ひなた / 今月の依頼を達成",i<0?"相談の条件を満たせたね。次に実際の運用でも確かめよう！":lines[i],380);
         }
         private void ReportChip(Transform p,string id,string text,float x,float y,float w,Color bg,Color fg)
         {var c=PCard(p,id,x,y,w,32,bg,16,false);PText(c,id+"Text",text,8,0,w-16,32,14,fg,true,true);}

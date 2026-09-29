@@ -35,6 +35,7 @@ namespace PatchWorkSecure.CompanyOps
         public OpsEstimate forecast;
         public bool hasClosingState;
         public int closingBudget, closingStability;
+        public int missionBonus;
     }
 
     [Serializable] public class OpsInvestmentEffect
@@ -54,6 +55,10 @@ namespace PatchWorkSecure.CompanyOps
         public bool audited, listened, mapped, rested, proposed;
         // 0は旧セーブ。新規年度だけ1にし、進行途中のルール変更を避ける。
         public int situationRules;
+        // 旧年度は0。受諾は目印のみで、達成判定を後付けで制限しない。
+        public int missionBudgetRules, missionBudgetPaid, acceptedMissionMonth=-1;
+        public const int MissionBudgetReward=1;
+        public int MissionBudgetOffer=>missionBudgetRules>0?MissionBudgetReward:0;
         public bool situationPrepared;
         public string promiseGroup = "", lastMessage = "今月は4工数あるよ。調査や対話に使う？ それとも改善計画から設備を導入する？";
         public int promiseBaseline, proposalGrant;
@@ -64,7 +69,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
         public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
@@ -259,6 +264,7 @@ namespace PatchWorkSecure.CompanyOps
                 if (completedMissions == null) completedMissions = new List<int>();
                 completedMissions.Add(month);
                 trust = Clamp(trust + 3);
+                missionBudgetPaid=MissionBudgetOffer;budget+=missionBudgetPaid;
                 Note("社内依頼「" + CurrentMission.title + "」達成。経営の信頼 +3。");
             }
             phase = OpsPhase.Incident; Note(Current.@event + "。先月までの整備と今月の確認を使って対応しよう。"); return true;
@@ -388,6 +394,7 @@ namespace PatchWorkSecure.CompanyOps
             totalLoss += result.loss; totalDowntime += result.downtime; history.Add(result); Learn(Current.lesson);
             CompleteGrowth(result);
             result.metricsAfter = ReportMetrics;
+            result.missionBonus=missionBudgetPaid;
             result.hasClosingState=true;result.closingBudget=budget;result.closingStability=stability;
             phase = OpsPhase.Review;
             Note("対応完了 / 被害 " + result.loss + "万円 / 停止 " + result.downtime + "h。");
@@ -411,12 +418,14 @@ namespace PatchWorkSecure.CompanyOps
             audited = listened = mapped = rested = proposed = false; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
             situationPrepared = false;
             ticketResolution = "";
+            missionBudgetPaid=0;
             phase = budget < 0 ? OpsPhase.Ended : OpsPhase.Planning;
             Note("月次予算 +" + income + "万円 / 維持費 -" + upkeep + "万円。今月の工数 " + capacity + "。" +
                 (situationRules > 0 ? "社内事情「" + Situation.title + "」も確認しよう。" : "")); CheckMilestones(); monthStartMetrics = ReportMetrics; return true;
         }
         public bool Valid()
         {
+            if(missionBudgetRules<0||missionBudgetRules>1||missionBudgetPaid<0||missionBudgetPaid>MissionBudgetReward||acceptedMissionMonth < -1||acceptedMissionMonth>month)return false;
             if (version != SaveVersion || situationRules < 0 || situationRules > 1 || month < 0 || month > 11 || !Enum.IsDefined(typeof(OpsPhase), phase) ||
                 budget < -500 || budget > 5000 || capacity < 0 || capacity > 8 ||
                 proposalGrant < 0 || proposalGrant > 21 || (proposalGrant != 0 && !proposed) ||

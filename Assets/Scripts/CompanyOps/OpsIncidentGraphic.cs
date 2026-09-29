@@ -12,7 +12,12 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="title-veil")
+            if(Kind=="heart")
+            {
+                var p=new[]{new Vector2(.5f,.73f),new Vector2(.35f,.94f),new Vector2(.18f,.97f),new Vector2(.04f,.83f),new Vector2(.03f,.64f),new Vector2(.17f,.4f),new Vector2(.5f,.05f),new Vector2(.83f,.4f),new Vector2(.97f,.64f),new Vector2(.96f,.83f),new Vector2(.82f,.97f),new Vector2(.65f,.94f)};
+                Polygon(vh,System.Array.ConvertAll(p,v=>new Vector2(r.xMin+v.x*w,r.yMin+v.y*h)),color);
+            }
+            else if(Kind=="title-veil")
             {
                 float[] stops={0,.34f,.62f,1};Color[] colors={new Color(.918f,.961f,1,.97f),new Color(.918f,.961f,1,.9f),new Color(1,.89f,.925f,.15f),new Color(1,.89f,.925f,0)};
                 for(int i=0;i<3;i++)Quad(vh,r.xMin+w*stops[i],r.yMin,w*(stops[i+1]-stops[i]),h,colors[i],colors[i+1]);

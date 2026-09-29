@@ -80,7 +80,7 @@ namespace PatchWorkSecure.CompanyOps
             RecordStatChanges(previous);
             Save(); Render();
             bool achieved = State.MissionCount > before;
-            Toast(achieved ? "社内依頼 達成 / 信頼 +3・年間 +45点 / 続けて状況に対応しよう" : "状況発生 / 対応方針を選択", achieved, achieved ? OpsCue.Growth : OpsCue.Alert);
+            Toast(achieved ? "社内依頼 達成 / 信頼 +3・年間 +45点"+(State.missionBudgetPaid>0?"・予算 +"+State.missionBudgetPaid+"万円":"") : "状況発生 / 対応方針を選択", achieved, achieved ? OpsCue.Growth : OpsCue.Alert);
         }
         public void Resolve(string response)
         {

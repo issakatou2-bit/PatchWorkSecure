@@ -20,3 +20,7 @@ if ($LASTEXITCODE -ne 0) { throw '育成と年間負荷の検証に失敗' }
 if ($LASTEXITCODE -ne 0) { throw 'ランダム年度のコンパイルに失敗' }
 & "$opsMono/bin/mono.exe" Artifacts/CompanyOps/EventChecks.exe
 if ($LASTEXITCODE -ne 0) { throw 'ランダム年度の検証に失敗' }
+& "$opsMono/bin/mono.exe" "$opsMono/lib/mono/4.5/csc.exe" -nologo -out:Artifacts/CompanyOps/RewardChecks.exe Assets/Scripts/CompanyOps/OpsCatalog.cs Assets/Scripts/CompanyOps/OpsEventCatalog.cs Assets/Scripts/CompanyOps/OpsState.cs Assets/Scripts/CompanyOps/OpsState.Events.cs Assets/Scripts/CompanyOps/OpsState.Growth.cs Tools/CompanyOpsRewardChecks.cs
+if ($LASTEXITCODE -ne 0) { throw '臨時予算の比較のコンパイルに失敗' }
+& "$opsMono/bin/mono.exe" Artifacts/CompanyOps/RewardChecks.exe
+if ($LASTEXITCODE -ne 0) { throw '臨時予算の比較に失敗' }

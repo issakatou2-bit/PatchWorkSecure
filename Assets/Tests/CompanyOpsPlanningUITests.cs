@@ -46,7 +46,7 @@ namespace PatchWorkSecure.Tests
             foreach(string id in new[]{"Action_audit","Action_listen","Action_map","Action_rest","OpenProjects","ConsultationDetails","AdvanceMonth","Menu"})CheckPointer(id);
             CheckText();Capture("46-approved-planning",1600,900);Capture("47-approved-planning-720",1280,720);Capture("48-approved-planning-1080",1920,1080);
             Click("ConsultationDetails");yield return null;
-            StringAssert.Contains(game.State.Current.news,Find<TextMeshProUGUI>("DialogBody").text);
+            StringAssert.Contains(game.State.Current.boss,Find<TextMeshProUGUI>("MissionBoss").text);
             CheckPointer("OpenEventBrief");CheckPointer("EmployeeConsultation");CheckText();Click("CloseDialog");yield return null;
             foreach(string id in new[]{"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"})
             {

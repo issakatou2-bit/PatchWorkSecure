@@ -12,6 +12,15 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator NextScreens2_依頼書の二経路と臨時予算は実数で一度だけ働く()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);game.ChooseAction(game.State.CurrentMission.actionA);Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);
+            Assert.AreEqual(new Vector2(330,-60),Find<RectTransform>("MissionBrief").anchoredPosition);Assert.AreEqual(new Vector2(940,780),Find<RectTransform>("MissionBrief").sizeDelta);
+            game.State.MissionProgress(false,out int b,out int bt);Assert.AreEqual(b+" / "+bt,Find<TextMeshProUGUI>("MissionProgressB").text);CheckPointer("AcceptMission");Capture("123-next-mission-brief");Click("AcceptMission");Assert.AreEqual(game.State.month,game.State.acceptedMissionMonth);
+            game.ChooseAction(game.State.CurrentMission.actionB);int money=game.State.budget;game.BeginIncident();Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);game.BeginIncident();Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);
+            game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Assert.AreEqual(1,game.State.Latest.missionBonus);Capture("123-next-mission-reward");Click("MissionConversation");yield return new WaitForSecondsRealtime(.5f);CheckPointer("CloseDialog");
+            var old=new OpsState(14);old.missionBudgetRules=0;old.Act(old.CurrentMission.actionA);old.Act(old.CurrentMission.actionB);money=old.budget;old.BeginIncident();Assert.AreEqual(money,old.budget);Assert.IsTrue(old.Valid());LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();

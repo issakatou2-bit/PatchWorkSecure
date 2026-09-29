@@ -104,7 +104,7 @@ namespace PatchWorkSecure.CompanyOps
             if(Application.isPlaying&&PortraitEntering&&screen!=null)
             {
                 outgoingScreen=screen;outgoingScreen.SetParent(null,false);
-                foreach(var child in outgoingScreen.GetComponentsInChildren<Transform>())child.name+="Outgoing";
+                foreach(var child in outgoingScreen.GetComponentsInChildren<Transform>())child.name="Outgoing_"+child.name;
                 var group=outgoingScreen.gameObject.AddComponent<CanvasGroup>();group.interactable=false;group.blocksRaycasts=false;
             }
             Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;

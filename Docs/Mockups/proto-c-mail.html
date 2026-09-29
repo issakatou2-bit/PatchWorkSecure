@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作C メールの仕分け</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作C：届くメールを「問題なし／怪しい」に仕分ける。何でも疑うと業務が遅れるので、手がかりを見て判断する */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#cfe9ff,#ffe3ec);min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 0 0 4px #dfe5ef,0 12px 30px rgba(27,35,64,.15)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#ff9ab3,var(--pink));color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 var(--pinkd)}
+.timer{flex:1;height:16px;border-radius:8px;background:#e3e8f1;overflow:hidden}.timer i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--pink));transition:width .1s linear}
+.stat{font-size:20px}
+.stack{position:absolute;left:60px;top:100px;width:760px;height:520px}
+.mail{position:absolute;inset:0;padding:26px 30px;transition:transform .35s cubic-bezier(.3,1.4,.5,1),opacity .35s}
+.mail.enter{animation:enter .4s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes enter{0%{transform:translateY(40px) scale(.95);opacity:0}100%{transform:none;opacity:1}}
+.mail.out-ok{transform:translateX(-120%) rotate(-10deg);opacity:0}
+.mail.out-bad{transform:translateX(120%) rotate(10deg);opacity:0}
+.row{display:flex;gap:10px;font-size:15px;margin:4px 0}
+.row b{width:70px;color:var(--gray);font-weight:700}
+.subject{font-size:26px;margin:14px 0 10px}
+.body{font-size:17px;line-height:1.8;background:#f6f8fc;border-radius:14px;padding:14px 18px;min-height:170px}
+.link{color:#1a6fd6;text-decoration:underline;cursor:pointer}
+.attach{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:#eef2f8;border-radius:10px;padding:6px 12px;font-size:14px}
+.status{position:absolute;left:30px;right:30px;bottom:14px;font-size:13px;color:var(--gray);height:18px}
+.hl{background:linear-gradient(transparent 55%,#ffe066 55%);font-weight:700}
+.btns{position:absolute;left:60px;top:640px;width:760px;display:flex;gap:18px}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:22px;padding:18px 20px;flex:1;color:#fff}
+button:active{transform:translateY(3px)}
+.ok{background:linear-gradient(180deg,#5fd39b,var(--green));box-shadow:0 5px 0 #1d8a55}
+.bad{background:linear-gradient(180deg,#ff7a93,var(--red));box-shadow:0 5px 0 #a82643}
+button small{display:block;font-size:13px;opacity:.9}
+.side{position:absolute;left:850px;top:100px;width:430px;height:600px;padding:18px}
+.side h3{margin:0 0 8px;font-size:17px}
+.learned{display:flex;flex-direction:column;gap:6px;max-height:250px;overflow:auto}
+.learned div{background:#fff4c4;border-radius:10px;padding:6px 10px;font-size:13px}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;margin-top:12px;min-height:60px;width:250px}
+.hin{position:absolute;right:6px;bottom:6px;height:230px;filter:drop-shadow(0 8px 14px rgba(27,35,64,.3))}
+.pop{position:absolute;z-index:21;font-size:24px;color:#fff;pointer-events:none;white-space:nowrap;text-shadow:2px 2px 0 var(--c),-2px -2px 0 var(--c),2px -2px 0 var(--c),-2px 2px 0 var(--c);animation:up 1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-12px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px)}}
+.tip{position:absolute;left:60px;top:590px;width:760px;z-index:15;background:var(--navy);color:#fff;border-radius:14px;padding:10px 16px;font-size:15px;opacity:0;transition:opacity .2s}
+.tip.on{opacity:1}
+.modal{position:absolute;inset:0;background:rgba(27,35,64,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:680px;padding:26px}
+.prep label{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 0}
+.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">メールの仕分け</div><div class="timer"><i id="timer"></i></div><div class="stat r" id="left">40</div><div class="stat r">正解 <span id="good" style="color:var(--green)">0</span></div><div class="stat r">見逃し <span id="miss" style="color:var(--red)">0</span></div><div class="stat r">止めすぎ <span id="fp" style="color:#ff8a3d">0</span></div></div>
+  <div class="stack" id="stack"></div>
+  <div class="tip" id="tip"></div>
+  <div class="btns"><button class="ok" id="okBtn">問題なし<small>← キー／開いて仕事を進める</small></button><button class="bad" id="badBtn">怪しい・報告<small>→ キー／開かずに情シスへ報告</small></button></div>
+  <div class="side panel"><h3 class="r">見つけた手がかり</h3><div class="learned" id="learned"><div style="background:#f3f6fb;color:#9aa6bd">まだない</div></div><div class="say" id="say">…</div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_magnifier.png" alt="ひなた"></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+// bad=trueは怪しいメール。tellは見分ける手がかり（研修があると本文で強調される）
+const MAILS=[
+ {bad:true,from:'総務部 システム管理',addr:'admin@nw-shoji-support.com',subj:'【至急】パスワードの有効期限が本日切れます',body:'本日中に下記から再設定しないと、<span data-t>アカウントが停止</span>されます。<br><span class="link" data-url="http://nw-shoji.login-check.xyz/reset">パスワードを再設定する</span>',tell:'差出人が社外のドメイン（nw-shoji-support.com）。リンク先も社外の別サイト'},
+ {bad:false,from:'総務 小川',addr:'ogawa@nw-shoji.co.jp',subj:'来週の避難訓練のお知らせ',body:'来週水曜の10時から避難訓練です。詳細は社内ポータルに掲載しました。<br><span class="link" data-url="https://portal.nw-shoji.co.jp/notice/1024">社内ポータルを見る</span>',tell:''},
+ {bad:true,from:'社長 加藤',addr:'kato.ceo@nw-shojii.co.jp',subj:'内密にお願いしたい振込の件',body:'商談中のため電話に出られません。<span data-t>至急、本日中</span>に下記口座へ320万円を振り込んでください。<span data-t>他の人には内密に</span>。',tell:'ドメインが nw-shoji<b>i</b>（iが1つ多い）。急がせる・内密に、は典型的な手口'},
+ {bad:false,from:'青葉印刷 営業 田中',addr:'tanaka@aoba-print.co.jp',subj:'パンフレット校正のご確認',body:'先日の校正データをお送りします。修正箇所に赤字を入れています。',att:'パンフ_校正2.pdf',tell:''},
+ {bad:true,from:'青葉印刷 経理',addr:'keiri@aoba-print.co.jp',subj:'振込先口座変更のお知らせ',body:'弊社の<span data-t>振込先口座が変更</span>になりました。今月のお支払いから下記の新口座へお願いします。',tell:'差出人は本物でも、口座変更はメールだけで信じない。いつもの連絡先へ電話で確認する'},
+ {bad:false,from:'経理 森',addr:'mori@nw-shoji.co.jp',subj:'経費精算の締め切りは25日です',body:'今月分の経費精算は25日締めです。申請は経費システムからお願いします。',tell:''},
+ {bad:true,from:'宅配便のお知らせ',addr:'info@delivery-notice.top',subj:'お荷物をお届けできませんでした',body:'ご不在のため持ち帰りました。<span class="link" data-url="http://delivery-notice.top/redeliver.apk">再配達の手続き</span>',tell:'会社のメールに届く宅配の不在通知は怪しい。リンク先がアプリ（.apk）'},
+ {bad:false,from:'制作 大野',addr:'ono@nw-shoji.co.jp',subj:'Re: 明日の打ち合わせ',body:'資料ありがとうございます。明日14時で大丈夫です。会議室Bを取っておきます。',tell:''},
+ {bad:true,from:'Microsoft 365',addr:'no-reply@micros0ft-365.com',subj:'サインインの異常を検知しました',body:'不審なサインインがありました。<span data-t>24時間以内</span>に確認しない場合、アカウントを制限します。<br><span class="link" data-url="http://micros0ft-365.com/verify">アカウントを確認</span>',tell:'micros<b>0</b>ft（oが数字の0）。本物の通知もリンクから入らず、いつもの入口から確認する'},
+ {bad:false,from:'社長 加藤',addr:'kato@nw-shoji.co.jp',subj:'月曜の朝会で話したいこと',body:'月曜の朝会で、情シスのみなさんの取り組みを紹介したいと思います。5分ほどお願いできますか。',tell:''},
+ {bad:true,from:'取引先 相田様',addr:'aida@partner-trade.co.jp',subj:'見積書の送付',body:'見積書を添付しました。<span data-t>マクロを有効にして</span>ご確認ください。',att:'見積書.xlsm',tell:'マクロを有効にさせる添付は危険。取引先でも、いつもと違う形式なら確認する'},
+ {bad:false,from:'情シス ひなた',addr:'hinata@nw-shoji.co.jp',subj:'プリンタ設定の変更について',body:'3階のプリンタを新しい機種に入れ替えました。印刷先の選び方は社内ポータルにまとめています。<br><span class="link" data-url="https://portal.nw-shoji.co.jp/it/printer">手順を見る</span>',tell:''},
+ {bad:true,from:'人事部',addr:'jinji@nw-shoji.co.jp.hr-update.net',subj:'【要回答】給与振込口座の再登録',body:'システム更新のため、<span data-t>全社員</span>の給与口座を再登録してください。<br><span class="link" data-url="http://nw-shoji.co.jp.hr-update.net/form">再登録フォーム</span>',tell:'アドレスの最後が hr-update.net。途中に会社名が入っていても、最後の部分が本当の送り主'},
+ {bad:false,from:'監視システム',addr:'alert@monitor.nw-shoji.co.jp',subj:'[定期] バックアップ完了（成功）',body:'昨夜のバックアップが正常に完了しました。所要時間 42分。',tell:''},
+];
+let G,ac,tid;
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(){G={q:shuffle(MAILS.slice()).slice(0,10),i:0,t:40,good:0,miss:0,fp:0,streak:0,train:document.getElementById('pTrain').checked,learned:[],over:false};closeModal();document.getElementById('learned').innerHTML='';show();say('届いたメールを仕分けよう！　迷ったらリンクにカーソルを当ててね','pose_magnifier');clearInterval(tid);tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/40*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100)}
+function show(){const m=G.q[G.i];const st=document.getElementById('stack');
+  const body=G.train?m.body.replace(/<span data-t>/g,'<span class="hl">'):m.body.replace(/<span data-t>/g,'<span>');
+  const addr=G.train&&m.bad&&/nw-shoji-|nw-shojii|micros0ft|hr-update|delivery|login-check/.test(m.addr+m.body)?`<span class="hl">${m.addr}</span>`:m.addr;
+  st.innerHTML=`<div class="mail panel enter" id="mail"><div class="row"><b>差出人</b>${m.from}　&lt;${addr}&gt;</div><div class="row"><b>宛先</b>あなた &lt;you@nw-shoji.co.jp&gt;</div><div class="subject r">${m.subj}</div><div class="body">${body}${m.att?`<div class="attach">添付 ${G.train&&/\.xlsm|\.apk/.test(m.att)?`<span class="hl">${m.att}</span>`:m.att}</div>`:''}</div><div class="status" id="status">${G.i+1} / ${G.q.length} 通目</div></div>`;
+  st.querySelectorAll('.link').forEach(l=>{l.onmouseenter=()=>document.getElementById('status').textContent='リンク先：'+l.dataset.url;l.onmouseleave=()=>document.getElementById('status').textContent=(G.i+1)+' / '+G.q.length+' 通目'})}
+function answer(saidBad){if(G.over)return;const m=G.q[G.i],el=document.getElementById('mail');const right=saidBad===m.bad;
+  el.classList.add(saidBad?'out-bad':'out-ok');
+  if(right){G.good++;G.streak++;beep(560*Math.pow(1.1,Math.min(G.streak,8)));pop(saidBad?'見破った！':'OK！',saidBad?'#e0405f':'#2bb673',G.streak);if(m.bad)learn(m.tell)}
+  else{G.streak=0;if(m.bad){G.miss++;beep(170,0,'sawtooth');tip('見逃し：'+m.tell);say('あっ、それ怪しいメールだった……！','pose_startled');learn(m.tell)}else{G.fp++;beep(260,0,'square');tip('止めすぎ：これは本物のメール。何でも疑うと仕事が止まる');say('それは大丈夫なメールだったみたい','pose_think')}document.getElementById('app').classList.add('shake');setTimeout(()=>document.getElementById('app').classList.remove('shake'),350)}
+  if(G.streak===4)say('その調子！　4連続正解！','pose_fists');
+  upd();setTimeout(()=>{G.i++;if(G.i>=G.q.length)finish();else show()},right?300:900)}
+function learn(t){if(!t||G.learned.includes(t))return;G.learned.push(t);const d=document.createElement('div');d.innerHTML=t;document.getElementById('learned').prepend(d)}
+function upd(){document.getElementById('good').textContent=G.good;document.getElementById('miss').textContent=G.miss;document.getElementById('fp').textContent=G.fp}
+function finish(){if(G.over)return;G.over=true;clearInterval(tid);const score=Math.max(0,G.good*10-G.miss*15-G.fp*5+Math.round(G.t));const rank=score>=95?'S':score>=75?'A':score>=50?'B':'C';
+  if(G.miss===0)chord();say(G.miss===0?'見逃しゼロ！　完璧だよ！':'見逃した手口、覚えておこうね','pose_jump');
+  setTimeout(()=>modal(`<h2 class="r">仕分け完了　評価 <span style="color:var(--pink)">${rank}</span></h2><div style="font-size:16px;line-height:1.9">正解 ${G.good}／見逃し ${G.miss}（被害につながる）／止めすぎ ${G.fp}（業務が遅れる）／残り時間 ${Math.ceil(G.t)}秒</div><div style="font-size:13px;color:var(--gray);margin:6px 0 12px">本番の事件では、見逃しが被害に、止めすぎが停止時間になる。研修を入れると手がかりが強調される。</div>${prep()}<button class="ok" id="again" style="width:100%;margin-top:10px">もう一度</button>`),600);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},700)}
+function prep(){return `<div class="prep"><label><input type="checkbox" id="pTrain" ${G&&G.train?'checked':''}>備え：気づける研修（手がかりが黄色で強調される）</label></div>`}
+function tip(t){const e=document.getElementById('tip');e.innerHTML=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600)}
+function pop(t,c,n){const d=document.createElement('div');d.className='pop r';d.textContent=t+(n>=2?' ×'+n:'');d.style.cssText='left:440px;top:260px;--c:'+c;document.getElementById('app').appendChild(d);setTimeout(()=>d.remove(),1000)}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.14,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+document.getElementById('okBtn').onclick=()=>answer(false);document.getElementById('badBtn').onclick=()=>answer(true);
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')answer(false);if(e.key==='ArrowRight')answer(true)});
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">メールの仕分け（試作）</h2><div style="font-size:15px;line-height:1.9">40秒で10通。怪しいメールを見破る。<br>・<b>問題なし</b>（←）：開いて仕事を進める<br>・<b>怪しい・報告</b>（→）：開かずに報告する<br>本物のメールまで報告すると「止めすぎ」で仕事が遅れる。リンクにカーソルを当てると行き先が下に出る。</div><div style="margin:12px 0">${prep()}</div><button class="ok" id="startBtn" style="width:100%">はじめる</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

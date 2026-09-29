@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作D 多要素認証の関所</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作D：届くログインの承認依頼を、社員の今の行動と照らして許可／拒否する。攻撃者は連打してくる（疲労攻撃） */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#1d2a44,#3b2a4a);min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 12px 30px rgba(0,0,0,.3)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#8f86ff,#6c63ff);color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 #4a42c9}
+.timer{flex:1;height:16px;border-radius:8px;background:#e3e8f1;overflow:hidden}.timer i{display:block;height:100%;background:linear-gradient(90deg,#8f86ff,var(--pink));transition:width .1s linear}
+.stat{font-size:19px}
+.staff{position:absolute;left:0;top:92px;width:400px;height:600px;padding:18px}
+.staff h3{margin:0 0 10px;font-size:17px}
+.person{display:flex;gap:10px;align-items:center;background:#f3f6fb;border-radius:14px;padding:10px 12px;margin-bottom:10px;transition:background .3s}
+.person.flash{background:#e4f6ff}
+.face{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0}
+.person .now{font-size:13px;color:var(--gray)}
+.phone{position:absolute;left:440px;top:92px;width:400px;height:640px;border-radius:44px;background:#0f172a;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.45)}
+.screen{position:absolute;inset:18px;border-radius:30px;background:linear-gradient(180deg,#eef3ff,#fff);overflow:hidden}
+.notch{position:absolute;left:50%;top:10px;width:110px;height:22px;border-radius:12px;background:#0f172a;transform:translateX(-50%)}
+.req{position:absolute;left:18px;right:18px;top:60px;padding:18px;border-radius:22px;background:#fff;box-shadow:0 10px 24px rgba(27,35,64,.18);animation:drop .35s cubic-bezier(.2,1.5,.4,1)}
+@keyframes drop{0%{transform:translateY(-60px);opacity:0}100%{transform:none;opacity:1}}
+.req h4{margin:0 0 10px;font-size:20px}
+.req .row{display:flex;justify-content:space-between;font-size:15px;padding:6px 0;border-bottom:1px dashed #e3e8f1}
+.req .row b{color:var(--gray);font-weight:700}
+.num{margin-top:12px;text-align:center;font-size:40px;letter-spacing:6px}
+.qcount{position:absolute;left:18px;right:18px;top:370px;text-align:center;font-size:14px;color:var(--gray)}
+.pbtns{position:absolute;left:18px;right:18px;bottom:26px;display:flex;gap:14px}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:22px;padding:16px;flex:1;color:#fff}
+button:active{transform:translateY(3px)}
+.deny{background:linear-gradient(180deg,#ff7a93,var(--red));box-shadow:0 5px 0 #a82643}
+.allow{background:linear-gradient(180deg,#5fd39b,var(--green));box-shadow:0 5px 0 #1d8a55}
+.side{position:absolute;left:870px;top:92px;width:410px;height:600px;padding:18px}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;min-height:60px}
+.hin{position:absolute;right:6px;bottom:6px;height:240px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35))}
+.log{font-size:13px;display:flex;flex-direction:column;gap:5px;margin-top:10px;max-height:230px;overflow:auto}
+.log div{border-radius:8px;padding:5px 8px;background:#f3f6fb}
+.pop{position:absolute;z-index:21;font-size:24px;color:#fff;pointer-events:none;white-space:nowrap;text-shadow:2px 2px 0 var(--c),-2px -2px 0 var(--c),2px -2px 0 var(--c),-2px 2px 0 var(--c);animation:up 1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-12px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px)}}
+.modal{position:absolute;inset:0;background:rgba(10,15,30,.55);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:680px;padding:26px}
+.prep label{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 0}
+.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">多要素認証の関所</div><div class="timer"><i id="timer"></i></div><div class="stat r" id="left">30</div><div class="stat r">正解 <span id="good" style="color:var(--green)">0</span></div><div class="stat r">侵入 <span id="breach" style="color:var(--red)">0</span></div><div class="stat r">足止め <span id="block" style="color:#ff8a3d">0</span></div></div>
+  <div class="staff panel"><h3 class="r">社員の今の様子</h3><div id="people"></div><div style="font-size:12px;color:var(--gray)">本人がちょうどログインしようとしているなら許可。そうでなければ誰かがパスワードを使っている。</div></div>
+  <div class="phone"><div class="screen"><div class="notch"></div><div id="req"></div><div class="qcount" id="qcount"></div><div class="pbtns"><button class="deny" id="denyBtn">拒否</button><button class="allow" id="allowBtn">許可</button></div></div></div>
+  <div class="side panel"><div class="say" id="say">…</div><div class="log" id="log"></div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_laptop.png" alt="ひなた"></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+const STAFF=[{n:'田中',c:'#3fa9f5'},{n:'森',c:'#2bb673'},{n:'大野',c:'#ff8a3d'},{n:'相田',c:'#6c63ff'}];
+const PLACES_OK=['本社（東京）','自宅（埼玉）','本社（東京）','大阪の取引先'];
+const ACTS_LOGIN=['PCを開いてログイン中','メールを開こうとしている','経費システムに入ろうとしている','会議室でノートPCを起動'];
+const ACTS_IDLE=['会議中（PCは閉じている）','昼休み','外出中','電話対応中'];
+let G,tid,ac;
+function rnd(n){return Math.floor(Math.random()*n)}
+function start(){G={t:30,good:0,breach:0,block:0,numMatch:document.getElementById('pNum').checked,over:false,cur:null,state:STAFF.map(()=>({login:false,act:ACTS_IDLE[rnd(4)]})),spamTarget:rnd(4),count:0};closeModal();document.getElementById('log').innerHTML='';renderPeople();next();say('ログインの承認が来るよ。本人がログインしてるか確かめて！','pose_laptop');clearInterval(tid);tid=setInterval(tick,100)}
+function tick(){if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/30*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()}
+function renderPeople(){document.getElementById('people').innerHTML=STAFF.map((s,i)=>`<div class="person" id="p${i}"><div class="face r" style="background:${s.c}">${s.n[0]}</div><div><div class="r">${s.n}さん</div><div class="now">${G.state[i].act}</div></div></div>`).join('')}
+function next(){
+  // 毎回だれかの行動が変わる。本物の依頼は「ログインしようとしている人」から、偽物はそれ以外の人から
+  const who=rnd(4);const st=G.state[who];const legit=Math.random()<.5;
+  G.state.forEach((s,i)=>{if(i!==who&&Math.random()<.3){s.login=false;s.act=ACTS_IDLE[rnd(4)]}});
+  let target=who,req;
+  if(legit){st.login=true;st.act=ACTS_LOGIN[rnd(4)];req={legit:true,who,place:PLACES_OK[who],time:'いま',app:['メール','経費システム','社内ポータル','ファイル共有'][rnd(4)],num:10+rnd(89)}}
+  else{target=Math.random()<.5?G.spamTarget:who;G.state[target].login=false;if(!ACTS_IDLE.includes(G.state[target].act))G.state[target].act=ACTS_IDLE[rnd(4)];
+    const foreign=Math.random()<.6;req={legit:false,who:target,place:foreign?['海外（不明）','ロシア','オランダ','シンガポール'][rnd(4)]:'本社（東京）',time:'いま',app:'メール',num:10+rnd(89)}}
+  G.cur=req;G.count++;renderPeople();const pe=document.getElementById('p'+req.who);if(pe){pe.classList.add('flash');setTimeout(()=>pe.classList.remove('flash'),600)}
+  const s=STAFF[req.who];const shown=G.numMatch?(req.legit?`画面の番号 <b class="r">${req.num}</b> と一致`:'<span style="color:var(--red)">入力された番号がない</span>'):'';
+  document.getElementById('req').innerHTML=`<div class="req"><h4 class="r">サインインを承認しますか？</h4><div class="row"><b>アカウント</b><span>${s.n}さん</span></div><div class="row"><b>場所</b><span>${req.place}</span></div><div class="row"><b>アプリ</b><span>${req.app}</span></div><div class="row"><b>時刻</b><span>${req.time}</span></div>${G.numMatch?`<div class="num r" style="font-size:16px;letter-spacing:0">${shown}</div>`:''}</div>`;
+  const spam=G.spamTarget===req.who&&!req.legit;document.getElementById('qcount').textContent=spam?'同じアカウントへの承認依頼が続いている…':'';
+}
+function answer(allow){if(G.over||!G.cur)return;const r=G.cur,s=STAFF[r.who];const right=allow===r.legit;
+  if(right){G.good++;beep(allow?620:760);pop(allow?'通した！':'弾いた！',allow?'#2bb673':'#6c63ff');log((allow?'許可':'拒否')+'：'+s.n+'さん（正解）','#e3f7ea')}
+  else if(allow){G.breach++;beep(160,0,'sawtooth');shake();say(s.n+'さんは今ログインしてない！　侵入されちゃった…','pose_startled');log('侵入：'+s.n+'さんは「'+G.state[r.who].act+'」だったのに許可','#ffe1e6');G.state[r.who].act='（パスワードの変更が必要）'}
+  else{G.block++;beep(260,0,'square');shake();say(s.n+'さん本人だったみたい。仕事が止まっちゃう','pose_think');log('足止め：'+s.n+'さん本人の依頼を拒否','#fff0dd')}
+  document.getElementById('good').textContent=G.good;document.getElementById('breach').textContent=G.breach;document.getElementById('block').textContent=G.block;
+  if(G.good===6)say('いい感じ！　本人かどうか、ちゃんと見えてるね','pose_fists');
+  G.cur=null;setTimeout(()=>{if(!G.over)next()},Math.max(250,600-G.count*20))}
+function finish(){G.over=true;clearInterval(tid);const score=Math.max(0,G.good*8-G.breach*25-G.block*6);const rank=score>=90?'S':score>=65?'A':score>=40?'B':'C';if(G.breach===0)chord();say(G.breach===0?'侵入ゼロ！　関所は守られた！':'許可する前に、本人の様子を確かめようね','pose_jump');
+  setTimeout(()=>modal(`<h2 class="r">関所の結果　評価 <span style="color:var(--pink)">${rank}</span></h2><div style="font-size:16px;line-height:1.9">正解 ${G.good}／侵入 ${G.breach}（被害）／足止め ${G.block}（業務が止まる）</div><div style="font-size:13px;color:var(--gray);margin:6px 0 12px">攻撃者はパスワードを手に入れ、承認依頼を何度も送って「うっかり許可」を待つ（疲労攻撃）。番号の一致を入れると、偽の依頼が見分けやすい。</div>${prep()}<button class="allow" id="again" style="width:100%;margin-top:10px">もう一度</button>`),600);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},700)}
+function prep(){return `<div class="prep"><label><input type="checkbox" id="pNum" ${G&&G.numMatch?'checked':''}>備え：番号の一致（本人の画面の番号を入力しないと承認できない）</label></div>`}
+function log(t,bg){const d=document.createElement('div');d.textContent=t;d.style.background=bg;document.getElementById('log').prepend(d)}
+function pop(t,c){const d=document.createElement('div');d.className='pop r';d.textContent=t;d.style.cssText='left:640px;top:300px;--c:'+c;document.getElementById('app').appendChild(d);setTimeout(()=>d.remove(),1000)}
+function shake(){const a=document.getElementById('app');a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),350)}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.14,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+document.getElementById('denyBtn').onclick=()=>answer(false);document.getElementById('allowBtn').onclick=()=>answer(true);
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')answer(false);if(e.key==='ArrowRight')answer(true)});
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">多要素認証の関所（試作）</h2><div style="font-size:15px;line-height:1.9">社員のパスワードが漏れた。攻撃者がログインの承認依頼を送ってくる。<br>左の「社員の今の様子」を見て、本人がログインしようとしているときだけ<b>許可</b>（→）、それ以外は<b>拒否</b>（←）。<br>本人を拒否すると仕事が止まる。30秒、だんだん速くなる。</div><div style="margin:12px 0">${prep()}</div><button class="allow" id="startBtn" style="width:100%">はじめる</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

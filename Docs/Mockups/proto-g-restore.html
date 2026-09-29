@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作G 復旧の順番</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作G（事件：障害・データ消失）：止まったシステムを、依存関係の順に立ち上げる。売上に直結する業務から早く戻すほど高得点 */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#1d2a44,#24394f);min-height:100vh;overflow:hidden}
+body::before{content:'';position:fixed;inset:-50%;background:repeating-linear-gradient(90deg,rgba(95,211,155,.05) 0 1px,transparent 1px 48px),repeating-linear-gradient(0deg,rgba(95,211,155,.05) 0 1px,transparent 1px 48px);animation:grid 30s linear infinite;pointer-events:none}
+@keyframes grid{to{transform:translate(48px,48px)}}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 12px 30px rgba(0,0,0,.3)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#5fd39b,var(--green));color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 #1d8a55}
+.clock{font-size:26px;background:var(--navy);color:#fff;border-radius:12px;padding:4px 14px;min-width:150px;text-align:center}
+.loss{font-size:20px}
+.map{position:absolute;left:0;top:92px;width:900px;height:654px;border-radius:22px;background:rgba(15,23,42,.75);box-shadow:0 0 0 3px #fff,0 12px 30px rgba(0,0,0,.35);overflow:hidden}
+#wires{position:absolute;inset:0;pointer-events:none}
+#wires line{stroke:rgba(159,179,214,.35);stroke-width:3;stroke-dasharray:6 6}
+#wires line.live{stroke:#5fd39b;stroke-dasharray:none;filter:drop-shadow(0 0 5px #5fd39b);animation:flow 1s linear infinite}
+#wires line.need{stroke:#ffc02e;stroke-width:4;stroke-dasharray:none;animation:needp .5s ease-in-out 3}
+@keyframes needp{50%{stroke:#fff}}
+.node{position:absolute;width:170px;height:92px;border-radius:18px;background:#2b3a55;color:#cfe0ff;padding:10px 12px;cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 5px 0 #0f172a;transition:background .25s,transform .12s}
+.node:hover{transform:translate(-50%,-52%)}
+.node h4{margin:0;font-size:16px}
+.node .sub{font-size:12px;opacity:.8;margin-top:2px}
+.node .lamp{position:absolute;right:10px;top:10px;width:14px;height:14px;border-radius:7px;background:#e0405f;box-shadow:0 0 10px #e0405f;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.35}}
+.node.biz{border:3px solid #ffc02e}
+.node.biz .money{position:absolute;left:12px;bottom:8px;font-size:12px;color:#ffe38a}
+.node.busy{background:#34507a}
+.node.busy .bar{position:absolute;left:10px;right:10px;bottom:8px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+.node.busy .bar i{display:block;height:100%;background:#7fd0ff}
+.node.up{background:linear-gradient(180deg,#5fd39b,#2bb673);color:#fff;cursor:default}
+.node.up .lamp{background:#fff;box-shadow:0 0 12px #fff;animation:none}
+.node.fail{animation:no .4s}
+@keyframes no{25%{transform:translate(-54%,-50%)}75%{transform:translate(-46%,-50%)}}
+.side{position:absolute;left:920px;top:92px;width:360px;height:654px;padding:18px}
+.side h3{margin:0 0 8px;font-size:17px}
+.crew{display:flex;gap:8px;margin-bottom:10px}.crew span{flex:1;border-radius:10px;padding:6px;text-align:center;font-size:13px;background:#e3f7ea}.crew span.work{background:#dff1ff}
+.log{font-size:13px;display:flex;flex-direction:column;gap:5px;max-height:220px;overflow:auto}.log div{border-radius:8px;padding:5px 8px;background:#f3f6fb}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;margin-top:12px;min-height:64px;width:240px}
+.hin{position:absolute;right:6px;bottom:6px;height:230px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35))}
+.ringfx{position:absolute;border-radius:24px;border:4px solid #fff;pointer-events:none;transform:translate(-50%,-50%);animation:ringfx .5s ease-out forwards;z-index:5}
+@keyframes ringfx{0%{width:170px;height:92px;opacity:1}100%{width:260px;height:170px;opacity:0}}
+.modal{position:absolute;inset:0;background:rgba(10,15,30,.55);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:700px;padding:26px}
+.prep label{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 0}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:20px;padding:14px;color:#fff;background:linear-gradient(180deg,#5fd39b,var(--green));box-shadow:0 5px 0 #1d8a55;width:100%}
+button:active{transform:translateY(3px)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">復旧の順番</div><div class="clock r" id="clock">停止 0:00</div><div style="flex:1;font-size:14px;color:var(--gray)">停電のあと、社内のシステムが全部止まった。依存するものから順に立ち上げる。</div><div class="loss r">業務の損失 <span id="loss" style="color:var(--red)">0</span> 万円</div></div>
+  <div class="map" id="map"><svg id="wires" width="900" height="654"></svg></div>
+  <div class="side panel"><h3 class="r">作業できる人</h3><div class="crew" id="crew"></div><h3 class="r">記録</h3><div class="log" id="log"></div><div class="say" id="say">…</div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_typing.png" alt="ひなた"></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+// 依存関係：needが全部動いていないと立ち上がらない。bizは止まっている間、1時間ごとに損失が出る
+const NODES=[
+ {id:'net',name:'社内ネットワーク',sub:'スイッチ・ルーター',x:450,y:90,need:[],t:1},
+ {id:'dns',name:'名前解決（DNS）',sub:'住所録のような仕組み',x:230,y:230,need:['net'],t:1},
+ {id:'auth',name:'認証サーバー',sub:'ログインの受付',x:670,y:230,need:['net'],t:2},
+ {id:'fs',name:'ファイル共有',sub:'共有フォルダ',x:120,y:400,need:['dns','auth'],t:2},
+ {id:'db',name:'データベース',sub:'受注・在庫の記録',x:450,y:380,need:['net'],t:2},
+ {id:'mail',name:'メール',sub:'社外との連絡',x:780,y:400,need:['dns','auth'],t:1,biz:2},
+ {id:'order',name:'受注システム',sub:'注文の受付',x:330,y:560,need:['db','auth','dns'],t:2,biz:6},
+ {id:'acct',name:'会計システム',sub:'請求・支払い',x:620,y:560,need:['db','auth'],t:2,biz:3},
+];
+let G,tid,ac;
+function start(){G={hour:0,loss:0,runbook:document.getElementById('pRun').checked,crew:[null,null],up:{},busy:{},over:false,fails:0};closeModal();draw();say('止まった順番じゃなくて、支えている仕組みから戻すよ！','pose_typing');document.getElementById('log').innerHTML='';clearInterval(tid);tid=setInterval(tick,1000)}
+function draw(){const m=document.getElementById('map');m.querySelectorAll('.node').forEach(e=>e.remove());
+  const w=document.getElementById('wires');w.innerHTML='';
+  for(const n of NODES)for(const d of n.need){if(!G.runbook)continue;const a=NODES.find(x=>x.id===d);const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',n.x);l.setAttribute('y2',n.y);l.dataset.k=d+'-'+n.id;w.appendChild(l)}
+  for(const n of NODES){const e=document.createElement('div');e.className='node'+(n.biz?' biz':'');e.id='n-'+n.id;e.style.left=n.x+'px';e.style.top=n.y+'px';e.innerHTML=`<span class="lamp"></span><h4 class="r">${n.name}</h4><div class="sub">${n.sub}　作業 ${n.t}時間</div>${n.biz?`<div class="money r">止まると 1時間 ${n.biz}万円</div>`:''}`;e.onclick=()=>boot(n);m.appendChild(e)}
+  crew()}
+function crew(){document.getElementById('crew').innerHTML=G.crew.map((c,i)=>`<span class="${c?'work':''}">${['ひなた','大野さん'][i]}<br><b>${c?NODES.find(n=>n.id===c).name.slice(0,6):'待機中'}</b></span>`).join('')}
+function boot(n){if(G.over||G.up[n.id]||G.busy[n.id])return;const free=G.crew.indexOf(null);if(free<0){say('二人とも作業中！　終わるまで待ってね','pose_think');beep(300,0,'square');return}
+  const miss=n.need.filter(d=>!G.up[d]);
+  if(miss.length){G.fails++;G.hour+=.5;beep(180,0,'sawtooth');const e=document.getElementById('n-'+n.id);e.classList.remove('fail');void e.offsetWidth;e.classList.add('fail');
+    const names=miss.map(d=>NODES.find(x=>x.id===d).name).join('・');log('失敗：'+n.name+'は「'+names+'」が動いていないと起動しない（30分むだに）','#ffe1e6');say(names+'が先だった……！','pose_startled');
+    // 手順書がないときは、失敗して初めてつながりが分かる
+    for(const d of miss){const a=NODES.find(x=>x.id===d);let l=document.querySelector(`#wires line[data-k="${d}-${n.id}"]`);if(!l){l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',n.x);l.setAttribute('y2',n.y);l.dataset.k=d+'-'+n.id;document.getElementById('wires').appendChild(l)}l.classList.remove('need');void l.getBBox();l.classList.add('need')}
+    render();return}
+  G.crew[free]=n.id;G.busy[n.id]={left:n.t,total:n.t,who:free};beep(520);log('開始：'+n.name+'（'+['ひなた','大野さん'][free]+'）','#dff1ff');render()}
+function tick(){if(G.over)return;G.hour+=.5;
+  for(const n of NODES)if(n.biz&&!G.up[n.id])G.loss+=n.biz*.5;
+  for(const id in G.busy){const b=G.busy[id];b.left-=.5;if(b.left<=0){G.up[id]=true;G.crew[b.who]=null;delete G.busy[id];const n=NODES.find(x=>x.id===id);up(n)}}
+  render();if(NODES.every(n=>G.up[n.id]))finish()}
+function up(n){const m=document.getElementById('map');const r=document.createElement('div');r.className='ringfx';r.style.left=n.x+'px';r.style.top=n.y+'px';m.appendChild(r);setTimeout(()=>r.remove(),520);beep(660);beep(990,.08);
+  document.querySelectorAll(`#wires line[data-k$="-${n.id}"],#wires line[data-k^="${n.id}-"]`).forEach(l=>{const [a,b]=l.dataset.k.split('-');if(G.up[a]&&G.up[b])l.classList.add('live')});
+  log('復旧：'+n.name,'#e3f7ea');if(n.biz)say(n.name+'、戻ったよ！　お客さんの注文が止まらずに済む！','pose_jump');}
+function render(){for(const n of NODES){const e=document.getElementById('n-'+n.id);e.classList.toggle('up',!!G.up[n.id]);e.classList.toggle('busy',!!G.busy[n.id]);let bar=e.querySelector('.bar');if(G.busy[n.id]){if(!bar){bar=document.createElement('div');bar.className='bar';bar.innerHTML='<i></i>';e.appendChild(bar)}bar.firstChild.style.width=((1-G.busy[n.id].left/G.busy[n.id].total)*100)+'%'}else if(bar)bar.remove()}
+  const h=Math.floor(G.hour),mi=Math.round((G.hour-h)*60);document.getElementById('clock').textContent='停止 '+h+':'+String(mi).padStart(2,'0');document.getElementById('loss').textContent=Math.round(G.loss);crew()}
+function log(t,bg){const d=document.createElement('div');d.textContent=t;d.style.background=bg;document.getElementById('log').prepend(d)}
+function finish(){G.over=true;clearInterval(tid);const score=Math.max(0,Math.min(100,Math.round(130-G.loss*2.2-G.fails*6)));const rank=score>=85?'S':score>=65?'A':score>=40?'B':'C';if(score>=65){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+  say(score>=65?'全部戻った！　順番、完璧だったね':'支えている仕組みから順に、だよ','pose_jump');
+  setTimeout(()=>modal(`<h2 class="r">復旧完了　評価 <span style="color:var(--pink)">${rank}</span>（${score}点）</h2><div style="font-size:16px;line-height:1.9">業務の停止 ${document.getElementById('clock').textContent.replace('停止 ','')}／業務の損失 ${Math.round(G.loss)}万円／順番の失敗 ${G.fails}回</div><div style="font-size:13px;color:var(--gray);margin:6px 0 12px">復旧は「売上に近いもの」を急ぎつつ、それを支える仕組み（ネットワーク→名前解決・認証→データベース）から順に戻す。手順書に依存関係を書いておくと、迷わず最短で戻せる。</div>${prep()}<button id="again" style="margin-top:10px">もう一度</button>`),600);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},700)}
+function prep(){return `<div class="prep"><label><input type="checkbox" id="pRun" ${G&&G.runbook?'checked':''}>備え：手順書（システムのつながりが最初から見える）</label></div>`}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.13,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">復旧の順番（試作・事件）</h2><div style="font-size:15px;line-height:1.9">停電のあと、社内のシステムが全部止まった。<br>システムを押すと、手の空いている人が立ち上げ始める（2人まで同時）。<br>支えている仕組みが動いていないと起動に失敗して30分むだになる。<br>黄色の枠は<b>止まっている間ずっと損失が出る業務</b>。早く戻すほど高得点。</div><div style="margin:12px 0">${prep()}</div><button id="startBtn">復旧を始める</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

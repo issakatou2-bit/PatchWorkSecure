@@ -19,6 +19,13 @@ namespace PatchWorkSecure.EditorTools
             if(palette==null) {palette=ScriptableObject.CreateInstance<OpsPlanningArt>();AssetDatabase.CreateAsset(palette,path);}
             foreach(var field in typeof(OpsPlanningArt).GetFields(BindingFlags.Public|BindingFlags.Instance))
             {
+                if(field.Name.StartsWith("bubble"))
+                {
+                    string suffix=field.Name=="bubbleNormal"?"normal":field.Name=="bubbleConsult"?"consult":field.Name=="bubbleRare"?"rare":"rare-ring";
+                    var bubble=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/UI/Bubbles/bubble-"+suffix+".png");
+                    if(bubble==null)throw new InvalidOperationException("泡素材未インポート："+suffix);
+                    field.SetValue(palette,bubble);continue;
+                }
                 if(field.Name=="titleKeyVisual")
                 {
                     const string kvPath="Assets/Art/KeyVisual/title-kv.png";

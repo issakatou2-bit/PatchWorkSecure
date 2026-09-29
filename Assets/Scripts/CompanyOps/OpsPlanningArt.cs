@@ -9,5 +9,6 @@ namespace PatchWorkSecure.CompanyOps
         public Sprite officeBlur, gradient, stageShade, shine, ribbon, tail, petal, snow, hinataShadow;
         public Sprite audit, listen, map, rest, upgrade, menu, tool, star, starMuted, morale, markerBubble;
         public Sprite logoIcon, logoWordmark, titleKeyVisual;
+        public Sprite bubbleNormal, bubbleConsult, bubbleRare, bubbleRareRing;
     }
 }

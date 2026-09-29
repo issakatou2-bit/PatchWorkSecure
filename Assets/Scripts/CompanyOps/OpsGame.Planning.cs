@@ -138,10 +138,11 @@ namespace PatchWorkSecure.CompanyOps
                 Vector2 position=BubblePosition(kind,index);
                 var b=PButton(stage,"OfficeBubble"+i,"",position.x,position.y,70,70,()=>PopOfficeBubble(index),new Color(1,1,1,.9f),tint,28);
                 b.GetComponent<Image>().sprite=PlanningArt.round28;b.GetComponent<Image>().color=new Color(1,1,1,.01f);
-                IncidentShape(b.transform,"BubbleGlass","bubble-glass",0,0,70,70,tint);
+                // 素材200px中の泡は直径140px。100pxで表示して操作範囲70pxと揃える。
+                PImage(b.transform,"BubbleGlass",kind==7?PlanningArt.bubbleRare:kind==6?PlanningArt.bubbleConsult:PlanningArt.bubbleNormal,-15,-15,100,100);
                 IncidentShape(b.transform,"BubbleIcon","bubble-icon",20,20,30,30,tint).GetComponent<OpsIncidentGraphic>().Offset=kind;
                 var tag=PCard(b.transform,"BubbleTag",-28,74,126,22,tint,12,false);PText(tag,"BubbleName",OpsCatalog.BubbleNames[kind],0,0,126,22,12,Color.white,true,true);
-                if(kind==7){var ring=IncidentShape(b.transform,"BubbleRareRing","bubble-ring",-9,-9,88,88,Hex("ffc02e"));ring.pivot=new Vector2(.5f,.5f);ring.anchoredPosition+=new Vector2(44,-44);Motion(ring,"rotate",6);}
+                if(kind==7){var ring=PImage(b.transform,"BubbleRareRing",PlanningArt.bubbleRareRing,-15,-15,100,100);ring.pivot=new Vector2(.5f,.5f);ring.anchoredPosition+=new Vector2(50,-50);Motion(ring,"rotate",6);}
                 var motion=b.gameObject.AddComponent<OpsBubbleMotion>();motion.Owner=this;motion.ArrivalAt=bubbleArrivalAt+i*.6f;
             }
             if(State.clueCollected)BubbleClue(stage,false);

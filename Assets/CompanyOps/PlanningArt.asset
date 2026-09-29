@@ -46,3 +46,4 @@ MonoBehaviour:
   bubbleConsult: {fileID: 1378210057481052027, guid: 7a12e61f1a8c61f4090bf310c7fe046b, type: 3}
   bubbleRare: {fileID: -427348944157872813, guid: 080029fbe646a214eb518f08729e0b24, type: 3}
   bubbleRareRing: {fileID: -1187470166, guid: e4a0fc01e145c3a4aa3d9b41dc1d165e, type: 3}
+  ribbonSlant: {fileID: 8106806523781951414, guid: b75cb45374c8cc54098e07be0ae0eec5, type: 3}

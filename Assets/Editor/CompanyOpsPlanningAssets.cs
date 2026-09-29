@@ -19,6 +19,11 @@ namespace PatchWorkSecure.EditorTools
             if(palette==null) {palette=ScriptableObject.CreateInstance<OpsPlanningArt>();AssetDatabase.CreateAsset(palette,path);}
             foreach(var field in typeof(OpsPlanningArt).GetFields(BindingFlags.Public|BindingFlags.Instance))
             {
+                if(field.Name=="ribbonSlant")
+                {
+                    var ribbon=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/UI/Craft/ribbon-slant.png");
+                    if(ribbon==null)throw new InvalidOperationException("斜め帯素材がありません。");field.SetValue(palette,ribbon);continue;
+                }
                 if(field.Name.StartsWith("bubble"))
                 {
                     string suffix=field.Name=="bubbleNormal"?"normal":field.Name=="bubbleConsult"?"consult":field.Name=="bubbleRare"?"rare":"rare-ring";

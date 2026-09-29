@@ -33,6 +33,12 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [UnityTest] public IEnumerator Polish4_14_副題帯は単色ピンクの斜め切り素材になる()
+        {
+            yield return PolishTitle();var game=Object.FindAnyObjectByType<OpsGame>();var ribbon=Find<Image>("TitleRibbon");Assert.AreSame(game.PlanningArt.ribbonSlant,ribbon.sprite);Assert.IsNotNull(ribbon.sprite);
+            Assert.IsNull(ribbon.GetComponent<OpsIncidentGraphic>());ColorUtility.TryParseHtmlString("#ff6f91",out var pink);Assert.AreEqual(pink,ribbon.color);Assert.AreEqual(new Vector2(570,44),ribbon.rectTransform.sizeDelta);
+            Assert.IsFalse(Find<TextMeshProUGUI>("TitleSubtitle").isTextOverflowing);PolishCapture(14);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_13_ロゴの最終角度はCSSのマイナス二度と一致する()
         {
             yield return PolishTitle();var brand=Find<RectTransform>("TitleBrand");Assert.AreEqual(2,Mathf.DeltaAngle(0,brand.localEulerAngles.z),.01f);

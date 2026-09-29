@@ -22,7 +22,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(brand,"TitlePinkShadow","情シスの一年",76,264,620,60,46,PlanPink);
             PText(brand,"TitleWhiteShadow","情シスの一年",73,261,620,60,46,Color.white);
             PText(brand,"Title","情シスの一年",70,258,620,60,46);
-            var ribbon=IncidentShape(brand,"TitleRibbon","cutin",70,326,570,44,PlanPink);
+            var ribbon=PImage(brand,"TitleRibbon",PlanningArt.ribbonSlant,70,326,570,44,PlanPink);
             PText(ribbon,"TitleSubtitle","会社を守る、12か月の育成シミュレーション",18,0,530,44,20,Color.white);
             var start=PButton(screen,"NewYear","ニューゲーム",90,450,460,76,ConfirmNewYear,PlanPink,Color.white);Shine(start.transform,460,76);
             TitleButtonStyle(start,true);

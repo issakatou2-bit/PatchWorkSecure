@@ -94,7 +94,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。旧画像は`ArtSource/Hinata/legacy/`。基本ポーズ`pose_fists`は4素材の目口差分、他17ポーズは1枚絵で動く。移動・拡縮・回転を減らしてもまばたきは残る。来歴は`Docs/Hinata-Replacement-2026-09-29.md`と`Docs/Reference-Asset-Provenance.md`。学生服は不可。ボイス台本は`Docs/Voice/`。
 - 音：SEは加藤さんの試聴後の指定でB-brightの11音を試遊用に登録（`Docs/Sfx-Candidates-2026-09-29.md`）。A案は未投入。BGMはGemini / Lyriaの生成2曲。**声はElevenLabsの「Hinata V9-2」に決定**し、台本v2の105本を生成済み（無料プランの試遊用、gitの追跡対象外。組み込みは`Docs/Voice/Integration.md`）。目・口の差分は`NavigatorPersona.AnimationFrames`で設定する。
-- **総合評価（9/29）：`Docs/Evaluation-2026-09-29.md`**。見た目・キャラは良いが、判断が浅い（限定が85〜90%、迷える選択肢が平均1.2〜1.5）、ほぼ全方針で完走、1年で終わる。Steamの予測は今のままで好評率60〜70%。改善の優先順位とUIの不具合4件を記載。追加キャラの案は`Docs/Characters-Ideas.md`（本格着手は後）。
+- **総合評価（9/29）：`Docs/Evaluation-2026-09-29.md`**。見た目・キャラは良いが、判断が浅い（限定が85〜90%、迷える選択肢が平均1.2〜1.5）、ほぼ全方針で完走、1年で終わる。Steamの予測は今のままで好評率60〜70%。改善の優先順位とUIの不具合4件を記載。追加キャラの案は`Docs/Characters-Ideas.md`（ひなた・秘書・金髪エンジニアの3人に絞った。本格着手は後）。困りごとの泡（ワンタッチで解決、小さな報酬、稀にレア）の案は`Docs/Ideas-Office-Bubbles.md`（未承認）。
 - UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
 
 ## 7. 次にやること（優先順）

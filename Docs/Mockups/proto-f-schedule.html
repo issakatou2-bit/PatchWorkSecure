@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作F 更新の時間割</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作F（日常の「優先順位」）：今週の夜の保守時間に、更新作業を入れる。止められない業務と期限を避けて組む */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e;--violet:#6c63ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#dfe4ff,#ffe3ec);min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 0 0 4px #dfe5ef,0 12px 30px rgba(27,35,64,.15)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#8f86ff,var(--violet));color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 #4a42c9}
+.timer{flex:1;height:16px;border-radius:8px;background:#e3e8f1;overflow:hidden}.timer i{display:block;height:100%;background:linear-gradient(90deg,#8f86ff,var(--pink));transition:width .1s linear}
+.stat{font-size:19px}
+/* 夜空の時間割。夜の保守時間らしく紺の地に星 */
+.board{position:absolute;left:0;top:92px;width:900px;height:470px;padding:16px 18px;background:linear-gradient(180deg,#1d2a44,#2b2f5e);border-radius:22px;box-shadow:0 0 0 3px #fff,0 12px 30px rgba(27,35,64,.3);overflow:hidden}
+.board::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 20% 12%,#fff 50%,transparent),radial-gradient(1px 1px at 70% 8%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 88% 20%,#fff 50%,transparent),radial-gradient(1px 1px at 40% 5%,#fff 50%,transparent);opacity:.6;pointer-events:none}
+.grid{position:relative;display:grid;grid-template-columns:70px repeat(7,1fr);grid-template-rows:40px repeat(4,1fr);gap:6px;height:100%}
+.hd{color:#cfe0ff;font-size:15px;display:flex;align-items:center;justify-content:center}
+.hr{color:#9fb3d6;font-size:12px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.cell{border-radius:12px;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.18);position:relative;cursor:pointer;transition:background .15s}
+.cell.ok{background:rgba(95,211,155,.28);border-color:#5fd39b}
+.cell.ng{background:rgba(224,64,95,.3);border-color:#ff7a93}
+.cell.lock{background:repeating-linear-gradient(-45deg,rgba(255,192,46,.28) 0 8px,rgba(255,192,46,.12) 8px 16px);border:2px solid rgba(255,192,46,.6);cursor:not-allowed}
+.cell.lock span{position:absolute;inset:4px;color:#ffe38a;font-size:11px;line-height:1.3;display:flex;align-items:center;justify-content:center;text-align:center}
+.cell .blk{position:absolute;left:0;right:0;top:0;border-radius:10px;color:#fff;font-size:12px;padding:6px;z-index:2;box-shadow:0 4px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35);animation:place .3s cubic-bezier(.2,1.6,.4,1)}
+@keyframes place{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
+.dead{position:absolute;top:34px;bottom:0;width:3px;background:#ff7a93;box-shadow:0 0 8px #ff7a93;z-index:3;pointer-events:none}
+.dead span{position:absolute;top:-24px;left:-30px;width:64px;text-align:center;font-size:11px;color:#fff;background:#e0405f;border-radius:6px;padding:1px 0}
+.tray{position:absolute;left:0;top:576px;width:900px;height:170px;padding:14px 16px;display:flex;gap:12px;align-items:stretch}
+.task{flex:1;border-radius:16px;padding:10px 12px;color:#fff;cursor:pointer;position:relative;box-shadow:0 5px 0 rgba(0,0,0,.2);transition:transform .15s}
+.task:hover{transform:translateY(-4px)}
+.task.sel{transform:translateY(-8px);box-shadow:0 0 0 4px #fff,0 0 0 7px var(--gold),0 10px 20px rgba(0,0,0,.25)}
+.task.done{opacity:.35;cursor:default;transform:none}
+.task h4{margin:0 0 4px;font-size:15px;padding-right:44px}
+.task .len{position:absolute;right:10px;top:8px;display:flex;gap:3px}.task .len i{width:10px;height:18px;border-radius:3px;background:rgba(255,255,255,.85)}
+.task .rule{font-size:12px;line-height:1.45;opacity:.95}
+.side{position:absolute;left:920px;top:92px;width:360px;height:654px;padding:18px}
+.side h3{margin:0 0 8px;font-size:17px}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;min-height:64px;width:250px}
+.hin{position:absolute;right:6px;bottom:80px;height:230px;filter:drop-shadow(0 8px 14px rgba(27,35,64,.3))}
+.check{font-size:13px;display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.check div{border-radius:8px;padding:5px 8px;background:#f3f6fb}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:20px;padding:14px;color:#fff;background:linear-gradient(180deg,#8f86ff,var(--violet));box-shadow:0 5px 0 #4a42c9;width:100%}
+button:active{transform:translateY(3px)}
+.fin{position:absolute;left:18px;right:18px;bottom:18px}
+.pop{position:absolute;z-index:21;font-size:20px;color:#fff;pointer-events:none;white-space:nowrap;text-shadow:2px 2px 0 var(--c),-2px -2px 0 var(--c),2px -2px 0 var(--c),-2px 2px 0 var(--c);animation:up 1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-12px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-60px)}}
+.modal{position:absolute;inset:0;background:rgba(27,35,64,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:700px;padding:26px}
+.prep label{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 0}
+.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">更新の時間割</div><div class="timer"><i id="timer"></i></div><div class="stat r" id="left">60</div><div class="stat r">配置 <span id="placed">0</span> / <span id="ntask">6</span></div></div>
+  <div class="board"><div class="grid" id="grid"></div></div>
+  <div class="tray panel" id="tray"></div>
+  <div class="side panel"><h3 class="r">今週のルール</h3><div class="check" id="check"></div><div class="say" id="say" style="margin-top:12px">…</div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_think.png" alt="ひなた"><div class="fin"><button id="finBtn">この時間割で決定</button></div></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+const DAYS=['月','火','水','木','金','土','日'],SLOTS=['22時','0時','2時','4時'];
+// 止められない業務（この時間は作業できない）
+const LOCKS=[{d:2,s:0,t:'給与の計算'},{d:2,s:1,t:'給与の計算'},{d:4,s:0,t:'在宅の夜間作業'},{d:5,s:2,t:'バックアップ'},{d:5,s:3,t:'バックアップ'}];
+function tasksFor(auto){return [
+ {id:'vpn',name:'公開VPN機器の緊急修正',len:2,col:'#e0405f',rule:'悪用が確認されている。<b>火曜のうち</b>に',deadline:1,val:30},
+ {id:'web',name:'Webサーバーの更新',len:2,col:'#ff8a3d',rule:'木曜までに',deadline:3,val:15},
+ {id:'pc',name:'社員PCの月例更新',len:auto?1:3,col:'#3fa9f5',rule:'今週中に'+(auto?'（自動化で短縮）':''),deadline:6,val:15},
+ {id:'keihi',name:'経費システムの更新',len:1,col:'#2bb673',rule:'<b>給与の計算の前後の日</b>（火・水・木）は避ける',avoid:[1,2,3],val:10},
+ {id:'fs',name:'ファイルサーバーの再起動',len:1,col:'#6c63ff',rule:'いつでも',val:5},
+ {id:'restore',name:'復元テスト',len:2,col:'#e0a100',rule:'土曜の<b>バックアップの後</b>に',after:[5,4],val:15},
+]}
+let G,tid,ac;
+function start(){G={t:60,auto:document.getElementById('pAuto').checked,sel:null,place:{},over:false};G.tasks=tasksFor(G.auto);closeModal();render();say('今週の夜の保守時間に、更新を入れよう。赤い線が期限だよ','pose_think');clearInterval(tid);tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/60*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100)}
+function locked(d,s){return LOCKS.find(l=>l.d===d&&l.s===s)}
+function occupied(d,s,except){for(const id in G.place){if(id===except)continue;const p=G.place[id],t=G.tasks.find(x=>x.id===id);if(p.d===d&&s>=p.s&&s<p.s+t.len)return id}return null}
+function fits(t,d,s){if(s+t.len>4)return 'その夜のうちに終わらない';for(let k=0;k<t.len;k++){if(locked(d,s+k))return '止められない業務と重なる';if(occupied(d,s+k,t.id))return 'ほかの作業と重なる'}return ''}
+function breaks(t,p){const out=[];if(t.deadline!==undefined&&p.d>t.deadline)out.push('期限に遅れる');if(t.avoid&&t.avoid.includes(p.d))out.push('給与の計算に響く');if(t.after&&(p.d<t.after[0]||(p.d===t.after[0]&&p.s<t.after[1])))out.push('バックアップの前に復元を試している');return out}
+function render(){
+  const g=document.getElementById('grid');let h='<div></div>'+DAYS.map((d,i)=>`<div class="hd r">${d}</div>`).join('');
+  for(let s=0;s<4;s++){h+=`<div class="hr r">${SLOTS[s]}</div>`;for(let d=0;d<7;d++){const l=locked(d,s);h+=`<div class="cell ${l?'lock':''}" data-d="${d}" data-s="${s}">${l?`<span class="r">${l.t}</span>`:''}</div>`}}
+  g.innerHTML=h;
+  // 置いた作業のブロック
+  for(const id in G.place){const p=G.place[id],t=G.tasks.find(x=>x.id===id);const c=g.querySelector(`.cell[data-d="${p.d}"][data-s="${p.s}"]`);const bad=breaks(t,p).length;const b=document.createElement('div');b.className='blk r';b.style.background=bad?'repeating-linear-gradient(-45deg,'+t.col+' 0 8px,#9aa6bd 8px 16px)':t.col;b.style.height='calc('+(t.len*100)+'% + '+((t.len-1)*6)+'px)';b.innerHTML=t.name+(bad?'<br>！条件に反する':'');b.onclick=e=>{e.stopPropagation();delete G.place[id];beep(300);render()};c.appendChild(b)}
+  // 期限の線（選んだ作業の期限）
+  const sel=G.sel&&G.tasks.find(x=>x.id===G.sel);
+  if(sel&&sel.deadline!==undefined&&sel.deadline<6){const gr=g.getBoundingClientRect(),cells=g.querySelectorAll('.cell[data-s="0"]'),c=cells[sel.deadline].getBoundingClientRect(),s=document.getElementById('app').getBoundingClientRect().width/1280;const x=(c.right-gr.left)/s+3;const ln=document.createElement('div');ln.className='dead';ln.style.left=x+'px';ln.innerHTML='<span class="r">期限</span>';g.appendChild(ln)}
+  g.querySelectorAll('.cell').forEach(c=>{const d=+c.dataset.d,s=+c.dataset.s;c.onmouseenter=()=>hover(d,s,true);c.onmouseleave=()=>hover(d,s,false);c.onclick=()=>drop(d,s)});
+  document.getElementById('tray').innerHTML=G.tasks.map(t=>`<div class="task ${G.sel===t.id?'sel':''} ${G.place[t.id]?'done':''}" data-id="${t.id}" style="background:linear-gradient(180deg,${t.col}dd,${t.col})"><div class="len">${'<i></i>'.repeat(t.len)}</div><h4 class="r">${t.name}</h4><div class="rule">${t.rule}</div></div>`).join('');
+  document.querySelectorAll('.task').forEach(el=>el.onclick=()=>{const id=el.dataset.id;if(G.place[id])return;G.sel=G.sel===id?null:id;beep(520);render()});
+  document.getElementById('placed').textContent=Object.keys(G.place).length;
+  document.getElementById('check').innerHTML=G.tasks.map(t=>{const p=G.place[t.id];const b=p?breaks(t,p):[];return `<div style="background:${!p?'#f3f6fb':b.length?'#ffe1e6':'#e3f7ea'}">${p?(b.length?'！ ':'○ '):'・'}${t.name}${b.length?'：'+b.join('・'):''}</div>`}).join('');
+}
+function hover(d,s,on){if(!G.sel)return;const t=G.tasks.find(x=>x.id===G.sel);const why=fits(t,d,s);for(let k=0;k<t.len&&s+k<4;k++){const c=document.querySelector(`.cell[data-d="${d}"][data-s="${s+k}"]`);if(c&&!c.classList.contains('lock')){c.classList.toggle(why?'ng':'ok',on);if(!on)c.classList.remove('ok','ng')}}}
+function drop(d,s){if(!G.sel||G.over)return;const t=G.tasks.find(x=>x.id===G.sel);const why=fits(t,d,s);if(why){beep(200,0,'square');say(why+'よ','pose_startled');const a=document.getElementById('app');a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),350);return}
+  G.place[t.id]={d,s};G.sel=null;const b=breaks(t,{d,s});if(b.length){beep(330,0,'triangle');say('置けたけど、'+b[0]+'みたい','pose_think')}else{beep(660);beep(990,.07);say(['いい場所！','ばっちり！','それなら業務も止まらないね'][Math.floor(Math.random()*3)],'pose_fists')}render();
+  if(Object.keys(G.place).length===G.tasks.length&&G.tasks.every(x=>!breaks(x,G.place[x.id]).length)){say('全部きれいに入った！　決定しよう！','pose_jump');chord()}}
+function finish(){if(G.over)return;G.over=true;clearInterval(tid);let score=0,miss=[];for(const t of G.tasks){const p=G.place[t.id];if(!p){miss.push(t.name+'：入れていない'+(t.id==='vpn'?'（悪用されている穴が開いたまま）':''));if(t.id==='vpn')score-=20;continue}const b=breaks(t,p);if(b.length){score+=Math.round(t.val*.3);miss.push(t.name+'：'+b.join('・'))}else score+=t.val}
+  score=Math.max(0,Math.min(100,score+Math.round(G.t/6)));const rank=score>=90?'S':score>=70?'A':score>=45?'B':'C';if(score>=70)chord();say(score>=70?'業務を止めずに、ちゃんと守れる時間割！':'期限と止められない業務、両方見ようね','pose_jump');
+  setTimeout(()=>modal(`<h2 class="r">時間割の結果　評価 <span style="color:var(--pink)">${rank}</span>（${score}点）</h2><div style="font-size:15px;line-height:1.8">${miss.length?miss.map(m=>'・'+m).join('<br>'):'すべての更新を、期限内に、業務を止めずに入れられた。'}</div><div style="font-size:13px;color:var(--gray);margin:8px 0 12px">更新は「全部すぐ」ではなく、危険度・期限・止められない業務を見て順番を決める。緊急の穴は最優先、復元テストはバックアップの後。うまく組めるほど経営の信頼が上がる。</div>${prep()}<button id="again" style="margin-top:10px">もう一度</button>`),500);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},600)}
+function prep(){return `<div class="prep"><label><input type="checkbox" id="pAuto" ${G&&G.auto?'checked':''}>備え：作業の自動化（社員PCの更新が1コマで済む）</label></div>`}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.13,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+document.getElementById('finBtn').onclick=()=>finish();
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">更新の時間割（試作・日常業務）</h2><div style="font-size:15px;line-height:1.9">今週の<b>夜の保守時間</b>（22時〜6時）に、更新作業を入れる。<br>①下の作業を押して選ぶ　②時間割のマスを押して置く（置いた作業を押すと外せる）<br>黄色の斜線は<b>止められない業務</b>。各作業の期限・条件を守るほど高得点。60秒。</div><div style="margin:12px 0">${prep()}</div><button id="startBtn">組みはじめる</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

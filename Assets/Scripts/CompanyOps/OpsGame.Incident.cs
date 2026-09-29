@@ -65,7 +65,9 @@ namespace PatchWorkSecure.CompanyOps
             bool meeting=CurrentRoom=="meeting";
             var room=PImage(map,"OfficeArt",OfficeArt,desks?-40:reception?-450:meeting?-840:-440,desks||meeting?-140:reception?-560:-20,1500,1500,new Color(.55f,.55f,.55f,1));
             if(Application.isPlaying)room.gameObject.AddComponent<OpsRoomZoom>().Owner=this;
-            var alarm=IncidentShape(map,"AffectedRoom","alarm",110,16,380,390,IncidentRed);Motion(alarm,"alarm",1.2f);
+            // 把握カードの下に確認対象の枠を収める。下端と対象の横幅は保ち、上端の飾りだけを下げる。
+            float alarmTop=State.decisionDepthRules>0?128:16;
+            var alarm=IncidentShape(map,"AffectedRoom","alarm",110,alarmTop,380,406-alarmTop,IncidentRed);Motion(alarm,"alarm",1.2f);
             var mark=PButton(map,"IncidentLocation","!",270,150,64,64,IncidentEvidence,IncidentRed,Color.white,28);
             mark.GetComponent<Image>().sprite=PlanningArt.markerBubble;Border(mark,Color.white,4);
             mark.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=38;Motion((RectTransform)mark.transform,"pop",1.6f);
@@ -82,14 +84,13 @@ namespace PatchWorkSecure.CompanyOps
             var right=Rect(screen,"DecisionPanel",648,120,928,770);IncidentComparison(right);
             if(State.decisionDepthRules>0)
             {
-                // 赤枠左端110pxまでの余白へ集約。確認対象の部屋の位置・大きさは変えない。
-                var time=PCard(map,"IncidentTimeBadge",18,18,90,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
-                PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,90,32,14,Color.white,true,true);
-                var knowButton=PButton(map,"KnowledgeCard","",18,64,90,132,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
-                PText(know,"KnowledgeTitle","状況の把握",6,6,78,26,14,PlanInk,true,true);
-                PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,6,34,78,26,15,PlanInk,true,true);
-                for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,8+i*20,68,14,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
-                PText(know,"KnowledgeHow","調べる・監視\n台帳・相談の泡",6,88,78,36,11,PlanGray,false,true);
+                var time=PCard(map,"IncidentTimeBadge",270,18,148,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
+                PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,148,32,14,Color.white,true,true);
+                var knowButton=PButton(map,"KnowledgeCard","",18,18,238,92,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
+                PText(know,"KnowledgeTitle","状況の把握",12,8,116,26,15);
+                PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,146,8,80,26,15,PlanInk,true,true);
+                for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,12+i*54,42,46,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
+                var how=PText(know,"KnowledgeHow","調べる・監視・台帳・相談の泡",12,65,214,20,11,PlanGray,false,true);how.textWrappingMode=TextWrappingModes.NoWrap;
                 Hover(knowButton,"調査・監視・台帳・相談の手がかりで把握。未確認の真相は表示しません。");
             }
         }

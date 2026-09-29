@@ -97,10 +97,26 @@ namespace PatchWorkSecure.Tests
             {
                 game.State.incidentTimes[game.State.month]=timeValue;game.OpenTab(0);yield return new WaitForSecondsRealtime(.3f);
                 var alarm=Find<RectTransform>("AffectedRoom");var time=Find<RectTransform>("IncidentTimeBadge");var know=Find<RectTransform>("KnowledgeCard");
-                foreach(var r in new[]{time,know})Assert.Less(r.anchoredPosition.x+r.rect.width,alarm.anchoredPosition.x);
-                Assert.AreEqual(time.anchoredPosition.x,know.anchoredPosition.x);Assert.AreEqual(time.rect.width,know.rect.width);
+                foreach(var r in new[]{time,know})Assert.IsFalse(PolishBounds(r).Overlaps(PolishBounds(alarm)));
+                Assert.AreEqual(time.anchoredPosition.y,know.anchoredPosition.y);Assert.Greater(time.anchoredPosition.x,know.anchoredPosition.x+know.rect.width);
                 Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);CheckPointer("KnowledgeCard");CheckText();
                 PolishCapture(12,timeValue==0?"after":"quiet");
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
+        private static Rect PolishBounds(RectTransform r)=>new Rect(r.anchoredPosition.x,-r.anchoredPosition.y,r.rect.width,r.rect.height);
+        [UnityTest] public IEnumerator Polish4_19_把握ゲージは横長で上げ方が一行に収まり赤枠と離れる()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
+            for(int time=0;time<2;time++)
+            {
+                game.State.incidentTimes[game.State.month]=time;game.OpenTab(0);yield return new WaitForSecondsRealtime(.3f);string before=JsonUtility.ToJson(game.State);
+                var know=Find<RectTransform>("KnowledgeCard");var alarm=Find<RectTransform>("AffectedRoom");Assert.GreaterOrEqual(know.rect.width,180);
+                var gauge=Enumerable.Range(0,OpsCatalog.KnowledgeMax).Select(i=>Find<RectTransform>("KnowledgeGauge"+i)).ToArray();
+                Assert.GreaterOrEqual(gauge.Last().anchoredPosition.x+gauge.Last().rect.width-gauge.First().anchoredPosition.x,180);
+                foreach(var r in new[]{know,Find<RectTransform>("IncidentTimeBadge")})Assert.IsFalse(PolishBounds(r).Overlaps(PolishBounds(alarm)));
+                var how=Find<TextMeshProUGUI>("KnowledgeHow");how.ForceMeshUpdate();Assert.AreEqual(1,how.textInfo.lineCount);Assert.IsFalse(how.isTextOverflowing);Assert.IsFalse(how.text.Contains("\n"));
+                CheckPointer("KnowledgeCard");CheckText();PolishCapture(19,time==0?"after":"quiet");Assert.AreEqual(before,JsonUtility.ToJson(game.State));
             }
             LogAssert.NoUnexpectedReceived();
         }

@@ -24,6 +24,13 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        [UnityTest] public IEnumerator Polish4_06_工具マークはひなたの名札より上に離れる()
+        {
+            yield return PolishPlanning();Canvas.ForceUpdateCanvases();var pin=Find<RectTransform>("Pin_change");var tag=(RectTransform)Find<TextMeshProUGUI>("NavigatorName").transform.parent;
+            var a=new Vector3[4];var b=new Vector3[4];pin.GetWorldCorners(a);tag.GetWorldCorners(b);
+            var surface=Object.FindAnyObjectByType<OpsGame>().Surface;Assert.Greater(surface.InverseTransformPoint(a[0]).y,surface.InverseTransformPoint(b[1]).y+10);
+            CheckPointer("Pin_change");PolishCapture(6);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_05_時間帯は困りごとと同じ高さでマップ内に収まる()
         {
             yield return PolishPlanning();var time=Find<RectTransform>("PlanningTimeBadge");var counter=Find<RectTransform>("BubbleCounter");

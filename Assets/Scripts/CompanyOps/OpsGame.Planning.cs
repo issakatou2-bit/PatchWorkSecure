@@ -104,7 +104,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             PlanningPin(stage,"Pin_backup","復旧基盤",430,190,52,State.Level("backup")+State.Level("drill"),()=>OfficePinDialog("復旧基盤",State.Level("backup")+State.Level("drill"),"backup","recover"));
             PlanningPin(stage,"Pin_culture","相談できる現場",650,365,42,State.Level("education"),()=>OfficePinDialog("相談できる現場",State.Level("education"),"culture","people"));
-            PlanningPin(stage,"Pin_change","運用のしくみ",330,410,42,State.Level("automation")+State.Level("runbook"),()=>OfficePinDialog("運用のしくみ",State.Level("automation")+State.Level("runbook"),"change","operations"));
+            PlanningPin(stage,"Pin_change","運用のしくみ",330,380,42,State.Level("automation")+State.Level("runbook"),()=>OfficePinDialog("運用のしくみ",State.Level("automation")+State.Level("runbook"),"change","operations"));
             var consultation=PButton(stage,"OfficeConsultation","!",700,36,56,56,PlanningBriefDialog,PlanPink,Color.white,20,Hex("c1536c"));
             var mark=consultation.GetComponentInChildren<TextMeshProUGUI>();mark.fontSize=mark.fontSizeMax=34;mark.fontSizeMin=34;
             consultation.GetComponent<Image>().sprite=PlanningArt.markerBubble;consultation.GetComponent<Image>().type=Image.Type.Simple;

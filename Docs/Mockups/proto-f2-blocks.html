@@ -40,15 +40,15 @@ body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);bac
 .tray{position:absolute;left:660px;top:92px;width:620px;height:430px;padding:14px 16px}
 .tray h3{margin:0 0 4px;font-size:17px}
 .tray .how{font-size:12px;color:var(--gray);margin-bottom:8px}
-.shapes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.shape{height:166px;border-radius:16px;background:#f3f6fb;position:relative;cursor:grab;padding:8px 10px;transition:transform .15s;touch-action:none}
+.shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.shape{height:124px;border-radius:16px;background:#f3f6fb;position:relative;cursor:grab;padding:8px 10px;transition:transform .15s;touch-action:none}
 .shape:hover{transform:translateY(-3px)}
 .shape.sel{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--gold);transform:translateY(-5px)}
 .shape.done{opacity:.3;cursor:default;transform:none}
-.shape .name{font-size:13px;font-weight:700;line-height:1.35}
+.shape .name{font-size:13px;font-weight:700;line-height:1.35;padding-right:4px}
 .shape .rule{font-size:11px;color:var(--gray)}
 .shape .mini{position:absolute;right:10px;bottom:10px}
-.shape .mini i{position:absolute;width:24px;height:24px;border-radius:6px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
+.shape .mini i{position:absolute;width:15px;height:15px;border-radius:4px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
 .shape .rotb{position:absolute;left:8px;bottom:8px;font-size:11px;padding:4px 8px;border-radius:10px;background:#fff;color:var(--navy);box-shadow:0 2px 0 #c7d0e0;cursor:pointer}
 .side{position:absolute;left:660px;top:536px;width:620px;height:210px;padding:14px 16px}
 .say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;min-height:58px;width:300px}
@@ -68,49 +68,97 @@ button:active{transform:translateY(3px)}
 </head>
 <body>
 <div id="app">
-  <div class="top panel"><div class="badge r">作業のはめ込み</div><div class="timer"><i id="timer"></i></div><div class="r" style="font-size:19px" id="left">90</div><div class="r" style="font-size:19px">配置 <span id="placed">0</span> / <span id="ntask">0</span></div></div>
+  <div class="top panel"><div class="badge r">作業のはめ込み</div><div class="r" id="mode" style="font-size:14px;color:var(--gray)"></div><div class="timer"><i id="timer"></i></div><div class="r" style="font-size:19px" id="left">90</div><div class="r" style="font-size:19px">配置 <span id="placed">0</span> / <span id="ntask">0</span></div></div>
   <div class="board"><div class="days r" id="days"></div><div class="slots" id="slots"></div><div class="grid" id="grid"></div><div class="noon"></div></div>
   <div class="tray panel"><h3 class="r">今週の作業</h3><div class="how">ドラッグして予定表に置く（選んでからマスを押しても置ける）。持っている間に <b>R キー・右クリック・ホイール</b>で向きを変える。置いた作業はドラッグで動かせる。</div><div class="shapes" id="shapes"></div></div>
   <div class="side panel"><div class="say" id="say">…</div><div class="check" id="check"></div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_think.png" alt="ひなた"><div class="fin"><button id="finBtn" style="width:100%">この予定で決定</button></div></div>
   <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
 </div>
 <script>
-const C=104,GAP=6,DAYS=['月','火','水','木','金'],SLOTS=[['午前','9〜10時半'],['午前','10時半〜12時'],['午後','13〜15時'],['午後','15〜17時']];
-const LOCKS={'0,0':'朝会','2,2':'給与の計算','3,2':'給与の計算','0,3':'来客対応','3,4':'定例会議'};
-const COLORS={red:'#e0405f',orange:'#ff8a3d',blue:'#3fa9f5',green:'#2bb673',violet:'#6c63ff',gold:'#e0a100'};
-// 形は（行＝時間, 列＝曜日）。解けることは Tools/Solve-BlockWeek.py で確認済み（25通り）
-const TASKS=[
- {id:'vpn',name:'VPN機器の緊急修正',rule:'<b>火曜まで</b>に。悪用が確認されている',cells:[[0,0],[1,0]],col:'red',deadline:1,val:22},
- {id:'big',name:'基幹サーバーの更新',rule:'<b>木曜まで</b>に。2日がかり',cells:[[0,0],[0,1],[1,0],[1,1]],col:'orange',deadline:3,val:20},
- {id:'mail',name:'メール移行（準備→本番）',rule:'今週中に',cells:[[0,0],[1,0],[1,1]],col:'violet',val:16},
- {id:'pc',name:'社員PCの更新',rule:'3日続けて少しずつ',cells:[[0,0],[0,1],[0,2]],col:'blue',val:16},
- {id:'edu',name:'研修の準備',rule:'<b>水曜は避ける</b>（給与の計算で経理が不在）',cells:[[0,0],[0,1]],col:'green',avoid:[2],val:14},
- {id:'fs',name:'ファイルサーバーの再起動',rule:'いつでも',cells:[[0,0]],col:'gold',val:12},
-];
+// ---- 盤面の生成：先に正解の敷き詰めをランダムに作り、そこから作業と条件を決める（必ず解ける） ----
+let C=104,GAP=6,R=4,K=5,DAYS=[],SLOTS=[],LOCKS={},TASKS=[];
+const ALLDAYS=['月','火','水','木','金','土'];
+const SLOT4=[['午前','9〜10時半'],['午前','10時半〜12時'],['午後','13〜15時'],['午後','15〜17時']];
+const SLOT3=[['午前','9〜12時'],['午後','13〜15時'],['午後','15〜17時']];
+const LOCKNAMES=['朝会','来客対応','定例会議','給与の計算','健康診断','全社の研修','監査の立ち会い','取引先の訪問','月末の締め'];
+const COLORS={red:'#e0405f',orange:'#ff8a3d',blue:'#3fa9f5',green:'#2bb673',violet:'#6c63ff',gold:'#e0a100',teal:'#1fb5b0',pink:'#ff6f91'};
+// 形の種類ごとの作業名（向きに関係なく同じ種類）
+const KINDS={
+ 1:{names:['ファイルサーバーの再起動','証明書の更新','アカウントの棚卸し','プリンタの入れ替え','無線LANの設定変更'],cols:['gold','teal']},
+ I2:{names:['VPN機器の緊急修正','研修の準備','ルーターの更新','ログ設定の見直し','権限の見直し'],cols:['red','green','pink']},
+ I3:{names:['社員PCの更新','資産台帳の整備','古いアカウントの削除'],cols:['blue','teal']},
+ O4:{names:['基幹サーバーの更新','データベースの移行'],cols:['orange']},
+ L3:{names:['メール移行（準備→本番）','設定変更→動作確認','新入社員のPC準備'],cols:['violet','green']},
+ L4:{names:['バックアップの強化','クラウドへの移行'],cols:['orange','violet']},
+ T4:{names:['ネットワークの切替','多要素認証の導入'],cols:['blue','red']},
+ I4:{names:['全社のOS更新'],cols:['teal']},
+};
+const SHAPES=[['I2',[[0,0],[0,1]]],['I3',[[0,0],[0,1],[0,2]]],['O4',[[0,0],[0,1],[1,0],[1,1]]],['L3',[[0,0],[1,0],[1,1]]],['L4',[[0,0],[1,0],[2,0],[2,1]]],['T4',[[0,0],[0,1],[0,2],[1,1]]],['I4',[[0,0],[0,1],[0,2],[0,3]]]];
+let rng=Math.random;
+function seeded(n){return function(){n|=0;n=n+0x6D2B79F5|0;let t=Math.imul(n^n>>>15,1|n);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function ri(n){return Math.floor(rng()*n)}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function allRot(c){const out=[],seen=new Set();let cur=c;for(let i=0;i<4;i++){cur=norm(cur.map(([a,b])=>[b,-a]));const k=JSON.stringify(cur.slice().sort());if(!seen.has(k)){seen.add(k);out.push(cur)}}return out}
+function generate(){
+  for(let tries=0;tries<200;tries++){
+    R=rng()<.3?3:4;K=[4,5,5,5,6][ri(5)];DAYS=ALLDAYS.slice(0,K);SLOTS=R===4?SLOT4:SLOT3;
+    // ふさがったマス：全体の2〜3割。同じ予定は縦に続けやすい（給与の計算が半日など）
+    LOCKS={};const nl=Math.round(R*K*(.2+rng()*.1));const names=shuf(LOCKNAMES.slice());let k=0;
+    while(Object.keys(LOCKS).length<nl){const r=ri(R),c=ri(K),nm=names[k++%names.length];LOCKS[r+','+c]=nm;if(rng()<.35&&r+1<R&&Object.keys(LOCKS).length<nl)LOCKS[(r+1)+','+c]=nm}
+    const grid=[];for(let r=0;r<R;r++){grid.push([]);for(let c=0;c<K;c++)grid[r].push(LOCKS[r+','+c]?'X':null)}
+    const pieces=[];let singles=0;
+    function firstEmpty(){for(let r=0;r<R;r++)for(let c=0;c<K;c++)if(grid[r][c]===null)return [r,c];return null}
+    function fill(depth){const e=firstEmpty();if(!e)return true;if(depth>40)return false;const [er,ec]=e;
+      const cands=[];for(const [kind,base] of shuf(SHAPES.slice()))for(const sh of allRot(base)){
+        // 形の「走査順で最初のマス」を空きマスに合わせる
+        const f=sh.slice().sort((x,y)=>x[0]-y[0]||x[1]-y[1])[0];const or=er-f[0],oc=ec-f[1];
+        const cells=sh.map(([a,b])=>[or+a,oc+b]);if(cells.every(([r,c])=>r>=0&&c>=0&&r<R&&c<K&&grid[r][c]===null))cands.push([kind,cells])}
+      if(singles<2)cands.push(['1',[[er,ec]]]);
+      for(const [kind,cells] of cands){cells.forEach(([r,c])=>grid[r][c]=pieces.length);pieces.push({kind,cells});if(kind==='1')singles++;
+        if(fill(depth+1))return true;pieces.pop();if(kind==='1')singles--;cells.forEach(([r,c])=>grid[r][c]=null)}
+      return false}
+    if(!fill(0))continue;
+    if(pieces.length<5||pieces.length>8)continue;
+    // 作業名・色・条件を決める。条件は正解の置き方を満たすように付ける
+    const used={};TASKS=pieces.map((pc,i)=>{const kd=KINDS[pc.kind];const pool=kd.names.filter(n=>!used[n]);const name=pool.length?pool[ri(pool.length)]:kd.names[0];used[name]=1;
+      const mr=Math.min(...pc.cells.map(x=>x[0])),mc=Math.min(...pc.cells.map(x=>x[1]));return {id:'t'+i,kind:pc.kind,name,cells:pc.cells.map(([r,c])=>[r-mr,c-mc]),col:kd.cols[ri(kd.cols.length)],val:10+pc.cells.length*3,sol:pc.cells,rule:'今週中に'}});
+    const order=shuf(TASKS.map((t,i)=>i));
+    // 1つは緊急（正解の最後の日が期限）、1つは期限つき、1つは避ける日つき
+    const urgent=TASKS[order[0]],u=Math.max(...urgent.sol.map(x=>x[1]));if(u<K-1){urgent.name={'1':'証明書の緊急更新',I2:'VPN機器の緊急修正',I3:'公開サーバーの緊急修正',O4:'基幹システムの緊急修正',L3:'緊急修正→動作確認',L4:'緊急修正と影響調査',T4:'全拠点への緊急修正',I4:'全社PCの緊急修正'}[urgent.kind]||'緊急の脆弱性対応';urgent.deadline=u;urgent.rule='<b>'+DAYS[u]+'曜まで</b>に。悪用が確認されている';urgent.col='red';urgent.val+=8}
+    const dl=TASKS[order[1]],d2=Math.max(...dl.sol.map(x=>x[1]))+ri(2);if(d2<K-1){dl.deadline=d2;dl.rule='<b>'+DAYS[d2]+'曜まで</b>に'}
+    const av=TASKS[order[2]],free=[...Array(K).keys()].filter(c=>!av.sol.some(x=>x[1]===c));if(free.length){const c=free[ri(free.length)];av.avoid=[c];av.rule='<b>'+DAYS[c]+'曜は避ける</b>（担当が不在）'}
+    // 名前の重なりを解消（緊急の付け替えで同名ができた場合）
+    for(const t of TASKS){if(t===urgent)continue;if(TASKS.some(o=>o!==t&&o.name===t.name)){const alt=KINDS[t.kind].names.find(n=>!TASKS.some(o=>o.name===n));t.name=alt||t.name+'（2件目）'}}
+    for(const t of TASKS)if(t.cells.length===1&&t.rule==='今週中に')t.rule='いつでも';
+    // 表示の大きさ：盤面に収まるようにマスを決める
+    C=Math.min(104,Math.floor((640-92-24-(K-1)*GAP)/K),Math.floor((560-52-24-(R-1)*GAP)/R));document.documentElement.style.setProperty('--C',C+'px');
+    return true}
+  return false}
+
 let G,tid,ac,drag=null;
 function norm(c){const ma=Math.min(...c.map(x=>x[0])),mb=Math.min(...c.map(x=>x[1]));return c.map(([a,b])=>[a-ma,b-mb])}
 function rot(c){return norm(c.map(([a,b])=>[b,-a]))}
-function start(){G={t:90,sel:null,place:{},over:false,bonus:0};G.tasks=TASKS.map(t=>({...t,cur:t.cells.map(x=>x.slice())}));document.getElementById('ntask').textContent=G.tasks.length;closeModal();build();render();say('今週の予定表に、作業をぴったりはめよう！　すき間ゼロを目指して','pose_think');clearInterval(tid);tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/90*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100)}
+function start(daily){rng=daily?seeded(+new Date().toISOString().slice(0,10).replace(/-/g,'')):Math.random;generate();rng=Math.random;G={daily,t:90,sel:null,place:{},over:false,bonus:0};G.tasks=TASKS.map(t=>({...t,cur:t.cells.map(x=>x.slice())}));document.getElementById('ntask').textContent=G.tasks.length;document.getElementById('mode').textContent=(daily?'今日の一問　':'')+K+'日×'+R+'コマ';closeModal();build();render();say('今週の予定表に、作業をぴったりはめよう！　すき間ゼロを目指して','pose_think');clearInterval(tid);tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/90*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100)}
 function build(){document.getElementById('days').innerHTML=DAYS.map(d=>`<span>${d}</span>`).join('');document.getElementById('slots').innerHTML=SLOTS.map(s=>`<span><b class="r">${s[0]}</b>${s[1]}</span>`).join('');
-  const g=document.getElementById('grid');g.innerHTML='';for(let r=0;r<4;r++)for(let c=0;c<5;c++){const l=LOCKS[r+','+c];const e=document.createElement('div');e.className='cell'+(l?' lock':'');e.dataset.r=r;e.dataset.c=c;if(l)e.textContent=l;e.onmouseenter=()=>{if(drag)return;G.hover=[r,c];preview()};e.onclick=()=>{if(G.sel)drop(G.tasks.find(x=>x.id===G.sel),r,c)};g.appendChild(e)}}
+  const g=document.getElementById('grid');g.style.gridTemplateColumns='repeat('+K+','+C+'px)';g.style.gridTemplateRows='repeat('+R+','+C+'px)';document.querySelector('.noon').style.display=R===4?'block':'none';g.innerHTML='';for(let r=0;r<R;r++)for(let c=0;c<K;c++){const l=LOCKS[r+','+c];const e=document.createElement('div');e.className='cell'+(l?' lock':'');e.dataset.r=r;e.dataset.c=c;if(l)e.textContent=l;e.onmouseenter=()=>{if(drag)return;G.hover=[r,c];preview()};e.onclick=()=>{if(G.sel)drop(G.tasks.find(x=>x.id===G.sel),r,c)};g.appendChild(e)}}
 function occ(r,c,except){for(const id in G.place){if(id===except)continue;const q=G.place[id];for(const [a,b] of q.cells)if(q.r+a===r&&q.c+b===c)return true}return false}
-function fits(t,r,c){for(const [a,b] of t.cur){const rr=r+a,cc=c+b;if(rr<0||cc<0||rr>3||cc>4)return 'はみ出す';if(LOCKS[rr+','+cc])return 'その時間は予定が入っている';if(occ(rr,cc,t.id))return 'ほかの作業と重なる'}return ''}
-function breaks(t,q){const o=[];const cols=q.cells.map(([a,b])=>q.c+b);if(t.deadline!==undefined&&Math.max(...cols)>t.deadline)o.push('期限に遅れる');if(t.avoid&&cols.some(x=>t.avoid.includes(x)))o.push('水曜に入っている');return o}
+function fits(t,r,c){for(const [a,b] of t.cur){const rr=r+a,cc=c+b;if(rr<0||cc<0||rr>R-1||cc>K-1)return 'はみ出す';if(LOCKS[rr+','+cc])return 'その時間は予定が入っている';if(occ(rr,cc,t.id))return 'ほかの作業と重なる'}return ''}
+function breaks(t,q){const o=[];const cols=q.cells.map(([a,b])=>q.c+b);if(t.deadline!==undefined&&Math.max(...cols)>t.deadline)o.push('期限に遅れる');if(t.avoid&&cols.some(x=>t.avoid.includes(x)))o.push(DAYS[t.avoid[0]]+'曜に入っている');return o}
 function clearPrev(){document.querySelectorAll('.cell.ok,.cell.ng').forEach(c=>c.classList.remove('ok','ng'))}
 function preview(t){clearPrev();t=t||(G.sel&&G.tasks.find(x=>x.id===G.sel));if(!t||!G.hover)return;const [r,c]=G.hover;const why=fits(t,r,c);for(const [a,b] of t.cur){const e=document.querySelector(`.cell[data-r="${r+a}"][data-c="${c+b}"]`);if(e&&!e.classList.contains('lock'))e.classList.add(why?'ng':'ok')}}
 function drop(t,r,c){if(G.over)return false;const why=fits(t,r,c);if(why){beep(200,0,'square');say(why+'よ','pose_startled');shake();return false}
   G.place[t.id]={r,c,cells:t.cur.map(x=>x.slice())};G.sel=null;const bad=breaks(t,G.place[t.id]);if(bad.length){beep(330,0,'triangle');say('はまったけど、'+bad[0]+'みたい','pose_think')}else{beep(640);beep(960,.06);say(['ぴったり！','いい組み方！','きれいにはまった！'][Math.floor(Math.random()*3)],'pose_fists')}
   render();checkDays();return true}
 function checkDays(){// 1日（縦1列）をすき間なく埋めると光る
-  for(let c=0;c<5;c++){let full=true;for(let r=0;r<4;r++)if(!LOCKS[r+','+c]&&!occ(r,c))full=false;if(full&&!G['d'+c]){G['d'+c]=true;G.bonus+=3;flash(c)}if(!full)G['d'+c]=false}
+  for(let c=0;c<K;c++){let full=true;for(let r=0;r<R;r++)if(!LOCKS[r+','+c]&&!occ(r,c))full=false;if(full&&!G['d'+c]){G['d'+c]=true;G.bonus+=3;flash(c)}if(!full)G['d'+c]=false}
   if(Object.keys(G.place).length===G.tasks.length&&G.tasks.every(t=>!breaks(t,G.place[t.id]).length)){say('すき間ゼロ、条件も全部守れた！　完璧な一週間！','pose_jump');chord()}}
-function flash(c){const g=document.getElementById('grid').getBoundingClientRect(),a=document.getElementById('app').getBoundingClientRect(),s=a.width/1280;const x=(g.left-a.left)/s+c*(C+GAP),y=(g.top-a.top)/s;const f=document.createElement('div');f.className='full';f.style.cssText=`left:${x-4}px;top:${y-4}px;width:${C+8}px;height:${4*C+3*GAP+8}px`;document.getElementById('app').appendChild(f);setTimeout(()=>f.remove(),920);
-  for(let i=0;i<12;i++){const p=document.createElement('div');p.className='spark';const an=i/12*Math.PI*2;p.style.cssText=`left:${x+C/2}px;top:${y+2*C}px;--dx:${Math.cos(an)*90}px;--dy:${Math.sin(an)*120}px`;document.getElementById('app').appendChild(p);setTimeout(()=>p.remove(),720)}beep(784);beep(1175,.08);say(DAYS[c]+'曜、すき間なし！','pose_jump')}
+function flash(c){const g=document.getElementById('grid').getBoundingClientRect(),a=document.getElementById('app').getBoundingClientRect(),s=a.width/1280;const x=(g.left-a.left)/s+c*(C+GAP),y=(g.top-a.top)/s;const f=document.createElement('div');f.className='full';f.style.cssText=`left:${x-4}px;top:${y-4}px;width:${C+8}px;height:${R*C+(R-1)*GAP+8}px`;document.getElementById('app').appendChild(f);setTimeout(()=>f.remove(),920);
+  for(let i=0;i<12;i++){const p=document.createElement('div');p.className='spark';const an=i/12*Math.PI*2;p.style.cssText=`left:${x+C/2}px;top:${y+R*C/2}px;--dx:${Math.cos(an)*90}px;--dy:${Math.sin(an)*120}px`;document.getElementById('app').appendChild(p);setTimeout(()=>p.remove(),720)}beep(784);beep(1175,.08);say(DAYS[c]+'曜、すき間なし！','pose_jump')}
 function pieceHTML(cells,col,label){const mc=Math.max(...cells.map(x=>x[1]));return cells.map(([a,b])=>`<i style="left:${b*(C+GAP)}px;top:${a*(C+GAP)}px;background:${COLORS[col]}"></i>`).join('')+(label?`<span class="lab" style="width:${(mc+1)*(C+GAP)-16}px">${label}</span>`:'')}
 function render(){document.querySelectorAll('.board .piece').forEach(e=>e.remove());const board=document.querySelector('.board');
   for(const id in G.place){const q=G.place[id],t=G.tasks.find(x=>x.id===id);const el=document.createElement('div');el.className='piece placed'+(breaks(t,q).length?' bad':'');el.style.left=(92+q.c*(C+GAP))+'px';el.style.top=(52+q.r*(C+GAP))+'px';el.innerHTML=pieceHTML(q.cells,t.col,t.name.split('（')[0]);
     el.onpointerdown=e=>{if(G.over)return;e.preventDefault();t.cur=q.cells.map(x=>x.slice());delete G.place[id];render();beginDrag(t,e,true)};board.appendChild(el)}
-  document.getElementById('shapes').innerHTML=G.tasks.map(t=>{const mx=Math.max(...t.cur.map(c=>c[1])),my=Math.max(...t.cur.map(c=>c[0]));return `<div class="shape ${G.sel===t.id?'sel':''} ${G.place[t.id]?'done':''}" data-id="${t.id}"><div class="name">${t.name}</div><div class="rule">${t.rule}</div><div class="mini" style="width:${(mx+1)*27}px;height:${(my+1)*27}px">${t.cur.map(([a,b])=>`<i style="left:${b*27}px;top:${a*27}px;background:${COLORS[t.col]}"></i>`).join('')}</div>${G.place[t.id]?'':'<span class="rotb r">向きを変える</span>'}</div>`}).join('');
+  document.getElementById('shapes').innerHTML=G.tasks.map(t=>{const mx=Math.max(...t.cur.map(c=>c[1])),my=Math.max(...t.cur.map(c=>c[0]));return `<div class="shape ${G.sel===t.id?'sel':''} ${G.place[t.id]?'done':''}" data-id="${t.id}"><div class="name">${t.name}</div><div class="rule">${t.rule}</div><div class="mini" style="width:${(mx+1)*17}px;height:${(my+1)*17}px">${t.cur.map(([a,b])=>`<i style="left:${b*17}px;top:${a*17}px;background:${COLORS[t.col]}"></i>`).join('')}</div>${G.place[t.id]?'':'<span class="rotb r">向きを変える</span>'}</div>`}).join('');
   document.querySelectorAll('.shape').forEach(el=>{const t=G.tasks.find(x=>x.id===el.dataset.id);const rb=el.querySelector('.rotb');if(rb)rb.onpointerdown=e=>{e.stopPropagation();t.cur=rot(t.cur);beep(760,0,'triangle');render()};
     el.onpointerdown=e=>{if(G.place[t.id]||G.over)return;e.preventDefault();beginDrag(t,e,false)};el.oncontextmenu=e=>{e.preventDefault();if(!G.place[t.id]){t.cur=rot(t.cur);beep(760,0,'triangle');render()}}});
   document.getElementById('placed').textContent=Object.keys(G.place).length;
@@ -125,14 +173,14 @@ function makeGhost(){const old=document.getElementById('ghostEl');if(old)old.rem
 function scale(){return document.getElementById('app').getBoundingClientRect().width/1280}
 function follow(ev){const g=document.getElementById('ghostEl');if(!g)return;const a=document.getElementById('app').getBoundingClientRect(),s=scale();g.style.left=((ev.clientX-a.left)/s-C/2)+'px';g.style.top=((ev.clientY-a.top)/s-C/2)+'px';const cell=cellAt(ev.clientX,ev.clientY);G.hover=cell;if(cell)preview(drag.t);else clearPrev();drag.lx=ev.clientX;drag.ly=ev.clientY}
 function cellAt(x,y){// 持っている形の左上のマスが、指の下のマスに来る
-  const g=document.getElementById('grid').getBoundingClientRect(),s=scale();const cx=Math.floor((x-g.left)/((C+GAP)*s)),cy=Math.floor((y-g.top)/((C+GAP)*s));if(cx<0||cy<0||cx>4||cy>3)return null;return [cy,cx]}
+  const g=document.getElementById('grid').getBoundingClientRect(),s=scale();const cx=Math.floor((x-g.left)/((C+GAP)*s)),cy=Math.floor((y-g.top)/((C+GAP)*s));if(cx<0||cy<0||cx>K-1||cy>R-1)return null;return [cy,cx]}
 function turnDrag(){if(!drag||!drag.moved)return false;drag.t.cur=rot(drag.t.cur);const g=document.getElementById('ghostEl');if(g)g.innerHTML=pieceHTML(drag.t.cur,drag.t.col,'');beep(760,0,'triangle');if(drag.lx)follow({clientX:drag.lx,clientY:drag.ly});return true}
 addEventListener('keydown',e=>{if(e.key!=='r'&&e.key!=='R')return;if(turnDrag())return;if(G&&G.sel){const t=G.tasks.find(x=>x.id===G.sel);t.cur=rot(t.cur);beep(760,0,'triangle');render()}});
 addEventListener('contextmenu',e=>{if(drag&&drag.moved){e.preventDefault();turnDrag()}});
 addEventListener('wheel',e=>{if(drag&&drag.moved){e.preventDefault();turnDrag()}},{passive:false});
 function finish(){if(G.over)return;G.over=true;clearInterval(tid);let score=G.bonus,miss=[];for(const t of G.tasks){const q=G.place[t.id];if(!q){miss.push(t.name+'：入れていない');if(t.id==='vpn')score-=20;continue}const b=breaks(t,q);if(b.length){score+=Math.round(t.val*.3);miss.push(t.name+'：'+b.join('・'))}else score+=t.val}
   score=Math.max(0,Math.min(100,score));const rank=score>=95?'S':score>=75?'A':score>=45?'B':'C';if(score>=75)chord();say(score>=75?'人も時間もむだなく使えたね！':'形と穴、もう一回見てみよ','pose_jump');
-  setTimeout(()=>modal(`<h2 class="r">今週の予定　評価 <span style="color:var(--pink)">${rank}</span>（${score}点）</h2><div style="font-size:15px;line-height:1.8">${miss.length?miss.map(m=>'・'+m).join('<br>'):'すべての作業を、期限と条件を守って、すき間なく入れられた。'}</div><div style="font-size:13px;color:var(--gray);margin:8px 0 12px">情シスの仕事は「急ぐものから、止められない予定を避けて」組む。緊急の穴ふさぎは最優先、大きな作業は期限から逆算。</div><button id="again" style="width:100%">もう一度</button>`),500);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},600)}
+  setTimeout(()=>modal(`<h2 class="r">今週の予定　評価 <span style="color:var(--pink)">${rank}</span>（${score}点）</h2><div style="font-size:15px;line-height:1.8">${miss.length?miss.map(m=>'・'+m).join('<br>'):'すべての作業を、期限と条件を守って、すき間なく入れられた。'}</div><div style="font-size:13px;color:var(--gray);margin:8px 0 12px">情シスの仕事は「急ぐものから、止められない予定を避けて」組む。緊急の穴ふさぎは最優先、大きな作業は期限から逆算。</div><div style="display:flex;gap:10px"><button id="again" style="flex:1">別の週でもう一度</button><button id="againDaily" style="flex:1;background:linear-gradient(180deg,#ff9ab3,#ff6f91);box-shadow:0 5px 0 #d94a70">今日の一問</button></div>`),500);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=()=>start(false);const d=document.getElementById('againDaily');if(d)d.onclick=()=>start(true)},600)}
 function shake(){const a=document.getElementById('app');a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),350)}
 function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
 function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
@@ -142,8 +190,8 @@ function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
 document.getElementById('finBtn').onclick=()=>finish();
 function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
 addEventListener('resize',fit);fit();
-modal(`<h2 class="r">作業のはめ込み（試作・日常業務）</h2><div style="font-size:15px;line-height:1.9">今週の予定表。<b>縦が時間（午前2・午後2）、横が曜日</b>。<br>作業にはそれぞれ形がある（2日がかり＝横に長い、準備→本番＝L字）。<br><b>ドラッグして置く</b>（選んでマスを押しても置ける）。持っている間にRキー・右クリック・ホイールで向きを変える。<br>空きマスと作業のマスは同じ数。期限と条件を守って<b>すき間ゼロ</b>を目指す。90秒。</div><button id="startBtn" style="width:100%;margin-top:14px">組みはじめる</button>`);
-document.getElementById('startBtn').onclick=start;
+modal(`<h2 class="r">作業のはめ込み（試作・日常業務）</h2><div style="font-size:15px;line-height:1.9">今週の予定表。<b>縦が時間、横が曜日</b>。盤面の大きさ・予定・作業は毎回かわる。<br>作業にはそれぞれ形がある（2日がかり＝横に長い、準備→本番＝L字）。<br><b>ドラッグして置く</b>（選んでマスを押しても置ける）。持っている間にRキー・右クリック・ホイールで向きを変える。<br>空きマスと作業のマスは同じ数。期限と条件を守って<b>すき間ゼロ</b>を目指す。90秒。</div><div style="display:flex;gap:10px;margin-top:14px"><button id="startBtn" style="flex:1">組みはじめる（毎回ちがう週）</button><button id="dailyBtn" style="flex:1;background:linear-gradient(180deg,#ff9ab3,#ff6f91);box-shadow:0 5px 0 #d94a70">今日の一問（全員同じ）</button></div>`);
+document.getElementById('startBtn').onclick=()=>start(false);document.getElementById('dailyBtn').onclick=()=>start(true);
 </script>
 </body>
 </html>

@@ -132,3 +132,23 @@ mg_mail_catch,掛け声,メールの仕分けで見破る,見破った！　そ�
 mg_mail_miss,掛け声,メールの仕分けで見逃す,あっ、それ開いちゃだめなやつ……！,face_panic,pose_startled,[panicked],
 mg_mfa_block,掛け声,多要素認証で偽の依頼を弾く,弾いた！　本人じゃないね！,face_doya,pose_armscross,[confident],
 mg_mfa_breach,掛け声,多要素認証で許可してしまう,その人、今ログインしてないよ〜！,face_shocked,pose_startled,[panicked],
+maxim_backup,格言,戻せることを確かめる,バックアップは、戻せてこそバックアップ、だよ！,face_doya,pose_point,[confident],
+maxim_hurry,格言,確かめてから信じる,「急いで」「内密に」は、詐欺の合図だよ！,face_alert,pose_point,[warning],内密＝ないみつ
+maxim_sender,格言,確かめてから信じる,名前より中身！　差出人は、確かめるものだよ！,face_determined,pose_magnifier,[confident],
+maxim_link,格言,確かめてから信じる,リンクは押す前に、行き先を確かめよ！,face_normal,pose_point,[friendly],
+maxim_account,格言,確かめてから信じる,口座の変更は、いつもの連絡先で確かめる。これ鉄則！,face_determined,pose_armscross,[firm],鉄則＝てっそく
+maxim_mfa,格言,確かめてから信じる,心当たりのない承認は、ぜったい拒否だよ！,face_alert,pose_shield,[firm],
+maxim_least,格言,最小権限,権限は、必要な人に、必要な分だけ！,face_tease,pose_point,[playful],
+maxim_layers,格言,多層防御,壁は一枚より、何枚も重ねるのが強いんだよ！,face_proud,pose_shield,[confident],
+maxim_segment,格言,分離,区切っておけば、広がらない！,face_doya,pose_armscross,[confident],
+maxim_uptime,格言,止めすぎない,守るのと同じくらい、仕事を止めないのも大事！,face_normal,pose_please,[gentle],
+maxim_baseline,格言,普段を知る,「いつもと違う」が、いちばんのサインだよ！,face_determined,pose_magnifier,[curious],
+maxim_logs,格言,普段を知る,ログは、残しておいてこそ役に立つんだ！,face_normal,pose_laptop,[friendly],
+maxim_priority,格言,優先順位,更新は、危ないものから順番に！,face_determined,pose_fists,[energetic],
+maxim_restore,格言,依存関係と業務影響,止まったときは、支えてる仕組みから戻すの！,face_normal,pose_typing,[explaining],
+maxim_runbook,格言,手順を残す,手順書は、未来の自分への手紙だよ！,face_sparkle,pose_peace,[warm],
+maxim_human,格言,性弱説,人は間違えるもの。だから、仕組みで守ろ！,face_relieved,pose_please,[warm],性弱説＝せいじゃくせつ（台詞には出さない）
+maxim_report,格言,相談文化,迷ったら相談！　早い報告ほど、被害は小さいよ！,face_sparkle,pose_wave,[cheerful],
+maxim_password,格言,基本,パスワードの使い回しは、ぜったいダメだよ〜！,face_pout,pose_armscross,[scolding playfully],使い回し＝つかいまわし
+maxim_usb,格言,基本,知らないUSBは、挿さない！,face_akire,pose_point,[firm],挿さない＝ささない
+maxim_estimate,格言,見積もりの読み方,見積もりは目安。確率じゃなくて、幅で考えるんだよ！,face_normal,pose_think,[explaining],目安＝めやす

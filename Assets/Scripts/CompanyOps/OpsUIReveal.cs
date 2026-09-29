@@ -15,6 +15,7 @@ namespace PatchWorkSecure.CompanyOps
         private void Awake() { group = gameObject.AddComponent<CanvasGroup>(); group.alpha = 0; rotation = transform.localRotation; }
         private void Update()
         {
+            if(Owner!=null&&Owner.AnnualPresentationCanSkip&&(Owner.AnnualPresentationSkipped||UnityEngine.InputSystem.Mouse.current?.leftButton.wasPressedThisFrame==true))elapsed=Delay+Duration;
             elapsed += Owner!=null?Owner.PresentationDeltaTime:Time.unscaledDeltaTime;
             float t = Mathf.Clamp01((elapsed - Delay) / Duration);
             group.alpha = t;

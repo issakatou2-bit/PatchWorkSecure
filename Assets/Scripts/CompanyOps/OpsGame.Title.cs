@@ -8,17 +8,19 @@ namespace PatchWorkSecure.CompanyOps
         private void TitleScreen()
         {
             PImage(screen,"TitleOffice",OfficeArt,350,-380,1400,1400);Motion((RectTransform)screen.Find("TitleOffice"),"drift",18);
-            var veil=Box(screen,"TitleVeil",0,0,1600,900,Color.white);
-            KitGradient(veil.GetComponent<Image>(),new Color(.92f,.96f,1,.97f),new Color(1,.89f,.93f,0),true);
+            IncidentShape(screen,"TitleVeil","title-veil",0,0,1600,900,Color.white);
             SeasonLayer(Rect(screen,"TitleSeason",0,0,1600,900),1600,900,saved==null?0:saved.month);
-            var logo=PImage(screen,"TitleLogoWordmark",PlanningArt.logoWordmark,90,40,640,246);Reveal(logo,0,true);
+            var logo=PImage(screen,"TitleLogoWordmark",PlanningArt.logoWordmark,90,40,640,246);Reveal(logo);if(Application.isPlaying)logo.GetComponent<OpsUIReveal>().Duration=.9f;
             var icon=PImage(screen,"TitleLogoIcon",PlanningArt.logoIcon,16,158,132,132);icon.localEulerAngles=new Vector3(0,0,8);
+            PText(screen,"TitlePinkShadow","情シスの一年",116,304,620,60,46,PlanPink);
+            PText(screen,"TitleWhiteShadow","情シスの一年",113,301,620,60,46,Color.white);
             PText(screen,"Title","情シスの一年",110,298,620,60,46);
             var ribbon=IncidentShape(screen,"TitleRibbon","cutin",110,374,570,44,PlanPink);
             PText(ribbon,"TitleSubtitle","会社を守る、12か月の育成シミュレーション",18,0,530,44,20,Color.white);
             var start=PButton(screen,"NewYear","ニューゲーム",90,450,460,76,ConfirmNewYear,PlanPink,Color.white);Shine(start.transform,460,76);
-            PButton(screen,"ContinueYear",saved==null?"つづきの記録はありません":"つづきから  /  "+saved.Current.name,90,540,460,64,
+            var resume=PButton(screen,"ContinueYear",saved==null?"つづきの記録はありません":"つづきから",90,540,460,64,
                 ()=>{State=saved;statChanges=new int[6];tab=0;Render();},Color.white,PlanInk,20,null,saved!=null);
+            if(saved!=null)PText(resume.transform,"ContinueMonth",saved.Current.name+" / "+(saved.month+1)+"か月目",258,0,186,64,14,PlanGray,true,true);
             PButton(screen,"HomeGuide","遊び方",90,618,223,64,Guide,Color.white,PlanInk);
             PButton(screen,"HomeSettings","設定",327,618,223,64,Menu,Color.white,PlanInk);
             Portrait(screen,"HomePortrait",1020,190,565,700,"pose_wave");

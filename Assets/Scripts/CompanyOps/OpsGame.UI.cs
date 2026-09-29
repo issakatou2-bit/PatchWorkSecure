@@ -96,11 +96,21 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
             if (Application.isPlaying) {StopAllCoroutines();StopPresentationSounds();}
+            if(outgoingScreen!=null)Destroy(outgoingScreen.gameObject);
+            outgoingScreen=null;
+            if(Application.isPlaying&&PortraitEntering&&screen!=null)
+            {
+                outgoingScreen=screen;outgoingScreen.SetParent(null,false);
+                foreach(var child in outgoingScreen.GetComponentsInChildren<Transform>())child.name+="Outgoing";
+                var group=outgoingScreen.gameObject.AddComponent<CanvasGroup>();group.interactable=false;group.blocksRaycasts=false;
+            }
             Clear(Surface); modal = null; toast = null; toastGroup = null; toastSpeech = null;
             screen = Box(Surface, "OpsScreen", 0, 0, 1600, 900, Ink);
             if (PlanningArt != null) PImage(screen,"SharedBackground",PlanningArt.gradient,0,0,1600,900);
+            if(outgoingScreen!=null)outgoingScreen.SetParent(Surface,false);
             foreach(var depart in departures)depart();
             if (Application.isPlaying&&PortraitEntering) StartCoroutine(ScreenWipe(screen));
         }

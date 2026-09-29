@@ -9,6 +9,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         private void AnnualScreen()
         {
+            AnnualPresentationCanSkip=presentationVisits.ContainsKey("annual_entry");AnnualPresentationSkipped=false;RepeatDuration("annual_entry",1,1);
             ReportBackground(true);var summary=OpsAnnualSummary.From(State);
             if(State.IsClear)
             {
@@ -23,7 +24,7 @@ namespace PatchWorkSecure.CompanyOps
             var rank=PCard(screen,"RankBadge",150,150,360,360,PlanPink,28);rank.localEulerAngles=new Vector3(0,0,-6);KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
             rank.GetComponent<Image>().pixelsPerUnitMultiplier=Mathf.Max(.01f,PlanningArt.round28.border.x/60);
             var border=rank.gameObject.AddComponent<Outline>();border.effectColor=Color.white;border.effectDistance=new Vector2(8,-8);
-            IncidentShape(rank,"RankStitch","dashed",16,16,328,328,new Color(1,1,1,.7f));Reveal(rank,0,true);
+            IncidentShape(rank,"RankStitch","dashed",16,16,328,328,new Color(1,1,1,.7f));Reveal(rank,State.history.Count*.08f+.45f,true);
             PText(rank,"RankHeading","運用ランク",0,46,360,44,26,Color.white,true,true);
             var rankText=PText(rank,"CompanyRank",State.Rank.Substring(State.Rank.Length-1),0,103,360,225,200,Color.white,true,true);var shadow=rankText.gameObject.AddComponent<Shadow>();shadow.effectColor=Hex("c23a60");shadow.effectDistance=new Vector2(0,-8);
             PText(screen,"ScoreHeading","年間得点",110,540,440,32,16,PlanGray,true,true);
@@ -37,7 +38,7 @@ namespace PatchWorkSecure.CompanyOps
                 var record=State.history.FirstOrDefault(r=>r.month==i);string label=OpsAnnualSummary.MonthLabel(State,record);
                 Color bg=label=="被害大"||label=="停止長"||label=="運営終了"?Hex("ffe9ee"):label=="山場突破"?Hex("fff6d6"):label=="達成"?Hex("e3faf3"):Hex("eef2f8");
                 Color fg=label=="被害大"||label=="停止長"||label=="運営終了"?Hex("c23a60"):label=="山場突破"?Hex("7a5a00"):label=="達成"?Hex("1a7c63"):Hex("52607a");
-                var cell=PCard(timeline,"AnnualMonth"+i,22+i*75.33f,67,67.33f,74,bg,16,false);Reveal(cell,i*.08f);
+                var cell=PCard(timeline,"AnnualMonth"+i,22+i*75.33f,67,67.33f,74,bg,16,false);if(record!=null)Reveal(cell,i*.08f);
                 PText(cell,"AnnualMonthName"+i,OpsCatalog.Months[i].name,0,9,67,29,15,fg,true,true);PText(cell,"AnnualMonthResult"+i,label,0,40,67,25,12,fg,true,true);
             }
             var mvp=ReportPanel("AnnualMvp",610,356,301.33f,174,.12f);

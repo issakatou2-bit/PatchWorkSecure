@@ -12,7 +12,12 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="trend-up"||Kind=="trend-down")
+            if(Kind=="title-veil")
+            {
+                float[] stops={0,.34f,.62f,1};Color[] colors={new Color(.918f,.961f,1,.97f),new Color(.918f,.961f,1,.9f),new Color(1,.89f,.925f,.15f),new Color(1,.89f,.925f,0)};
+                for(int i=0;i<3;i++)Quad(vh,r.xMin+w*stops[i],r.yMin,w*(stops[i+1]-stops[i]),h,colors[i],colors[i+1]);
+            }
+            else if(Kind=="trend-up"||Kind=="trend-down")
             {
                 bool up=Kind=="trend-up";float tip=up?r.yMax:r.yMin,baseY=up?r.yMin:r.yMax,head=up?r.yMax-h*.4f:r.yMin+h*.4f;
                 Line(vh,new Vector2(r.center.x,baseY),new Vector2(r.center.x,head),2.5f);

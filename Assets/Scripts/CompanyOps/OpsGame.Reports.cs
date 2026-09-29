@@ -70,6 +70,8 @@ namespace PatchWorkSecure.CompanyOps
             PText(medal,"YearNumber","1年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
             PText(screen,"MonthlyCategory","MONTHLY REPORT",272,26,800,28,12,PlanPink);
             PText(screen,"ReviewTitle","今月のふりかえり",272,52,800,62,40);
+            var damageStamp=PCard(screen,"MonthlyDamageStamp",1050,53,240,54,r.loss==0?Hex("e3faf3"):Hex("ffe9ee"),16,false);
+            PText(damageStamp,"MonthlyDamageStampText",r.loss==0?"金銭被害なし":"金銭被害 "+r.loss+"万円",0,0,240,54,20,r.loss==0?Hex("1a7c63"):Coral,true,true);Reveal(damageStamp,.25f,true);
             PButton(screen,"Menu","設定",1370,38,180,52,Menu,Color.white,PlanInk);
             var incident=ReportPanel("MonthlyIncident",40,140,700,330);
             PText(incident,"ReviewEvent","事件："+(r.eventTitle??State.Current.title),26,20,648,36,18,PlanGray);

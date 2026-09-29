@@ -19,6 +19,7 @@ namespace PatchWorkSecure.CompanyOps
     [CreateAssetMenu(menuName = "PatchWorkSecure/情シスの一年/キャラの短い反応")]
     public sealed class OpsReactionBank : ScriptableObject
     {
+        public const string ProductionVoice = "ElevenLabs / Hinata V9-2";
         public OpsReactionLine[] lines = Array.Empty<OpsReactionLine>();
         public bool HasAudio => lines != null && lines.Any(l => l != null && l.clip != null);
         public static OpsReactionLine[] Defaults()

@@ -45,6 +45,10 @@ namespace PatchWorkSecure.CompanyOps
             states.pressedColor=new Color(.96f,.96f,.96f);states.colorMultiplier=1;button.colors=states;
             button.GetComponent<Shadow>().effectColor=primary?Hex("d94a70"):Hex("c7d0e0");
             button.GetComponent<Shadow>().effectDistance=new Vector2(0,-6);
+            // 厚みはボタン背面の独立画像。グラデーションやメッシュ効果の順序に依存しない。
+            var body=button.GetComponent<RectTransform>();
+            var depth=PImage(body.parent,button.name+"Depth",PlanningArt.round20,body.anchoredPosition.x,-body.anchoredPosition.y+6,body.rect.width,body.rect.height,primary?Hex("d94a70"):Hex("c7d0e0"),true);
+            depth.SetSiblingIndex(body.GetSiblingIndex());button.GetComponent<Shadow>().enabled=false;
             var label=button.GetComponentInChildren<TMPro.TextMeshProUGUI>();label.fontSizeMax=primary?24:button.name=="ContinueYear"?21:18;label.fontSizeMin=primary?20:14;label.fontSize=label.fontSizeMax;
             bool large=primary||button.name=="ContinueYear";float padding=large?58:26;var rect=button.GetComponent<RectTransform>();
             label.alignment=TMPro.TextAlignmentOptions.MidlineLeft;label.rectTransform.anchorMin=label.rectTransform.anchorMax=label.rectTransform.pivot=new Vector2(0,1);

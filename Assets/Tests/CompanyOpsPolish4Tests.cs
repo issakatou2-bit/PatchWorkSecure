@@ -33,6 +33,17 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [UnityTest] public IEnumerator Polish4_16_四つのタイトルボタンは六ピクセルの厚みがある()
+        {
+            yield return PolishTitle();
+            foreach(string name in new[]{"NewYear","ContinueYear","HomeGuide","HomeSettings"})
+            {
+                var body=Find<RectTransform>(name);var depth=Find<Image>(name+"Depth");Assert.AreEqual(body.sizeDelta,depth.rectTransform.sizeDelta);
+                Assert.AreEqual(body.anchoredPosition+Vector2.down*6,depth.rectTransform.anchoredPosition);Assert.Less(depth.transform.GetSiblingIndex(),body.GetSiblingIndex());Assert.IsFalse(depth.raycastTarget);
+                ColorUtility.TryParseHtmlString(name=="NewYear"?"#d94a70":"#c7d0e0",out var color);Assert.AreEqual(color,depth.color);
+            }
+            CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");PolishCapture(16);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_15_タイトル文字は白三ピクセルと薄ピンク六ピクセルの輪郭になる()
         {
             yield return PolishTitle();var title=Find<RectTransform>("Title");

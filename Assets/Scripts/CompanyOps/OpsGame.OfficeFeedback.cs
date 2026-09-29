@@ -25,7 +25,9 @@ namespace PatchWorkSecure.CompanyOps
                 int placeholders=0,slot=0;
                 for(int i=0;i<ids.Length;i++)
                 {
-                    int level=State.Level(ids[i]);if(level==0&&placeholders++>=3)continue;float x=16+slot++*34;
+                    int level=State.Level(ids[i]);
+                    // 未導入の置き場所は導入画面を開いている間だけ示す。通常のオフィスには重ねない。
+                    if(level==0&&(tab!=1||placeholders++>=3))continue;float x=16+slot++*34;
                     if(level==0)
                     {
                         var device=Rect(room.transform,"RoomDevice_"+ids[i],area.width-40-(placeholders-1)*34,area.height-44,26,30);

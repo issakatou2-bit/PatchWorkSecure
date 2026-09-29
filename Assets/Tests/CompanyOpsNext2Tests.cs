@@ -217,14 +217,15 @@ namespace PatchWorkSecure.Tests
             foreach(string room in new[]{"server","office","meeting"})
             {
                 var button=Find<UnityEngine.UI.Button>("Room_"+room);var rect=button.GetComponent<RectTransform>();Canvas.ForceUpdateCanvases();
-                var pointer=new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current){position=RectTransformUtility.WorldToScreenPoint(null,rect.TransformPoint(new Vector2(rect.rect.xMin+20,rect.rect.yMax-16)))};
+                // 動く泡の操作範囲を避け、固定の部屋名の位置で部屋ボタンを確認する。
+                var pointer=new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current){position=RectTransformUtility.WorldToScreenPoint(null,rect.TransformPoint(new Vector2(rect.rect.xMin+100,rect.rect.yMax-16)))};
                 var hits=new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointer,hits);Assert.AreEqual(button,hits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>());
                 Click("Room_"+room);yield return new WaitForSecondsRealtime(.5f);
                 var cards=UnityEngine.Object.FindObjectsByType<RectTransform>().Where(t=>t.name.StartsWith("Project_")).ToArray();Assert.IsNotEmpty(cards);foreach(var c in cards)Assert.AreEqual(room,OpsGame.ProjectRoom(c.name.Substring(8)));
                 Click("ClosePlanner");yield return null;
             }
-            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(1.6f);Assert.IsNotNull(Find<UnityEngine.UI.Image>("RoomDevice_mfa"));Assert.IsNotNull(Find<RectTransform>("RoomDevice_inventory").Find("UninstalledFrame"));Capture("124-next-office-rooms");
-            Click("Room_office");yield return new WaitForSecondsRealtime(.5f);Click("Details_inventory");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Buy_inventory");Click("Buy_inventory");yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual(1,game.State.Level("inventory"));
+            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(1.6f);Assert.IsNotNull(Find<UnityEngine.UI.Image>("RoomDevice_mfa"));Assert.IsFalse(game.Surface.GetComponentsInChildren<OpsIncidentGraphic>().Any(g=>g.name=="UninstalledFrame"));Capture("124-next-office-rooms");
+            Click("Room_office");yield return new WaitForSecondsRealtime(.5f);Assert.IsNotNull(Find<RectTransform>("RoomDevice_inventory").Find("UninstalledFrame"));Click("Details_inventory");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Buy_inventory");Click("Buy_inventory");yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual(1,game.State.Level("inventory"));
             game.OpenTab(0);Click("Room_reception");yield return new WaitForSecondsRealtime(.5f);CheckPointer("ReceptionBrief");Click("CloseDialog");
             game.OpenTab(0);SetEvent(game.State,"ransom-backup");game.State.staffExperience[1]=3;game.State.supportOrder="investigate";game.BeginIncident();game.Resolve("scope");
             float limit=Time.realtimeSinceStartup+5;while(!UnityEngine.Object.FindObjectsByType<OpsRoomHelperMotion>().Any()&&Time.realtimeSinceStartup<limit)yield return null;

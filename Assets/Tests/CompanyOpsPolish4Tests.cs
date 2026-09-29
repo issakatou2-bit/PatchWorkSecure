@@ -146,7 +146,8 @@ namespace PatchWorkSecure.Tests
         }
         [UnityTest] public IEnumerator Polish4_04_未導入枠は一ピクセル半透明で部屋の隅に収まる()
         {
-            yield return PolishPlanning();
+            yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();game.OpenTab(1);yield return new WaitForSecondsRealtime(.3f);
+            Assert.IsNotEmpty(Find<RectTransform>("OfficeStage").GetComponentsInChildren<OpsIncidentGraphic>().Where(g=>g.name=="UninstalledFrame"));
             foreach(var frame in Find<RectTransform>("OfficeStage").GetComponentsInChildren<OpsIncidentGraphic>().Where(g=>g.name=="UninstalledFrame"))
             {
                 Assert.AreEqual(1,frame.StrokeWidth);Assert.AreEqual(.5f,frame.color.a);
@@ -155,6 +156,17 @@ namespace PatchWorkSecure.Tests
                 Assert.LessOrEqual(room.GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.name=="UninstalledFrame"),3);
             }
             PolishCapture(4);LogAssert.NoUnexpectedReceived();
+        }
+        [UnityTest] public IEnumerator Polish4_17_未導入の置き場所は導入を開いた間だけ表示する()
+        {
+            yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
+            Assert.IsFalse(game.Surface.GetComponentsInChildren<OpsIncidentGraphic>().Any(g=>g.name=="UninstalledFrame"));PolishCapture(17);
+            game.OpenTab(1);yield return new WaitForSecondsRealtime(.3f);
+            Assert.IsNotEmpty(game.Surface.GetComponentsInChildren<OpsIncidentGraphic>().Where(g=>g.name=="UninstalledFrame"));PolishCapture(17,"install");
+            Click("ClosePlanner");yield return null;
+            Assert.IsFalse(game.Surface.GetComponentsInChildren<OpsIncidentGraphic>().Any(g=>g.name=="UninstalledFrame"));
+            Click("Room_office");yield return null;Assert.IsNotNull(Find<RectTransform>("RoomDevice_inventory").Find("UninstalledFrame"));Click("ClosePlanner");yield return null;
+            Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator Polish4_03_ランプはサーバー室の名札の下に収まる()
         {

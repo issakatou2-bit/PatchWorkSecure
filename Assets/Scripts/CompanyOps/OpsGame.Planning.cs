@@ -88,8 +88,8 @@ namespace PatchWorkSecure.CompanyOps
             PlanningRooms(stage);
             if(State.decisionDepthRules>0)
             {
-                var time=PCard(stage,"PlanningTimeBadge",166,18,146,30,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
-                PText(time,"PlanningTimeLabel",State.IncidentTimeLabel,0,0,146,30,14,Color.white,true,true);
+                var time=PCard(stage,"PlanningTimeBadge",250,16,146,34,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
+                PText(time,"PlanningTimeLabel",State.IncidentTimeLabel,0,0,146,34,14,Color.white,true,true);
             }
             if(State.CultureEarlySignal)
             {
@@ -131,7 +131,7 @@ namespace PatchWorkSecure.CompanyOps
             var counter=PCard(stage,"BubbleCounter",16,16,220,34,Color.white,16,false);
             PText(counter,"BubbleDone","困りごと "+State.BubbleDone+" / 4",12,0,196,34,16);
             // 時間帯はカウンターの右へ。どちらもマップの公開情報。
-            var clock=stage.Find("PlanningTimeBadge") as RectTransform;if(clock!=null)clock.anchoredPosition=new Vector2(250,-18);
+            var clock=stage.Find("PlanningTimeBadge") as RectTransform;if(clock!=null)clock.anchoredPosition=new Vector2(250,-16);
             for(int i=0;i<4;i++)if(State.BubbleAvailable(i))
             {
                 int index=i,kind=State.BubbleKind(i);Color tint=kind==7?Hex("e0a100"):kind==6?PlanPink:PlanBlue;

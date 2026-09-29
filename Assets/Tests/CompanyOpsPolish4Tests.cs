@@ -24,6 +24,13 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        [UnityTest] public IEnumerator Polish4_05_時間帯は困りごとと同じ高さでマップ内に収まる()
+        {
+            yield return PolishPlanning();var time=Find<RectTransform>("PlanningTimeBadge");var counter=Find<RectTransform>("BubbleCounter");
+            Assert.AreEqual(counter.anchoredPosition.y,time.anchoredPosition.y);Assert.AreEqual(counter.rect.height,time.rect.height);
+            Assert.Greater(time.anchoredPosition.x,counter.anchoredPosition.x+counter.rect.width);Assert.GreaterOrEqual(-time.anchoredPosition.y,0);
+            Assert.Less(time.anchoredPosition.x+time.rect.width,Find<RectTransform>("OfficeStage").rect.width);PolishCapture(5);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_04_未導入枠は一ピクセル半透明で部屋の隅に収まる()
         {
             yield return PolishPlanning();

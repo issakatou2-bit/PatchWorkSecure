@@ -14,6 +14,9 @@ namespace PatchWorkSecure.CompanyOps
             IncidentShape(screen,"TitleBottomVeil","title-bottom-veil",0,780,1600,120,Color.white);
             SeasonLayer(Rect(screen,"TitleSeason",0,0,1600,900),1600,900,0);
             var brand=Rect(screen,"TitleBrand",40,40,700,400);brand.localScale=Vector3.one*.84f;
+            brand.pivot=new Vector2(0,.5f);brand.anchoredPosition+=new Vector2(0,-168);
+            // HTMLは下向きYなので CSS rotate(-2deg) はUnityの +2度。
+            brand.localEulerAngles=new Vector3(0,0,2);
             var logo=PImage(brand,"TitleLogoWordmark",PlanningArt.logoWordmark,50,0,640,246);Reveal(logo);if(Application.isPlaying)logo.GetComponent<OpsUIReveal>().Duration=.9f;
             var icon=PImage(brand,"TitleLogoIcon",PlanningArt.logoIcon,-24,118,132,132);icon.pivot=new Vector2(.5f,.5f);icon.anchoredPosition+=new Vector2(66,-66);icon.localEulerAngles=new Vector3(0,0,8);
             PText(brand,"TitlePinkShadow","情シスの一年",76,264,620,60,46,PlanPink);

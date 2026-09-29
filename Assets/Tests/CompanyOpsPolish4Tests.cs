@@ -29,6 +29,16 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        private IEnumerator PolishTitle()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
+        }
+        [UnityTest] public IEnumerator Polish4_13_ロゴの最終角度はCSSのマイナス二度と一致する()
+        {
+            yield return PolishTitle();var brand=Find<RectTransform>("TitleBrand");Assert.AreEqual(2,Mathf.DeltaAngle(0,brand.localEulerAngles.z),.01f);
+            Assert.AreEqual(new Vector2(0,.5f),brand.pivot);Assert.AreEqual(.84f,brand.localScale.x);Assert.IsFalse(Find<OpsUIReveal>("TitleLogoWordmark").enabled);
+            PolishCapture(13);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_12_把握と時間帯は左上の赤枠外にまとまる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();

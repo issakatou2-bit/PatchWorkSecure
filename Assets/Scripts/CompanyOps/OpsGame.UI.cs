@@ -190,7 +190,7 @@ namespace PatchWorkSecure.CompanyOps
             TickVoice();
             TickMusic();
             AlignDialogFooter(); RefreshTutorial();
-            if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 StopVoice();
                 if (modal != null) CloseDialog(); else Menu();

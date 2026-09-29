@@ -39,6 +39,10 @@ namespace PatchWorkSecure.CompanyOps
         // 山場の確定結果。旧記録はfalse/0のまま保存する。
         public bool peakGoalRecorded, peakGoalMet;
         public int peakTrustChange, peakBudgetBonus, peakScoreBonus;
+        // 旧記録のfalseは点数なし。表示・計算とも50点として扱う。
+        public bool minigameRecorded, delegated;
+        public int minigameScore;
+        public int EffectiveMinigameScore=>minigameRecorded?minigameScore:OpsCatalog.MinigameDelegateScore;
     }
 
     [Serializable] public class OpsInvestmentEffect
@@ -456,6 +460,7 @@ namespace PatchWorkSecure.CompanyOps
             if (learned.Any(t => OpsCatalog.Term(t) == null) || journal.Any(t => t == null || t.Length > 1500)) return false;
             if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > 200 || r.downtime < 0 || r.downtime > 200 ||
                 r.missionBonus<0||r.missionBonus>MissionBudgetReward||
+                (r.minigameRecorded && (r.minigameScore<0 || r.minigameScore>OpsCatalog.MinigameMaxScore || r.delegated&&r.minigameScore!=OpsCatalog.MinigameDelegateScore)) ||
                 !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
                 (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > 5000 || r.closingStability < 0 || r.closingStability > 100)) ||
                 (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > 200 || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > 200 || r.forecast.cost < 0 || r.forecast.cost > 200)) ||

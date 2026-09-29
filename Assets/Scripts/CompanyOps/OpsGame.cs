@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { StopVoice();voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false; resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
+        public void StartYear(int seed) { CancelMinigame();StopVoice();voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false; resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
         public void OpenTab(int next) { roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {

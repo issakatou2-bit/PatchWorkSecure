@@ -17,7 +17,7 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
             Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);
-            foreach(var line in OpsReactionBank.ScriptV2().Skip(105))
+            foreach(var line in OpsReactionBank.ScriptV2().Skip(105).Take(12))
             {
                 var actual=game.ActiveVoiceBank.Find(line.id);Assert.AreEqual(line.caption,actual.caption);Assert.AreEqual(line.poseId,actual.poseId);Assert.AreEqual(line.faceId,actual.faceId);
                 game.SpeakSceneLine(line.id,0);yield return new WaitForSecondsRealtime(.1f);

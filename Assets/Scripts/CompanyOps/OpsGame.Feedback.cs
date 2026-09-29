@@ -83,14 +83,14 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void SetPresentationVolume(float volume)
         {
-            foreach(var source in new[]{countAudio,stampAudio,transitionAudio,bubbleAudio})
+            foreach(var source in new[]{countAudio,stampAudio,transitionAudio,bubbleAudio,minigameAudio})
                 if(source!=null){source.volume=volume*.65f;if(volume<=0)source.Stop();}
             if(dangerAudio!=null){dangerAudio.volume=volume*.12f;if(volume<=0)dangerAudio.Stop();}
             if(rejectAudio!=null){rejectAudio.volume=volume*.25f;if(volume<=0)rejectAudio.Stop();}
         }
         private void StopPresentationSounds()
         {
-            foreach(var source in new[]{countAudio,stampAudio,transitionAudio,dangerAudio,rejectAudio,bubbleAudio})if(source!=null)source.Stop();
+            foreach(var source in new[]{countAudio,stampAudio,transitionAudio,dangerAudio,rejectAudio,bubbleAudio,minigameAudio})if(source!=null)source.Stop();
         }
         private void SetMusic(AudioClip clip)
         {

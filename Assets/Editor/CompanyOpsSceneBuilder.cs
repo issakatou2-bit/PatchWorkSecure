@@ -33,6 +33,7 @@ namespace PatchWorkSecure.EditorTools
             surface.pivot = new Vector2(.5f, .5f); surface.sizeDelta = new Vector2(1600, 900);
             var controller = new GameObject("CompanyOpsGame").AddComponent<OpsGame>();
             controller.Surface = surface;
+            AttachMinigame(controller);
             CompanyOpsTypography.Configure(controller);
             controller.OfficeArt = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Office/office-topdown.png");
             controller.Navigator = AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
@@ -69,6 +70,13 @@ namespace PatchWorkSecure.EditorTools
                 EditorBuildSettings.scenes = EditorBuildSettings.scenes.Concat(new[] { new EditorBuildSettingsScene(ScenePath, true) }).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("[CompanyOps] 保存完了: " + ScenePath);
+        }
+
+        public static void AttachMinigame(OpsGame controller)
+        {
+            var host=controller.GetComponent<OpsMinigameHost>();
+            if(host==null)host=controller.gameObject.AddComponent<OpsMinigameHost>();
+            host.Owner=controller;
         }
 
         [MenuItem("PatchWorkSecure/新しい試作/ひなたの台本と試遊用音声を更新")]

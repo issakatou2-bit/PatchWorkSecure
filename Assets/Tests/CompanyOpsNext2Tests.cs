@@ -121,7 +121,7 @@ namespace PatchWorkSecure.Tests
         {
             var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(52,lines.Count(l=>l.fullSpeech));Assert.AreEqual(11,lines.Count(l=>l.extra));
             foreach(var l in lines){Assert.IsNotEmpty(l.caption);Assert.IsNotEmpty(l.faceId);Assert.IsNotEmpty(l.poseId);Assert.IsNull(l.clip);}
-            foreach(OpsReaction r in System.Enum.GetValues(typeof(OpsReaction)))Assert.AreEqual(6,lines.Count(l=>!l.fullSpeech&&!l.extra&&l.reaction==r));
+            foreach(OpsReaction r in System.Enum.GetValues(typeof(OpsReaction)))Assert.AreEqual(6,lines.Count(l=>!l.fullSpeech&&!l.extra&&!l.id.StartsWith("mg_")&&l.reaction==r));
             for(int m=0;m<12;m++){var s=new OpsState(1){month=m};Assert.AreEqual("mission_accept_"+(m+1).ToString("00"),OpsGame.MissionVoiceId(s));}
             var random=new OpsState(14,true);SetEvent(random,"vuln-web");Assert.AreEqual("mission_accept_06",OpsGame.MissionVoiceId(random));
         }

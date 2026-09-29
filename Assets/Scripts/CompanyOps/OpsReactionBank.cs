@@ -145,6 +145,22 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="next_rank", caption="次のランクまで、あとちょっと！", scene="次のランクが近い", faceId="face_determined", poseId="pose_fists", fullSpeech=true },
             new OpsReactionLine { id="annual_ss", caption="運用ランクSS！　……うそ、ほんとに？　最高の一年だよ！", scene="年間評価SS", faceId="face_crying", poseId="pose_jump", fullSpeech=true },
             new OpsReactionLine { id="annual_s", caption="運用ランクS！　胸を張っていい一年だったね！", scene="年間評価S", faceId="face_proud", poseId="pose_jump", fullSpeech=true },
+            new OpsReactionLine { id="mg_start_01", caption="よーし、いくよっ！", scene="ミニゲームの始まり", faceId="face_determined", poseId="pose_fists" },
+            new OpsReactionLine { id="mg_start_02", caption="さあ、腕の見せどころ！", scene="ミニゲームの始まり", faceId="face_doya", poseId="pose_point" },
+            new OpsReactionLine { id="mg_combo_01", caption="その調子！", scene="ミニゲームで連続成功", faceId="face_sparkle", poseId="pose_fists" },
+            new OpsReactionLine { id="mg_combo_02", caption="すごいすごい、止まらないね！", scene="ミニゲームで連続成功", faceId="face_sparkle", poseId="pose_jump" },
+            new OpsReactionLine { id="mg_miss_01", caption="あっ、今のは惜しい！", scene="ミニゲームで失敗", faceId="face_worried", poseId="pose_startled" },
+            new OpsReactionLine { id="mg_miss_02", caption="大丈夫、次いこ！", scene="ミニゲームで失敗", faceId="face_normal", poseId="pose_please" },
+            new OpsReactionLine { id="mg_end_good", caption="完璧〜っ！　プロの仕事だね！", scene="ミニゲームの高評価", faceId="face_sparkle", poseId="pose_jump" },
+            new OpsReactionLine { id="mg_end_ok", caption="うん、しっかり守れたよ！", scene="ミニゲームの普通の評価", faceId="face_proud", poseId="pose_peace" },
+            new OpsReactionLine { id="mg_end_bad", caption="う〜ん、次はもっとうまくやろ！", scene="ミニゲームの低評価", faceId="face_sad", poseId="pose_think" },
+            new OpsReactionLine { id="mg_delegate", caption="じゃあ、ここはみんなに任せちゃお！", scene="社員に任せた", faceId="face_tease", poseId="pose_wave" },
+            new OpsReactionLine { id="mg_contain_cut", caption="ナイス遮断！", scene="封じ込めで感染を切り離す", faceId="face_doya", poseId="pose_shield" },
+            new OpsReactionLine { id="mg_contain_false", caption="それ、正常な端末だよ〜！", scene="封じ込めで正常な端末を止めた", faceId="face_akire", poseId="pose_startled" },
+            new OpsReactionLine { id="mg_mail_catch", caption="見破った！　それ、怪しいメール！", scene="メールの仕分けで見破る", faceId="face_doya", poseId="pose_magnifier" },
+            new OpsReactionLine { id="mg_mail_miss", caption="あっ、それ開いちゃだめなやつ……！", scene="メールの仕分けで見逃す", faceId="face_panic", poseId="pose_startled" },
+            new OpsReactionLine { id="mg_mfa_block", caption="弾いた！　本人じゃないね！", scene="多要素認証で偽の依頼を弾く", faceId="face_doya", poseId="pose_armscross" },
+            new OpsReactionLine { id="mg_mfa_breach", caption="その人、今ログインしてないよ〜！", scene="多要素認証で許可してしまう", faceId="face_shocked", poseId="pose_startled" },
         };
     }
 
@@ -166,7 +182,7 @@ namespace PatchWorkSecure.CompanyOps
             if (bank == null || bank.lines == null || double.IsNaN(time) || double.IsInfinity(time)) return false;
             if (!preview&&(time - lastTime < .8 || time - lastTime < 4 && Priority(cue) <= lastPriority)) return false;
             if (!preview&&recent.TryGetValue(cue, out double previous) && time - previous < 8) return false;
-            var pool = bank.lines.Where(l => l != null && !l.fullSpeech && !l.extra && l.reaction == cue && !string.IsNullOrWhiteSpace(l.caption)).ToArray();
+            var pool = bank.lines.Where(l => l != null && !l.fullSpeech && !l.extra && !(l.id??"").StartsWith("mg_") && l.reaction == cue && !string.IsNullOrWhiteSpace(l.caption)).ToArray();
             if (pool.Length == 0) return false;
             // 音源が一部だけ届いた段階でも、字幕と再生する台詞を一致させる。
             var alternatives = pool.Where(l => l.id != lastId && l.caption != lastCaption && (l.clip == null || l.clip != lastClip)).ToArray();

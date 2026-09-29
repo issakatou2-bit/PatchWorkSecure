@@ -240,6 +240,25 @@ namespace PatchWorkSecure.Tests
             game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Assert.AreEqual(1,game.State.Latest.missionBonus);Capture("123-next-mission-reward");Click("MissionConversation");yield return new WaitForSecondsRealtime(.5f);CheckPointer("CloseDialog");
             var old=new OpsState(14);old.missionBudgetRules=0;old.Act(old.CurrentMission.actionA);old.Act(old.CurrentMission.actionB);money=old.budget;old.BeginIncident();Assert.AreEqual(money,old.budget);Assert.IsTrue(old.Valid());LogAssert.NoUnexpectedReceived();
         }
+        private static void PressPresentationEnter(System.Action assertion)
+        {
+            var settings=InputSystem.settings;var focus=settings.editorInputBehaviorInPlayMode;var background=settings.backgroundBehavior;
+            Keyboard keyboard=null;
+            try
+            {
+                // Gameビューのフォーカスに検証を依存させない。実際の入力イベントを処理し、押下を確認してから操作する。
+                settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+                settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+                keyboard=InputSystem.AddDevice<Keyboard>();keyboard.MakeCurrent();InputSystem.EnableDevice(keyboard);
+                Assert.IsTrue(keyboard.enabled);InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();
+                Assert.IsTrue(keyboard.enterKey.wasPressedThisFrame);assertion();
+            }
+            finally
+            {
+                if(keyboard!=null)InputSystem.RemoveDevice(keyboard);
+                settings.editorInputBehaviorInPlayMode=focus;settings.backgroundBehavior=background;
+            }
+        }
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -247,18 +266,13 @@ namespace PatchWorkSecure.Tests
             game.StartYear(14);string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.8f);
             Assert.AreEqual(game.State.Current.name,Find<TextMeshProUGUI>("CalendarMonth").text);Assert.IsFalse(game.PhasePresentationCanSkip);Capture("122-next-calendar");
             // スキップに使った入力を、背後の行動ボタンへ通さない。初回は短縮しない。
-            var keyboard=InputSystem.AddDevice<Keyboard>();
-            // 仮想キーボードを明示的に現在のデバイスにし、実入力の押下を確認してから検証する。
-            try{keyboard.MakeCurrent();InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Assert.IsTrue(keyboard.enterKey.wasPressedThisFrame);Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
-            finally{InputSystem.RemoveDevice(keyboard);}
+            PressPresentationEnter(()=>{Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));});
             yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));game.BeginIncident();state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.6f);
             Assert.AreEqual("緊急",Find<TextMeshProUGUI>("IncidentEntryTitle").text);Capture("122-next-incident-entry");yield return new WaitForSecondsRealtime(.9f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
             game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);
             StringAssert.Contains(game.State.Latest.loss==0?"金銭被害なし":game.State.Latest.loss.ToString(),Find<TextMeshProUGUI>("MonthlyDamageStampText").text);
             game.Next();yield return new WaitForSecondsRealtime(.6f);Assert.IsTrue(game.PhasePresentationCanSkip);state=JsonUtility.ToJson(game.State);
-            keyboard=InputSystem.AddDevice<Keyboard>();
-            try{keyboard.MakeCurrent();InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Assert.IsTrue(keyboard.enterKey.wasPressedThisFrame);Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
-            finally{InputSystem.RemoveDevice(keyboard);}
+            PressPresentationEnter(()=>{Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));});
             yield return null;yield return null;
             Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="PhasePresentation"));CheckPointer("Action_listen");LogAssert.NoUnexpectedReceived();
         }

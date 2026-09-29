@@ -298,7 +298,8 @@ namespace PatchWorkSecure.Tests
         private static IEnumerator WaitForResolution(OpsGame game)
         {
             // 実際のスキップボタンだけを使う。初回は省略せず最後まで再生する。
-            float deadline=Time.realtimeSinceStartup+8;
+            // 全画面を連続検証すると初回メッシュ生成等も待機に含まれる。完了の断言は維持し、監視上限だけ20秒にする。
+            float deadline=Time.realtimeSinceStartup+20;
             while(game.ResolutionActive && Time.realtimeSinceStartup<deadline)
             {
                 if(game.CanSkipResolution) { Click("SkipResolution"); yield return null; }

@@ -23,7 +23,7 @@ public const int JuneLossGoal=8, JuneStopGoal=8, SeptemberLossGoal=5, SeptemberS
 public const int DecemberLossGoal=3, DecemberStopGoal=4, MarchLossGoal=6, MarchStopGoal=7;
 public const int PeakTrustReward=6, PeakBudgetReward=8, PeakScoreReward=60, PeakTrustPenalty=4;
 public const int AnnualSS=2135, AnnualS=1880, AnnualA=1563, AnnualB=1151, LegacyAnnualA=1350, LegacyAnnualB=750;
-public const int NextRankVoiceDistance=50, VoiceScriptLineCount=133;
+public const int NextRankVoiceDistance=50, VoiceScriptLineCount=153;
 public const int MinigameDelegateScore=50, MinigameMaxScore=100, MinigameS=85, MinigameA=70, MinigameB=50, MinigameGood=80;
 public const float MinigameSeconds=20;
 public const double MinigameResultInfluence=.4;

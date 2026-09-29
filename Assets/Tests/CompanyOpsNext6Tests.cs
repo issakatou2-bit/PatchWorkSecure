@@ -12,6 +12,43 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Test] public void Next6Common_格言二十行を一般反応と混ぜず台本通り保持する()
+        {
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(153,lines.Length);Assert.AreEqual(20,lines.Count(l=>l.id.StartsWith("maxim_")));Assert.AreEqual(54,OpsReactionBank.Defaults().Length);
+            var csv=System.IO.File.ReadAllLines("Docs/Voice/hinata-script-v2.csv").Where(l=>l.StartsWith("maxim_"));
+            foreach(var row in csv)
+            {
+                var cells=row.Split(',');var line=lines.Single(l=>l.id==cells[0]);Assert.AreEqual(cells[3],line.caption);Assert.AreEqual(cells[4],line.faceId);Assert.AreEqual(cells[5],line.poseId);Assert.IsNull(line.clip);Assert.IsFalse(OpsReactionBank.IsGeneralReaction(line));
+            }
+            var bank=ScriptableObject.CreateInstance<OpsReactionBank>();bank.lines=lines;var director=new OpsReactionDirector(24);
+            for(int i=0;i<100;i++){Assert.IsTrue(director.TryChoose(bank,OpsReaction.Think,i*10,out var line,true));Assert.IsTrue(OpsReactionBank.IsGeneralReaction(line));}
+            Object.DestroyImmediate(bank);
+        }
+        [UnityTest] public IEnumerator Next6CommonUI_音声なし消音字幕設定格言と研修の進行を守る()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            game.StartYear(14);yield return null;game.StopVoice();string before=JsonUtility.ToJson(game.State);
+            game.OpenMailTraining();yield return new WaitForSecondsRealtime(.3f);Capture("next6-c-training-start");Click("MinigameStart");yield return new WaitForSecondsRealtime(.1f);var mail=(OpsMailMinigame)game.Minigame;
+            while(mail.Phase==OpsMinigamePhase.Playing)
+            {
+                if(mail.CanAnswer){bool bad=mail.Current.Suspicious;Click(bad?"MailReport":"MailSafe");if(bad){Assert.AreEqual("mg_mail_catch",game.LastReactionId);Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("NavigatorSpeech").text);}game.TickMinigame(.5f);}
+                yield return null;
+            }
+            yield return new WaitForSecondsRealtime(3.2f);Assert.IsFalse(game.MinigameCounting);StringAssert.StartsWith("maxim_",game.LastReactionId);Assert.IsFalse(game.PortraitVoicePlaying);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);
+            Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("MinigameMaxim").text);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Capture("next6-c-maxim-result");
+            int xp=game.State.staffExperience[0],work=game.State.capacity;Click("MinigameContinue");Assert.IsFalse(game.MinigameActive);Assert.IsFalse(game.PortraitVoicePlaying);
+            if(game.VoicePending){var pending=(OpsReactionLine)typeof(OpsGame).GetField("pendingVoice",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(game);Assert.IsFalse(pending.id.StartsWith("maxim_"));}
+            game.StopVoice();Assert.IsFalse(game.VoicePending);Assert.AreEqual(xp+2,game.State.staffExperience[0]);Assert.AreEqual(work-1,game.State.capacity);Assert.IsTrue(game.State.Valid());
+            var fixture=DecisionFixture("remote",false);game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);
+            // 設定値だけを切り替え、実ユーザーのPlayerPrefsは変更しない。
+            typeof(OpsGame).GetField("muted",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).SetValue(game,true);
+            game.BeginIncident();while(game.PhasePresentationRunning)yield return null;game.ChooseResponse("scope");Click("MinigameStart");yield return new WaitForSecondsRealtime(.1f);var mfa=(OpsMfaMinigame)game.Minigame;
+            while(mfa.Current.Legitimate){Click("MfaAllow");game.TickMinigame(.7f);yield return null;}
+            Click("MfaAllow");Assert.AreEqual("mg_mfa_breach",game.LastReactionId);Assert.IsFalse(game.PortraitVoicePlaying);game.TickMinigame(31);yield return new WaitForSecondsRealtime(3.2f);
+            Assert.AreEqual("maxim_mfa",game.LastReactionId);StringAssert.Contains("心当たり",Find<TextMeshProUGUI>("MinigameMaxim").text);Capture("next6-d-maxim-result");Click("MinigameContinue");yield return WaitForResolution(game);
+            typeof(OpsGame).GetProperty("CaptionsEnabled").SetValue(game,false);game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;game.ChooseResponse("scope");Click("MinigameStart");game.TickMinigame(31);yield return new WaitForSecondsRealtime(3.2f);
+            Assert.IsEmpty(Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.IsEmpty(Find<TextMeshProUGUI>("MinigameMaxim").text);Capture("next6-d-captions-off");Click("MinigameContinue");yield return WaitForResolution(game);Assert.IsTrue(game.State.Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         private static OpsState DecisionFixture(string profile,bool benign,int seed=0)
         {
             for(int n=seed;n<seed+10000;n++)

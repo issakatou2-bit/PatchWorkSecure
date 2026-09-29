@@ -40,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
             if(q!=null&&renderedMfaCount!=game.Count)
             {
                 renderedMfaCount=game.Count;
-                if(mfaRequest!=null){mfaRequest.gameObject.SetActive(false);Destroy(mfaRequest.gameObject);}
+                RemoveDecisionCard(ref mfaRequest);
                 mfaRequest=PCard(mfaPhone,"MfaRequest",18,60,328,game.NumberMatch?246:210,Color.white,22);DecisionPanel(mfaRequest);MinigameGloss(mfaRequest,328,210);
                 PText(mfaRequest,"MfaRequestTitle","サインインを承認しますか？",18,18,292,32,20);
                 string[] names={"アカウント","場所","アプリ","時刻"},values={game.People[q.Who].Name+"さん",q.Place,q.App,"いま"};

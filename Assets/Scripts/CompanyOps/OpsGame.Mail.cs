@@ -49,6 +49,13 @@ namespace PatchWorkSecure.CompanyOps
             KitGradient(panel.GetComponent<UnityEngine.UI.Image>(),Color.white,Color.white);
             var outline=panel.gameObject.AddComponent<UnityEngine.UI.Outline>();outline.effectColor=Color.white;outline.effectDistance=new Vector2(3,-3);
         }
+        private void RemoveDecisionCard(ref RectTransform card)
+        {
+            if(card==null)return;
+            // PCardの影は兄弟。カードだけ消すと影が通数分重なって黒くなる。
+            var shadow=card.parent.Find(card.name+"Shadow");if(shadow!=null){shadow.gameObject.SetActive(false);Destroy(shadow.gameObject);}
+            card.gameObject.SetActive(false);Destroy(card.gameObject);card=null;
+        }
         // 手本の手がかり／ログ欄。すべての記録をスクロールで読める。
         private RectTransform DecisionScroll(Transform parent,string name,float x,float y,float w,float h)
         {
@@ -76,7 +83,7 @@ namespace PatchWorkSecure.CompanyOps
             var q=game.Phase==OpsMinigamePhase.Brief?null:game.Current;
             if(q!=null&&renderedMailNumber!=game.Number)
             {
-                if(mailCard!=null){mailCard.gameObject.SetActive(false);Destroy(mailCard.gameObject);}
+                RemoveDecisionCard(ref mailCard);
                 renderedMailNumber=game.Number;
                 mailCard=PCard(mailStack,"MailCard",0,0,760,520,Color.white,22);DecisionPanel(mailCard);MinigameGloss(mailCard,760,520);mailCard.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
                 var swipe=mailCard.gameObject.AddComponent<OpsMailPointer>();swipe.Owner=this;swipe.Swipe=true;

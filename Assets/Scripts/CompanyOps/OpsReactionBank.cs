@@ -25,7 +25,8 @@ namespace PatchWorkSecure.CompanyOps
         public OpsReactionLine[] lines = Array.Empty<OpsReactionLine>();
         public bool HasAudio => lines != null && lines.Any(l => l != null && l.clip != null);
         public OpsReactionLine Find(string id) => lines?.FirstOrDefault(l => l!=null && l.id==id);
-        public static OpsReactionLine[] Defaults() => ScriptV2().Where(l => !l.fullSpeech && !l.extra && !(l.id??"").StartsWith("mg_")).ToArray();
+        public static OpsReactionLine[] Defaults() => ScriptV2().Where(IsGeneralReaction).ToArray();
+        public static bool IsGeneralReaction(OpsReactionLine line)=>line!=null&&!line.fullSpeech&&!line.extra&&!(line.id??"").StartsWith("mg_")&&!(line.id??"").StartsWith("maxim_");
         // 台本v2の字幕・表情・ポーズ。音声が無い取得直後の環境でも同じ内容を使う。
         public static OpsReactionLine[] ScriptV2() => new[] {
             new OpsReactionLine { id="think_01", caption="う〜ん……", scene="考える", reaction=OpsReaction.Think, faceId="face_normal", poseId="pose_think", fullSpeech=false, extra=false },
@@ -161,6 +162,26 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="mg_mail_miss", caption="あっ、それ開いちゃだめなやつ……！", scene="メールの仕分けで見逃す", faceId="face_panic", poseId="pose_startled" },
             new OpsReactionLine { id="mg_mfa_block", caption="弾いた！　本人じゃないね！", scene="多要素認証で偽の依頼を弾く", faceId="face_doya", poseId="pose_armscross" },
             new OpsReactionLine { id="mg_mfa_breach", caption="その人、今ログインしてないよ〜！", scene="多要素認証で許可してしまう", faceId="face_shocked", poseId="pose_startled" },
+            new OpsReactionLine { id="maxim_backup", caption="バックアップは、戻せてこそバックアップ、だよ！", scene="戻せることを確かめる", faceId="face_doya", poseId="pose_point" },
+            new OpsReactionLine { id="maxim_hurry", caption="「急いで」「内密に」は、詐欺の合図だよ！", scene="確かめてから信じる", faceId="face_alert", poseId="pose_point" },
+            new OpsReactionLine { id="maxim_sender", caption="名前より中身！　差出人は、確かめるものだよ！", scene="確かめてから信じる", faceId="face_determined", poseId="pose_magnifier" },
+            new OpsReactionLine { id="maxim_link", caption="リンクは押す前に、行き先を確かめよ！", scene="確かめてから信じる", faceId="face_normal", poseId="pose_point" },
+            new OpsReactionLine { id="maxim_account", caption="口座の変更は、いつもの連絡先で確かめる。これ鉄則！", scene="確かめてから信じる", faceId="face_determined", poseId="pose_armscross" },
+            new OpsReactionLine { id="maxim_mfa", caption="心当たりのない承認は、ぜったい拒否だよ！", scene="確かめてから信じる", faceId="face_alert", poseId="pose_shield" },
+            new OpsReactionLine { id="maxim_least", caption="権限は、必要な人に、必要な分だけ！", scene="最小権限", faceId="face_tease", poseId="pose_point" },
+            new OpsReactionLine { id="maxim_layers", caption="壁は一枚より、何枚も重ねるのが強いんだよ！", scene="多層防御", faceId="face_proud", poseId="pose_shield" },
+            new OpsReactionLine { id="maxim_segment", caption="区切っておけば、広がらない！", scene="分離", faceId="face_doya", poseId="pose_armscross" },
+            new OpsReactionLine { id="maxim_uptime", caption="守るのと同じくらい、仕事を止めないのも大事！", scene="止めすぎない", faceId="face_normal", poseId="pose_please" },
+            new OpsReactionLine { id="maxim_baseline", caption="「いつもと違う」が、いちばんのサインだよ！", scene="普段を知る", faceId="face_determined", poseId="pose_magnifier" },
+            new OpsReactionLine { id="maxim_logs", caption="ログは、残しておいてこそ役に立つんだ！", scene="普段を知る", faceId="face_normal", poseId="pose_laptop" },
+            new OpsReactionLine { id="maxim_priority", caption="更新は、危ないものから順番に！", scene="優先順位", faceId="face_determined", poseId="pose_fists" },
+            new OpsReactionLine { id="maxim_restore", caption="止まったときは、支えてる仕組みから戻すの！", scene="依存関係と業務影響", faceId="face_normal", poseId="pose_typing" },
+            new OpsReactionLine { id="maxim_runbook", caption="手順書は、未来の自分への手紙だよ！", scene="手順を残す", faceId="face_sparkle", poseId="pose_peace" },
+            new OpsReactionLine { id="maxim_human", caption="人は間違えるもの。だから、仕組みで守ろ！", scene="性弱説", faceId="face_relieved", poseId="pose_please" },
+            new OpsReactionLine { id="maxim_report", caption="迷ったら相談！　早い報告ほど、被害は小さいよ！", scene="相談文化", faceId="face_sparkle", poseId="pose_wave" },
+            new OpsReactionLine { id="maxim_password", caption="パスワードの使い回しは、ぜったいダメだよ〜！", scene="基本", faceId="face_pout", poseId="pose_armscross" },
+            new OpsReactionLine { id="maxim_usb", caption="知らないUSBは、挿さない！", scene="基本", faceId="face_akire", poseId="pose_point" },
+            new OpsReactionLine { id="maxim_estimate", caption="見積もりは目安。確率じゃなくて、幅で考えるんだよ！", scene="見積もりの読み方", faceId="face_normal", poseId="pose_think" },
         };
     }
 
@@ -182,7 +203,7 @@ namespace PatchWorkSecure.CompanyOps
             if (bank == null || bank.lines == null || double.IsNaN(time) || double.IsInfinity(time)) return false;
             if (!preview&&(time - lastTime < .8 || time - lastTime < 4 && Priority(cue) <= lastPriority)) return false;
             if (!preview&&recent.TryGetValue(cue, out double previous) && time - previous < 8) return false;
-            var pool = bank.lines.Where(l => l != null && !l.fullSpeech && !l.extra && !(l.id??"").StartsWith("mg_") && l.reaction == cue && !string.IsNullOrWhiteSpace(l.caption)).ToArray();
+            var pool = bank.lines.Where(l => OpsReactionBank.IsGeneralReaction(l) && l.reaction == cue && !string.IsNullOrWhiteSpace(l.caption)).ToArray();
             if (pool.Length == 0) return false;
             // 音源が一部だけ届いた段階でも、字幕と再生する台詞を一致させる。
             var alternatives = pool.Where(l => l.id != lastId && l.caption != lastCaption && (l.clip == null || l.clip != lastClip)).ToArray();

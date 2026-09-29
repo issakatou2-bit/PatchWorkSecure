@@ -114,7 +114,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void TryNextRankVoice()
         {
-            if(!Application.isPlaying||homeVisible||State==null||State.phase!=OpsPhase.Planning||State.peakGoalRules==0||State.nextRankVoicePlayed||tutorialStep>=0||
+            if(!Application.isPlaying||homeVisible||MinigameActive||State==null||State.phase!=OpsPhase.Planning||State.peakGoalRules==0||State.nextRankVoicePlayed||tutorialStep>=0||
                 State.NextRankPoints<=0||State.NextRankPoints>OpsCatalog.NextRankVoiceDistance||VoicePending||PortraitVoicePlaying||Time.unscaledTime<voiceBusyUntil||followingVoice.Count>0)return;
             if(SpeakSceneLine("next_rank",.2f)){State.nextRankVoicePlayed=true;Save();}
         }

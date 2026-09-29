@@ -16,6 +16,8 @@ namespace PatchWorkSecure.CompanyOps
         private int minigameStartVoice,minigameComboVoice,minigameMissVoice;
         private float minigameResultAt;
         private bool minigameResultDrawn;
+        private string minigameMaxim="";
+        private bool minigameMaximSpoken;
         private AudioSource minigameAudio;
         public bool MinigameCounting {get;private set;}
         public void ChooseResponse(string response)
@@ -31,7 +33,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             bool practice=session is OpsMailMinigame mail&&mail.Practice;
             if(session==null||session.Phase!=OpsMinigamePhase.Brief||State==null||(practice?State.phase!=OpsPhase.Planning:State.phase!=OpsPhase.Incident)||MinigameActive||ResolutionActive)return false;
-            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;
+            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
             StopVoice();homeVisible=false;NewScreen();
             var shared=screen.Find("SharedBackground");if(shared!=null)shared.gameObject.SetActive(false);
             KitGradient(screen.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));
@@ -133,6 +135,9 @@ namespace PatchWorkSecure.CompanyOps
                 if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();}
             }
             if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn&&Time.unscaledTime>=minigameResultAt)MinigameResult();
+            // 終了の掛け声と数え上げを遮らない。続ける操作はいつでも可能。
+            if(minigameResultDrawn&&!MinigameCounting&&!minigameMaximSpoken&&minigameMaxim!=""&&!VoicePending&&!PortraitVoicePlaying&&Time.unscaledTime>=voiceBusyUntil)
+            {minigameMaximSpoken=true;SpeakSceneLine(minigameMaxim,0,"MinigameMaxim");}
         }
         private TextMeshProUGUI FindMinigameText(string name)=>minigameCanvas.GetComponentsInChildren<TextMeshProUGUI>(true).First(t=>t.name==name);
         public void TickMinigameInput()=>TickDecisionKeys();
@@ -150,13 +155,21 @@ namespace PatchWorkSecure.CompanyOps
         private void MinigameResult()
         {
             minigameResultDrawn=true;var card=MinigameModal(Minigame.Delegated?"社員が対応しました":Minigame.Title+" / 結果");
+            bool decision=Minigame is OpsMailMinigame||Minigame is OpsMfaMinigame;
+            if(decision){card.anchoredPosition=new Vector2(300,-135);card.sizeDelta=new Vector2(680,490);}
             var stamp=PCard(card,"MinigameRankStamp",26,88,170,116,Minigame.Grade=="S"?Hex("e0a100"):PlanPink,22,false);
             KitGradient(stamp.GetComponent<Image>(),Minigame.Grade=="S"?Hex("ffe38a"):Hex("ffb3c6"),Minigame.Grade=="S"?Hex("e0a100"):PlanPink);
             var depth=stamp.gameObject.AddComponent<Shadow>();depth.effectDistance=new Vector2(0,-8);depth.effectColor=Minigame.Grade=="S"?Hex("a87400"):Hex("d94a70");
             PText(stamp,"MinigameGrade",Minigame.Grade,0,0,170,116,92,Color.white,true,true);Shine(stamp,170,116);
             PText(card,"MinigameScore",Minigame.Score+"点",222,94,432,76,48,PlanInk,true,true);
-            PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,224,628,112,16,null,false);
-            PButton(card,"MinigameContinue","結果を反映する",26,352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
+            if(decision)
+            {
+                minigameMaxim=Minigame is OpsMailMinigame mail?mail.ResultMaxim:"maxim_mfa";
+                PText(card,"MinigameMaxim",CaptionsEnabled?SpeechLines(ReactionBank?.Find(minigameMaxim)?.caption??""):"",222,170,432,70,16,PlanInk,false);
+            }
+            PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,decision?250:224,628,112,16,null,false);
+            bool practice=Minigame is OpsMailMinigame training&&training.Practice;
+            PButton(card,"MinigameContinue",practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):"結果を反映する",26,decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
             if(!Minigame.Delegated)StartCoroutine(CountMinigameResult(stamp,Minigame.Score));
         }
         public void ConfirmMinigame()
@@ -166,16 +179,17 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void CancelMinigame()
         {
-            Minigame=null;minigameDone=null;minigameResultDrawn=false;MinigameCounting=false;
+            Minigame=null;minigameDone=null;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
             if(minigameAudio!=null)minigameAudio.Stop();
         }
         private string MinigameResultDetail()
         {
-            if(Minigame is OpsMfaMinigame mfa)return "正解 "+mfa.Correct+"／侵入 "+mfa.Breaches+"（被害）／足止め "+mfa.Blocks+"（業務が止まる）\n攻撃者は承認依頼を何度も送り、うっかり許可を待つ（疲労攻撃）。番号の一致で偽の依頼を見分けやすく。";
+            if(Minigame is OpsMfaMinigame mfa)return "正解 "+mfa.Correct+"／侵入 "+mfa.Breaches+"（被害）／足止め "+mfa.Blocks+"（業務が止まる）\n攻撃者は承認依頼を何度も送り、うっかり許可を待つ（疲労攻撃）。番号の一致で偽の依頼を見分けやすく。\n"+DecisionResultFactor();
             if(Minigame is OpsMailMinigame mail)return "正解 "+mail.Correct+"／見逃し "+mail.Misses+"（被害につながる）／止めすぎ "+mail.FalseAlarms+"（業務が遅れる）／残り時間 "+Mathf.CeilToInt(mail.Remaining)+"秒\n"+
-                (mail.Practice?"事件の結果には反映しません。小川へ手がかりを共有します。":"本番の事件では、見逃しが被害に、止めすぎが停止時間になる。研修を入れると手がかりが強調される。");
+                (mail.Practice?"事件の結果には反映しません。小川へ手がかりを共有します。":"見逃しも止めすぎも点数に反映。研修を入れると手がかりが強調される。\n"+DecisionResultFactor());
             string text="";DescribeMinigameResult(ref text);return text;
         }
+        private string DecisionResultFactor()=>"被害・停止に ×"+(1-OpsCatalog.MinigameResultInfluence*(Minigame.Score-OpsCatalog.MinigameDelegateScore)/OpsCatalog.MinigameDelegateScore).ToString("F2")+"。現行結果を含む目安の幅で抑えます。\nゲーム用の単純化です。実際は製品・契約・状況で異なります。";
         partial void DrawMinigameBoard(RectTransform parent);
         partial void DrawMinigameBackground(RectTransform parent);
         partial void DrawMinigameTools(RectTransform parent);

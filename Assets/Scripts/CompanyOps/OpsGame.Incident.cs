@@ -81,15 +81,21 @@ namespace PatchWorkSecure.CompanyOps
             {
                 var time=PCard(map,"IncidentTimeBadge",18,18,148,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
                 PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,148,32,15,Color.white,true,true);
-                var knowButton=PButton(map,"KnowledgeCard","",18,64,238,72,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
+                var knowButton=PButton(map,"KnowledgeCard","",18,64,238,90,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
                 PText(know,"KnowledgeTitle","状況の把握",12,4,110,26,15,PlanInk);
                 PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,140,4,86,26,15,PlanInk,true,true);
                 for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,12+i*54,38,46,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
+                PText(know,"KnowledgeHow","調べる・監視・台帳・相談の泡",12,59,214,22,11,PlanGray,false);
                 Hover(knowButton,"調査・監視・台帳・相談の手がかりで把握。未確認の真相は表示しません。");
             }
         }
         private void IncidentComparison(RectTransform p)
         {
+            if(State.HasPeakGoal)
+            {
+                var goal=PCard(p,"IncidentPeakGoal",0,-38,928,29,Hex("fff6d6"),12,false);
+                PText(goal,"IncidentPeakGoalText",State.PeakGoalText(State.month),16,0,896,29,16,Hex("7a5a00"));
+            }
             PText(p,"DecisionHeading","対応方針を選ぶ",0,0,235,39,26,Color.white);
             PButton(p,"IncidentEvidence","未確認：正常な操作の可能性もある",247,5,340,29,IncidentEvidence,IncidentYellow,Hex("5c4000"),16).GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
             var ready=PCard(p,"Readiness",0,53,928,62,new Color(1,1,1,.1f),20,false);
@@ -147,7 +153,14 @@ namespace PatchWorkSecure.CompanyOps
                 PText(card,"CostUnit_"+id,"万円",w-57,105,37,38,14,PlanGray).alignment=TextAlignmentOptions.MidlineLeft;
                 EstimateMetric(card,"Stop_"+id,"業務停止",e.stopMin,e.stopMax,stopScale,159,PlanPink,w);
                 EstimateMetric(card,"Loss_"+id,"被害",e.lossMin,e.lossMax,lossScale,227,Hex("ff9f43"),w);
-                PText(card,"ResponseCaution_"+id,State.budget<e.cost?"手元予算が対応費に不足\n"+caution[i]:caution[i],20,305,w-40,70,14,PlanInk,false);
+                PText(card,"ResponseCaution_"+id,State.budget<e.cost?"手元予算が対応費に不足\n"+caution[i]:caution[i],20,305,w-40,State.HasPeakGoal?44:70,14,PlanInk,false);
+                if(State.HasPeakGoal)
+                {
+                    int prospect=State.PeakProspect(State.month,e);Color tone=PeakProspectColor(prospect);
+                    var forecast=PCard(card,"PeakForecast_"+id,20,350,w-40,26,Color.clear,12,false);
+                    IncidentShape(forecast,"PeakForecastFrame","dashed",0,0,w-40,26,tone);
+                    PText(forecast,"PeakForecastText_"+id,"予測："+OpsState.PeakProspectText(prospect),6,0,w-52,26,13,tone,true,true);
+                }
                 WorkingEquipment(card,id,working,w);
                 // 詳細はアイコンから開く。モックにない説明列は常設しない。
                 var details=PButton(card,"Power_"+id,"",20,20,56,56,()=>PowerReport(id),Color.clear,Color.clear,20);Hover(details,"抑制力の内訳を見る");

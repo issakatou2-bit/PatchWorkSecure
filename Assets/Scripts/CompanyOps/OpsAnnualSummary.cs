@@ -42,6 +42,7 @@ namespace PatchWorkSecure.CompanyOps
             if(record.loss>=10)return "被害大";
             if(record.downtime>=12)return "停止長";
             if(record.hasClosingState && (record.closingBudget<0 || record.closingStability==0))return "運営終了";
+            if(record.peakGoalRecorded)return record.peakGoalMet?"山場突破":"目標未達";
             if(state.growthRules>0 && record.month%3==2 && record.hasClosingState && record.closingBudget>=0 && record.closingStability>0)return "山場突破";
             if(state.completedMissions!=null && state.completedMissions.Contains(record.month))return "達成";
             return record.loss==0 && record.downtime==0 ? "無事" : "対応済";

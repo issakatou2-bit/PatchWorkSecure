@@ -17,7 +17,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool ResolutionActive => resolutionActive && State != null && State.phase == OpsPhase.Review;
         public bool CanSkipResolution => ResolutionActive && resolutionCount > 1;
         public void SkipResolution() {if(CanSkipResolution){StopVoice();FinishResolution();}}
-        private sealed class ResolutionStep { public string name,detail,member; public Color color; public bool equipment,staff,missing; }
+        private sealed class ResolutionStep { public string name,detail,member; public Color color; public bool equipment,staff,missing,peak; }
         private static string EffectLine(OpsInvestmentEffect effect) =>
             (effect.avoidedLoss>0?"被害 −"+effect.avoidedLoss+"万円":"")+
             (effect.avoidedLoss>0&&effect.avoidedDowntime>0?" / ":"")+
@@ -36,6 +36,7 @@ namespace PatchWorkSecure.CompanyOps
                 string task=parts.Length>1?parts[1].Split(new[]{" / "},StringSplitOptions.None)[0]:"対応を助力";
                 steps.Add(new ResolutionStep{name=member+"の支援",detail="抑制力 +"+result.power.staff+" / "+task,color=PlanBlue,staff=true,member=member});
             }
+            if(result.peakGoalRecorded&&result.peakGoalMet)steps.Add(new ResolutionStep{name="山場の盾",detail="信頼 +"+result.peakTrustChange+" / 予算 +"+result.peakBudgetBonus+"万円 / 年間 +"+result.peakScoreBonus+"点",color=Hex("ba8000"),peak=true});
             var missing=result.potentialInvestmentEffects?.Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0)
                 .OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault();
             if(missing!=null)steps.Add(new ResolutionStep{name=OpsCatalog.Projects[OpsCatalog.Index(missing.projectId)].name+" 未導入",detail="あれば、"+EffectLine(missing),color=PlanGray,missing=true});
@@ -130,14 +131,14 @@ namespace PatchWorkSecure.CompanyOps
             for(int index=0;index<steps.Count;index++)
             {
                 var step=steps[index];ResolutionFlow(flow,steps,index);
-                cutin.gameObject.SetActive(step.equipment||step.staff);
-                if(step.equipment||step.staff)
+                cutin.gameObject.SetActive(step.equipment||step.staff||step.peak);
+                if(step.equipment||step.staff||step.peak)
                 {
                     DuckMusic(stepDuration+.25f);
-                    cutin.Find("CutinCaption").GetComponent<TextMeshProUGUI>().text=step.staff?"社員が助けてくれた！":"備えが効いた！";
+                    cutin.Find("CutinCaption").GetComponent<TextMeshProUGUI>().text=step.peak?"山場の目標達成！":step.staff?"社員が助けてくれた！":"備えが効いた！";
                     cutin.Find("CutinTitle").GetComponent<TextMeshProUGUI>().text=step.name;
                     cutin.Find("CutinEffect").GetComponent<TextMeshProUGUI>().text=step.detail;
-                    PlayCue(step.staff?OpsCue.StaffHelp:OpsCue.Prepared);
+                    PlayCue(step.peak?OpsCue.Success:step.staff?OpsCue.StaffHelp:OpsCue.Prepared);
                     if(step.equipment&&!equipmentSpoken){equipmentSpoken=true;ResolutionVoice("incident_activate");}
                     for(int j=0;j<3;j++)
                     {
@@ -154,7 +155,7 @@ namespace PatchWorkSecure.CompanyOps
                     float progress=elapsed/stepDuration;
                     float slide=progress<.2f?Mathf.Lerp(-1500,0,progress/.2f):progress>.8f?Mathf.Lerp(0,1700,(progress-.8f)/.2f):0;
                     cutin.anchoredPosition=new Vector2(380+(ReducedMotion?0:slide), -300);
-                    if(!impact&&progress>=.2f&&(step.equipment||step.staff)){impact=true;HoldPresentation();hinata.GetComponentInChildren<OpsPortraitMotion>()?.Celebrate();}
+                    if(!impact&&progress>=.2f&&(step.equipment||step.staff||step.peak)){impact=true;HoldPresentation();hinata.GetComponentInChildren<OpsPortraitMotion>()?.Celebrate();}
                     yield return null;
                 }
                 for(int j=cutin.childCount-1;j>=0;j--)if(cutin.GetChild(j).name.StartsWith("CutinSpark"))Destroy(cutin.GetChild(j).gameObject);

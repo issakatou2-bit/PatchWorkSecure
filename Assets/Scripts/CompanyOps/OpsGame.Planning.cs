@@ -38,7 +38,8 @@ namespace PatchWorkSecure.CompanyOps
             }
             return t;
         }
-        public static string SpeechLines(string value)=>value.Replace("、","、\n").Replace("！","！\n").Replace("。","。\n").Replace("？","？\n").Replace("\n\n","\n").TrimEnd('\n');
+        public static string SpeechLines(string value)=>string.Join("\n",(value??"").Replace("\r","").Replace("、","、\n").Replace("！","！\n").Replace("。","。\n").Replace("？","？\n")
+            .Split('\n').Select(line=>line.TrimStart(' ','　','\t')).Where(line=>line.Length>0));
         private Button PButton(Transform p,string id,string label,float x,float y,float w,float h,Action action,Color bg,Color fg,float radius=20,Color? shadow=null,bool enabled=true)
         {
             var b=Button(p,id,label,x,y,w,h,action,bg,enabled); var i=b.GetComponent<Image>();
@@ -241,6 +242,11 @@ namespace PatchWorkSecure.CompanyOps
                 if(current) PCard(timeline,"CurrentMonthRing",x-4,32-size/2-4,size+8,size+8,Hex("ffd3de"),20,false);
                 var dot=PCard(timeline,"Month"+j,x,32-size/2,size,size,current?PlanPink:j==11?PlanBlue:peak?Hex("ffd23f"):j<State.month?Hex("b8dbea"):PlanTrack,12,false);
                 if(peak) PText(dot,"PeakMark",j==11?"決":"山",0,0,size,size,13,current||j==11?Color.white:Hex("7a5a00"),true,true);
+                if(peak&&State.peakGoalRules>0)
+                {
+                    int target=j;var hit=PButton(dot,"PeakGoal_"+j,"",0,0,size,size,()=>PeakGoalDialog(target),Color.clear,Color.clear,12);
+                    Hover(hit,OpsCatalog.Months[j].name+"の目標と見込み");
+                }
                 x+=size+8;
             }
             int next=Math.Min(11,State.month+(2-State.month%3));
@@ -301,6 +307,7 @@ namespace PatchWorkSecure.CompanyOps
                 PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
             }
             rankBefore=rankAfter=null;
+            RankProgressStrip(left,18,475,276);
             int spare=Mathf.Clamp(100-State.fatigue,0,100); Color tone=spare>=70?PlanMint:spare>=40?PlanBlue:Hex("c23a60");
             var rest=PButton(left,"Stat_5","",18,520,276,74,()=>StatusDetail(5),Hex("e9fbf5"),PlanInk,16);
             PImage(rest.transform,"MoraleIcon",PlanningArt.morale,12,11,30,30);

@@ -69,6 +69,8 @@ namespace PatchWorkSecure.CompanyOps
             PText(medal,"YearNumber","1年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
             PText(screen,"MonthlyCategory","MONTHLY REPORT",272,26,800,28,12,PlanPink);
             PText(screen,"ReviewTitle","今月のふりかえり",272,52,800,62,40);
+            RankProgressStrip(screen,272,109,468);
+            PeakMonthlyResult(r);
             var damageStamp=PCard(screen,"MonthlyDamageStamp",1050,53,240,54,r.loss==0?Hex("e3faf3"):Hex("ffe9ee"),16,false);
             PText(damageStamp,"MonthlyDamageStampText",r.loss==0?"金銭被害なし":"金銭被害 "+r.loss+"万円",0,0,240,54,20,r.loss==0?Hex("1a7c63"):Coral,true,true);Reveal(damageStamp,.25f,true);
             PButton(screen,"Menu","設定",1370,38,180,52,Menu,Color.white,PlanInk);
@@ -93,12 +95,13 @@ namespace PatchWorkSecure.CompanyOps
             var effect=PButton(incident,"EffectDetails","",26,236,648,66,()=>InvestmentReport(r),Hex("e3faf3"),PlanInk,16);
             KitGradient(effect.GetComponent<Image>(),Hex("e3faf3"),Hex("e3faf3"));effect.GetComponent<Shadow>().enabled=false;
             var best=r.investmentEffects?.OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault(e=>e.avoidedLoss>0||e.avoidedDowntime>0);
-            PText(effect.transform,"EffectTag",best==null?"次に効きそうな備え":"効いた備え",16,6,240,28,14,Hex("1a7c63"));
+            bool peakMiss=r.peakGoalRecorded&&!r.peakGoalMet;
+            PText(effect.transform,"EffectTag",peakMiss?"山場未達 / 次に効きそうな備え":best==null?"次に効きそうな備え":"効いた備え",16,6,peakMiss?616:240,28,14,Hex("1a7c63"));
             var potential=r.potentialInvestmentEffects?.FirstOrDefault();
-            string equipment=best!=null?OpsCatalog.Projects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level:
+            string equipment=peakMiss?PeakMissHint(r):best!=null?OpsCatalog.Projects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level:
                 potential!=null?OpsCatalog.Projects[OpsCatalog.Index(potential.projectId)].name+" / 未導入":"次の計画で備えを確認しよう";
-            PText(effect.transform,"ImpactNumbers",equipment,16,34,best==null?616:396,24,17);
-            if(best==null)IncidentShape(effect.transform,"PotentialEquipmentFrame","dashed",4,4,640,58,Hex("1a7c63"));
+            PText(effect.transform,"ImpactNumbers",equipment,16,34,best==null||peakMiss?616:396,24,peakMiss?13:17);
+            if(best==null||peakMiss)IncidentShape(effect.transform,"PotentialEquipmentFrame","dashed",4,4,640,58,Hex("1a7c63"));
             else PText(effect.transform,"ImpactSummary",r.hasInvestmentComparison?"被害 −"+r.avoidedLoss+"万円\n停止 −"+r.avoidedDowntime+"時間":"比較未記録",430,6,200,52,15,Hex("1a7c63"));
             MonthlyGrowth(r);
             var mission=ReportPanel("MonthlyMission",770,140,440,330,.04f);ReportHeading(mission,"MISSION","社内依頼",PlanPink);

@@ -61,7 +61,7 @@ namespace PatchWorkSecure.Tests
             game.State.budget = -1; game.Next(); yield return null;
             Assert.AreEqual(OpsPhase.Ended, game.State.phase);
             Assert.AreEqual("累計被害 "+game.State.totalLoss + " 万円", Find<TextMeshProUGUI>("AnnualLossValue").text);
-            Assert.AreEqual(game.State.Rank.Substring(game.State.Rank.Length - 1), Find<TextMeshProUGUI>("CompanyRank").text);
+            Assert.AreEqual(game.State.RankCode, Find<TextMeshProUGUI>("CompanyRank").text);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="AnnualConfetti0"),"失敗時は年度クリアの紙吹雪を出さない");
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t => t.name.StartsWith("AchievementSpark")));
             Capture("45-compact-annual", 1280, 720); CheckText();

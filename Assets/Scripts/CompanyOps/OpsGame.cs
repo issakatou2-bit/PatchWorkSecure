@@ -418,7 +418,7 @@ namespace PatchWorkSecure.CompanyOps
             Text(p, "EndingTitle", State.IsClear ? "12か月 クリア！" : "運営終了", 42, 84, 930, 76, 43, Ink);
             var rank = Box(p, "RankBadge", 966, 34, 264, 187, Ink);
             Text(rank, "RankHeading", "運用ランク", 16, 8, 232, 26, 18, Muted);
-            var rankText = Text(rank, "CompanyRank", State.Rank.Substring(State.Rank.Length - 1), 16, 33, 232, 86, 72, Accent);
+            var rankText = Text(rank, "CompanyRank", State.RankCode, 16, 33, 232, 86, 72, Accent);
             rankText.alignment = TextAlignmentOptions.Center;
             Text(rank, "AnnualScoreValue", State.AnnualScore + " 点", 24, 126, 218, 40, 29);
             Text(p, "AnnualNumbers", "乗り越えた月  " + State.history.Count + " / 12", 42, 181, 874, 42, 28, Ink);

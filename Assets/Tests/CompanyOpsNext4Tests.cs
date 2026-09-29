@@ -12,6 +12,53 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next4UI_山場の予測と達成未達と五段の評価を撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
+            var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            game.State.month=2;game.OpenTab(0);while(game.PhasePresentationRunning)yield return null;yield return new WaitForSecondsRealtime(.3f);
+            Assert.IsNotNull(Find<TextMeshProUGUI>("NextRankPoints"));CheckPointer("PeakGoal_2");Click("PeakGoal_2");yield return null;
+            StringAssert.Contains("公開見積もり",Find<TextMeshProUGUI>("DialogBody").text);StringAssert.Contains("8万円",Find<TextMeshProUGUI>("DialogBody").text);
+            CheckText();yield return new WaitForSecondsRealtime(.3f);Capture("140-peak-goal-prospect");Click("CloseDialog");yield return null;
+            game.BeginIncident();while(game.PhasePresentationRunning)yield return null;yield return new WaitForSecondsRealtime(.3f);
+            StringAssert.Contains("6月",Find<TextMeshProUGUI>("IncidentPeakGoalText").text);StringAssert.Contains("相談の泡",Find<TextMeshProUGUI>("KnowledgeHow").text);
+            foreach(string id in new[]{"contain","scope","recover"})StringAssert.StartsWith("予測",Find<TextMeshProUGUI>("PeakForecastText_"+id).text);
+            CheckText();Capture("141-peak-incident-goal");
+            // テストでは真相を使って未達の固定ケースを選ぶ。プレイヤーの見込みには使用しない。
+            int seed=game.State.seed;while(game.State.Preview("recover").loss<=OpsCatalog.JuneLossGoal&&game.State.Preview("recover").downtime<=OpsCatalog.JuneStopGoal)game.State.seed=++seed;
+            game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.5f);
+            Assert.IsFalse(game.State.Latest.peakGoalMet);StringAssert.Contains("未達",Find<TextMeshProUGUI>("PeakResultText").text);CheckText();Capture("142-peak-miss");
+            game.StartYear(14);game.State.month=2;game.State.culture=100;game.State.fatigue=0;
+            for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;
+            game.OpenTab(0);game.BeginIncident();game.Resolve("scope");Assert.IsTrue(game.State.Latest.peakGoalMet);
+            bool captured=false;
+            for(float t=0;t<12&&game.ResolutionActive;t+=.025f)
+            {
+                var caption=Object.FindObjectsByType<TextMeshProUGUI>().FirstOrDefault(l=>l.name=="CutinCaption"&&l.text=="山場の目標達成！");
+                if(caption!=null&&!captured&&Mathf.Abs(((RectTransform)caption.transform.parent).anchoredPosition.x-380)<60){Capture("143-peak-shield-cutin");captured=true;}
+                yield return new WaitForSecondsRealtime(.025f);
+            }
+            Assert.IsTrue(captured);yield return new WaitForSecondsRealtime(.5f);CheckText();Capture("144-peak-clear");
+            game.State.phase=OpsPhase.Ended;
+            game.State.completedMissions=Enumerable.Range(0,12).ToList();
+            foreach(var pair in new[]{new{score=1000,rank="C"},new{score=1100,rank="B"},new{score=1450,rank="A"},new{score=1750,rank="S"},new{score=1950,rank="SS"}})
+            {
+                // 得点だけを表示用に構成。年間のルールを変更しない。
+                game.State.totalLoss=0;game.State.totalDowntime=0;game.State.budget=0;
+                int baseScore=game.State.AnnualScore;
+                game.State.totalLoss=Mathf.Max(0,(baseScore-pair.score+6)/7);
+                game.State.budget=pair.score-(baseScore-game.State.totalLoss*7);
+                game.OpenTab(0);yield return new WaitForSecondsRealtime(1.2f);
+                Assert.AreEqual(pair.rank,game.State.RankCode);Assert.AreEqual(pair.rank,Find<TextMeshProUGUI>("CompanyRank").text);
+                Assert.IsNotNull(Find<RectTransform>("PeakMedal0"));CheckText();Capture("145-annual-"+pair.rank);
+            }
+            Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
+        [Test] public void Next4UI_吹き出しの改行後に全角空白を残さない()
+        {
+            Assert.AreEqual("春だね！\n桜もきれいだし、\n準備しよ。",OpsGame.SpeechLines("春だね！　桜もきれいだし、　準備しよ。"));
+            Assert.AreEqual("一行目\n二行目\n三行目",OpsGame.SpeechLines("一行目\r\n　　二行目\n 三行目"));
+        }
         [Test] public void Next4Rules_山場報酬は一度だけで旧年度を変更しない()
         {
             foreach (int month in OpsCatalog.PeakMonths)

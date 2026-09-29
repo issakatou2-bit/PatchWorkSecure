@@ -35,7 +35,8 @@ namespace PatchWorkSecure.CompanyOps
                 "\n\n採点\n基礎1000 − 被害 " + State.totalLoss * 7 + " − 停止 " + State.totalDowntime * 4 +
                 "\n依頼 +" + State.MissionCount * 45 + " / 成長 +" + State.milestones.Count * 30 +
                 "\n会社の能力 +" + (State.Preparedness + State.Resilience + State.Organization) * 2 +
-                " / 残予算 +" + Math.Max(0, Math.Min(200, State.budget)), 630);
+                " / 残予算 +" + Math.Max(0, Math.Min(200, State.budget)) +
+                (State.peakGoalRules>0?"\n山場の盾 "+State.PeakMedals+"個 / 山場 +"+State.PeakScore+"点":""), 660);
         }
     }
 }

@@ -26,8 +26,10 @@ namespace PatchWorkSecure.CompanyOps
             var border=rank.gameObject.AddComponent<Outline>();border.effectColor=Color.white;border.effectDistance=new Vector2(8,-8);
             IncidentShape(rank,"RankStitch","dashed",16,16,328,328,new Color(1,1,1,.7f));Reveal(rank,State.history.Count*.08f+.45f,true);
             PText(rank,"RankHeading","運用ランク",0,46,360,44,26,Color.white,true,true);
-            var rankText=PText(rank,"CompanyRank",State.Rank.Substring(State.Rank.Length-1),0,103,360,225,200,Color.white,true,true);var shadow=rankText.gameObject.AddComponent<Shadow>();shadow.effectColor=Hex("c23a60");shadow.effectDistance=new Vector2(0,-8);
+            StyleAnnualRank(rank);
+            var rankText=PText(rank,"CompanyRank",State.RankCode,0,103,360,225,State.RankCode=="SS"?150:200,Color.white,true,true);var shadow=rankText.gameObject.AddComponent<Shadow>();shadow.effectColor=State.RankCode=="SS"?Hex("986000"):Hex("c23a60");shadow.effectDistance=new Vector2(0,-8);
             PText(screen,"ScoreHeading","年間得点",110,540,440,32,16,PlanGray,true,true);
+            PeakAnnualMedals();
             ReportNumber(screen,"AnnualScoreValue",State.AnnualScore,"<size=26>点</size>",110,580,440,72,PlanInk);
             PButton(screen,"AnnualDetails","評価の内訳を見る",110,690,440,48,AnnualDetails,Color.white,PlanInk,20);
             var timeline=ReportPanel("AnnualTimeline",610,140,940,190,.04f);ReportHeading(timeline,"12 MONTHS","乗り越えた "+State.history.Count+"か月",PlanBlue);

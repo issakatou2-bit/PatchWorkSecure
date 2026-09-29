@@ -29,6 +29,15 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        [UnityTest] public IEnumerator Polish4_11_備えなしの二行だけ消しカードの高さを保つ()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
+            Assert.IsFalse(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name.StartsWith("WorkingHeading_")||t.name.StartsWith("WorkingNone_")));
+            foreach(string id in new[]{"contain","scope","recover"})Assert.AreEqual(576,Find<RectTransform>("ResponseCard_"+id).rect.height);
+            PolishCapture(11);game.State.levels[OpsCatalog.Index("backup")]=1;game.OpenTab(0);yield return new WaitForSecondsRealtime(.5f);
+            Assert.IsTrue(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name.StartsWith("WorkingHeading_")));
+            Assert.IsFalse(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name.StartsWith("WorkingNone_")));LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_10_数字と小さい単位は同じ行で隙間なくつながる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);

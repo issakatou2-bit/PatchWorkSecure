@@ -34,7 +34,11 @@ namespace PatchWorkSecure.Tests
                         return absent.lossMin>actual.lossMin||absent.lossMax>actual.lossMax||absent.stopMin>actual.stopMin||absent.stopMax>actual.stopMax;
                     }).ToArray();
                     var badge=Object.FindObjectsByType<TextMeshProUGUI>().FirstOrDefault(t=>t.name=="PreparedText_"+response);
-                    if(working.Length==0){Assert.IsNull(badge);Assert.IsNotNull(Find<TextMeshProUGUI>("WorkingNone_"+response));}
+                    if(working.Length==0)
+                    {
+                        Assert.IsNull(badge);
+                        Assert.IsFalse(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name=="WorkingNone_"+response||t.name=="WorkingHeading_"+response));
+                    }
                     else
                     {
                         Assert.IsNotNull(badge);Assert.IsTrue(working.Any(j=>badge.text==OpsCatalog.Projects[j].name+"が効く"));

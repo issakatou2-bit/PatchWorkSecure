@@ -178,12 +178,8 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void WorkingEquipment(Transform card,string response,int[] working,float width)
         {
+            if(working.Length==0)return;
             PText(card,"WorkingHeading_"+response,"この方針で働く備え",20,380,width-40,24,13,PlanGray);
-            if(working.Length==0)
-            {
-                PText(card,"WorkingNone_"+response,"導入済みの備えなし",20,413,width-40,56,14,PlanGray,false);
-                return;
-            }
             int count=Math.Min(working.Length,6);float chipWidth=(width-48)/2;
             for(int j=0;j<count;j++)
             {

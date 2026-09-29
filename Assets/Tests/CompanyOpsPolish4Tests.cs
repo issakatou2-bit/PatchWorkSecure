@@ -29,6 +29,20 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        [UnityTest] public IEnumerator Polish4_12_把握と時間帯は左上の赤枠外にまとまる()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
+            foreach(int timeValue in new[]{0,1})
+            {
+                game.State.incidentTimes[game.State.month]=timeValue;game.OpenTab(0);yield return new WaitForSecondsRealtime(.3f);
+                var alarm=Find<RectTransform>("AffectedRoom");var time=Find<RectTransform>("IncidentTimeBadge");var know=Find<RectTransform>("KnowledgeCard");
+                foreach(var r in new[]{time,know})Assert.Less(r.anchoredPosition.x+r.rect.width,alarm.anchoredPosition.x);
+                Assert.AreEqual(time.anchoredPosition.x,know.anchoredPosition.x);Assert.AreEqual(time.rect.width,know.rect.width);
+                Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);CheckPointer("KnowledgeCard");CheckText();
+                PolishCapture(12,timeValue==0?"after":"quiet");
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_11_備えなしの二行だけ消しカードの高さを保つ()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();

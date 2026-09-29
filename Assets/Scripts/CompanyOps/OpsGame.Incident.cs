@@ -82,13 +82,14 @@ namespace PatchWorkSecure.CompanyOps
             var right=Rect(screen,"DecisionPanel",648,120,928,770);IncidentComparison(right);
             if(State.decisionDepthRules>0)
             {
-                var time=PCard(map,"IncidentTimeBadge",18,18,148,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
-                PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,148,32,15,Color.white,true,true);
-                var knowButton=PButton(map,"KnowledgeCard","",18,64,238,90,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
-                PText(know,"KnowledgeTitle","状況の把握",12,4,110,26,15,PlanInk);
-                PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,140,4,86,26,15,PlanInk,true,true);
-                for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,12+i*54,38,46,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
-                PText(know,"KnowledgeHow","調べる・監視・台帳・相談の泡",12,59,214,22,11,PlanGray,false);
+                // 赤枠左端110pxまでの余白へ集約。確認対象の部屋の位置・大きさは変えない。
+                var time=PCard(map,"IncidentTimeBadge",18,18,90,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
+                PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,90,32,14,Color.white,true,true);
+                var knowButton=PButton(map,"KnowledgeCard","",18,64,90,132,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
+                PText(know,"KnowledgeTitle","状況の把握",6,6,78,26,14,PlanInk,true,true);
+                PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,6,34,78,26,15,PlanInk,true,true);
+                for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,8+i*20,68,14,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
+                PText(know,"KnowledgeHow","調べる・監視\n台帳・相談の泡",6,88,78,36,11,PlanGray,false,true);
                 Hover(knowButton,"調査・監視・台帳・相談の手がかりで把握。未確認の真相は表示しません。");
             }
         }

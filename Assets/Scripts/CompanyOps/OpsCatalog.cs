@@ -17,6 +17,16 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+// 山場と年間評価。進行中の旧年度には適用しない。
+public const int PeakRulesVersion=1, JunePeak=2, SeptemberPeak=5, DecemberPeak=8, MarchPeak=11;
+public const int JuneLossGoal=8, JuneStopGoal=8, SeptemberLossGoal=5, SeptemberStopGoal=6;
+public const int DecemberLossGoal=3, DecemberStopGoal=4, MarchLossGoal=6, MarchStopGoal=7;
+public const int PeakTrustReward=6, PeakBudgetReward=8, PeakScoreReward=60, PeakTrustPenalty=4;
+public const int AnnualSS=1950, AnnualS=1750, AnnualA=1450, AnnualB=1100, LegacyAnnualA=1350, LegacyAnnualB=750;
+public const int NextRankVoiceDistance=50, VoiceScriptLineCount=117;
+public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
+public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
+public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};
         public const int BubblesPerMonth=4, BubbleReward=1, ConsultationChance=50, RareBubbleChance=3;
         public static readonly string[] BubbleNames={"紙づまり","PCが重い","パスワード","来客Wi-Fi","プロジェクタ","宅配の端末","相談があるよ","？？？"};
         public static readonly string[] BubbleRewards={"信頼 +1","疲労 −1","相談文化 +1","信頼 +1","疲労 −1","相談文化 +1","手がかり","お礼カード"};

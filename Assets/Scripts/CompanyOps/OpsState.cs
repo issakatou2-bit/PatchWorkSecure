@@ -36,6 +36,9 @@ namespace PatchWorkSecure.CompanyOps
         public bool hasClosingState;
         public int closingBudget, closingStability;
         public int missionBonus;
+        // 山場の確定結果。旧記録はfalse/0のまま保存する。
+        public bool peakGoalRecorded, peakGoalMet;
+        public int peakTrustChange, peakBudgetBonus, peakScoreBonus;
     }
 
     [Serializable] public class OpsInvestmentEffect
@@ -58,6 +61,8 @@ namespace PatchWorkSecure.CompanyOps
         // 旧年度は0。受諾は目印のみで、達成判定を後付けで制限しない。
         public int missionBudgetRules, missionBudgetPaid, acceptedMissionMonth=-1;
         public int rankBenefitRules, rankQuarterBonusPaid;
+        public int peakGoalRules;
+        public bool nextRankVoicePlayed;
         public int ProposalRankBonus=>rankBenefitRules>0&&trust>=50?1:0;
         public int QuarterTrustBonus=>rankBenefitRules>0&&trust>=65?1:0;
         public bool CultureEarlySignal=>rankBenefitRules>0&&culture>=50&&month<11;
@@ -75,7 +80,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1;InitializeDecisionDepth(yearSeed);InitializeBubbles(yearSeed); staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1;peakGoalRules=OpsCatalog.PeakRulesVersion;InitializeDecisionDepth(yearSeed);InitializeBubbles(yearSeed); staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
         public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
@@ -114,8 +119,8 @@ namespace PatchWorkSecure.CompanyOps
         public string StaffVoice => Level("education") > 0 && culture >= 65 && (CurrentProfile == null ? Current.kind == "social" : CurrentProfile.id == "bec") ?
             "経理の森さん：「急ぎの依頼も、いつもの連絡先で確認してから相談しています」" : Current.staff;
         public int AnnualScore => Math.Max(0, 1000 - totalLoss * 7 - totalDowntime * 4 +
-            MissionCount * 45 + milestones.Count * 30 + (Preparedness + Resilience + Organization) * 2 + Math.Max(0, Math.Min(200, budget)));
-        public string Rank => AnnualScore >= 1350 ? "運用ランク A" : AnnualScore >= 750 ? "運用ランク B" : "運用ランク C";
+            MissionCount * 45 + milestones.Count * 30 + (Preparedness + Resilience + Organization) * 2 + Math.Max(0, Math.Min(200, budget)) + PeakScore);
+        public string Rank => "運用ランク " + RankCode;
 
         private bool ActionDone(string action)
         {
@@ -400,6 +405,7 @@ namespace PatchWorkSecure.CompanyOps
             else result.promise = "今月は追加予算の約束なし。";
             totalLoss += result.loss; totalDowntime += result.downtime; history.Add(result); Learn(Current.lesson);
             CompleteGrowth(result);
+            ApplyPeakGoal(result);
             result.metricsAfter = ReportMetrics;
             result.missionBonus=missionBudgetPaid;
             result.hasClosingState=true;result.closingBudget=budget;result.closingStability=stability;
@@ -443,7 +449,7 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
-            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
+            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || !ValidPeaks() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;

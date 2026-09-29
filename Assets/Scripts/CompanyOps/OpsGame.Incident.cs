@@ -77,6 +77,16 @@ namespace PatchWorkSecure.CompanyOps
             PText(navigator,"NavigatorSpeech",State.audited?"調査できたね！\n止める範囲も比べよう！":"まだ確認が必要だね！\nまずは止める範囲を決めよう！",18,17,284,76,18,PlanInk,false);
             PButton(map,"IncidentHelp","",250,560,320,126,IncidentEvidence,Color.clear,Color.clear,20);
             var right=Rect(screen,"DecisionPanel",648,120,928,770);IncidentComparison(right);
+            if(State.decisionDepthRules>0)
+            {
+                var time=PCard(map,"IncidentTimeBadge",18,18,148,32,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
+                PText(time,"IncidentTimeLabel",State.IncidentTimeLabel,0,0,148,32,15,Color.white,true,true);
+                var knowButton=PButton(map,"KnowledgeCard","",18,64,238,72,IncidentEvidence,Color.white,PlanInk,16);var know=(RectTransform)knowButton.transform;
+                PText(know,"KnowledgeTitle","状況の把握",12,4,110,26,15,PlanInk);
+                PText(know,"KnowledgeValue",State.SituationKnowledge+" / "+OpsCatalog.KnowledgeMax,140,4,86,26,15,PlanInk,true,true);
+                for(int i=0;i<OpsCatalog.KnowledgeMax;i++)PCard(know,"KnowledgeGauge"+i,12+i*54,38,46,12,i<State.SituationKnowledge?PlanMint:PlanTrack,12,false);
+                Hover(knowButton,"調査・監視・台帳・相談の手がかりで把握。未確認の真相は表示しません。");
+            }
         }
         private void IncidentComparison(RectTransform p)
         {
@@ -108,7 +118,7 @@ namespace PatchWorkSecure.CompanyOps
                 staff.GetComponentInChildren<TextMeshProUGUI>().margin=new Vector4(30,0,0,0);
             }
             var estimates=ResponseIds.Select(State.Estimate).ToArray();int lossScale=Math.Max(1,estimates.Max(e=>e.lossMax)),stopScale=Math.Max(1,estimates.Max(e=>e.stopMax));
-            string[] caution={"正常な業務も止め、\n広がりを抑える","業務を続けやすいが、\n範囲を絞る備えが重要","安全確認の後に再開。\n戻せる備えが重要"};
+            string[] caution={"正常な業務も止め、\n広がりを抑える",State.ScopeOversight>0?"見落としの恐れを含む\n範囲を絞る備えが重要":"業務を続けやすいが、\n範囲を絞る備えが重要","安全確認の後に再開。\n戻せる備えが重要"};
             for(int i=0;i<3;i++)
             {
                 string id=ResponseIds[i];var e=estimates[i];float w=896f/3,xCard=i*(w+16);

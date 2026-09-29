@@ -104,6 +104,8 @@ public static class CompanyOpsDepthChecks
         Directory.CreateDirectory("Artifacts/CompanyOps/Depths");
         var years=new StringBuilder("方針,種,完走,月数,得点,被害万円,停止h,残予算,未使用工数,依頼,社員加算月,日常委任,工数支援月,Lv2設備,維持費,停止選択,限定選択,復旧選択\n");
         var turns=new StringBuilder("方針,種,月,出来事,計画,対応,被害,停止,社員加算,未使用工数,成長前社員Lv,成長後社員Lv,優越されない選択数\n");
+        var baselineClear=new[]{100,100,57,93,100,100,100,100,100};
+        int allMonths=0,allScopes=0,allCandidates=0;var differences=new List<int>();
         foreach(int role in Enumerable.Range(0,3))foreach(int depth in Enumerable.Range(0,3))
         {
             var p=new Profile{role=role,depth=depth,name=Names[role][depth]};int clear=0,months=0,score=0,loss=0,stop=0,unusedTotal=0,help=0;
@@ -144,12 +146,18 @@ public static class CompanyOpsDepthChecks
                 years.AppendLine(string.Join(",",new object[]{p.name,seed,s.IsClear,s.history.Count,s.AnnualScore,s.totalLoss,s.totalDowntime,s.budget,
                     unusedYear,s.MissionCount,staffMonths,delegations,routine,s.levels.Count(n=>n==2),s.Upkeep,counts[0],counts[1],counts[2]}.Select(Cell)));
             }
+            allMonths+=months;allScopes+=responses[1];allCandidates+=nondominatedTotal;differences.Add(clear-baselineClear[role*3+depth]);
             Console.WriteLine(p.name+" / 完走"+clear+"/100 / 平均点"+(score/100.0).ToString("F1")+" / 被害"+(loss/100.0).ToString("F1")+
                 " / 停止"+(stop/100.0).ToString("F1")+" / 未使用工数"+(unusedTotal/100.0).ToString("F1")+" / 社員加算"+help+"/"+months+
                 "月 / 停止・限定・復旧="+string.Join("/",responses)+" / 出来事"+eventIds.Count+"種 / 非優越候補平均"+(nondominatedTotal/(double)months).ToString("F2"));
         }
         File.WriteAllText("Artifacts/CompanyOps/Depths/years.csv",years.ToString(),new UTF8Encoding(true));
         File.WriteAllText("Artifacts/CompanyOps/Depths/turns.csv",turns.ToString(),new UTF8Encoding(true));
+        double scopePercent=100.0*allScopes/allMonths,candidateMean=allCandidates/(double)allMonths;
+        Console.WriteLine("全体：限定="+scopePercent.ToString("F2")+"% / 非優越候補="+candidateMean.ToString("F3")+" / v0.12からの完走率差(pt)="+string.Join("/",differences));
+        Check(scopePercent>=40&&scopePercent<=55,"限定40〜55%の基準を満たさない");
+        Check(candidateMean>=1.9,"非優越候補の平均1.9を満たさない");
+        Check(differences.All(d=>Math.Abs(d)<=5),"いずれかの方針の完走率差が±5ポイントを超えた");
         Console.WriteLine("9方針×100年度=900年度。経験深度は方針差の仮説であり、人間の技能・学習・面白さの測定ではない。");
     }
 }

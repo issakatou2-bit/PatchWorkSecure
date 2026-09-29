@@ -8,7 +8,7 @@ namespace PatchWorkSecure.CompanyOps
         public string id, category, kind, lesson, source;
         public string projectA, projectB, actionA, actionB;
         public int[] prevention;
-        public int cultureDivisor, containment, stopPower = 23, scopePower = 5, recoverPower = 5;
+        public int cultureDivisor, containment, spread, stopPower = 23, scopePower = 5, recoverPower = 5;
         public bool dataRecovery, restart;
         public string[] responses;
     }
@@ -54,6 +54,7 @@ namespace PatchWorkSecure.CompanyOps
             bool business = kind == "social" || kind == "leak";
             return new OpsEventProfile { id=id, category=category, kind=kind, lesson=lesson, source=source, projectA=a, projectB=b, actionA=aa, actionB=ab,
                 prevention=weights, cultureDivisor=culture, containment=contain, stopPower=stop, recoverPower=recover, dataRecovery=data, restart=restart,
+                spread=new[]{"ransom","supply","vulnerability","targeted","remote"}.Contains(id)?OpsCatalog.SpreadHigh:new[]{"change","storage","service","ddos"}.Contains(id)?OpsCatalog.SpreadNone:OpsCatalog.SpreadNormal,
                 responses=business ? new[]{"関連する処理を一時保留", "対象・依頼元を確認して処理", "安全な業務経路へ切り替える"} :
                     kind == "outage" ? new[]{"影響サービスを広く停止", "対象を絞って調査・対処", "切戻し・代替業務を優先"} :
                     new[]{"関連環境を広く停止・隔離", "対象を絞って隔離・調査", "安全確認と復旧に人を配分"} };

@@ -85,6 +85,11 @@ namespace PatchWorkSecure.CompanyOps
             PImage(stage,"StageShade",PlanningArt.stageShade,0,492,900,300);
             SeasonLayer(stage,900,792,State.month);
             PlanningRooms(stage);
+            if(State.decisionDepthRules>0)
+            {
+                var time=PCard(stage,"PlanningTimeBadge",166,18,146,30,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
+                PText(time,"PlanningTimeLabel",State.IncidentTimeLabel,0,0,146,30,14,Color.white,true,true);
+            }
             if(State.CultureEarlySignal)
             {
                 var upcoming=State.EventAt(State.month+1);string category=upcoming==null?"システムの運用":OpsEventCatalog.Profile(upcoming.profile).category;

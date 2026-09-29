@@ -17,6 +17,11 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+// 判断の深さ。旧年度には遡及適用しない。
+public const int KnowledgeMax=4, UnauditedBlindness=2, MissingEvidenceBlindness=1, ClueBlindnessCut=1;
+public const int BlindLossPerPoint=3, ScopeCostPerBlind=2, QuietContainStop=2, SegmentContainStopCut=2, MinimumContainStop=3;
+public const int ContainStop=9, ScopeStop=1, RecoverStop=3, ContainCost=6, ScopeCost=3, RecoverCost=2, LegacyRecoverCost=4;
+public const int QuietTimeDenominator=3, SpreadHigh=2, SpreadNormal=1, SpreadNone=0;
 // 年度内の適用対象と連携値。保存データの復元と、性能・処理の再開は別の備え。
 public static readonly int[] DataRecoveryMonths = { 0, 9, 11 };
 public static readonly int[] RestartMonths = { 3, 4 };

@@ -5,6 +5,26 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsState
     {
+        public int decisionDepthRules;
+        public int[] incidentTimes;
+        public bool clueCollected;
+        public int IncidentTime=>decisionDepthRules>0&&incidentTimes!=null?incidentTimes[month]:0;
+        public string IncidentTimeLabel=>IncidentTime==0?"業務時間":IncidentTime==1?"金曜の夜":"連休中";
+        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?0:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0));
+        public int SituationKnowledge=>OpsCatalog.KnowledgeMax-Blindness;
+        public int EventSpread=>CurrentProfile!=null?CurrentProfile.spread:Current.kind=="outage"?OpsCatalog.SpreadNone:new[]{"ransom","supply","vulnerability","identity"}.Contains(Current.kind)?OpsCatalog.SpreadHigh:OpsCatalog.SpreadNormal;
+        public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/3);
+        private void InitializeDecisionDepth(int yearSeed)
+        {
+            decisionDepthRules=1;incidentTimes=new int[12];var order=Enumerable.Range(0,12).ToArray();
+            // 攻撃の真相・月内操作とは別系列。先に12か月分を決めて保存する。
+            var clockRandom=new Random(unchecked(yearSeed^0x735C1D));
+            for(int i=order.Length-1;i>0;i--){int j=clockRandom.Next(i+1);int v=order[i];order[i]=order[j];order[j]=v;}
+            for(int i=0;i<order.Length/OpsCatalog.QuietTimeDenominator;i++)incidentTimes[order[i]]=1+i%2;
+        }
+        private bool ValidDecisionDepth()=>decisionDepthRules>=0&&decisionDepthRules<=1&&
+            (decisionDepthRules==0?(!clueCollected&&(incidentTimes==null||incidentTimes.Length==0)):
+            incidentTimes!=null&&incidentTimes.Length==12&&incidentTimes.All(t=>t>=0&&t<=2)&&incidentTimes.Count(t=>t>0)==12/OpsCatalog.QuietTimeDenominator);
         // 旧セーブは0のまま。新年度でのみ抽選し、イベントIDを保存する。
         public int eventRules;
         public string[] eventSchedule, ticketSchedule;

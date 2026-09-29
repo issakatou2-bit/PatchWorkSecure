@@ -14,6 +14,33 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Test] public void Next3Depth_五規則と旧年度と保存の境界を確認する()
+        {
+            var state=new OpsState(14,true);SetEvent(state,"ransom-extortion");Assert.AreEqual(4,state.Blindness);Assert.AreEqual(11,state.Estimate("scope").cost);Assert.AreEqual(24,state.ScopeOversight);Assert.AreEqual(2,state.Preview("recover").cost);
+            var legacy=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(state));legacy.decisionDepthRules=0;legacy.incidentTimes=null;
+            Assert.AreEqual(3,legacy.Estimate("scope").cost);Assert.AreEqual(4,legacy.Preview("recover").cost);Assert.AreEqual(24,state.Preview("scope").loss-legacy.Preview("scope").loss);
+            state.levels[OpsCatalog.Index("segment")]=1;Assert.AreEqual(22,state.ScopeOversight);state.audited=true;Assert.AreEqual(2,state.Blindness);state.levels[OpsCatalog.Index("monitor")]=1;state.levels[OpsCatalog.Index("inventory")]=1;Assert.AreEqual(0,state.Blindness);
+            Assert.AreEqual(4,state.incidentTimes.Count(t=>t>0));var saved=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(state));CollectionAssert.AreEqual(state.incidentTimes,saved.incidentTimes);Assert.IsTrue(saved.Valid());Assert.AreEqual(0,legacy.IncidentTime);
+            foreach(var p in OpsEventCatalog.Profiles)Assert.AreEqual(new[]{"ransom","supply","vulnerability","targeted","remote"}.Contains(p.id)?2:new[]{"change","storage","service","ddos"}.Contains(p.id)?0:1,p.spread);
+        }
+        [Test] public void Next3Depth_把握と見積もりに未確認の真相を漏らさない()
+        {
+            foreach(bool audit in new[]{false,true})
+            {
+                var first=new OpsState(14,true){audited=audit};
+                for(int seed=15;seed<45;seed++)
+                {
+                    var other=new OpsState(seed,true){audited=audit,eventSchedule=first.eventSchedule,incidentTimes=first.incidentTimes};
+                    Assert.AreEqual(first.SituationKnowledge,other.SituationKnowledge);
+                    foreach(string response in new[]{"contain","scope","recover"})Assert.AreEqual(JsonUtility.ToJson(first.Estimate(response)),JsonUtility.ToJson(other.Estimate(response)));
+                }
+            }
+        }
+        [UnityTest] public IEnumerator Next3Depth_時間帯と把握ゲージは公開状態に一致する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
+            Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);Assert.AreEqual(game.State.SituationKnowledge+" / 4",Find<TextMeshProUGUI>("KnowledgeValue").text);CheckPointer("KnowledgeCard");Capture("132-depth-incident");CheckText();LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Next3Polish_月報と計画の八件を同条件で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.State.budget=59;game.OpenTab(0);game.StopVoice();game.SpeakSceneLine("growth_01",0);yield return new WaitForSecondsRealtime(1.4f);Capture("130-polish-planning");

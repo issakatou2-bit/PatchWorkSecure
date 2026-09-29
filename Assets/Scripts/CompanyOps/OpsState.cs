@@ -75,7 +75,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1;InitializeDecisionDepth(yearSeed); staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
         public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
@@ -289,7 +289,7 @@ namespace PatchWorkSecure.CompanyOps
                 default: return 4 * Level("monitor") + 3 * Level("inventory");
             }
         }
-        // 未調査の見積もりは公開情報のみ。調査後は把握した深刻度の周辺へ幅を絞る。
+        // 公開情報を中心に、調査で幅を絞る。新年度は調査後も未確認のSeverityを参照しない。
         public string Forecast(string response)
         {
             var estimate = Estimate(response);
@@ -300,7 +300,7 @@ namespace PatchWorkSecure.CompanyOps
         public OpsEstimate Estimate(string response)
         {
             int margin = EstimateMargin;
-            int center = audited ? Severity : Current.@base + SeasonPressure + 6;
+            int center = decisionDepthRules==0&&audited ? Severity : Current.@base + SeasonPressure + 6;
             var low = Calculate(response, Math.Max(0, center - margin), false);
             var high = Calculate(response, center + margin, false);
             int lowLoss = !string.IsNullOrEmpty(Current.calm) ? Math.Min(low.loss, Calculate(response, 0, true).loss) : low.loss;
@@ -326,7 +326,8 @@ namespace PatchWorkSecure.CompanyOps
             bool dataLoss = DataRecoveryApplies;
             int recovery = dataLoss ? 5 * Level("backup") + 3 * Math.Min(Level("backup"), Level("drill")) : 0;
             int loss = Math.Max(0, (pressure + 1) / 2 - recovery);
-            int stop = response == "contain" ? 9 : response == "recover" ? 3 : 1;
+            if(!benign&&response=="scope")loss+=ScopeOversight;
+            int stop = response == "contain" ? decisionDepthRules==0?OpsCatalog.ContainStop:IncidentTime>0?OpsCatalog.QuietContainStop:Math.Max(OpsCatalog.MinimumContainStop,OpsCatalog.ContainStop-OpsCatalog.SegmentContainStopCut*Level("segment")) : response == "recover" ? OpsCatalog.RecoverStop : OpsCatalog.ScopeStop;
             int downtime = Math.Max(0, (pressure + 2) / 3 + stop - 3 * Level("redundancy") - (mapped ? 2 : 0)
                 - (response == "recover" ? (dataLoss ? 2 * Level("drill") : 0) + 2 * Level("runbook") : 0));
             if (benign && response != "contain") downtime = 0;
@@ -337,7 +338,7 @@ namespace PatchWorkSecure.CompanyOps
             loss -= chainLoss; downtime -= chainStop;
             int businessLoss = situationPrepared ? 0 : Math.Min(Situation.stopLossCap, downtime);
             loss += businessLoss;
-            int cost = response == "contain" ? 6 : response == "scope" ? 3 : 4;
+            int cost = response == "contain" ? OpsCatalog.ContainCost : response == "scope" ? OpsCatalog.ScopeCost+Blindness*OpsCatalog.ScopeCostPerBlind : decisionDepthRules==0?OpsCatalog.LegacyRecoverCost:OpsCatalog.RecoverCost;
             return new OpsOutcome { month = month, loss = loss, downtime = downtime, pressure = pressure,
                 eventId=CurrentEvent?.id, eventTitle=CurrentEvent?.title, lessonId=CurrentEvent==null ? null : Current.lesson,
                 ticketId=Ticket?.id, ticketMode=Ticket==null ? null : string.IsNullOrEmpty(ticketResolution) ? "defer" : ticketResolution,
@@ -424,6 +425,7 @@ namespace PatchWorkSecure.CompanyOps
             audited = listened = mapped = rested = proposed = false; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
             situationPrepared = false;
             ticketResolution = "";
+            clueCollected=false;
             missionBudgetPaid=0;
             rankQuarterBonusPaid=0;
             phase = budget < 0 ? OpsPhase.Ended : OpsPhase.Planning;
@@ -441,7 +443,7 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
-            if (!ValidGrowth() || !ValidEvents() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
+            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;

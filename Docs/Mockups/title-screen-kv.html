@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>タイトル画面（一枚絵）</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;family=Zen+Kaku+Gothic+New:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.btn{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;cursor:pointer;border:0;text-align:left}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes fall{0%{transform:translate(0,-40px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate(-160px,960px) rotate(540deg);opacity:0}}
+@keyframes shine{0%{left:-40%}60%,100%{left:120%}}
+@keyframes kv{0%,100%{transform:scale(1.02) translate(0,0)}50%{transform:scale(1.06) translate(-10px,-6px)}}
+@keyframes drift{0%,100%{transform:scale(1.04) translate(0,0)}50%{transform:scale(1.08) translate(-14px,-8px)}}
+@keyframes logo{0%{transform:scale(.8) rotate(-4deg);opacity:0}60%{transform:scale(1.06) rotate(-2deg);opacity:1}100%{transform:scale(1) rotate(-2deg)}}
+.bob{animation:bob 3.4s ease-in-out infinite}
+.petal{position:absolute;top:0;width:16px;height:11px;border-radius:11px 0 11px 0;background:#ffc4d6;animation:fall linear infinite}
+.shine{position:absolute;top:0;width:30%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 2.8s ease-in-out infinite}
+.menu{position:relative;overflow:hidden;height:64px;border-radius:20px;padding:0 26px;font-size:21px;display:flex;align-items:center;gap:14px}
+
+/* 質感レイヤー：UIキット準拠。インラインの見た目の上に、光沢・縁・影の層を重ねる */
+button{position:relative}
+button::before{content:'';position:absolute;left:8px;right:8px;top:4px;height:38%;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0));pointer-events:none}
+button:active{transform:translateY(3px)}
+button[style*="#ff6f91"],div[style*="background: #ff6f91; box-shadow"]{background-image:linear-gradient(180deg,#ff9ab3 0%,#ff6f91 55%,#f2557c 100%)!important;text-shadow:0 2px 0 rgba(160,40,80,.4)}
+button[style*="#1d2a44"]{background-image:linear-gradient(180deg,#3b4d7a,#1d2a44)!important}
+button[style*="#ffc02e"]{background-image:linear-gradient(180deg,#ffe38a,#ffc02e 58%,#f2a400)!important}
+button[style*="background: #ffffff"],button[style*="background: #eef2f8"],button[style*="rgba(255,255,255,.9"]{background-image:linear-gradient(180deg,#ffffff,#edf1f7)!important}
+div[style*="border-radius: 24px; background: rgba(255,255,255,.94)"],div[style*="border-radius: 24px; background: #ffffff"],div[style*="border-radius: 20px; background: rgba(255,255,255,.94)"],div[style*="border-radius: 30px; background: #ffffff"],div[style*="background: rgba(255,255,255,.96)"],div[style*="border-radius: 18px; background: rgba(255,255,255,.9"]{background-image:linear-gradient(180deg,#ffffff,#f4f7fb)!important;box-shadow:0 0 0 3px #ffffff,0 0 0 4px #dfe5ef,0 14px 34px rgba(27,35,64,.18)!important}
+span[style*="width: 40px; height: 40px; border-radius: 12px"],span[style*="width: 56px; height: 56px; border-radius: 18px"]{background-image:linear-gradient(160deg,rgba(255,255,255,.38),rgba(255,255,255,0) 60%)!important;box-shadow:0 0 0 3px #ffffff,0 3px 8px rgba(27,35,64,.22),inset 0 -4px 0 rgba(0,0,0,.1)!important;text-shadow:0 2px 0 rgba(0,0,0,.18)}
+div[style*="height: 58px; border-radius: 16px"],div[style*="border-radius: 14px; background: #f3f6fb"],div[style*="border-radius: 18px; background: #f3f6fb"]{background-image:linear-gradient(180deg,#f8fafd,#edf1f7)!important;box-shadow:inset 0 2px 0 #ffffff,inset 0 -1px 0 #e1e6ef}
+span[style*="height: 6px; border-radius: 3px"],div[style*="height: 12px; border-radius: 6px"],div[class="meter"]{box-shadow:inset 0 1px 2px rgba(27,35,64,.12)}
+span[style*="border-radius: 10px; padding: 3px"],span[style*="border-radius: 9px; padding: 3px"],span[style*="border-radius: 12px; padding: 6px"]{box-shadow:inset 0 -2px 0 rgba(0,0,0,.07)}
+div[style*="box-shadow: 0 0 0 6px #ffffff"]::after,div[style*="box-shadow: 0 0 0 5px #ffffff"]::after{content:'';position:absolute;inset:9px;border:2px dashed rgba(255,255,255,.5);border-radius:20px;pointer-events:none}
+div[style*="width: 120px; height: 80px"]{position:relative}
+div[style*="width: 120px; height: 80px"]::after{content:'';position:absolute;inset:5px;border:2px dashed rgba(255,255,255,.65);border-radius:17px;pointer-events:none}
+div[style*="border-radius: 22px; background: #ffffff"],div[style*="border-radius: 20px; background: #ffffff; padding: 1"]{box-shadow:0 0 0 3px #ffd3de,0 10px 26px rgba(27,35,64,.25)!important}
+</style>
+<div style="position: relative; width: 1600px; height: 900px; overflow: hidden; background: #cfe9ff">
+<!-- 一枚絵（仮、ChatGPT生成）。左の4割はロゴとメニューのために明るくぼかしてある。右へ80pxずらし、ロゴと秘書の頭が重ならないようにする -->
+<img src="../../ArtSource/Characters/ideas-20260929/title-kv-1.png" alt="ひなた・秘書・エンジニア" style="position: absolute; left: 80px; top: 0; width: 1600px; height: 900px; object-fit: cover; transform-origin: 70% 40%; animation: kv 20s ease-in-out infinite">
+<div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(240,248,255,.94) 0%, rgba(240,248,255,.82) 26%, rgba(255,240,245,.25) 40%, rgba(255,240,245,0) 50%)"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(transparent, rgba(240,248,255,.7))"></div>
+<div class="petal" style="left: 300px; animation-duration: 10s"></div>
+<div class="petal" style="left: 620px; animation-duration: 12s; animation-delay: 3s"></div>
+<div class="petal" style="left: 900px; animation-duration: 9s; animation-delay: 1s"></div>
+<div class="petal" style="left: 1150px; animation-duration: 11s; animation-delay: 5s"></div>
+<div class="petal" style="left: 1400px; animation-duration: 13s; animation-delay: 2s"></div>
+<div class="petal" style="left: 1560px; animation-duration: 10s; animation-delay: 7s"></div>
+
+<div style="position: absolute; left: 40px; top: 40px; zoom: .84; display: flex; flex-direction: column; gap: 8px; animation: logo .9s cubic-bezier(.2,.8,.2,1) both; transform-origin: left center">
+  <div style="position: relative; width: 700px; height: 250px">
+    <img src="../../Assets/Art/UI/Logo/wordmark.png" alt="PatchWork Secure" style="position: absolute; left: 50px; top: 0; width: 640px; height: 246px">
+    <img src="../../Assets/Art/UI/Logo/icon.png" alt="" style="position: absolute; left: -24px; top: 118px; width: 132px; height: 132px; transform: rotate(-8deg); filter: drop-shadow(0 8px 14px rgba(201,72,108,.35))">
+  </div>
+  <span class="r" style="margin-left: 70px; font-size: 46px; line-height: 1.1; color: #1d2a44; text-shadow: 3px 3px 0 #ffffff, 6px 6px 0 #ffc4d3">情シスの一年</span>
+  <span class="r" style="align-self: flex-start; margin: 6px 0 0 70px; font-size: 20px; color: #ffffff; background: #ff6f91; padding: 8px 22px; clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%)">会社を守る、12か月の育成シミュレーション</span>
+</div>
+
+<div style="position: absolute; left: 90px; top: 450px; width: 460px; display: flex; flex-direction: column; gap: 14px">
+  <button class="btn menu" style="background: #ff6f91; box-shadow: 0 6px 0 #d94a70; color: #ffffff; font-size: 24px; height: 76px"><span class="shine"></span><svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff"><path d="M7 4v16l13-8z"></path></svg>ニューゲーム</button>
+  <button class="btn menu" style="background: #ffffff; box-shadow: 0 6px 0 #c7d0e0; color: #1d2a44"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3fa9f5" stroke-width="2.6" stroke-linecap="round"><path d="M4 12h12M12 6l6 6-6 6"></path></svg>つづきから<span style="margin-left: auto; font-size: 14px; color: #6b7894">5月 / 2か月目</span></button>
+  <div style="display: flex; gap: 14px">
+    <button class="btn menu" style="flex: 1; background: rgba(255,255,255,.9); box-shadow: 0 6px 0 #c7d0e0; color: #1d2a44; font-size: 18px">遊び方</button>
+    <button class="btn menu" style="flex: 1; background: rgba(255,255,255,.9); box-shadow: 0 6px 0 #c7d0e0; color: #1d2a44; font-size: 18px">設定</button>
+  </div>
+</div>
+
+<span class="r" style="position: absolute; left: 90px; bottom: 34px; font-size: 14px; color: #6b7894">ねっとわーく商事・社員45人 ／ 公表事例を参考にした架空の会社と数値です</span>
+</div>
+</body>
+</html>

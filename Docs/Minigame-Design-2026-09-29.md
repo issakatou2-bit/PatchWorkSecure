@@ -46,7 +46,8 @@
 - 試作Bに凝った演出を追加（`Docs/Visual-Craft-2026-09-29.md`の★）
 - `Docs/Mockups/proto-f-schedule.html`：更新の時間割（日常の「優先順位」、自動化の備え）
 - `Docs/Mockups/proto-g-restore.html`：復旧の順番（依存関係、手順書の備え、2人で並行作業）
-- `Docs/Mockups/proto-f2-blocks.html`：作業のはめ込み（Fの発展。縦＝人・横＝時間の穴に、形のある作業をはめる。回転、一晩をすき間なく埋めるとボーナス）
+- `Docs/Mockups/proto-f2-blocks.html`：作業のはめ込み（Fの発展。今週の予定表＝縦4（午前2・午後2）×横5（月〜金）に形のある作業をはめる。ドラッグ・回転・1日を埋めるとボーナス。空き15＝作業15で解は25通り、`Tools/Solve-BlockWeek.py`で確認）
+- 原則との対応：`Docs/Principles-in-Play-2026-09-29.md`
 - Gに足す現実の要素（次の改訂）：システムごとの目標復旧時間（RTO）の表示、ランサムの事件だけ「安全確認」の工程。根拠はBIA・RTO・依存関係の整理、NIST SP 800-34／800-184
 - 次：通信の振り分け（DDoS）、相談の聞き取り
 

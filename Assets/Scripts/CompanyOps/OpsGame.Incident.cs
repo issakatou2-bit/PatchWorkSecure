@@ -73,8 +73,7 @@ namespace PatchWorkSecure.CompanyOps
             var portrait=Rect(map,"IncidentHinata",10,440,266,330);Portrait(portrait,"NavigatorPortrait",0,0,266,330,"pose_startled");
             var navigator=PCard(map,"Navigator",250,560,320,126,Color.white,20,false);
             PImage(navigator,"SpeechTail",PlanningArt.tail,-20,20,26,36);
-            var tag=PCard(navigator,"NavigatorTag",16,-13,78,23,PlanPink,12,false);
-            PText(tag,"NavigatorName",Navigator==null?"ひなた":Navigator.DisplayName,0,0,78,23,13,Color.white,true,true);
+            SpeechName(navigator);
             PText(navigator,"NavigatorSpeech",State.audited?"調査できたね！\n止める範囲も比べよう！":"まだ確認が必要だね！\nまずは止める範囲を決めよう！",18,17,284,76,18,PlanInk,false);
             PButton(map,"IncidentHelp","",250,560,320,126,IncidentEvidence,Color.clear,Color.clear,20);
             var right=Rect(screen,"DecisionPanel",648,120,928,770);IncidentComparison(right);

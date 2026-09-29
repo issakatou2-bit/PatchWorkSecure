@@ -53,6 +53,13 @@ namespace PatchWorkSecure.CompanyOps
             var clip=Rect(p,"ShineClip",0,0,w,h);clip.gameObject.AddComponent<RectMask2D>();
             var shine=PImage(clip,"ButtonShine",PlanningArt.shine,-w*.4f,0,w*.3f,h);Motion(shine,"shine",2.8f);
         }
+        private void SpeechName(RectTransform bubble,string label="NavigatorName")
+        {
+            // 名札全体を吹き出しの上に置く。枠の縁・マスクに文字を重ねない。
+            var p=bubble.anchoredPosition;
+            var tag=PCard(bubble.parent,bubble.name+"NameTag",p.x+16,-p.y-36,90,28,PlanPink,12,false);
+            PText(tag,label,Navigator!=null?Navigator.DisplayName:"ひなた",0,0,90,28,14,Color.white,true,true);
+        }
         private void PlanningScreen()
         {
             if(PlanningArt==null) throw new InvalidOperationException("計画画面の承認済みUI素材を設定してください。");
@@ -255,8 +262,7 @@ namespace PatchWorkSecure.CompanyOps
             Portrait(character,"NavigatorPortrait",0,0,347,430,State.fatigue>=70?"pose_exhausted":"pose_fists");
             var speech=PCard(screen,"Navigator",600,580,420,129.2f,Color.white,24);
             PImage(speech,"SpeechTail",PlanningArt.tail,-13,36,14,20);
-            var tag=PCard(speech,"NavigatorTag",18,-14,82,28,PlanPink,12,false);
-            PText(tag,"NavigatorName",Navigator!=null?Navigator.DisplayName:"ひなた",0,0,82,28,14,Color.white,true,true);
+            SpeechName(speech);
             var line=PText(speech,"NavigatorSpeech",State.Current.person.Split('・')[0].Trim()+"から相談が来てるよ！\n今月の備え、一緒に確認しよう。",20,22,380,85,19,null,false);
             line.fontStyle=FontStyles.Bold;
         }
@@ -305,7 +311,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(quote,"MissionBoss","「"+State.Current.boss+"」",18,32,750,50,19,PlanInk,false);
             PText(d,"MissionTitle",State.CurrentMission.title,32,196,876,72,34);
             State.MissionProgress(true,out int equipDone,out int equipTotal);State.MissionProgress(false,out int fieldDone,out int fieldTotal);
-            PText(d,"MissionProgress","どちらかの道で達成  / 設備 "+equipDone+"/"+equipTotal+"  または現場 "+fieldDone+"/"+fieldTotal,32,280,876,28,15,PlanGray);
+            PText(d,"MissionProgress","どちらかの道で達成  / 設備 "+equipDone+"/"+equipTotal+"  または現場 "+fieldDone+"/"+fieldTotal,32,280,440,28,15,PlanGray);
             MissionRoute(d,true,32,322);MissionRoute(d,false,478,322);
             PText(d,"MissionRewardsHeading","達成すると",32,548,876,26,15,PlanGray);
             Color[] colors={Hex("fff6d6"),Hex("f0ecfb"),Hex("ffe3ec"),Hex("e3f2ff")};
@@ -319,12 +325,12 @@ namespace PatchWorkSecure.CompanyOps
                 else PImage(reward,"RewardIcon",icons[i],87,12,36,36);
                 PText(reward,"RewardCaption"+i,rewards[i],4,52,202,34,18,null,true,true);
             }
-            PButton(d,"OpenEventBrief","題材・根拠",500,548,200,26,EventBriefDialog,new Color(1,1,1,0),PlanGray,16);
-            PButton(d,"EmployeeConsultation","社員の声",710,548,170,26,ConsultationDetails,new Color(1,1,1,0),PlanGray,16);
+            PButton(d,"OpenEventBrief","題材・根拠",500,280,200,26,EventBriefDialog,new Color(1,1,1,0),PlanGray,16);
+            PButton(d,"EmployeeConsultation","社員の声",710,280,170,26,ConsultationDetails,new Color(1,1,1,0),PlanGray,16);
             PButton(d,"CloseDialog","閉じる",32,696,286,60,CloseDialog,Hex("eef2f8"),PlanInk,20);
             var accept=PButton(d,"AcceptMission",State.acceptedMissionMonth==State.month?"引き受け済み":"引き受ける",332,696,576,60,()=>{State.acceptedMissionMonth=State.month;Save();CloseDialog();Toast("依頼を確認 / 条件を満たして今月を進めよう",true,OpsCue.Action);},PlanPink,Color.white);Shine(accept.transform,576,60);
             Portrait(modal,"MissionPortrait",1255,455,320,440,"pose_point");
-            var hint=PCard(modal,"MissionHint",1290,330,290,104,Color.white,20);PText(hint,"MissionHintName","ひなた",16,-13,90,26,13,PlanPink);
+            var hint=PCard(modal,"MissionHint",1290,330,290,104,Color.white,20);SpeechName(hint,"MissionHintName");
             State.MissionProgress(true,out int a,out int at);State.MissionProgress(false,out int b,out int bt);
             string near=State.MissionReady?"もう条件を満たしてるよ！\n今月を進めると達成だね。":at-a<=bt-b?"Aの道は、あと"+(at-a)+"つ。\n費用と工数も確認しよう！":"Bの道は、あと"+(bt-b)+"つ。\n今月の工数を使って確かめよう！";
             PText(hint,"MissionHintLine",near,16,12,258,80,17,null,false);

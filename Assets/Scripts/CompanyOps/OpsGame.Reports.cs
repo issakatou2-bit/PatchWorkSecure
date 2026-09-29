@@ -58,7 +58,7 @@ namespace PatchWorkSecure.CompanyOps
         private void ReportSpeech(string line,float x,float y,float w,string face="face_normal")
         {
             var bubble=PCard(screen,"Navigator",x,y,w,120,Color.white,20);
-            var tag=PCard(bubble,"NameTag",16,-13,90,27,PlanPink,12,false);PText(tag,"NavigatorName","ひなた",0,0,90,27,13,Color.white,true,true);
+            SpeechName(bubble);
             var icon=PImage(bubble,"HinataFaceIcon",Navigator?.Face(face),12,24,52,52);icon.GetComponent<Image>().preserveAspect=true;icon.gameObject.AddComponent<OpsPortraitIdentity>().FaceIcon=true;
             PText(bubble,"NavigatorSpeech",line,76,15,w-94,92,18,null,false);
         }
@@ -99,7 +99,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(effect.transform,"ImpactSummary",r.hasInvestmentComparison?"被害 −"+r.avoidedLoss+"万円\n停止 −"+r.avoidedDowntime+"時間":"比較未記録",430,6,200,52,15,Hex("1a7c63"));
             MonthlyGrowth(r);
             var mission=ReportPanel("MonthlyMission",770,140,440,330,.04f);ReportHeading(mission,"MISSION","社内依頼",PlanPink);
-            PText(mission,"MissionTitle",State.CurrentMission.title,26,62,225,100,22);
+            PText(mission,"MissionTitle",ReportMissionTitle(State.CurrentMission.title),26,62,225,100,22);
             State.MissionProgress(true,out int a,out int at);State.MissionProgress(false,out int b,out int bt);
             PText(mission,"MissionResult",State.CurrentMissionCompleted?"達成！ 設備 "+a+"/"+at+"・現場 "+b+"/"+bt:"今回は未達成",26,186,388,38,15,PlanGray);
             if(State.CurrentMissionCompleted)
@@ -128,6 +128,32 @@ namespace PatchWorkSecure.CompanyOps
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
             PButton(screen,"NextMonth",State.QuarterRewardPending?"山場クリア / 報酬を選ぶ":State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
+        }
+        public static string ReportMissionTitle(string title)
+        {
+            // 表示だけの分かち書き。元の依頼名・条件・記録は変更しない。
+            string[] lines={
+                "納品データを戻す\n手段を示す","新人のログインを\n守る","急ぎの依頼を\n安全に判断する","受注を止めない\n体制を作る",
+                "担当者が休める\n運用にする","更新対象を\n絞り込む","取引先からの影響を\n限定する","共有範囲の判断を\n支える",
+                "忙しい時も\n報告できる","復元できる状態を\n確かめる","異常なログインを\n見分ける","年度末の納品を\n守る",
+                "うちのデータ、\n戻せる？","バックアップも\n同じ権限？","暗号化だけではない\n被害","一台から全部に\n広がる？",
+                "委託先の保守IDは\n誰が使う？","正規の更新なら\n安全？","外部サービスが\n侵害されたら","AIに顧客資料を\n入れていい？",
+                "AIの回答に\n操作を任せる？","生成した回答を\nそのまま配布？","公開機器の\n緊急更新","使っている\nライブラリが対象？",
+                "古い端末を\nすぐ替えられない","会議資料を装う\n添付","便利な連携アプリの\n権限","MFAを通っている\nから安心？",
+                "外部情勢で\n攻撃が増えたら","侵害を名乗る\n投稿が出た","退職前の大量\nダウンロード","共有の管理者ID",
+                "外注メンバーの\n権限が残る","在宅接続の\n認証情報が流出？","持ち帰った端末が\n見つからない","サポートを名乗る\n電話",
+                "サイトだけが重い","回線が埋まっている","取引先の振込先が\n変わった","社長の声なら\n信用する？",
+                "いつものメールの\n続き","証明書の更新担当が\nいない","SSOの切替後に\n入れない","更新後に端末が\n起動しない",
+                "売上が伸びたら\n処理が詰まる","夜間処理が止まった","保存装置が故障した","共有フォルダを\n誤って削除",
+                "使っているSaaSが\n停止","オフィスのネットが\n不安定","共有リンクの範囲が\n広い","メールが勝手に\n転送される"
+            };
+            foreach(string line in lines)
+            {
+                string plain=line.Replace("\n","");
+                if(title==plain)return line;
+                if(title==plain+"への備え")return line+"\nへの備え";
+            }
+            return (title??"").Replace("、","、\n");
         }
         private void MissionConversation()
         {

@@ -14,6 +14,33 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.4f);var game=Object.FindAnyObjectByType<OpsGame>();Capture("126-ui-title");
+            foreach(string id in new[]{"NewYear","ContinueYear","HomeGuide","HomeSettings"})
+            {
+                var b=Find<Button>(id);Assert.AreEqual(Color.white,b.colors.disabledColor);Assert.AreEqual(Color.white,b.GetComponent<Image>().color);
+                var g=b.GetComponent<OpsKitGradient>();Assert.Greater(g.Top.r,.95f);if(id!="NewYear")Assert.AreEqual(Color.white,g.Top);else Assert.Less(g.Bottom.g,.4f);
+            }
+            AssertSpeechName("HomeGreeting","HomeGreetingName");
+            game.StartYear(14);yield return new WaitForSecondsRealtime(2);Capture("126-ui-planning");
+            Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);Capture("126-ui-brief");AssertSpeechName("MissionHint","MissionHintName");
+            Assert.AreEqual(-280,Find<RectTransform>("OpenEventBrief").anchoredPosition.y);Assert.AreEqual(-280,Find<RectTransform>("EmployeeConsultation").anchoredPosition.y);CheckPointer("OpenEventBrief");CheckPointer("EmployeeConsultation");Click("CloseDialog");yield return null;
+            SetEvent(game.State,"vuln-web");game.BeginIncident();yield return new WaitForSecondsRealtime(1.6f);Capture("126-ui-incident");AssertSpeechName("Navigator","NavigatorName");game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(1);Capture("126-ui-monthly");
+            var title=Find<TextMeshProUGUI>("MissionTitle");Assert.AreEqual("使っている\nライブラリが対象？\nへの備え",title.text);title.ForceMeshUpdate();
+            int start=title.text.IndexOf("ライブラリ");int lineNumber=title.textInfo.characterInfo[start].lineNumber;
+            for(int i=start;i<start+5;i++)Assert.AreEqual(lineNumber,title.textInfo.characterInfo[i].lineNumber);Assert.IsFalse(title.isTextOverflowing);AssertSpeechName("Navigator","NavigatorName");LogAssert.NoUnexpectedReceived();
+        }
+        private static void AssertSpeechName(string bubbleName,string textName)
+        {
+            var bubble=Find<RectTransform>(bubbleName);var name=Find<TextMeshProUGUI>(textName);var tag=(RectTransform)name.transform.parent;
+            Assert.AreEqual(bubble.parent,tag.parent);Assert.GreaterOrEqual(tag.anchoredPosition.y-tag.rect.height,bubble.anchoredPosition.y+6);name.ForceMeshUpdate();Assert.IsFalse(name.isTextOverflowing);
+        }
+        [Test] public void UIRepair_全依頼の語の区切りは元の依頼名を保つ()
+        {
+            foreach(var m in OpsCatalog.Missions)Assert.AreEqual(m.title,OpsGame.ReportMissionTitle(m.title).Replace("\n",""));
+            foreach(var e in OpsEventCatalog.Events)Assert.AreEqual(e.title+"への備え",OpsGame.ReportMissionTitle(e.title+"への備え").Replace("\n",""));
+        }
         [UnityTest] public IEnumerator NextScreens4_ランクの恩恵と行動の粒は実状態に連動し省演出でも動く()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();

@@ -20,8 +20,22 @@ namespace PatchWorkSecure.CompanyOps
             if(PopAt>=0){float p=Mathf.Clamp01((now-PopAt)/.32f);group.blocksRaycasts=false;rect.localScale=Vector3.one*(reduced?1:p<.3f?1-.18f*p/.3f:.82f+(p-.3f)*1.1f);group.alpha=1-p;if(p>=1)Destroy(gameObject);return;}
             float age=now-ArrivalAt;group.blocksRaycasts=age>=0;group.alpha=age<0?0:1;
             if(age<0){rect.localScale=Vector3.zero;return;}
-            float a=Mathf.Clamp01(age/.5f);rect.localScale=Vector3.one*(reduced?1:a<.7f?a/.7f*1.12f:Mathf.Lerp(1.12f,1,(a-.7f)/.3f));
-            rect.anchoredPosition=origin+(reduced?Vector2.zero:new Vector2(Mathf.Sin(age*2)*3,Mathf.Sin(age*2)*5));
+            rect.localScale=Vector3.one*(reduced?1:EntranceScale(age));
+            rect.anchoredPosition=origin+(reduced?Vector2.zero:FloatOffset(age));
+        }
+        // モックの .5秒 bIn と3.2秒 bFloat。ゲームの乱数・状態には触れない。
+        public static float EntranceScale(float age)
+        {
+            float p=Mathf.Clamp01(age/.5f);
+            return p<.7f?Mathf.Lerp(0,1.12f,Mathf.SmoothStep(0,1,p/.7f)):Mathf.Lerp(1.12f,1,Mathf.SmoothStep(0,1,(p-.7f)/.3f));
+        }
+        public static Vector2 FloatOffset(float age)
+        {
+            float p=Mathf.Repeat(age/3.2f,1);Vector2 a,b;float t;
+            if(p<.33f){a=Vector2.zero;b=new Vector2(3,7);t=p/.33f;}
+            else if(p<.66f){a=new Vector2(3,7);b=new Vector2(-3,3);t=(p-.33f)/.33f;}
+            else {a=new Vector2(-3,3);b=Vector2.zero;t=(p-.66f)/.34f;}
+            return Vector2.Lerp(a,b,Mathf.SmoothStep(0,1,t));
         }
     }
     // UIだけで再現するモックの動き。ゲームの乱数・判定には触れない。

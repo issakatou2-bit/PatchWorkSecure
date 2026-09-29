@@ -24,6 +24,15 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        [UnityTest] public IEnumerator Polish4_02_泡は半秒で弾み三秒二で漂い省演出では静止する()
+        {
+            Assert.AreEqual(0,OpsBubbleMotion.EntranceScale(0));Assert.AreEqual(1.12f,OpsBubbleMotion.EntranceScale(.35f),.001f);Assert.AreEqual(1,OpsBubbleMotion.EntranceScale(.5f));
+            Assert.AreEqual(new Vector2(3,7),OpsBubbleMotion.FloatOffset(3.2f*.33f));Assert.AreEqual(new Vector2(-3,3),OpsBubbleMotion.FloatOffset(3.2f*.66f));Assert.AreEqual(Vector2.zero,OpsBubbleMotion.FloatOffset(3.2f));
+            yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
+            PolishCapture(2);Click("Menu");if(!game.ReducedMotion)Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);
+            var rect=Find<RectTransform>("OfficeBubble0");var position=rect.anchoredPosition;yield return new WaitForSecondsRealtime(.3f);
+            Assert.AreEqual(position,rect.anchoredPosition);Assert.AreEqual(Vector3.one,rect.localScale);Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_01_泡は透過素材と輪を重ね操作範囲を保つ()
         {
             yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();

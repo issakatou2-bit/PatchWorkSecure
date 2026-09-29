@@ -140,6 +140,7 @@ namespace PatchWorkSecure.CompanyOps
                     cutin.Find("CutinEffect").GetComponent<TextMeshProUGUI>().text=step.detail;
                     PlayCue(step.peak?OpsCue.Success:step.staff?OpsCue.StaffHelp:OpsCue.Prepared);
                     if(step.equipment&&!equipmentSpoken){equipmentSpoken=true;ResolutionVoice("incident_activate");}
+                    if(step.peak)ResolutionVoice(PeakResultVoiceId(State));
                     for(int j=0;j<3;j++)
                     {
                         var spark=PCard(cutin,"CutinSpark"+j,j==0?1000:j==1?1060:40,j==0?-20:j==1?170:200,18,18,j==2?Color.white:IncidentYellow,20,false);
@@ -181,7 +182,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(!ResolutionActive)return;
             // 自動で月報に移っただけでは全文を切らない。次の操作なら即時停止する。
-            carryResolutionVoice=speakingPriority==5&&(VoicePending||PortraitVoicePlaying||Time.unscaledTime<voiceBusyUntil||followingVoice.Count>0)&&LastReactionId.StartsWith("incident_");
+            carryResolutionVoice=speakingPriority==5&&(VoicePending||PortraitVoicePlaying||Time.unscaledTime<voiceBusyUntil||followingVoice.Count>0)&&(LastReactionId.StartsWith("incident_")||LastReactionId.StartsWith("peak_"));
             resolutionActive=false;Render();
             if(Application.isPlaying)StartCoroutine(ReviewGrowthFeedback(State.Latest,resolutionLevelUp));
         }

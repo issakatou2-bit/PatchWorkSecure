@@ -102,7 +102,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
-            var bank=game.ActiveVoiceBank;var expected=OpsReactionBank.ScriptV2();Assert.AreEqual(105,bank.lines.Length);Assert.IsFalse(game.Navigator.Reactions.HasAudio);
+            var bank=game.ActiveVoiceBank;var expected=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,bank.lines.Length);Assert.IsFalse(game.Navigator.Reactions.HasAudio);
             foreach(var row in expected)
             {
                 var line=bank.Find(row.id);Assert.AreEqual(row.caption,line.caption);Assert.AreEqual(row.faceId,line.faceId);Assert.AreEqual(row.poseId,line.poseId);
@@ -117,9 +117,9 @@ namespace PatchWorkSecure.Tests
             }
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
-        [Test] public void VoiceV2_台本は九場面六本と追加十一と全文四十で重複しない()
+        [Test] public void VoiceV2_台本は九場面六本と追加十一と全文五十二で重複しない()
         {
-            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(105,lines.Length);Assert.AreEqual(105,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(40,lines.Count(l=>l.fullSpeech));Assert.AreEqual(11,lines.Count(l=>l.extra));
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(52,lines.Count(l=>l.fullSpeech));Assert.AreEqual(11,lines.Count(l=>l.extra));
             foreach(var l in lines){Assert.IsNotEmpty(l.caption);Assert.IsNotEmpty(l.faceId);Assert.IsNotEmpty(l.poseId);Assert.IsNull(l.clip);}
             foreach(OpsReaction r in System.Enum.GetValues(typeof(OpsReaction)))Assert.AreEqual(6,lines.Count(l=>!l.fullSpeech&&!l.extra&&l.reaction==r));
             for(int m=0;m<12;m++){var s=new OpsState(1){month=m};Assert.AreEqual("mission_accept_"+(m+1).ToString("00"),OpsGame.MissionVoiceId(s));}
@@ -128,7 +128,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator VoiceV2_素材なしでも全文字幕と台本のポーズで進み操作が予約を取り消す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
-            Assert.AreEqual(105,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("season_04").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
             game.StartYear(14);Assert.IsTrue(game.VoicePending,"新年度を始め直したら同じ季節でも読み直す");yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("season_04").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);

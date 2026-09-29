@@ -110,13 +110,27 @@ namespace PatchWorkSecure.CompanyOps
             {
                 var line=ReactionBank?.Find(followingVoice.Dequeue());if(line!=null)BeginVoice(line,.18f,5,ResolutionActive?"ResolutionReaction":"NavigatorSpeech");
             }
+            TryNextRankVoice();
+        }
+        private void TryNextRankVoice()
+        {
+            if(!Application.isPlaying||homeVisible||State==null||State.phase!=OpsPhase.Planning||State.peakGoalRules==0||State.nextRankVoicePlayed||tutorialStep>=0||
+                State.NextRankPoints<=0||State.NextRankPoints>OpsCatalog.NextRankVoiceDistance||VoicePending||PortraitVoicePlaying||Time.unscaledTime<voiceBusyUntil||followingVoice.Count>0)return;
+            if(SpeakSceneLine("next_rank",.2f)){State.nextRankVoicePlayed=true;Save();}
+        }
+        public static string PeakResultVoiceId(OpsState state)
+        {
+            var r=state?.Latest;if(r==null||!r.peakGoalRecorded)return "";
+            if(r.peakGoalMet&&r.month==OpsCatalog.MarchPeak)return "peak_clear_final";
+            int count=state.history.Count(p=>p.peakGoalRecorded&&p.peakGoalMet==r.peakGoalMet);
+            return (r.peakGoalMet?"peak_clear_":"peak_miss_")+(count%2==1?"01":"02");
         }
         private void ScreenVoice()
         {
             if(!Application.isPlaying||State==null||ResolutionActive)return;
             string key=State.seed+":"+State.month+":"+State.phase;
             if(key==voiceScreenKey)return;voiceScreenKey=key;
-            if(State.phase==OpsPhase.Planning)SpeakSceneLine("season_"+(((State.month+3)%12)+1).ToString("00"),1.65f);
+            if(State.phase==OpsPhase.Planning)SpeakSceneLine((State.HasPeakGoal?"peak_goal_":"season_")+(((State.month+3)%12)+1).ToString("00"),1.65f);
             else if(State.phase==OpsPhase.Incident)
             {
                 SpeakSceneLine("incident_start",.9f);followingVoice.Enqueue("incident_unconfirmed");
@@ -124,12 +138,13 @@ namespace PatchWorkSecure.CompanyOps
             else if(State.phase==OpsPhase.Review)
             {
                 string id=State.CurrentMissionCompleted?"mission_done":"mission_miss";
-                if(carryResolutionVoice){carryResolutionVoice=false;voiceCaptionTarget="NavigatorSpeech";ApplyVoiceCaption();ApplyReactionFace(OpsReaction.Think,ReactionBank.Find(LastReactionId));followingVoice.Enqueue(id);}
+                if(carryResolutionVoice){carryResolutionVoice=false;voiceCaptionTarget="NavigatorSpeech";ApplyVoiceCaption();ApplyReactionFace(OpsReaction.Think,ReactionBank.Find(LastReactionId));if(State.Latest.peakGoalRecorded&&!State.Latest.peakGoalMet)followingVoice.Enqueue(PeakResultVoiceId(State));followingVoice.Enqueue(id);}
+                else if(State.Latest.peakGoalRecorded){SpeakSceneLine(PeakResultVoiceId(State),.65f);followingVoice.Enqueue(id);}
                 else SpeakSceneLine(id,.65f);
             }
             else if(State.phase==OpsPhase.Ended)
             {
-                string rank=State.Rank.Substring(State.Rank.Length-1);SpeakSceneLine("annual_"+rank.ToLowerInvariant(),State.history.Count*.08f+.95f);
+                SpeakSceneLine("annual_"+State.RankCode.ToLowerInvariant(),State.history.Count*.08f+.95f);
             }
         }
         private void TutorialVoice()

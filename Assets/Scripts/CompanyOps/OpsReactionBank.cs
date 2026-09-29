@@ -133,6 +133,18 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="season_01", caption="あけまして、おめでと〜！　今年もよろしくね！", scene="1月", reaction=OpsReaction.Think, faceId="face_sparkle", poseId="pose_wave", fullSpeech=true, extra=false },
             new OpsReactionLine { id="season_02", caption="年度末まで、あと少し！　予算の使い方、慎重にね。", scene="2月", reaction=OpsReaction.Think, faceId="face_normal", poseId="pose_think", fullSpeech=true, extra=false },
             new OpsReactionLine { id="season_03", caption="一年の集大成だよ！　最後まで、一緒に守りきろ！", scene="3月", reaction=OpsReaction.Think, faceId="face_determined", poseId="pose_shield", fullSpeech=true, extra=false },
+            new OpsReactionLine { id="peak_goal_06", caption="今月は最初の山場だよ！　目標、ちゃんと見ておいてね！", scene="山場の月の始まり（6月）", faceId="face_determined", poseId="pose_point", fullSpeech=true },
+            new OpsReactionLine { id="peak_goal_09", caption="上期のしめくくり、二つ目の山場！　ここは落とせないね！", scene="山場の月の始まり（9月）", faceId="face_determined", poseId="pose_fists", fullSpeech=true },
+            new OpsReactionLine { id="peak_goal_12", caption="年末の山場！　みんな忙しい時期だから、気を引きしめていこ！", scene="山場の月の始まり（12月）", faceId="face_alert", poseId="pose_salute", fullSpeech=true },
+            new OpsReactionLine { id="peak_goal_03", caption="いよいよ決算の山場！　一年の集大成、見せちゃお！", scene="山場の月の始まり（3月・決算）", faceId="face_determined", poseId="pose_shield", fullSpeech=true },
+            new OpsReactionLine { id="peak_clear_01", caption="山場、突破〜っ！　みんなで守りきったね！", scene="山場の目標を達成", faceId="face_sparkle", poseId="pose_jump", fullSpeech=true },
+            new OpsReactionLine { id="peak_clear_02", caption="よしっ、目標クリア！　備えてきたかいがあったね！", scene="山場の目標を達成", faceId="face_proud", poseId="pose_peace", fullSpeech=true },
+            new OpsReactionLine { id="peak_clear_final", caption="決算の山場、突破！　この一年、ほんとにおつかれさま！", scene="決算の山場を達成", faceId="face_crying", poseId="pose_jump", fullSpeech=true },
+            new OpsReactionLine { id="peak_miss_01", caption="う〜ん、今回は届かなかったか……。でも、次の山場で取り返そ！", scene="山場の目標に届かず", faceId="face_worried", poseId="pose_please", fullSpeech=true },
+            new OpsReactionLine { id="peak_miss_02", caption="惜しかった〜！　何があれば届いたか、月報で一緒に見てみよ？", scene="山場の目標に届かず", faceId="face_sad", poseId="pose_think", fullSpeech=true },
+            new OpsReactionLine { id="next_rank", caption="次のランクまで、あとちょっと！", scene="次のランクが近い", faceId="face_determined", poseId="pose_fists", fullSpeech=true },
+            new OpsReactionLine { id="annual_ss", caption="運用ランクSS！　……うそ、ほんとに？　最高の一年だよ！", scene="年間評価SS", faceId="face_crying", poseId="pose_jump", fullSpeech=true },
+            new OpsReactionLine { id="annual_s", caption="運用ランクS！　胸を張っていい一年だったね！", scene="年間評価S", faceId="face_proud", poseId="pose_jump", fullSpeech=true },
         };
     }
 

@@ -112,7 +112,7 @@ namespace PatchWorkSecure.EditorTools
                 System.Enum.TryParse(cells[0].Split('_')[0],true,out OpsReaction reaction);
                 result.Add(new OpsReactionLine{id=cells[0],caption=cells[3],scene=cells[2],reaction=reaction,faceId=cells[4],poseId=cells[5],fullSpeech=cells[1]=="全文",extra=cells[0].StartsWith("extra_")});
             }
-            if(result.Count!=105||result.Select(l=>l.id).Distinct().Count()!=105)throw new System.FormatException("台本v2は重複のない105行が必要です。");
+            if(result.Count!=OpsCatalog.VoiceScriptLineCount||result.Select(l=>l.id).Distinct().Count()!=OpsCatalog.VoiceScriptLineCount)throw new System.FormatException("台本v2は重複のない"+OpsCatalog.VoiceScriptLineCount+"行が必要です。");
             return result.ToArray();
         }
 

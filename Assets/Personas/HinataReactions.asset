@@ -958,3 +958,111 @@ MonoBehaviour:
     scene: "3\u6708"
     fullSpeech: 1
     extra: 0
+  - id: peak_goal_06
+    caption: "\u4ECA\u6708\u306F\u6700\u521D\u306E\u5C71\u5834\u3060\u3088\uFF01\u3000\u76EE\u6A19\u3001\u3061\u3083\u3093\u3068\u898B\u3066\u304A\u3044\u3066\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_point
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF086\u6708\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_goal_09
+    caption: "\u4E0A\u671F\u306E\u3057\u3081\u304F\u304F\u308A\u3001\u4E8C\u3064\u76EE\u306E\u5C71\u5834\uFF01\u3000\u3053\u3053\u306F\u843D\u3068\u305B\u306A\u3044\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF089\u6708\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_goal_12
+    caption: "\u5E74\u672B\u306E\u5C71\u5834\uFF01\u3000\u307F\u3093\u306A\u5FD9\u3057\u3044\u6642\u671F\u3060\u304B\u3089\u3001\u6C17\u3092\u5F15\u304D\u3057\u3081\u3066\u3044\u3053\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_alert
+    poseId: pose_salute
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF0812\u6708\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_goal_03
+    caption: "\u3044\u3088\u3044\u3088\u6C7A\u7B97\u306E\u5C71\u5834\uFF01\u3000\u4E00\u5E74\u306E\u96C6\u5927\u6210\u3001\u898B\u305B\u3061\u3083\u304A\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_shield
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF083\u6708\u30FB\u6C7A\u7B97\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_clear_01
+    caption: "\u5C71\u5834\u3001\u7A81\u7834\u301C\u3063\uFF01\u3000\u307F\u3093\u306A\u3067\u5B88\u308A\u304D\u3063\u305F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u5C71\u5834\u306E\u76EE\u6A19\u3092\u9054\u6210"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_clear_02
+    caption: "\u3088\u3057\u3063\u3001\u76EE\u6A19\u30AF\u30EA\u30A2\uFF01\u3000\u5099\u3048\u3066\u304D\u305F\u304B\u3044\u304C\u3042\u3063\u305F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_proud
+    poseId: pose_peace
+    scene: "\u5C71\u5834\u306E\u76EE\u6A19\u3092\u9054\u6210"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_clear_final
+    caption: "\u6C7A\u7B97\u306E\u5C71\u5834\u3001\u7A81\u7834\uFF01\u3000\u3053\u306E\u4E00\u5E74\u3001\u307B\u3093\u3068\u306B\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_crying
+    poseId: pose_jump
+    scene: "\u6C7A\u7B97\u306E\u5C71\u5834\u3092\u9054\u6210"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_miss_01
+    caption: "\u3046\u301C\u3093\u3001\u4ECA\u56DE\u306F\u5C4A\u304B\u306A\u304B\u3063\u305F\u304B\u2026\u2026\u3002\u3067\u3082\u3001\u6B21\u306E\u5C71\u5834\u3067\u53D6\u308A\u8FD4\u305D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_please
+    scene: "\u5C71\u5834\u306E\u76EE\u6A19\u306B\u5C4A\u304B\u305A"
+    fullSpeech: 1
+    extra: 0
+  - id: peak_miss_02
+    caption: "\u60DC\u3057\u304B\u3063\u305F\u301C\uFF01\u3000\u4F55\u304C\u3042\u308C\u3070\u5C4A\u3044\u305F\u304B\u3001\u6708\u5831\u3067\u4E00\u7DD2\u306B\u898B\u3066\u307F\u3088\uFF1F"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sad
+    poseId: pose_think
+    scene: "\u5C71\u5834\u306E\u76EE\u6A19\u306B\u5C4A\u304B\u305A"
+    fullSpeech: 1
+    extra: 0
+  - id: next_rank
+    caption: "\u6B21\u306E\u30E9\u30F3\u30AF\u307E\u3067\u3001\u3042\u3068\u3061\u3087\u3063\u3068\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u6B21\u306E\u30E9\u30F3\u30AF\u304C\u8FD1\u3044"
+    fullSpeech: 1
+    extra: 0
+  - id: annual_ss
+    caption: "\u904B\u7528\u30E9\u30F3\u30AFSS\uFF01\u3000\u2026\u2026\u3046\u305D\u3001\u307B\u3093\u3068\u306B\uFF1F\u3000\u6700\u9AD8\u306E\u4E00\u5E74\u3060\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_crying
+    poseId: pose_jump
+    scene: "\u5E74\u9593\u8A55\u4FA1SS"
+    fullSpeech: 1
+    extra: 0
+  - id: annual_s
+    caption: "\u904B\u7528\u30E9\u30F3\u30AFS\uFF01\u3000\u80F8\u3092\u5F35\u3063\u3066\u3044\u3044\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_proud
+    poseId: pose_jump
+    scene: "\u5E74\u9593\u8A55\u4FA1S"
+    fullSpeech: 1
+    extra: 0

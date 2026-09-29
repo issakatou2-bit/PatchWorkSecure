@@ -12,6 +12,35 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next4Voice_追加十二行の字幕ポーズと素材なしの進行と年度一回を確認する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
+            var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);
+            foreach(var line in OpsReactionBank.ScriptV2().Skip(105))
+            {
+                var actual=game.ActiveVoiceBank.Find(line.id);Assert.AreEqual(line.caption,actual.caption);Assert.AreEqual(line.poseId,actual.poseId);Assert.AreEqual(line.faceId,actual.faceId);
+                game.SpeakSceneLine(line.id,0);yield return new WaitForSecondsRealtime(.1f);
+                Assert.AreEqual(OpsGame.SpeechLines(line.caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual(line.poseId,Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);
+                Assert.IsFalse(game.PortraitVoicePlaying);game.StopVoice();
+            }
+            foreach(int month in OpsCatalog.PeakMonths){game.StartYear(14);game.State.month=month;game.OpenTab(0);Assert.AreEqual("peak_goal_"+(((month+3)%12)+1).ToString("00"),game.LastReactionId);}
+            game.StartYear(14);game.State.budget=0;game.State.culture=100;game.State.trust=80;game.State.fatigue=0;for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;
+            game.State.budget+=game.State.NextRankPoints-40;Assert.AreEqual(40,game.State.NextRankPoints);game.StopVoice();yield return new WaitForSecondsRealtime(.5f);
+            Assert.AreEqual("next_rank",game.LastReactionId);Assert.IsTrue(game.State.nextRankVoicePlayed);
+            var loaded=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(game.State));Assert.IsTrue(loaded.Valid());Assert.IsTrue(loaded.nextRankVoicePlayed);
+            game.StopVoice();game.SpeakSceneLine("think_01",0);game.StopVoice();yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual("think_01",game.LastReactionId);
+            LogAssert.NoUnexpectedReceived();
+        }
+        [Test] public void Next4Voice_達成未達は別々に交互で決算は専用の声()
+        {
+            var state=new OpsState(14);Assert.AreEqual("",OpsGame.PeakResultVoiceId(state));
+            state.history.Add(new OpsOutcome{month=2,peakGoalRecorded=true,peakGoalMet=true});Assert.AreEqual("peak_clear_01",OpsGame.PeakResultVoiceId(state));
+            state.history.Add(new OpsOutcome{month=5,peakGoalRecorded=true});Assert.AreEqual("peak_miss_01",OpsGame.PeakResultVoiceId(state));
+            state.history.Add(new OpsOutcome{month=8,peakGoalRecorded=true,peakGoalMet=true});Assert.AreEqual("peak_clear_02",OpsGame.PeakResultVoiceId(state));
+            state.history.Add(new OpsOutcome{month=11,peakGoalRecorded=true,peakGoalMet=true});Assert.AreEqual("peak_clear_final",OpsGame.PeakResultVoiceId(state));
+            state.history.Last().peakGoalMet=false;Assert.AreEqual("peak_miss_02",OpsGame.PeakResultVoiceId(state));
+        }
         [UnityTest] public IEnumerator Next4UI_山場の予測と達成未達と五段の評価を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);

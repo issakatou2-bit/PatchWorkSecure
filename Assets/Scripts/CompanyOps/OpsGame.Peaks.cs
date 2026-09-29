@@ -66,7 +66,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var medals=State.history.Where(r=>r.peakGoalRecorded&&r.peakGoalMet).ToArray();
             if(State.peakGoalRules==0)return;
-            PText(screen,"PeakMedalHeading","山場の盾　"+medals.Length+" / "+OpsCatalog.PeakMonths.Length,110,513,440,24,14,Hex("7a5a00"),true,true);
+            PText(screen,"PeakMedalHeading","山場の盾　"+medals.Length+" / "+OpsCatalog.PeakMonths.Length,632,298,890,24,14,Hex("7a5a00"));
             for(int i=0;i<medals.Length;i++)
             {
                 var medal=PCard(screen,"PeakMedal"+i,110+i*112,740,104,30,Hex("fff6d6"),12,false);

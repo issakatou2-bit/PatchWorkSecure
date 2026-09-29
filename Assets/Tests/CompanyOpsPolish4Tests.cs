@@ -33,6 +33,15 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [UnityTest] public IEnumerator Polish4_20_未確認札は紺の十四ピクセル太字とモックの高さになる()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
+            var badge=Find<RectTransform>("IncidentEvidence");var label=badge.GetComponentInChildren<TextMeshProUGUI>();label.ForceMeshUpdate();
+            ColorUtility.TryParseHtmlString("#1d2a44",out var ink);Assert.AreEqual(ink,label.color);Assert.AreEqual(FontStyles.Bold,label.fontStyle);
+            Assert.AreEqual(14,label.fontSize);Assert.AreEqual(14,label.fontSizeMin);Assert.AreEqual(14,label.fontSizeMax);Assert.AreEqual(30,badge.rect.height);
+            Assert.AreEqual(Mathf.Ceil(label.GetPreferredValues(label.text).x)+24,badge.rect.width);Assert.AreEqual(1,label.textInfo.lineCount);Assert.IsFalse(label.isTextOverflowing);
+            CheckPointer("IncidentEvidence");PolishCapture(20);Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_18_備えの札は白緑青を区別し左から一列に詰まる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();

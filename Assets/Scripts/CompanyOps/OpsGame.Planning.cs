@@ -99,7 +99,7 @@ namespace PatchWorkSecure.CompanyOps
             for(int j=0;j<3;j++)
             {
                 bool installed=State.Level(j==0?"backup":j==1?"monitor":"redundancy")>0;
-                var lamp=PCard(stage,"ServerLamp"+j,372+j*18,118,8,8,installed?(j<2?Hex("5dff9c"):Hex("ffcf4a")):Hex("8b93a3"),12,false);
+                var lamp=PCard(stage,"ServerLamp"+j,372+j*18,146,8,8,installed?(j<2?Hex("5dff9c"):Hex("ffcf4a")):Hex("8b93a3"),12,false);
                 if(installed) Motion(lamp,"blink",1.1f,j*.4f);
             }
             PlanningPin(stage,"Pin_backup","復旧基盤",430,190,52,State.Level("backup")+State.Level("drill"),()=>OfficePinDialog("復旧基盤",State.Level("backup")+State.Level("drill"),"backup","recover"));

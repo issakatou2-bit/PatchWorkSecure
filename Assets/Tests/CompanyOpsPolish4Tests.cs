@@ -24,6 +24,16 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        [UnityTest] public IEnumerator Polish4_03_ランプはサーバー室の名札の下に収まる()
+        {
+            yield return PolishPlanning();var room=Find<RectTransform>("Room_server");var label=room.Find("RoomLabel").GetComponent<RectTransform>();
+            for(int i=0;i<3;i++)
+            {
+                var lamp=Find<RectTransform>("ServerLamp"+i);Assert.AreEqual(-146,lamp.anchoredPosition.y);
+                Assert.Less(lamp.anchoredPosition.y,room.anchoredPosition.y+label.anchoredPosition.y-label.rect.height);
+            }
+            PolishCapture(3);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_02_泡は半秒で弾み三秒二で漂い省演出では静止する()
         {
             Assert.AreEqual(0,OpsBubbleMotion.EntranceScale(0));Assert.AreEqual(1.12f,OpsBubbleMotion.EntranceScale(.35f),.001f);Assert.AreEqual(1,OpsBubbleMotion.EntranceScale(.5f));

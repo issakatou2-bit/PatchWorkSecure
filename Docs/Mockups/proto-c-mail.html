@@ -114,6 +114,12 @@ function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300
 addEventListener('resize',fit);fit();
 modal(`<h2 class="r">メールの仕分け（試作）</h2><div style="font-size:15px;line-height:1.9">40秒で10通。怪しいメールを見破る。<br>・<b>問題なし</b>（←）：開いて仕事を進める<br>・<b>怪しい・報告</b>（→）：開かずに報告する<br>本物のメールまで報告すると「止めすぎ」で仕事が遅れる。リンクにカーソルを当てると行き先が下に出る。</div><div style="margin:12px 0">${prep()}</div><button class="ok" id="startBtn" style="width:100%">はじめる</button>`);
 document.getElementById('startBtn').onclick=start;
+
+// 撮影用（#shot=play / play-hint / result）。URLに付けたときだけ動く。普段の遊びには影響しない
+(function(){const m=location.hash.match(/^#shot=([\w-]+)/);if(!m)return;const st=m[1];document.getElementById('pTrain').checked=st==='play-hint';start();clearInterval(tid);
+  if(st==='play-hint'){const k=G.q.findIndex(x=>x.bad&&/data-t/.test(x.body));G.i=k<0?0:k;G.t=31;show();document.getElementById('timer').style.width=(31/40*100)+'%';document.getElementById('left').textContent=31;learn(MAILS[0].tell);learn(MAILS[2].tell)}
+  else if(st==='play'){G.t=33;show();document.getElementById('timer').style.width='82%';document.getElementById('left').textContent=33}
+  else if(st==='result'){for(let k=0;k<7;k++){const q=G.q[G.i];G.i++;if(k===2){G.miss++;learn(q.tell||MAILS[4].tell)}else if(k===5){G.fp++}else{G.good++;if(q.bad)learn(q.tell)}}upd();G.t=9;document.getElementById('timer').style.width=(9/40*100)+'%';document.getElementById('left').textContent=9;finish()}})();
 </script>
 </body>
 </html>

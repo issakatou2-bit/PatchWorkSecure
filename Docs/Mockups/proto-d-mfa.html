@@ -106,6 +106,12 @@ function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300
 addEventListener('resize',fit);fit();
 modal(`<h2 class="r">多要素認証の関所（試作）</h2><div style="font-size:15px;line-height:1.9">社員のパスワードが漏れた。攻撃者がログインの承認依頼を送ってくる。<br>左の「社員の今の様子」を見て、本人がログインしようとしているときだけ<b>許可</b>（→）、それ以外は<b>拒否</b>（←）。<br>本人を拒否すると仕事が止まる。30秒、だんだん速くなる。</div><div style="margin:12px 0">${prep()}</div><button class="allow" id="startBtn" style="width:100%">はじめる</button>`);
 document.getElementById('startBtn').onclick=start;
+
+// 撮影用（#shot=play / play-num / play-num-attack / result）。URLに付けたときだけ動く
+(function(){const m=location.hash.match(/^#shot=([\w-]+)/);if(!m)return;const st=m[1];document.getElementById('pNum').checked=st.startsWith('play-num');start();clearInterval(tid);
+  const want=st==='play-num-attack'?false:true;for(let k=0;k<40&&G.cur.legit!==want;k++)next();G.t=19;document.getElementById('timer').style.width=(19/30*100)+'%';document.getElementById('left').textContent=19;
+  if(st!=='result'){G.good=5;document.getElementById('good').textContent=5;log('拒否：森さん（正解）','#e3f7ea');log('許可：田中さん（正解）','#e3f7ea')}
+  else{G.good=9;G.breach=1;G.block=1;G.t=0;document.getElementById('timer').style.width='0%';document.getElementById('left').textContent=0;['good','breach','block'].forEach(k=>document.getElementById(k).textContent=G[k]);finish()}})();
 </script>
 </body>
 </html>

@@ -37,6 +37,47 @@ namespace PatchWorkSecure.Tests
             state.BeginIncident();state.Resolve("scope");state.Latest.minigameRecorded=true;state.Latest.minigameScore=50;state.Latest.delegated=true;Assert.IsTrue(state.Valid());
             state.Latest.minigameScore=51;Assert.IsFalse(state.Valid());state.Latest.delegated=false;Assert.IsTrue(state.Valid());state.Latest.minigameScore=101;Assert.IsFalse(state.Valid());
         }
+        [Test] public void Next5Score_五十点の互換と幅外をさらに広げない係数を三方針で確認する()
+        {
+            int outside=0,cases=0;
+            for(int seed=0;seed<35;seed++)for(int month=0;month<12;month++)foreach(string response in new[]{"contain","scope","recover"})
+            {
+                var state=new OpsState(seed){month=month,audited=seed%2==0};if(!state.SupportsContainment)continue;
+                for(int i=0;i<state.levels.Length;i++)state.levels[i]=(seed+month)%3;
+                state.BeginIncident();var original=state.Preview(response);var range=state.Estimate(response);string snapshot=JsonUtility.ToJson(state);
+                if(original.loss<range.lossMin||original.loss>range.lossMax||original.downtime<range.stopMin||original.downtime>range.stopMax)outside++;
+                int previousLoss=200,previousStop=200;
+                foreach(int score in new[]{0,1,25,49,50,51,75,99,100})
+                {
+                    var copy=JsonUtility.FromJson<OpsState>(snapshot);Assert.IsTrue(copy.Resolve(response,score,false));var actual=copy.Latest;
+                    if(score==50){Assert.AreEqual(original.loss,actual.loss);Assert.AreEqual(original.downtime,actual.downtime);Assert.AreEqual(original.businessLoss,actual.businessLoss);}
+                    else
+                    {
+                        double f=1-OpsCatalog.MinigameResultInfluence*(score-50)/50;
+                        int expectedLoss=System.Math.Max(System.Math.Min(original.loss,range.lossMin),System.Math.Min(System.Math.Max(original.loss,range.lossMax),(int)System.Math.Round(original.loss*f,System.MidpointRounding.AwayFromZero)));
+                        int expectedStop=System.Math.Max(System.Math.Min(original.downtime,range.stopMin),System.Math.Min(System.Math.Max(original.downtime,range.stopMax),(int)System.Math.Round(original.downtime*f,System.MidpointRounding.AwayFromZero)));
+                        Assert.AreEqual(expectedLoss,actual.loss);Assert.AreEqual(expectedStop,actual.downtime);
+                    }
+                    Assert.LessOrEqual(actual.loss,previousLoss);Assert.LessOrEqual(actual.downtime,previousStop);previousLoss=actual.loss;previousStop=actual.downtime;
+                    Assert.AreEqual(JsonUtility.ToJson(range),JsonUtility.ToJson(actual.forecast));Assert.AreEqual(original.cost,actual.cost);Assert.AreEqual(original.recovery,actual.recovery);
+                    Assert.IsTrue(actual.minigameRecorded);Assert.AreEqual(score,actual.EffectiveMinigameScore);Assert.IsFalse(actual.delegated);
+                    Assert.IsTrue(actual.investmentEffects.All(e=>e.avoidedLoss>=0&&e.avoidedDowntime>=0));
+                    Assert.AreEqual(state.budget-actual.loss-actual.cost+actual.peakBudgetBonus,copy.budget);
+                }
+                var auto=JsonUtility.FromJson<OpsState>(snapshot);var delegated=JsonUtility.FromJson<OpsState>(snapshot);
+                auto.Resolve(response);delegated.Resolve(response,50,true);Assert.AreEqual(JsonUtility.ToJson(auto),JsonUtility.ToJson(delegated));cases++;
+            }
+            Assert.Greater(outside,0);Assert.Greater(cases,100);
+        }
+        [Test] public void Next5Score_対象外と不正点数と二重反映を拒否し保存して戻せる()
+        {
+            var state=new OpsState(14);state.BeginIncident();string before=JsonUtility.ToJson(state);
+            Assert.IsFalse(state.Resolve("scope",-1,false));Assert.IsFalse(state.Resolve("scope",101,false));Assert.IsFalse(state.Resolve("scope",80,true));Assert.AreEqual(before,JsonUtility.ToJson(state));
+            Assert.IsTrue(state.Resolve("scope",100,false));Assert.IsTrue(state.Valid());var copy=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(state));Assert.IsTrue(copy.Valid());Assert.AreEqual(100,copy.Latest.EffectiveMinigameScore);
+            before=JsonUtility.ToJson(state);Assert.IsFalse(state.Resolve("scope",0,false));Assert.AreEqual(before,JsonUtility.ToJson(state));
+            state=new OpsState(14){month=3};Assert.IsFalse(state.SupportsContainment);state.BeginIncident();before=JsonUtility.ToJson(state);
+            Assert.IsFalse(state.Resolve("scope",100,false));Assert.AreEqual(before,JsonUtility.ToJson(state));Assert.IsTrue(state.Resolve("scope"));Assert.IsFalse(state.Latest.minigameRecorded);
+        }
         [UnityTest] public IEnumerator Next5Foundation_共通開始結果と十六行は音源なしでも進む()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);

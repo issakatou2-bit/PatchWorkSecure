@@ -360,16 +360,34 @@ namespace PatchWorkSecure.CompanyOps
                 explanation = benign ? Current.calm : (eventRules == 1 ? "事前の備えで影響 -" : "予防で脅威 -") + prevention + " / 影響限定 -" + containment +
                     " / 対応力 " + responsePower + "。" + (dataLoss ? "復旧の備えでデータ被害 -" + recovery + "万円。" : "この出来事はバックアップだけでは防げない。") };
         }
-        public bool Resolve(string response)
+        // 真相を使うのは対応確定後だけ。見積もり自体は変更しない。
+        private OpsOutcome ScoredPreview(string response,int score,OpsEstimate publicRange=null)
         {
-            if (phase != OpsPhase.Incident || !new[] { "contain", "scope", "recover" }.Contains(response)) return false;
-            var result = Preview(response);
+            var result=Preview(response);
+            if(score==OpsCatalog.MinigameDelegateScore)return result;
+            var range=publicRange??Estimate(response);
+            double factor=1-OpsCatalog.MinigameResultInfluence*(score-OpsCatalog.MinigameDelegateScore)/OpsCatalog.MinigameDelegateScore;
+            result.loss=BoundMinigameResult(result.loss,range.lossMin,range.lossMax,factor);
+            result.downtime=BoundMinigameResult(result.downtime,range.stopMin,range.stopMax,factor);
+            result.businessLoss=Math.Min(result.businessLoss,result.loss);
+            return result;
+        }
+        private static int BoundMinigameResult(int original,int low,int high,double factor)=>
+            Math.Max(Math.Min(original,low),Math.Min(Math.Max(original,high),(int)Math.Round(original*factor,MidpointRounding.AwayFromZero)));
+        public bool SupportsContainment=>EventSpread==OpsCatalog.SpreadHigh;
+        public bool Resolve(string response)=>Resolve(response,OpsCatalog.MinigameDelegateScore,true);
+        public bool Resolve(string response,int score,bool delegated)
+        {
+            if (phase != OpsPhase.Incident || !new[] { "contain", "scope", "recover" }.Contains(response) ||
+                score<0 || score>OpsCatalog.MinigameMaxScore || delegated&&score!=OpsCatalog.MinigameDelegateScore || !SupportsContainment&&score!=OpsCatalog.MinigameDelegateScore) return false;
+            var result = ScoredPreview(response,score);
+            if(SupportsContainment){result.minigameRecorded=true;result.minigameScore=score;result.delegated=delegated;}
             result.forecast = Estimate(response);
             result.metricsBefore = monthStartMetrics == null ? null : (int[])monthStartMetrics.Clone();
-            // 同じ事件・対応・社員の状態で、設備と運用整備の有無だけを比較する。
+            // 同じ事件・対応・社員・点数・公開幅で、設備と運用整備の有無だけを比較する。
             var withoutInvestment = CopyForComparison();
             Array.Clear(withoutInvestment.levels, 0, withoutInvestment.levels.Length);
-            var baseline = withoutInvestment.Preview(response);
+            var baseline = withoutInvestment.ScoredPreview(response,score,result.forecast);
             result.avoidedLoss = baseline.loss - result.loss;
             result.avoidedDowntime = baseline.downtime - result.downtime;
             result.hasInvestmentComparison = true;
@@ -379,7 +397,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 if (levels[i] == 0) continue;
                 var withoutOne = CopyForComparison(); withoutOne.levels[i] = 0;
-                var comparison = withoutOne.Preview(response);
+                var comparison = withoutOne.ScoredPreview(response,score,result.forecast);
                 result.investmentEffects.Add(new OpsInvestmentEffect { projectId = OpsCatalog.Projects[i].id, level = levels[i],
                     avoidedLoss = comparison.loss - result.loss, avoidedDowntime = comparison.downtime - result.downtime });
             }
@@ -389,7 +407,7 @@ namespace PatchWorkSecure.CompanyOps
                 var project = OpsCatalog.Projects[i];
                 if (levels[i] > 0 || (!string.IsNullOrEmpty(project.requires) && Level(project.requires) == 0)) continue;
                 var withOne = CopyForComparison(); withOne.levels[i] = 1;
-                var comparison = withOne.Preview(response);
+                var comparison = withOne.ScoredPreview(response,score,result.forecast);
                 int loss = result.loss - comparison.loss, stop = result.downtime - comparison.downtime;
                 if (loss > 0 || stop > 0) result.potentialInvestmentEffects.Add(new OpsInvestmentEffect {
                     projectId = project.id, level = 1, avoidedLoss = loss, avoidedDowntime = stop });

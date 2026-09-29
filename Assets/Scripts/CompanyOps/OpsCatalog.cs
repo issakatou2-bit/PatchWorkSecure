@@ -26,6 +26,7 @@ public const int AnnualSS=2135, AnnualS=1880, AnnualA=1563, AnnualB=1151, Legacy
 public const int NextRankVoiceDistance=50, VoiceScriptLineCount=133;
 public const int MinigameDelegateScore=50, MinigameMaxScore=100, MinigameS=85, MinigameA=70, MinigameB=50, MinigameGood=80;
 public const float MinigameSeconds=20;
+public const double MinigameResultInfluence=.4;
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
 public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};

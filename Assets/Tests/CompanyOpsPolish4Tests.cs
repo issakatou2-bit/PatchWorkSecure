@@ -24,6 +24,18 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        private IEnumerator PolishIncident()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
+            var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
+        }
+        [UnityTest] public IEnumerator Polish4_07_攻撃種別は題名の直後のピンク札になる()
+        {
+            yield return PolishIncident();var topic=Find<RectTransform>("IncidentTopic");var title=Find<TextMeshProUGUI>("IncidentTitle");
+            Assert.AreEqual(100+Mathf.Min(506,title.GetPreferredValues(title.text).x)+16,topic.anchoredPosition.x,.1f);
+            var gradient=topic.GetComponent<OpsKitGradient>();Assert.AreEqual(gradient.Top,gradient.Bottom);Assert.AreEqual(ColorUtility.TryParseHtmlString("#ffe3ec",out var pink)?pink:Color.clear,gradient.Top);
+            CheckPointer("IncidentTopic");PolishCapture(7);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_06_工具マークはひなたの名札より上に離れる()
         {
             yield return PolishPlanning();Canvas.ForceUpdateCanvases();var pin=Find<RectTransform>("Pin_change");var tag=(RectTransform)Find<TextMeshProUGUI>("NavigatorName").transform.parent;

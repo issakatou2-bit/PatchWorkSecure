@@ -45,8 +45,11 @@ namespace PatchWorkSecure.CompanyOps
             var header=PCard(screen,"IncidentHeader",374,34,980,64,Color.white,20,false);
             var month=PCard(header,"MonthBadge",22,19,64,26,PlanInk,12,false);
             PText(month,"Month",State.Current.name,0,0,64,26,14,Color.white,true,true);
-            PText(header,"IncidentTitle",State.Current.title,100,0,506,64,26);
-            var category=PButton(header,"IncidentTopic",State.CurrentProfile==null?"今月の出来事":State.CurrentProfile.category,620,18,338,28,EventBriefDialog,Hex("ffe3ec"),Hex("c23a60"),16);
+            var title=PText(header,"IncidentTitle",State.Current.title,100,0,506,64,26);
+            float topicX=100+Mathf.Min(506,title.GetPreferredValues(State.Current.title).x)+16;
+            string topic=State.CurrentProfile==null?"今月の出来事":State.CurrentProfile.category;
+            var category=PButton(header,"IncidentTopic",topic,topicX,18,Mathf.Min(958-topicX,32+topic.Length*14),28,EventBriefDialog,Hex("ffe3ec"),Hex("c23a60"),16);
+            KitGradient(category.GetComponent<Image>(),Hex("ffe3ec"),Hex("ffe3ec"));category.transform.Find("KitTopLight").gameObject.SetActive(false);
             category.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
             var budget=PButton(screen,"Menu","",1370,34,206,64,Menu,Color.white,PlanInk,20);
             var coin=PCard(budget.transform,"BudgetCoin",22,18,28,28,IncidentYellow,28,false);

@@ -36,6 +36,9 @@ public static readonly string[] ContainmentRoomNames={"執務室","営業","制�
 public const float MailSeconds=40, MailFeedbackSeconds=1.6f, MailRightDelay=.3f;
 public const int MailCount=10, MailGoodPoints=10, MailMissPenalty=15, MailFalsePenalty=5, MailPracticeXp=2;
 public const int MailS=95, MailA=75, MailB=50;
+public const float MfaSeconds=30, MfaFirstDelay=.6f, MfaDelayStep=.02f, MfaMinimumDelay=.25f;
+public const int MfaGoodPoints=8, MfaBreachPenalty=25, MfaBlockPenalty=6, MfaS=90, MfaA=65, MfaB=40;
+public const double MfaLegitimateChance=.5, MfaSpamChance=.5, MfaForeignChance=.6, MfaIdleChangeChance=.3;
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
 public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};

@@ -23,6 +23,94 @@ namespace PatchWorkSecure.Tests
             }
             throw new System.InvalidOperationException("指定の事件状態が見つからない");
         }
+        private static OpsState LegacyMfaFixture(bool benign,int seed=0)
+        {
+            for(int n=seed;n<seed+10000;n++)
+            {
+                var state=new OpsState(n);state.BeginIncident();state.Resolve("scope");state.NextMonth();
+                if(state.Preview("scope").benign!=benign)continue;state.BeginIncident();Assert.IsTrue(state.Valid());return state;
+            }
+            throw new System.InvalidOperationException("旧年度の認証事件が見つからない");
+        }
+        [Test] public void Next6Mfa_社員照合番号疲労攻撃正常採点と抽選を守る()
+        {
+            bool spamSeen=false;
+            for(int seed=0;seed<45;seed++)foreach(bool benign in new[]{false,true})
+            {
+                var state=benign?LegacyMfaFixture(true,seed):DecisionFixture("remote",false,seed);state.levels[OpsCatalog.Index("mfa")]=2;
+                var snapshot=JsonUtility.ToJson(state);var a=state.CreateMfa();var b=state.CreateMfa();Assert.IsTrue(a.NumberMatch);Assert.IsTrue(a.Start());b.Start();
+                float firstDelay=0,lastDelay=0;int attacks=0,legits=0;
+                while(a.Phase==OpsMinigamePhase.Playing)
+                {
+                    if(a.CanAnswer)
+                    {
+                        var q=a.Current;Assert.AreEqual(q.Number,b.Current.Number);Assert.AreEqual(q.Who,b.Current.Who);
+                        Assert.AreEqual(q.Legitimate,a.People[q.Who].LoggingIn);Assert.AreEqual(4,a.People.Count);
+                        if(q.Legitimate)legits++;else{attacks++;spamSeen|=q.Spam;}
+                        bool answer=a.Count%5==0?!q.Legitimate:q.Legitimate;
+                        a.Answer(answer);b.Answer(answer);Assert.AreEqual(OpsMfaAnswer.None,a.Answer(true));lastDelay=a.DelayRemaining;if(firstDelay==0)firstDelay=lastDelay;
+                    }
+                    a.Tick(.65f);b.Tick(.65f);
+                }
+                Assert.That(lastDelay,Is.LessThan(firstDelay));Assert.Greater(legits,0);if(benign)Assert.AreEqual(0,attacks);
+                Assert.AreEqual(Mathf.Clamp(a.Correct*8-a.Breaches*25-a.Blocks*6,0,100),a.Score);Assert.AreEqual(a.Score,b.Score);Assert.AreEqual(snapshot,JsonUtility.ToJson(state));
+            }
+            Assert.IsTrue(spamSeen);var timeout=DecisionFixture("session",false).CreateMfa();Assert.IsFalse(timeout.NumberMatch);timeout.Start();timeout.Tick(float.NaN);Assert.AreEqual(30,timeout.Remaining);timeout.Tick(35);Assert.AreEqual(0,timeout.Score);
+        }
+        [Test] public void Next6Mfa_全対象の委任は既存と完全同一で点数は結果を広げない()
+        {
+            foreach(string profile in new[]{"session","remote","device"})foreach(string response in new[]{"contain","scope","recover"})
+            {
+                var source=DecisionFixture(profile,false);Assert.IsTrue(source.SupportsMfa);var snapshot=JsonUtility.ToJson(source);
+                var original=source.Preview(response);var estimate=source.Estimate(response);
+                foreach(int score in new[]{0,25,49,50,51,75,100})
+                {
+                    var state=JsonUtility.FromJson<OpsState>(snapshot);Assert.IsTrue(state.Resolve(response,score,score==50));Assert.IsTrue(state.Valid());
+                    if(score==50){var normal=JsonUtility.FromJson<OpsState>(snapshot);normal.Resolve(response);Assert.AreEqual(JsonUtility.ToJson(normal),JsonUtility.ToJson(state));}
+                    Assert.That(state.Latest.loss,Is.InRange(System.Math.Min(original.loss,estimate.lossMin),System.Math.Max(original.loss,estimate.lossMax)));
+                    Assert.That(state.Latest.downtime,Is.InRange(System.Math.Min(original.downtime,estimate.stopMin),System.Math.Max(original.downtime,estimate.stopMax)));
+                }
+            }
+            var legacy=LegacyMfaFixture(true);var before=JsonUtility.ToJson(legacy);var delegated=legacy.CreateMfa();delegated.Delegate();var normalLegacy=JsonUtility.FromJson<OpsState>(before);normalLegacy.Resolve("scope");legacy.Resolve("scope",delegated.Score,delegated.Delegated);Assert.AreEqual(JsonUtility.ToJson(normalLegacy),JsonUtility.ToJson(legacy));
+        }
+        [UnityTest] public IEnumerator Next6MfaUI_社員番号一致結果委任正常と演出を撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            var fixture=DecisionFixture("remote",false);game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
+            game.ChooseResponse("scope");yield return new WaitForSecondsRealtime(.3f);Capture("next6-d-start");CheckPointer("MinigameDelegate");var original=game.State.Preview("scope");Click("MinigameDelegate");yield return null;Capture("next6-d-delegate");Click("MinigameContinue");Assert.AreEqual(original.loss,game.State.Latest.loss);Assert.AreEqual(original.downtime,game.State.Latest.downtime);yield return WaitForResolution(game);
+            game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;game.ChooseResponse("scope");Click("MinigameStart");yield return new WaitForSecondsRealtime(.6f);Capture("next6-d-play");CheckPointer("MfaDeny");CheckPointer("MfaAllow");
+            var session=(OpsMfaMinigame)game.Minigame;string snapshot=JsonUtility.ToJson(game.State);
+            while(session.Phase==OpsMinigamePhase.Playing)
+            {
+                if(session.CanAnswer)
+                {
+                    bool answer=session.Current.Legitimate;
+                    if(session.Breaches==0&&!answer)answer=true;else if(session.Blocks==0&&answer)answer=false;
+                    Click(answer?"MfaAllow":"MfaDeny");game.TickMinigame(.7f);
+                }
+                if(session.Correct>=9&&session.Breaches==1&&session.Blocks==1)game.TickMinigame(30);
+                yield return null;
+            }
+            Assert.AreEqual(snapshot,JsonUtility.ToJson(game.State));yield return new WaitForSecondsRealtime(2.5f);Capture("next6-d-result");StringAssert.Contains("正解 9／侵入 1（被害）／足止め 1",Find<TextMeshProUGUI>("MinigameResultDetail").text);CheckPointer("MinigameContinue");Click("MinigameContinue");yield return WaitForResolution(game);
+            game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.State.levels[OpsCatalog.Index("mfa")]=2;game.BeginIncident();while(game.PhasePresentationRunning)yield return null;game.ChooseResponse("scope");Click("MinigameStart");yield return new WaitForSecondsRealtime(.6f);
+            session=(OpsMfaMinigame)game.Minigame;bool legit=false,spam=false;
+            while(!legit||!spam)
+            {
+                Assert.AreEqual(OpsMinigamePhase.Playing,session.Phase);var q=session.Current;
+                if(q!=null)
+                {
+                    Assert.AreEqual(q.Legitimate?"画面の番号 <b>"+q.Number+"</b> と一致":"入力された番号がない",Find<TextMeshProUGUI>("MfaNumber").text);
+                    if(q.Legitimate){Capture("next6-d-play-num");legit=true;}else if(q.Spam){Capture("next6-d-play-num-attack");spam=true;}
+                    Click(q.Legitimate?"MfaAllow":"MfaDeny");if(!q.Legitimate){yield return null;Assert.AreEqual(10,Object.FindObjectsByType<Transform>().Count(t=>t.name=="MinigameCutShard"));Capture("next6-d-burst");}
+                    game.TickMinigame(.7f);yield return new WaitForSecondsRealtime(.4f);
+                }
+                else yield return null;
+            }
+            game.TickMinigame(session.Remaining-5);yield return null;Assert.IsTrue(Find<RectTransform>("MinigameDanger").gameObject.activeSelf);Capture("next6-d-danger");game.TickMinigame(6);yield return new WaitForSecondsRealtime(2.5f);Click("MinigameContinue");yield return WaitForResolution(game);
+            fixture=LegacyMfaFixture(true);game.StartYear(fixture.seed);game.State.eventRules=0;game.State.eventSchedule=null;game.State.ticketSchedule=null;game.State.BeginIncident();game.State.Resolve("scope");game.State.NextMonth();Assert.IsTrue(game.State.Preview("scope").benign);game.OpenTab(0);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;game.ChooseResponse("scope");Click("MinigameStart");yield return new WaitForSecondsRealtime(.6f);Capture("next6-d-benign-play");
+            session=(OpsMfaMinigame)game.Minigame;while(session.Phase==OpsMinigamePhase.Playing){if(session.CanAnswer){Assert.IsTrue(session.Current.Legitimate);Click("MfaDeny");}game.TickMinigame(.7f);yield return null;}
+            Assert.AreEqual(0,session.Breaches);Assert.Greater(session.Blocks,0);Assert.AreEqual(0,session.Score);yield return new WaitForSecondsRealtime(2.5f);Capture("next6-d-benign-result");Click("MinigameContinue");yield return WaitForResolution(game);Assert.IsTrue(game.State.Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         [Test] public void Next6Mail_十通の配分と急ぐ本物と採点と年の乱数を守る()
         {
             for(int seed=0;seed<45;seed++)foreach(bool benign in new[]{false,true})

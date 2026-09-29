@@ -155,9 +155,10 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void TickDecisionKeys()
         {
-            if(!(Minigame is OpsMailMinigame)||Minigame.Phase!=OpsMinigamePhase.Playing)return;
+            if(!(Minigame is OpsMailMinigame)&&!(Minigame is OpsMfaMinigame)||Minigame.Phase!=OpsMinigamePhase.Playing)return;
             var key=Keyboard.current;if(key==null)return;
-            if(key.leftArrowKey.wasPressedThisFrame)AnswerMail(false);else if(key.rightArrowKey.wasPressedThisFrame)AnswerMail(true);
+            if(key.leftArrowKey.wasPressedThisFrame){if(Minigame is OpsMailMinigame)AnswerMail(false);else AnswerMfa(false);}
+            else if(key.rightArrowKey.wasPressedThisFrame){if(Minigame is OpsMailMinigame)AnswerMail(true);else AnswerMfa(true);}
         }
     }
     // スワイプはカードだけ。リンクはタッチ長押しで照会し、実際のURLは開かない。

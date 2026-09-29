@@ -22,6 +22,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response)||MinigameActive)return;
             OpsMinigame session=State.CreateMail();
+            if(session==null)session=State.CreateMfa();
             if(session==null)session=State.CreateContainment();
             if(session==null){Resolve(response);return;}
             OpenMinigame(session,response,s=>Resolve(response,s.Score,s.Delegated));
@@ -37,12 +38,13 @@ namespace PatchWorkSecure.CompanyOps
             minigameCanvas=Box(screen,"MinigameCanvas",42.105f,0,1280,760,Hex("1d2a44"));minigameCanvas.localScale=Vector3.one*(900f/760f);
             KitGradient(minigameCanvas.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));
             DrawMinigameBackground(minigameCanvas);
-            if(session is OpsMailMinigame)
+            if(session is OpsMailMinigame||session is OpsMfaMinigame)
             {
                 minigameCanvas.anchoredPosition=new Vector2(61.5385f,-11.5385f);minigameCanvas.localScale=Vector3.one*(900f/780f);
-                KitGradient(screen.GetComponent<Image>(),Hex("cfe9ff"),Hex("ffe3ec"));
-                KitGradient(minigameCanvas.GetComponent<Image>(),Hex("cfe9ff"),Hex("ffe3ec"));
-                DrawMailPresentation();MinigameBrief();return true;
+                bool isMail=session is OpsMailMinigame;
+                KitGradient(screen.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
+                KitGradient(minigameCanvas.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
+                if(isMail)DrawMailPresentation();else DrawMfaPresentation();MinigameBrief();return true;
             }
             IncidentShape(minigameCanvas,"MinigameHazard","tape",0,0,1280,14,Hex("ffc02e"));
             var top=PCard(minigameCanvas,"MinigameTop",0,24,1280,70,Color.white,20);
@@ -88,6 +90,15 @@ namespace PatchWorkSecure.CompanyOps
                 PButton(card,"MinigameStart","はじめる",26,310,628,70,StartMinigame,Hex("2bb673"),Color.white,22,Hex("1d8a55"));
                 PButton(minigameModal,"MinigameDelegate",mail.Practice?"今回は見送る":"社員に任せる / 50点",854,602,222,38,DelegateMinigame,Color.white,PlanInk,16);return;
             }
+            if(Minigame is OpsMfaMinigame mfa)
+            {
+                card.anchoredPosition=new Vector2(300,-200);card.sizeDelta=new Vector2(680,360);DecisionPanel(card);
+                FindMinigameText("MinigameModalTitle").rectTransform.anchoredPosition=new Vector2(26,-48);
+                PText(card,"MinigameInstructions","社員のパスワードが漏れた。攻撃者が承認依頼を送ってくる。\n左の「社員の今の様子」を見て、本人がログインしようとしているときだけ<b>許可</b>（→）、それ以外は<b>拒否</b>（←）。\n本人を拒否すると仕事が止まる。30秒、だんだん速くなる。",26,94,628,120,15,null,false);
+                PText(card,"MinigameEquipment",(mfa.NumberMatch?"導入済み":"未導入")+"：番号の一致（本人の画面の番号を入力しないと承認できない）",26,230,628,42,15,null,false);
+                PButton(card,"MinigameStart","はじめる",26,276,628,64,StartMinigame,Hex("2bb673"),Color.white,22,Hex("1d8a55"));
+                PButton(minigameModal,"MinigameDelegate","社員に任せる / 50点",854,602,222,38,DelegateMinigame,Color.white,PlanInk,16);return;
+            }
             PText(card,"MinigameInstructions","20秒で広がりを止めよう。\n端末を押す：1台ずつ切り離す\n部屋を選んで調べる：隠れた感染が3秒見える\n部屋ごと止める：速いが、正常な端末も止まる",26,78,628,108,17,null,false);
             PText(card,"MinigameEquipment",MinigameEquipment(),26,204,628,112,16,null,false);
             PButton(card,"MinigameStart","対応を始める",26,332,390,58,StartMinigame,PlanPink,Color.white,20);
@@ -101,7 +112,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(Minigame==null||!Minigame.Start())return;
             minigameModal.gameObject.SetActive(false);Destroy(minigameModal.gameObject);minigameModal=null;
-            SpeakSceneLine("mg_start_0"+(1+minigameStartVoice++%2),0);RefreshMinigameBoard();
+            SpeakSceneLine("mg_start_0"+(1+minigameStartVoice++%2),0);
+            if(Minigame is OpsMailMinigame)RefreshMailPresentation();else if(Minigame is OpsMfaMinigame)RefreshMfaPresentation();else RefreshMinigameBoard();
         }
         public void DelegateMinigame()
         {
@@ -114,10 +126,10 @@ namespace PatchWorkSecure.CompanyOps
             var phase=Minigame.Phase;Minigame.Tick(delta);
             if(phase==OpsMinigamePhase.Playing)
             {
-                FindMinigameText("MinigameTime").text=Minigame is OpsMailMinigame?Mathf.CeilToInt(Minigame.Remaining).ToString():Minigame.Remaining.ToString("F1");
+                FindMinigameText("MinigameTime").text=Minigame is OpsContainmentMinigame?Minigame.Remaining.ToString("F1"):Mathf.CeilToInt(Minigame.Remaining).ToString();
                 var fill=minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill") as RectTransform;
-                if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:310)*Minigame.Remaining/Minigame.Duration);
-                if(Minigame is OpsMailMinigame)RefreshMailPresentation();else RefreshMinigameBoard();
+                if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:Minigame is OpsMfaMinigame?670:310)*Minigame.Remaining/Minigame.Duration);
+                if(Minigame is OpsMailMinigame)RefreshMailPresentation();else if(Minigame is OpsMfaMinigame)RefreshMfaPresentation();else RefreshMinigameBoard();
                 if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();}
             }
             if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn&&Time.unscaledTime>=minigameResultAt)MinigameResult();
@@ -129,6 +141,7 @@ namespace PatchWorkSecure.CompanyOps
             var containment=Minigame as OpsContainmentMinigame;
             string title=containment!=null&&containment.TotalInfected==0?"確認完了":containment!=null&&containment.Uncontained>0?"広がってしまった…":"封じ込め成功！";
             if(Minigame is OpsMailMinigame)title="仕分け完了！";
+            if(Minigame is OpsMfaMinigame mfa)title=mfa.Breaches==0?"侵入ゼロ！":"関所の対応完了";
             bool good=Minigame.Score>=OpsCatalog.MinigameGood;
             MinigameBanner(title,good?PlanMint:Hex("e0405f"));
             if(good)StartCoroutine(MinigameChord());else MinigameTone(150,"saw");
@@ -158,6 +171,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private string MinigameResultDetail()
         {
+            if(Minigame is OpsMfaMinigame mfa)return "正解 "+mfa.Correct+"／侵入 "+mfa.Breaches+"（被害）／足止め "+mfa.Blocks+"（業務が止まる）\n攻撃者は承認依頼を何度も送り、うっかり許可を待つ（疲労攻撃）。番号の一致で偽の依頼を見分けやすく。";
             if(Minigame is OpsMailMinigame mail)return "正解 "+mail.Correct+"／見逃し "+mail.Misses+"（被害につながる）／止めすぎ "+mail.FalseAlarms+"（業務が遅れる）／残り時間 "+Mathf.CeilToInt(mail.Remaining)+"秒\n"+
                 (mail.Practice?"事件の結果には反映しません。小川へ手がかりを共有します。":"本番の事件では、見逃しが被害に、止めすぎが停止時間になる。研修を入れると手がかりが強調される。");
             string text="";DescribeMinigameResult(ref text);return text;

@@ -126,7 +126,9 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.clear&&s.isPlaying),"判子は年度ファンファーレを止めない");
             Assert.IsTrue(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.stamp&&s.isPlaying));
             Click("Menu");yield return null;Find<Slider>("SoundVolume").value=0;yield return null;
-            foreach(var source in game.GetComponents<AudioSource>().Where(s=>s.clip!=null&&!s.loop&&s.clip!=game.Sounds.titleMusic&&s.clip!=game.Sounds.planningMusic&&s.clip!=game.Sounds.incidentMusic&&s.clip!=game.Sounds.reviewMusic))Assert.AreEqual(0,source.volume);
+            // 声は独立した音量。効果音のスライダーでは効果音だけを検査する。
+            var effects=Enum.GetValues(typeof(OpsCue)).Cast<OpsCue>().Select(cue=>game.Sounds.Clip(cue)).ToArray();
+            foreach(var source in game.GetComponents<AudioSource>().Where(s=>s.clip!=null&&effects.Contains(s.clip)))Assert.AreEqual(0,source.volume);
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator 負荷でフレームが遅れても抑制力と月報の数え上げは期限で確定する()

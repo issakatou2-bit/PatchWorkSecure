@@ -72,7 +72,8 @@ namespace PatchWorkSecure.CompanyOps
 
         public bool SpeakSceneLine(string id,float delay=.2f,string target="NavigatorSpeech")
         {
-            var line=ReactionBank?.Find(id);if(line==null||id==LastReactionId)return false;
+            // 全文は同じ場面が再発したら読み直す。掛け声の連続防止はDirector側で行う。
+            var line=ReactionBank?.Find(id);if(line==null)return false;
             StopVoice();BeginVoice(line,delay,5,target);return true;
         }
         private void BeginVoice(OpsReactionLine line,float delay,int priority,string target)

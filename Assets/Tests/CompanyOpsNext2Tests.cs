@@ -45,6 +45,8 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
             Assert.AreEqual(105,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(game.ActiveVoiceBank.Find("season_04").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
+            game.StartYear(14);Assert.IsTrue(game.VoicePending,"新年度を始め直したら同じ季節でも読み直す");yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual(game.ActiveVoiceBank.Find("season_04").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
             string before=JsonUtility.ToJson(game.State);game.SpeakSceneLine("incident_unconfirmed",2);Assert.IsTrue(game.VoicePending);Click("Stat_0");yield return null;Assert.IsFalse(game.VoicePending);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Click("CloseDialog");
             Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual("tutorial_1",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_1").caption,Find<TextMeshProUGUI>("TutorialLine").text);
             Click("Stat_0");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual("tutorial_2",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_2").caption,Find<TextMeshProUGUI>("TutorialLine").text);Capture("127-voice-tutorial-no-audio");LogAssert.NoUnexpectedReceived();
@@ -57,6 +59,7 @@ namespace PatchWorkSecure.Tests
             {
                 string before=JsonUtility.ToJson(game.State);var music=game.GetComponents<AudioSource>().First(s=>s.clip==game.Sounds.planningMusic);float volume=music.volume;
                 Assert.IsTrue(game.SpeakSceneLine("rankup",.2f));yield return new WaitForSecondsRealtime(.4f);Assert.IsTrue(game.PortraitVoicePlaying);Assert.Less(music.volume,volume*.7f);Assert.AreEqual("sparkle",Find<OpsPortraitAnimator>("NavigatorPortrait").ExpressionId);
+                game.StopVoice();Assert.IsTrue(game.SpeakSceneLine("rankup",0),"別の昇格でも同じ全文を再生する");yield return new WaitForSecondsRealtime(.15f);Assert.IsTrue(game.PortraitVoicePlaying);
                 var source=game.GetComponents<AudioSource>().Single(s=>s.clip==clip);Click("Menu");yield return null;Assert.IsFalse(source.isPlaying);Assert.IsFalse(game.VoicePending);
                 Find<Slider>("VoiceVolume").value=.36f;Assert.IsTrue(game.SpeakSceneLine("tutorial_1",0));yield return new WaitForSecondsRealtime(.15f);Assert.AreEqual(.36f,source.volume,.001f);Assert.IsTrue(source.isPlaying);
                 Click("CaptionToggle");yield return null;Assert.IsFalse(game.CaptionsEnabled);Assert.AreEqual("",Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.IsFalse(source.isPlaying);
@@ -69,7 +72,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
             game.Buy(OpsCatalog.Index("backup"));game.ChooseAction("audit");game.ChooseAction("map");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.4f);Click("AcceptMission");Assert.AreEqual(OpsGame.MissionVoiceId(game.State),game.LastReactionId);
-            game.BeginIncident();Assert.AreEqual("incident_start",game.LastReactionId);yield return new WaitForSecondsRealtime(3.7f);Assert.AreEqual("incident_unconfirmed",game.LastReactionId);Capture("128-voice-unconfirmed");
+            game.BeginIncident();Assert.AreEqual("incident_start",game.LastReactionId);yield return new WaitForSecondsRealtime(3.7f);Assert.AreEqual("incident_unconfirmed",game.LastReactionId);yield return new WaitForSecondsRealtime(1.4f);Capture("128-voice-unconfirmed");
             game.Resolve("recover");float limit=Time.realtimeSinceStartup+4;while(game.LastReactionId!="incident_activate"&&Time.realtimeSinceStartup<limit)yield return null;
             Assert.AreEqual("incident_activate",game.LastReactionId);Assert.IsTrue(game.State.Latest.investmentEffects.Any(e=>e.avoidedLoss>0||e.avoidedDowntime>0));
             limit=Time.realtimeSinceStartup+10;

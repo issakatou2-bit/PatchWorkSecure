@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作F2 作業のはめ込み</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作F2（日常の「優先順位」）：夜ごとの「人×時間」の穴に、形のある作業をはめる。縦＝作業する人、横＝時間 */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e;--violet:#6c63ff;--C:44px}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#dfe4ff,#ffe3ec);min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 0 0 4px #dfe5ef,0 12px 30px rgba(27,35,64,.15)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#8f86ff,var(--violet));color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 #4a42c9}
+.timer{flex:1;height:16px;border-radius:8px;background:#e3e8f1;overflow:hidden}.timer i{display:block;height:100%;background:linear-gradient(90deg,#8f86ff,var(--pink));transition:width .1s linear}
+.board{position:absolute;left:0;top:92px;width:1280px;height:300px;padding:16px 18px;background:linear-gradient(180deg,#1d2a44,#2b2f5e);border-radius:22px;box-shadow:0 0 0 3px #fff,0 12px 30px rgba(27,35,64,.3);display:flex;gap:14px;overflow:hidden}
+.board::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 14%,#fff 50%,transparent),radial-gradient(1px 1px at 55% 8%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 83% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 33% 6%,#fff 50%,transparent);opacity:.6;pointer-events:none}
+.night{position:relative;flex:1}
+.night h4{margin:0 0 6px;color:#cfe0ff;font-size:15px;display:flex;justify-content:space-between}
+.night h4 small{font-size:11px;color:#9fb3d6;font-weight:700}
+.nwrap{position:relative}
+.cells{display:grid;grid-template-columns:repeat(4,var(--C));grid-template-rows:repeat(3,var(--C));gap:4px}
+.cell{border-radius:10px;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.18)}
+.cell.lock{background:repeating-linear-gradient(-45deg,rgba(255,192,46,.3) 0 7px,rgba(255,192,46,.1) 7px 14px);border:2px solid rgba(255,192,46,.55)}
+.cell.ok{background:rgba(95,211,155,.35);border-color:#5fd39b}
+.cell.ng{background:rgba(224,64,95,.35);border-color:#ff7a93}
+.rowlab{position:absolute;left:-2px;font-size:10px;line-height:44px;color:#9fb3d6;transform:translateX(-100%);padding-right:4px}
+.times{display:flex;gap:4px;margin-top:4px}.times span{width:var(--C);text-align:center;font-size:10px;color:#9fb3d6}
+.lockname{position:absolute;color:#ffe38a;font-size:11px;pointer-events:none;display:flex;align-items:center;justify-content:center;text-align:center}
+.piece{position:absolute;pointer-events:none}
+.piece i{position:absolute;width:var(--C);height:var(--C);border-radius:10px;box-shadow:inset 0 3px 0 rgba(255,255,255,.4),inset 0 -4px 0 rgba(0,0,0,.18)}
+.piece.placed{pointer-events:auto;cursor:pointer;animation:snap .32s cubic-bezier(.2,1.7,.4,1)}
+.piece.placed.bad i{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 6px,transparent 6px 12px)!important}
+@keyframes snap{0%{transform:scale(1.25);filter:brightness(1.6)}100%{transform:none}}
+.piece .lab{position:absolute;left:4px;top:4px;color:#fff;font-size:10px;line-height:1.25;font-family:'M PLUS Rounded 1c';font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.45);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.tray{position:absolute;left:0;top:406px;width:900px;height:340px;padding:14px 16px}
+.tray h3{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between}
+.tray h3 small{font-size:13px;color:var(--gray);font-weight:700}
+.shapes{display:flex;flex-wrap:wrap;gap:12px}
+.shape{width:200px;height:132px;border-radius:16px;background:#f3f6fb;position:relative;cursor:pointer;padding:8px 10px;transition:transform .15s}
+.shape:hover{transform:translateY(-4px)}
+.shape.sel{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--gold);transform:translateY(-6px)}
+.shape.done{opacity:.35;cursor:default;transform:none}
+.shape .name{font-size:13px;font-weight:700}
+.shape .rule{font-size:11px;color:var(--gray)}
+.shape .mini{position:absolute;right:10px;bottom:10px}
+.shape .mini i{position:absolute;width:18px;height:18px;border-radius:4px}
+.side{position:absolute;left:920px;top:406px;width:360px;height:340px;padding:16px}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:14px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;min-height:58px;width:210px}
+.hin{position:absolute;right:4px;bottom:66px;height:190px;filter:drop-shadow(0 8px 14px rgba(27,35,64,.3))}
+.check{font-size:12px;margin-top:8px;display:flex;flex-direction:column;gap:3px;width:200px}.check div{border-radius:6px;padding:3px 6px;background:#f3f6fb}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:16px;cursor:pointer;font-size:18px;padding:12px;color:#fff;background:linear-gradient(180deg,#8f86ff,var(--violet));box-shadow:0 5px 0 #4a42c9;width:100%}
+button:active{transform:translateY(3px)}
+.fin{position:absolute;left:16px;right:16px;bottom:14px}
+.ghost{position:absolute;pointer-events:none;opacity:.85;z-index:20;transition:transform .08s}
+.ghost i{position:absolute;width:var(--C);height:var(--C);border-radius:10px;border:2px solid #fff}
+.modal{position:absolute;inset:0;background:rgba(27,35,64,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:720px;padding:26px}
+.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+.linefx{position:absolute;z-index:6;pointer-events:none;border-radius:12px;box-shadow:0 0 0 3px #fff,0 0 24px 6px rgba(255,255,255,.7);animation:full .7s ease-out forwards}
+@keyframes full{0%{opacity:1}100%{opacity:0;transform:scale(1.06)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">作業のはめ込み</div><div class="timer"><i id="timer"></i></div><div class="r" style="font-size:19px" id="left">75</div><div class="r" style="font-size:19px">配置 <span id="placed">0</span> / <span id="ntask">0</span></div></div>
+  <div class="board" id="board"></div>
+  <div class="tray panel"><h3 class="r">今週の作業<small>作業を選ぶ → 夜の穴に置く。R キー／右クリックで向きを変える</small></h3><div class="shapes" id="shapes"></div></div>
+  <div class="side panel"><div class="say" id="say">…</div><div class="check" id="check"></div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_think.png" alt="ひなた"><div class="fin"><button id="finBtn">この組み方で決定</button></div></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+const C=44,GAP=4,NIGHTS=['月','火','水','木','金'],PEOPLE=['ひなた','大野','佐伯'],TIMES=['22','0','2','4'];
+// 各夜の塞がり：[夜, 人, 時間, 名前]
+const LOCKS=[[1,1,0,'大野 休み'],[1,1,1,''],[1,1,2,''],[1,1,3,''],[2,0,0,'給与の計算'],[2,1,0,''],[2,2,0,''],[2,0,1,''],[2,1,1,''],[2,2,1,''],[4,2,2,'佐伯 早上がり'],[4,2,3,'']];
+const COLORS={red:'#e0405f',orange:'#ff8a3d',blue:'#3fa9f5',green:'#2bb673',violet:'#6c63ff',gold:'#e0a100',teal:'#1fb5b0'};
+function TASKS(auto){return [
+ {id:'vpn',name:'VPN機器の緊急修正',rule:'火曜までに',cells:[[0,0],[0,1]],col:'red',deadline:1,val:22},
+ {id:'big',name:'基幹サーバーの更新（2人がかり）',rule:'木曜までに',cells:[[0,0],[0,1],[1,0],[1,1]],col:'orange',deadline:3,val:18},
+ {id:'prep',name:'メール移行（準備→2人で本番）',rule:'今週中に',cells:[[0,0],[0,1],[1,1]],col:'violet',val:16},
+ {id:'pc',name:'社員PCの月例更新',rule:auto?'今週中に（自動化で短縮）':'今週中に',cells:auto?[[0,0]]:[[0,0],[0,1],[0,2]],col:'blue',val:14},
+ {id:'check',name:'夜間の点検（2人で同時）',rule:'水曜以外',cells:[[0,0],[1,0]],col:'teal',avoid:[2],val:10},
+ {id:'fw',name:'ファイアウォールの設定変更→確認',rule:'今週中に',cells:[[0,0],[1,0],[1,1]],col:'green',val:12},
+ {id:'fs',name:'ファイルサーバーの再起動',rule:'いつでも',cells:[[0,0]],col:'gold',val:8},
+]}
+let G,tid,ac,mouse={x:0,y:0};
+function rot(cells){const r=cells.map(([a,b])=>[b,-a]);const ma=Math.min(...r.map(c=>c[0])),mb=Math.min(...r.map(c=>c[1]));return r.map(([a,b])=>[a-ma,b-mb])}
+function start(){G={t:75,auto:document.getElementById('pAuto').checked,sel:null,place:{},over:false};G.tasks=TASKS(G.auto).map(t=>({...t,cur:t.cells}));document.getElementById('ntask').textContent=G.tasks.length;closeModal();build();render();say('夜ごとに空いてる「人×時間」の穴に、作業の形をはめよう！','pose_think');clearInterval(tid);tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/75*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100)}
+function locked(n,p,t){return LOCKS.some(l=>l[0]===n&&l[1]===p&&l[2]===t)}
+function build(){const b=document.getElementById('board');b.innerHTML=NIGHTS.map((d,n)=>`<div class="night" data-n="${n}"><h4 class="r">${d}曜の夜<small>22時〜6時</small></h4><div class="nwrap" style="margin-left:34px">${PEOPLE.map((p,i)=>`<div class="rowlab" style="top:${i*(C+GAP)}px">${p}</div>`).join('')}<div class="cells">${Array.from({length:12},(_,k)=>{const p=Math.floor(k/4),t=k%4;return `<div class="cell ${locked(n,p,t)?'lock':''}" data-n="${n}" data-p="${p}" data-t="${t}"></div>`}).join('')}</div>${LOCKS.filter(l=>l[0]===n&&l[3]).map(l=>`<div class="lockname" style="left:0;top:${l[1]*(C+GAP)}px;width:${4*C+3*GAP}px;height:${C}px">${l[3]}</div>`).join('')}<div class="times">${TIMES.map(t=>`<span>${t}時</span>`).join('')}</div></div></div>`).join('');
+  b.querySelectorAll('.cell').forEach(c=>{c.onmouseenter=()=>{G.hover=[+c.dataset.n,+c.dataset.p,+c.dataset.t];preview()};c.onclick=()=>drop(+c.dataset.n,+c.dataset.p,+c.dataset.t)})}
+function occ(n,p,t,except){for(const id in G.place){if(id===except)continue;const q=G.place[id],task=G.tasks.find(x=>x.id===id);for(const [a,b] of q.cells)if(q.n===n&&q.p+a===p&&q.t+b===t)return true}return false}
+function fits(task,n,p,t){for(const [a,b] of task.cur){const pp=p+a,tt=t+b;if(pp>2||tt>3)return 'はみ出す';if(locked(n,pp,tt))return 'その時間はふさがっている';if(occ(n,pp,tt,task.id))return 'ほかの作業と重なる'}return ''}
+function breaks(task,q){const o=[];if(task.deadline!==undefined&&q.n>task.deadline)o.push('期限に遅れる');if(task.avoid&&task.avoid.includes(q.n))o.push('給与の計算の日');return o}
+function preview(){document.querySelectorAll('.cell.ok,.cell.ng').forEach(c=>c.classList.remove('ok','ng'));if(!G.sel||!G.hover)return;const task=G.tasks.find(x=>x.id===G.sel);const [n,p,t]=G.hover;const why=fits(task,n,p,t);for(const [a,b] of task.cur){const c=document.querySelector(`.cell[data-n="${n}"][data-p="${p+a}"][data-t="${t+b}"]`);if(c&&!c.classList.contains('lock'))c.classList.add(why?'ng':'ok')}}
+function drop(n,p,t){if(!G.sel||G.over)return;const task=G.tasks.find(x=>x.id===G.sel);const why=fits(task,n,p,t);if(why){beep(200,0,'square');say(why+'よ','pose_startled');const a=document.getElementById('app');a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),350);return}
+  G.place[task.id]={n,p,t,cells:task.cur.map(c=>c.slice())};G.sel=null;const bad=breaks(task,G.place[task.id]);if(bad.length){beep(330,0,'triangle');say('はまったけど、'+bad[0]+'みたい','pose_think')}else{beep(640);beep(960,.06);say(['ぴったり！','いい組み方！','きれいにはまった！'][Math.floor(Math.random()*3)],'pose_fists')}
+  render();checkFull(n)}
+function checkFull(n){// 一晩の空きを全部埋めたら、光る演出と小さな加点
+  let free=0;for(let p=0;p<3;p++)for(let t=0;t<4;t++)if(!locked(n,p,t)&&!occ(n,p,t))free++;
+  if(free===0&&!G['full'+n]){G['full'+n]=true;G.bonus=(G.bonus||0)+4;const w=document.querySelector(`.night[data-n="${n}"] .cells`);const r=w.getBoundingClientRect(),a=document.getElementById('app').getBoundingClientRect(),s=a.width/1280;const fx=document.createElement('div');fx.className='linefx';fx.style.cssText=`left:${(r.left-a.left)/s}px;top:${(r.top-a.top)/s}px;width:${r.width/s}px;height:${r.height/s}px`;document.getElementById('app').appendChild(fx);setTimeout(()=>fx.remove(),720);chord();say(NIGHTS[n]+'曜の夜、すき間なし！','pose_jump')}}
+function render(){document.querySelectorAll('.piece').forEach(e=>e.remove());
+  for(const id in G.place){const q=G.place[id],task=G.tasks.find(x=>x.id===id);const wrap=document.querySelector(`.night[data-n="${q.n}"] .nwrap`);const el=document.createElement('div');el.className='piece placed'+(breaks(task,q).length?' bad':'');el.style.left=(q.t*(C+GAP))+'px';el.style.top=(q.p*(C+GAP))+'px';
+    el.innerHTML=q.cells.map(([a,b])=>`<i style="left:${b*(C+GAP)}px;top:${a*(C+GAP)}px;background:${COLORS[task.col]}"></i>`).join('')+`<span class="lab" style="width:${(Math.max(...q.cells.map(c=>c[1]))+1)*(C+GAP)-10}px">${task.name.split('（')[0]}</span>`;el.onclick=e=>{e.stopPropagation();delete G.place[id];G['full'+q.n]=false;beep(300);render()};wrap.appendChild(el)}
+  document.getElementById('shapes').innerHTML=G.tasks.map(t=>{const mx=Math.max(...t.cur.map(c=>c[1])),my=Math.max(...t.cur.map(c=>c[0]));return `<div class="shape ${G.sel===t.id?'sel':''} ${G.place[t.id]?'done':''}" data-id="${t.id}"><div class="name">${t.name}</div><div class="rule">${t.rule}</div><div class="mini" style="width:${(mx+1)*21}px;height:${(my+1)*21}px">${t.cur.map(([a,b])=>`<i style="left:${b*21}px;top:${a*21}px;background:${COLORS[t.col]}"></i>`).join('')}</div></div>`}).join('');
+  document.querySelectorAll('.shape').forEach(el=>{el.onclick=()=>{const id=el.dataset.id;if(G.place[id])return;G.sel=G.sel===id?null:id;beep(520);render()};el.oncontextmenu=e=>{e.preventDefault();turn(el.dataset.id)}});
+  document.getElementById('placed').textContent=Object.keys(G.place).length;
+  document.getElementById('check').innerHTML=G.tasks.map(t=>{const q=G.place[t.id];const b=q?breaks(t,q):[];return `<div style="background:${!q?'#f3f6fb':b.length?'#ffe1e6':'#e3f7ea'}">${q?(b.length?'！':'○'):'・'} ${t.name.split('（')[0]}${b.length?'：'+b[0]:''}</div>`}).join('');
+  preview()}
+function turn(id){const t=G.tasks.find(x=>x.id===(id||G.sel));if(!t||G.place[t.id])return;t.cur=rot(t.cur);beep(760,0,'triangle');render()}
+addEventListener('keydown',e=>{if((e.key==='r'||e.key==='R')&&G&&!G.over)turn()});
+addEventListener('contextmenu',e=>{if(G&&G.sel){e.preventDefault();turn()}});
+function finish(){if(G.over)return;G.over=true;clearInterval(tid);let score=G.bonus||0,miss=[];for(const t of G.tasks){const q=G.place[t.id];if(!q){miss.push(t.name+'：入れていない');if(t.id==='vpn')score-=20;continue}const b=breaks(t,q);if(b.length){score+=Math.round(t.val*.3);miss.push(t.name+'：'+b.join('・'))}else score+=t.val}
+  score=Math.max(0,Math.min(100,score));const rank=score>=90?'S':score>=70?'A':score>=45?'B':'C';if(score>=70)chord();say(score>=70?'人も時間もむだなく使えたね！':'形と穴、もう一回見てみよ','pose_jump');
+  setTimeout(()=>modal(`<h2 class="r">今週の組み方　評価 <span style="color:var(--pink)">${rank}</span>（${score}点）</h2><div style="font-size:15px;line-height:1.8">${miss.length?miss.map(m=>'・'+m).join('<br>'):'すべての作業を、期限と条件を守って入れられた。'}</div><div style="font-size:13px;color:var(--gray);margin:8px 0 12px">情シスの夜間作業は「誰が・いつ・何人で」をパズルのように組む。休みの人、止められない業務、期限を見て、緊急のものから。</div><div><label style="font-size:15px"><input type="checkbox" id="pAuto" ${G.auto?'checked':''}> 備え：作業の自動化（社員PCの更新が1コマで済む）</label></div><button id="again" style="margin-top:12px">もう一度</button>`),500);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},600)}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.13,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+document.getElementById('finBtn').onclick=()=>finish();
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">作業のはめ込み（試作・日常業務）</h2><div style="font-size:15px;line-height:1.9">月〜金の夜の保守時間。<b>縦が作業する人、横が時間</b>。<br>作業にはそれぞれ形がある（2人がかり＝縦に2マス、準備→本番＝L字）。<br>①作業を選ぶ　②夜の空いた穴に置く（置いた作業を押すと外せる）。<b>R キー／右クリックで向きを変える</b>。<br>期限と条件を守り、一晩をすき間なく埋めるとボーナス。75秒。</div><div style="margin:12px 0"><label style="font-size:15px"><input type="checkbox" id="pAuto"> 備え：作業の自動化（社員PCの更新が1コマで済む）</label></div><button id="startBtn">組みはじめる</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

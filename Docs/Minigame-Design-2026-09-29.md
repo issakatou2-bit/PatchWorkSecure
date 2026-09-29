@@ -46,6 +46,8 @@
 - 試作Bに凝った演出を追加（`Docs/Visual-Craft-2026-09-29.md`の★）
 - `Docs/Mockups/proto-f-schedule.html`：更新の時間割（日常の「優先順位」、自動化の備え）
 - `Docs/Mockups/proto-g-restore.html`：復旧の順番（依存関係、手順書の備え、2人で並行作業）
+- `Docs/Mockups/proto-f2-blocks.html`：作業のはめ込み（Fの発展。縦＝人・横＝時間の穴に、形のある作業をはめる。回転、一晩をすき間なく埋めるとボーナス）
+- Gに足す現実の要素（次の改訂）：システムごとの目標復旧時間（RTO）の表示、ランサムの事件だけ「安全確認」の工程。根拠はBIA・RTO・依存関係の整理、NIST SP 800-34／800-184
 - 次：通信の振り分け（DDoS）、相談の聞き取り
 
 試作を遊び比べてから、Unityへ移す順番と、`OpsState`への組み込み（手際の点数を`Calculate`の幅の位置へ）を設計する。

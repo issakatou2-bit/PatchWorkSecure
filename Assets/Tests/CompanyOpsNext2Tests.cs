@@ -20,7 +20,8 @@ namespace PatchWorkSecure.Tests
             var kv=Find<Image>("TitleKeyVisual");Assert.AreSame(game.PlanningArt.titleKeyVisual,kv.sprite);Assert.AreEqual(new Vector2(1672,941),kv.sprite.rect.size);Assert.AreEqual(new Vector2(.7f,.6f),kv.rectTransform.pivot);
             Assert.AreEqual("kv",kv.GetComponent<OpsPlanningMotion>().Kind);Assert.AreEqual(20,kv.GetComponent<OpsPlanningMotion>().Period);Assert.That(kv.rectTransform.localScale.x,Is.InRange(1.02f,1.06f));Assert.AreEqual(.84f,Find<RectTransform>("TitleBrand").localScale.x);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="HomePortrait"||t.name=="HomeGreeting"));CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");Capture("134-title-kv");
-            game.SpeakSceneLine("think_01",0);yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("TitleCaption").text);Assert.IsFalse(game.PortraitVoicePlaying);
+            game.SpeakSceneLine("think_01",0);yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual(game.LastReactionCaption,Find<TextMeshProUGUI>("TitleCaption").text);Assert.IsFalse(game.PortraitVoicePlaying);
+            game.SpeakSceneLine(game.ActiveVoiceBank.lines.OrderByDescending(l=>l.caption.Length).First().id,0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual(TextWrappingModes.NoWrap,Find<TextMeshProUGUI>("TitleCaption").textWrappingMode);Assert.IsFalse(Find<TextMeshProUGUI>("TitleCaption").text.Contains("\n"));CheckText();
             Click("HomeSettings");yield return new WaitForSecondsRealtime(.5f);Click("CaptionToggle");Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.5f);
             game.SpeakSceneLine("think_02",0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual("",Find<TextMeshProUGUI>("TitleCaption").text);Assert.AreEqual(1.02f,Find<RectTransform>("TitleKeyVisual").localScale.x);CheckText();Capture("134-title-kv-reduced");LogAssert.NoUnexpectedReceived();
         }
@@ -68,12 +69,12 @@ namespace PatchWorkSecure.Tests
         }
         [Test] public void Next3Depth_把握と見積もりに未確認の真相を漏らさない()
         {
-            foreach(bool audit in new[]{false,true})
+            foreach(int rules in new[]{0,1})foreach(bool audit in new[]{false,true})
             {
-                var first=new OpsState(14,true){audited=audit};
+                var first=new OpsState(14,true){audited=audit,decisionDepthRules=rules};
                 for(int seed=15;seed<45;seed++)
                 {
-                    var other=new OpsState(seed,true){audited=audit,eventSchedule=first.eventSchedule,incidentTimes=first.incidentTimes};
+                    var other=new OpsState(seed,true){audited=audit,decisionDepthRules=rules,eventSchedule=first.eventSchedule,incidentTimes=first.incidentTimes};
                     Assert.AreEqual(first.SituationKnowledge,other.SituationKnowledge);
                     foreach(string response in new[]{"contain","scope","recover"})Assert.AreEqual(JsonUtility.ToJson(first.Estimate(response)),JsonUtility.ToJson(other.Estimate(response)));
                 }
@@ -83,15 +84,19 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
             Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);Assert.AreEqual(game.State.SituationKnowledge+" / 4",Find<TextMeshProUGUI>("KnowledgeValue").text);CheckPointer("KnowledgeCard");Capture("132-depth-incident");CheckText();LogAssert.NoUnexpectedReceived();
+            int quietSeed=Enumerable.Range(0,100).First(s=>new OpsState(s,true).IncidentTime>0);game.StartYear(quietSeed);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);Assert.Greater(game.State.IncidentTime,0);Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);Capture("132-depth-incident-quiet");CheckText();LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator Next3Polish_月報と計画の八件を同条件で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.State.budget=59;game.OpenTab(0);game.StopVoice();game.SpeakSceneLine("growth_01",0);yield return new WaitForSecondsRealtime(1.4f);Capture("130-polish-planning");
             var budget=Find<RectTransform>("予算Value");var unit=Find<RectTransform>("BudgetUnit");Assert.Greater(unit.anchoredPosition.x,budget.anchoredPosition.x+budget.rect.width+4);Assert.Less(budget.rect.height-budget.anchoredPosition.y,56);
+            foreach(int value in new[]{0,59,100,108,999,5000}){game.State.budget=value;game.OpenTab(0);CheckText();budget=Find<RectTransform>("予算Value");unit=Find<RectTransform>("BudgetUnit");Assert.Greater(unit.anchoredPosition.x,budget.anchoredPosition.x+budget.rect.width+4);}
+            game.State.budget=59;game.OpenTab(0);game.SpeakSceneLine("rankup",0);yield return new WaitForSecondsRealtime(.2f);CheckText();Capture("130-polish-planning-rankup");
             foreach(var room in Find<RectTransform>("OfficeStage").GetComponentsInChildren<RectTransform>().Where(r=>r.name.StartsWith("Room_")))Assert.LessOrEqual(room.GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.name=="UninstalledFrame"),3);
             Assert.Greater(Find<RectTransform>("Pin_change").anchoredPosition.x,283);Assert.AreEqual(TextWrappingModes.NoWrap,Find<TextMeshProUGUI>("NavigatorSpeech").textWrappingMode);
             game.ChooseAction("audit");game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);game.StopVoice();yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-empty");
             Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="ImpactSummary"));Assert.IsNotNull(Find<RectTransform>("PotentialEquipmentFrame"));Assert.IsFalse(Object.FindObjectsByType<OpsPortraitIdentity>().Any(i=>i.FaceIcon));Assert.AreEqual(3,Find<RectTransform>("MonthlyTeam").GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("NextSupportFace")));CheckText();
+            Assert.AreEqual(3,Find<RectTransform>("MonthlyTeam").GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.Kind=="staff-face"));
             game.StartYear(14);game.ChooseAction(game.State.CurrentMission.actionA);game.ChooseAction(game.State.CurrentMission.actionB);game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectA));game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectB));game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-mission");Assert.IsTrue(game.State.CurrentMissionCompleted);CheckPointer("MissionConversation");Assert.GreaterOrEqual(Find<Button>("MissionConversation").GetComponent<RectTransform>().rect.height,32);CheckText();LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
@@ -302,7 +307,7 @@ namespace PatchWorkSecure.Tests
             for(int i=0;i<12;i++)
             {
                 if(game.State.phase==OpsPhase.Ended)break;
-                Plan(game.State);game.OpenTab(0);game.BeginIncident();game.Resolve(game.State.Current.kind=="outage"?"recover":"scope");game.Next();yield return null;
+                Plan(game.State);game.OpenTab(0);game.BeginIncident();game.Resolve(PublicTestResponse(game.State));game.Next();yield return null;
             }
             yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(OpsPhase.Ended,game.State.phase);Assert.AreEqual(12,game.State.history.Count);Assert.IsTrue(game.State.IsClear);
             Assert.AreEqual(12,game.Surface.GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("AnnualMonth")&&!t.name.StartsWith("AnnualMonthName")&&!t.name.StartsWith("AnnualMonthResult")));

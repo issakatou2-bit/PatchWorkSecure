@@ -20,7 +20,7 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 
 | シーン | 中身 | コード | 詳細 |
 |---|---|---|---|
-| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.12。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
+| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.13。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない。キャラデータの共有は`NavigatorPersona`、表示用の`OpsPortraitAnimator`／`OpsPortraitMotion`も両版で再利用。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で132件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で139件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -90,23 +90,23 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-29）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.10：共通UI・次画面・新ひなた・ロゴ・質感、ひなたの動き①②と演出調査◎9技法、Quick-Wins-2の0〜8を実装済み。PlayMode121/121、最後の音量補正後も追加10件10/10、Verify4系統・コンパイル成功。報酬・難易度は変更なし。詳細は`Docs/Quick-Wins-2-Implementation-2026-09-29.md`と`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。社員の事件支援・顔マーク・工数追加・日常委任は実装済み。計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
-- v0.11：Next-Screensのタイトル・遷移、依頼書、部屋操作、文化・信頼のランク恩恵まで実装。追加報酬は新年度だけ。全125件で123成功、失敗2件は確認先・待機修正後に個別成功、最終対象4/4・Verify4系成功。全125件の最終版一括成功とは区別する。Windows版は据え置き。詳細は`Docs/Next-Screens-Remaining-2026-09-29.md`。
-- v0.12：UI不具合4件を修正し、ひなたV9-2の105行（掛け声54・追加11・全文40）を場面へ配線。字幕・表情・ポーズ・操作キャンセル・BGM減衰・音量設定に対応。公開側は音源なしの台本、音声入りResourcesは追跡対象外。全132件は130成功、失敗2件は旧検査を更新して個別成功。再開始・再昇格の全文再生も補正後に確認し、最終関係分7/7、Verify4系・コンパイル成功。最終版の全件一括成功とは区別する。ルール・臨時予算1万円は変更せず、Windows版は据え置き。画像比較と結果は`Docs/UI-Repair-and-Hinata-Voice-2026-09-29.md`。
-- 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
-- ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。旧画像は`ArtSource/Hinata/legacy/`。基本ポーズ`pose_fists`は4素材の目口差分、他17ポーズは1枚絵で動く。移動・拡縮・回転を減らしてもまばたきは残る。来歴は`Docs/Hinata-Replacement-2026-09-29.md`と`Docs/Reference-Asset-Provenance.md`。学生服は不可。ボイス台本は`Docs/Voice/`。
-- 音：SEは加藤さん指定のB-brightの11音、BGMはGemini / Lyriaの生成2曲。**声はElevenLabs「Hinata V9-2」の台本v2・105本を組み込み済み**（無料プランの私的試遊限定、音源と音声入りResourcesはgit追跡対象外）。配布・公開・動画投稿は禁止。実装指示は`Docs/Voice/Integration.md`。目口差分は`NavigatorPersona.AnimationFrames`、差分のないポーズは1枚絵を維持。
-- **総合評価（9/29）：`Docs/Evaluation-2026-09-29.md`**。見た目・キャラは良いが、判断が浅い（限定が85〜90%、迷える選択肢が平均1.2〜1.5）、ほぼ全方針で完走、1年で終わる。Steamの予測は今のままで好評率60〜70%。改善の優先順位とUIの不具合4件を記載。追加キャラの案は`Docs/Characters-Ideas.md`（ひなた・秘書・金髪エンジニアの3人に絞った。本格着手は後）。困りごとの泡（ワンタッチで解決、小さな報酬、稀にレア）の案は`Docs/Ideas-Office-Bubbles.md`（未承認）。
-- UI・UXの評価と改善候補：`Docs/UI-UX-Review-2026-09-28.md`（画面の不具合6件と演出・音）、`Docs/UI-UX-Research-2026-09-28.md`（方針）。
+- 新試作v0.13：Next-3①〜④を個別コミット済み。月報・計画の8件、判断の深さA〜E、月4個の困りごとの泡、承認済みタイトル一枚絵を実装。結果・撮影・最終検証は`Docs/Next-3-Implementation-2026-09-29.md`。Windows版は据え置き。
+- 全139件を一度実行して132成功、7失敗を修正して個別に全成功。追加のNext-3も7/7。Verify4系統・3アセンブリのコンパイル成功。最終版の139件一括成功とは区別する。3視点各5年度の自動画面操作は完走、文字の収まり指摘0。
+- 新年度は把握不足が限定対応の見落とし・調査費に効き、12か月中4か月が夜間/休日。復旧費2万円。数値はOpsCatalog。旧年度の計算は維持。未確認の真相を公開表示へ使わない。
+- 泡は無料の通常報酬/公開の手がかり/数値報酬なしのお礼。抽選・解決済み・手がかりを保存し、旧保存は泡なし。計測の9方針は深度1以上で相談を必ず、深度0で半分の月に拾う（通常泡を全回収する計測とは区別）。
+- 900年度：限定50.31%、非優越候補平均1.983、v0.12比の完走率差は最大2ポイントで指定基準内。**人間の初見プレイ・楽しさ・学習効果の測定ではない**。旧版は変更せず回帰検証を継続。
+- 共通UI、次画面、設備・社員支援、ランク恩恵、Quick-Wins-2、声は以前の実装を維持。計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。過去の経緯はDocsへ。
+- ひなた：新デザインの表情18・ポーズ18を両版へ適用。基本ポーズは目口差分、他は1枚絵フォールバック。タイトルだけは3頭身立ち絵と吹き出しを出さず、承認済みKVを使う。`Docs/Hinata-Replacement-2026-09-29.md`、`Docs/Reference-Asset-Provenance.md`。
+- SEは承認済みB-bright、BGMはGemini/Lyriaの生成2曲。声はElevenLabs「Hinata V9-2」105本（無料プランの私的試遊限定、音源・音声入りResourcesはgit追跡対象外）。配布・公開・動画投稿は禁止。音声なし/消音でも字幕と操作で進む。`Docs/Voice/Integration.md`。
+- UI・UXの評価と改善候補は`Docs/UI-UX-Review-2026-09-28.md`、総合評価の背景は`Docs/Evaluation-2026-09-29.md`。その「限定85〜90%」等は変更前の計測で、現在の数値と混同しない。
 
 ## 7. 次にやること（優先順）
 
-1. **加藤さんの試遊**で、どちらを本命にするかを決める。決まる前に機能を足し続けない。
-2. 新ひなたの動き・差分・105本の声と音のミックスを加藤さんが私的試遊で確認する。現在はUnity Editorで確認でき、Windows版は未更新。配布前は有料プランで音声を再制作し、VoiceTestのResourcesを除いて公開用音声へ移す。追加ポーズの目口素材は同じキャンバス・基準点で登録し、1枚絵フォールバックは維持。Live2D等の部品分けは未着手。
-3. `Docs/Mockups/Next-Screens.md`の①〜⑥は実装済み。新年度の依頼報酬に臨時予算1万円を追加。文化・信頼のランク恩恵もVerify系で比較済み。旧年度の途中には追加ルールを適用しない。次は実プレイでテンポ・部屋の操作・恩恵の伝わり方を確認する。
-4. 生成BGM2曲の試聴・ループ調整、B案SEを実プレイで確認してミックスを詰める（別案は承認前に登録しない）。図鑑は年度内遭遇集計と枠まで、一覧画面・年度をまたぐ集計は未実装。商用本採用前に利用条件を再確認する。
-5. **判断の深さ（面白さの芯）**：臨時予算1万円の見直しもここで扱う（UI・ボイス修正では変更しない）。状況で最善の方針が変わる仕組み。Claudeが設計案と自動プレイでの検証を作り、Codexが実装する。設計案と900年度の結果は`Docs/Decision-Depth-Design-2026-09-29.md`（推奨案で限定43%・迷える選択肢1.95。加藤さんの承認待ち）。目標は「迷える選択肢」平均2.0以上、限定の比率60%以下。続いて山場の目標（レース）と年間ランク5段（案：`Docs/Peak-Goals-Design-2026-09-29.md`）、難易度の段階、兆候の連鎖、3年キャンペーン、図鑑、会話イベント（`Docs/Evaluation-2026-09-29.md`の4）。限定対応を弱めるだけにしない。旧版は逆に難しい（準備＋復旧の方針でも258/1000）。
-6. Player Settings（Steam向け）、ブランチ整理。`planning-bubbles.html`と`title-screen-kv.html`は承認前なので実装しない。
+1. 加藤さんがUnity EditorのCompanyYearを私的試遊し、判断の迷い方・泡の手応え・一枚絵・文字量・テンポを確認する。本命の旧版/新試作の選択は未決定。
+2. 声105本・目口・SE/BGMのミックスを確認する。配布前には利用条件を満たした公開用音声を再制作し、VoiceTestのResourcesは除く。Windows版の更新は依頼があったときだけ。
+3. Next-3とNext-Screensの実装済み項目を繰り返し作らない。旧保存の継続と新年度で追加される規則を区別。臨時予算1万円は今回は維持し、見直す場合は別途設計・比較する。
+4. 次の設計候補は山場の目標/年間ランク（`Docs/Peak-Goals-Design-2026-09-29.md`）、難易度、兆候の連鎖、複数年、図鑑・会話。設計案を実装済みと扱わず、承認を得てから進める。追加キャラの本格着手も後。
+5. Player Settings（Steam向け）、ブランチ整理。旧版を自動で新試作へ置き換えない。`planning-bubbles.html`と`title-screen-kv.html`はNext-3で承認され実装済み。
 
 ## 8. 対話スタイル
 

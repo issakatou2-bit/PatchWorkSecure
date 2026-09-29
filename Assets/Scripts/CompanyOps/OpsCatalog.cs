@@ -25,6 +25,7 @@ public const int KnowledgeMax=4, UnauditedBlindness=2, MissingEvidenceBlindness=
 public const int BlindLossPerPoint=3, ScopeCostPerBlind=2, QuietContainStop=2, SegmentContainStopCut=2, MinimumContainStop=3;
 public const int ContainStop=9, ScopeStop=1, RecoverStop=3, ContainCost=6, ScopeCost=3, RecoverCost=2, LegacyRecoverCost=4;
 public const int QuietTimeDenominator=3, SpreadHigh=2, SpreadNormal=1, SpreadNone=0;
+public const int ForecastCenterOffset=6, ContainmentOversightDivisor=3;
 // 年度内の適用対象と連携値。保存データの復元と、性能・処理の再開は別の備え。
 public static readonly int[] DataRecoveryMonths = { 0, 9, 11 };
 public static readonly int[] RestartMonths = { 3, 4 };

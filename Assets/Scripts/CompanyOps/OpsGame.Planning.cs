@@ -231,7 +231,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(medal,"YearLabel","1年目",0,9,120,22,13,Color.white,true,true);
             PText(medal,"Month",State.Current.name,0,30,120,45,38,Color.white,true,true);
             int slots=Math.Max(State.MaxCapacity,State.capacity);
-            float workWidth=Math.Max(192,72+slots*30), workX=1496-workWidth, budgetWidth=Math.Max(170,142+Math.Max(0,State.budget.ToString().Length-2)*20), budgetX=workX-16-budgetWidth;
+            float workWidth=Math.Max(192,72+slots*30), workX=1496-workWidth, budgetWidth=Math.Max(170,126+State.budget.ToString().Length*24), budgetX=workX-16-budgetWidth;
             var timeline=PCard(screen,"YearTimeline",252,24,budgetX-268,64,null,20,false);
             PText(timeline,"TimelineTitle","一年の歩み",20,0,84,64,14,PlanGray);
             float x=118;

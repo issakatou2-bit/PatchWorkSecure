@@ -117,7 +117,7 @@ namespace PatchWorkSecure.Tests
             game.StartYear(14);
             for(int month=0;month<12&&game.State.phase!=OpsPhase.Ended;month++)
             {
-                Plan(game.State);game.BeginIncident();game.Resolve(game.State.Current.kind=="outage"?"recover":"scope");game.Next();yield return null;
+                Plan(game.State);game.BeginIncident();game.Resolve(PublicTestResponse(game.State));game.Next();yield return null;
             }
             Assert.IsTrue(game.State.IsClear);
             // 12か月の点灯の後にランクを押す。固定の0.3秒ではなく実際の判子を待つ。

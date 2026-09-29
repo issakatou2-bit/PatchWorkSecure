@@ -47,7 +47,7 @@ namespace PatchWorkSecure.CompanyOps
         public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?0:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0));
         public int SituationKnowledge=>OpsCatalog.KnowledgeMax-Blindness;
         public int EventSpread=>CurrentProfile!=null?CurrentProfile.spread:Current.kind=="outage"?OpsCatalog.SpreadNone:new[]{"ransom","supply","vulnerability","identity"}.Contains(Current.kind)?OpsCatalog.SpreadHigh:OpsCatalog.SpreadNormal;
-        public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/3);
+        public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/OpsCatalog.ContainmentOversightDivisor);
         private void InitializeDecisionDepth(int yearSeed)
         {
             decisionDepthRules=1;incidentTimes=new int[12];var order=Enumerable.Range(0,12).ToArray();

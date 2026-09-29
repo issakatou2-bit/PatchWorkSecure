@@ -12,7 +12,17 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="bubble-glass"||Kind=="bubble-ring")
+            if(Kind=="staff-face")
+            {
+                var center=r.center+Vector2.up*h*.03f;
+                for(int i=0;i<40;i++){float a=i*Mathf.PI/20,b=(i+1)*Mathf.PI/20;Line(vh,center+new Vector2(Mathf.Cos(a)*w*.34f,Mathf.Sin(a)*h*.4f),center+new Vector2(Mathf.Cos(b)*w*.34f,Mathf.Sin(b)*h*.4f),2);}
+                Line(vh,center+new Vector2(-w*.17f,h*.06f),center+new Vector2(-w*.17f,-h*.02f),2);
+                Line(vh,center+new Vector2(w*.17f,h*.06f),center+new Vector2(w*.17f,-h*.02f),2);
+                Line(vh,center+new Vector2(-w*.09f,-h*.18f),center+new Vector2(w*.09f,-h*.18f),2);
+                if(Offset==1){Line(vh,center+new Vector2(-w*.27f,h*.06f),center+new Vector2(w*.27f,h*.06f),2);}
+                else{Line(vh,center+new Vector2(-w*.26f,h*.21f),center+new Vector2(Offset==0?w*.12f:0,h*.33f),3);Line(vh,center+new Vector2(w*.26f,h*.21f),center+new Vector2(Offset==0?w*.12f:0,h*.33f),3);}
+            }
+            else if(Kind=="bubble-glass"||Kind=="bubble-ring")
             {
                 var center=r.center;float radius=Mathf.Min(w,h)*.48f;
                 if(Kind=="bubble-glass")

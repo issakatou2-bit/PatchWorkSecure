@@ -144,7 +144,7 @@ namespace PatchWorkSecure.Tests
             game.Buy(OpsCatalog.Index("runbook")); yield return null; Click("OpenTeam"); yield return null;
             CheckPointer("Support_routine"); Click("Support_routine"); yield return new WaitForSeconds(2.9f);
             Assert.AreEqual(1, game.State.capacity); Capture("25-routine-unlocked", 1280, 720); CheckTeamText();
-            Click("CloseDialog"); game.ChooseAction("audit"); game.BeginIncident(); game.Resolve("scope"); game.Next(); yield return null;
+            Click("CloseDialog"); game.ChooseAction("audit"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); game.Next(); yield return null;
             Click("OpenTeam"); yield return null; Click("Practice_1"); yield return null; Click("Support_investigate"); yield return null;
             Click("CloseDialog"); game.Buy(OpsCatalog.Index("mfa")); game.ChooseAction("map"); game.BeginIncident(); yield return null;
             Capture("26-staff-assistance"); CheckText(); CheckPointer("Power_scope"); Click("Power_scope"); yield return WaitForPowerCount(game.State.ResponsePower("scope").Total);
@@ -154,7 +154,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(predicted.loss, game.State.Latest.loss);
             Capture("28-growth-review"); CheckText(); Click("ReviewPower"); yield return new WaitForSeconds(.7f); CheckTeamText();
             Click("CloseDialog"); game.Next(); yield return null;
-            game.ChooseAction("listen"); game.ChooseAction("map"); game.BeginIncident(); game.Resolve("scope"); yield return WaitForResolution(game);
+            game.ChooseAction("listen"); game.ChooseAction("map"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); yield return WaitForResolution(game);
             Assert.IsTrue(game.State.QuarterRewardPending); CheckPointer("NextMonth"); Click("NextMonth"); yield return null;
             Capture("29-quarter-reward"); CheckTeamText(); CheckPointer("Reward_capacity"); Click("Reward_capacity"); yield return null;
             Assert.AreEqual(3, game.State.month); Assert.AreEqual(1, game.State.monthExtraCapacity);
@@ -179,6 +179,7 @@ namespace PatchWorkSecure.Tests
         }
         private static void PlanGrowthTestYear(OpsState s)
         {
+            for(int i=0;i<OpsCatalog.BubblesPerMonth;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)s.PopBubble(i);
             if (s.SupportBlock("routine") == "" && s.month != 11) s.AssignSupport("routine");
             if (s.fatigue > 40) s.Act("rest");
             foreach (string id in new[] { "backup", "drill", "inventory", "patch", "automation", "monitor", "redundancy", "segment", "education" })
@@ -189,11 +190,7 @@ namespace PatchWorkSecure.Tests
             s.Act("audit"); s.Act("map"); s.Act("listen");
             for (int i = 0; i < 3; i++) if (s.PracticeBlock(i) == "") s.Practice(i);
         }
-        private static string PublicGrowthResponse(OpsState s) => new[] { "contain", "scope", "recover" }.OrderBy(r =>
-        {
-            var n = System.Text.RegularExpressions.Regex.Matches(s.Forecast(r), @"\d+").Cast<System.Text.RegularExpressions.Match>().Select(v => int.Parse(v.Value)).ToArray();
-            return 2 * (n[1] + (r == "contain" ? 6 : r == "scope" ? 3 : 4)) + n[3];
-        }).First();
+        private static string PublicGrowthResponse(OpsState s) => PublicTestResponse(s);
         private static void CheckTeamText()
         {
             CheckText();

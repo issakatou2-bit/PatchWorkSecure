@@ -171,7 +171,7 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
             for(int month=0;month<3;month++)
             {
-                game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);
+                Plan(game.State);game.OpenTab(0);game.BeginIncident();game.Resolve(PublicTestResponse(game.State));yield return WaitForResolution(game);
                 if(month<2)game.Next();
             }
             Assert.IsTrue(game.State.QuarterRewardPending);

@@ -7,6 +7,7 @@ public static class CompanyOpsChecks
     private static void Check(bool ok, string why) { if (!ok) throw new Exception(why); }
     public static void Prepare(OpsState s, int strategy)
     {
+        for(int i=0;i<4;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)s.PopBubble(i);
         string[] order = strategy == 1 ? new[] { "automation", "backup", "inventory", "drill", "education", "runbook", "mfa", "patch", "redundancy", "monitor", "segment" } :
             new[] { "education", "inventory", "backup", "runbook", "patch", "mfa", "drill", "automation", "monitor", "segment", "redundancy" };
         if (s.fatigue > 40) s.Act("rest");
@@ -21,14 +22,17 @@ public static class CompanyOpsChecks
         }
         s.Act("audit"); s.Act("rest"); s.Act("map");
     }
-    public static OpsState PlayYear(int seed, int strategy)
+    public static OpsState PlayYear(int seed, int strategy,bool legacy=false)
     {
         var s = new OpsState(seed);
+        if(legacy){s.decisionDepthRules=0;s.incidentTimes=null;s.bubbleRules=0;s.bubbleSchedule=null;s.poppedBubbles=null;}
         for (int i = 0; i < 12 && s.phase != OpsPhase.Ended; i++)
         {
             if (strategy != 0) Prepare(s, strategy);
             Check(s.Valid(), "計画時の状態破損");
-            s.BeginIncident(); s.Resolve(strategy != 0 && s.Current.kind == "outage" ? "recover" : "scope"); s.NextMonth();
+            string response=legacy||strategy==0?strategy!=0&&s.Current.kind=="outage"?"recover":"scope":
+                new[]{"contain","scope","recover"}.OrderBy(r=>{var f=s.Estimate(r);return f.lossMax*(strategy==1?7:4)+f.stopMax*(strategy==1?4:2)+f.cost*2;}).First();
+            s.BeginIncident(); s.Resolve(response); s.NextMonth();
             Check(s.Valid(), "進行時の状態破損");
         }
         return s;
@@ -36,6 +40,10 @@ public static class CompanyOpsChecks
     public static bool Simulate(int seed, int strategy) => PlayYear(seed, strategy).IsClear;
     public static void Main()
     {
+        var legacyWins=new int[3];for(int i=0;i<300;i++)for(int j=0;j<3;j++)if(PlayYear(i,j,true).IsClear)legacyWins[j]++;
+        Console.WriteLine("旧年度・従来の固定対応 / 放置="+legacyWins[0]+", 運用重視="+legacyWins[1]+", 組織重視="+legacyWins[2]);
+        Check(legacyWins[1]>150&&legacyWins[2]>150,"旧年度の回帰");
+        Console.WriteLine("新年度は公開見積もりから選択・相談の泡を回収。旧固定対応の完走率とは区別する。");
         int[] wins = new int[3], scoreSum = new int[3], missionSum = new int[3];
         for (int i = 0; i < 300; i++) for (int j = 0; j < 3; j++)
         {

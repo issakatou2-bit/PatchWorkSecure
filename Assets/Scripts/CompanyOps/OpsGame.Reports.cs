@@ -131,7 +131,7 @@ namespace PatchWorkSecure.CompanyOps
                 for(int i=0;i<3;i++)
                 {
                     var face=PCard(team,"NextSupportFace"+i,26+i*116,64,58,58,Hex("edf1f7"),24,false);
-                    PText(face,"NextSupportInitial"+i,OpsGrowthCatalog.StaffNames[i].Substring(0,1),0,0,58,58,24,new Color(.42f,.47f,.57f,.45f),true,true);
+                    IncidentShape(face,"NextStaffGlyph"+i,"staff-face",6,6,46,46,new Color(.42f,.47f,.57f,.45f)).GetComponent<OpsIncidentGraphic>().Offset=i;
                 }
                 PText(team,"SupportNone",r.power==null?"社員の支援は未記録":"次の月は支援を頼める",26,136,388,36,17,PlanGray);
             }

@@ -289,7 +289,7 @@ namespace PatchWorkSecure.CompanyOps
                 default: return 4 * Level("monitor") + 3 * Level("inventory");
             }
         }
-        // 公開情報を中心に、調査で幅を絞る。新年度は調査後も未確認のSeverityを参照しない。
+        // 公開情報を中心に、調査で幅を絞る。旧保存でも未確認のSeverityを参照しない。
         public string Forecast(string response)
         {
             var estimate = Estimate(response);
@@ -300,7 +300,7 @@ namespace PatchWorkSecure.CompanyOps
         public OpsEstimate Estimate(string response)
         {
             int margin = EstimateMargin;
-            int center = decisionDepthRules==0&&audited ? Severity : Current.@base + SeasonPressure + 6;
+            int center = Current.@base + SeasonPressure + OpsCatalog.ForecastCenterOffset;
             var low = Calculate(response, Math.Max(0, center - margin), false);
             var high = Calculate(response, center + margin, false);
             int lowLoss = !string.IsNullOrEmpty(Current.calm) ? Math.Min(low.loss, Calculate(response, 0, true).loss) : low.loss;

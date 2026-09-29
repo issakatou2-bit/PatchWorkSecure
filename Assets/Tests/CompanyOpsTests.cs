@@ -196,7 +196,7 @@ namespace PatchWorkSecure.Tests
             {
                 Plan(game.State); game.OpenTab(0); yield return null;
                 game.BeginIncident(); yield return null;
-                game.Resolve(game.State.Current.kind == "outage" ? "recover" : "scope"); yield return null;
+                game.Resolve(PublicTestResponse(game.State)); yield return null;
                 game.Next(); yield return null;
             }
             Assert.IsTrue(game.State.IsClear, "一年を完走できない");
@@ -228,6 +228,7 @@ namespace PatchWorkSecure.Tests
         }
         private static void Plan(OpsState s)
         {
+            for(int i=0;i<OpsCatalog.BubblesPerMonth;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)s.PopBubble(i);
             if (s.fatigue > 40) s.Act("rest"); s.Act("listen");
             foreach (string key in new[] { "automation", "inventory", "drill", "education", "runbook", "mfa", "patch", "redundancy", "monitor", "segment" })
             {
@@ -238,6 +239,11 @@ namespace PatchWorkSecure.Tests
             }
             s.Act("audit"); s.Act("rest"); s.Act("map");
         }
+        // 年間の画面確認も、今の公開見積もりから選ぶ。確定結果・真偽は選択に使わない。
+        private static string PublicTestResponse(OpsState s) => new[] { "contain", "scope", "recover" }.OrderBy(r =>
+        {
+            var estimate=s.Estimate(r);return estimate.lossMax*7+estimate.stopMax*4+estimate.cost*2;
+        }).First();
         private static void Click(string name)
         {
             NavigatePlanningControl(name);

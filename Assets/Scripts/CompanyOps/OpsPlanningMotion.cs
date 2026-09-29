@@ -14,10 +14,10 @@ namespace PatchWorkSecure.CompanyOps
             if(Kind=="drop"||Kind=="reward")
             {
                 float duration=Kind=="drop"?.5f:1f,p=Mathf.Clamp01(t/duration);group.blocksRaycasts=false;group.alpha=1-p;
-                rect.anchoredPosition=origin+(Kind=="drop"?new Vector2(Direction.x,-Direction.y)*p:Vector2.up*70*p);rect.localScale=Vector3.one*(Kind=="drop"?1-.7f*p:1);
+                rect.anchoredPosition=origin+(reduced?Vector2.zero:Kind=="drop"?new Vector2(Direction.x,-Direction.y)*p:Vector2.up*70*p);rect.localScale=Vector3.one*(reduced?1:Kind=="drop"?1-.7f*p:1);
                 if(p>=1)Destroy(gameObject);return;
             }
-            if(PopAt>=0){float p=Mathf.Clamp01((now-PopAt)/.32f);group.blocksRaycasts=false;rect.localScale=Vector3.one*(p<.3f?1-.18f*p/.3f:.82f+(p-.3f)*1.1f);group.alpha=1-p;if(p>=1)Destroy(gameObject);return;}
+            if(PopAt>=0){float p=Mathf.Clamp01((now-PopAt)/.32f);group.blocksRaycasts=false;rect.localScale=Vector3.one*(reduced?1:p<.3f?1-.18f*p/.3f:.82f+(p-.3f)*1.1f);group.alpha=1-p;if(p>=1)Destroy(gameObject);return;}
             float age=now-ArrivalAt;group.blocksRaycasts=age>=0;group.alpha=age<0?0:1;
             if(age<0){rect.localScale=Vector3.zero;return;}
             float a=Mathf.Clamp01(age/.5f);rect.localScale=Vector3.one*(reduced?1:a<.7f?a/.7f*1.12f:Mathf.Lerp(1.12f,1,(a-.7f)/.3f));

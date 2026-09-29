@@ -29,7 +29,7 @@ namespace PatchWorkSecure.CompanyOps
             if(saved!=null)PText(resume.transform,"ContinueMonth",saved.Current.name+" / "+(saved.month+1)+"か月目",258,0,186,64,14,PlanGray,true,true);
             TitleButtonStyle(PButton(screen,"HomeGuide","遊び方",90,618,223,64,Guide,Color.white,PlanInk),false);
             TitleButtonStyle(PButton(screen,"HomeSettings","設定",327,618,223,64,Menu,Color.white,PlanInk),false);
-            PText(screen,"TitleCaption","",620,836,890,30,16,PlanInk,false,true);
+            var caption=PText(screen,"TitleCaption","",620,836,890,30,16,PlanInk,false,true);caption.textWrappingMode=TMPro.TextWrappingModes.NoWrap;
             PText(screen,"HomeFooter","ねっとわーく商事・社員45人 / 公表事例を参考にした架空の会社と数値です",90,828,1320,38,14,PlanGray,false);
             if(SaveWarning!="")PText(screen,"SaveWarning",SaveWarning,90,864,1420,28,15,Coral,false);
         }
@@ -40,6 +40,7 @@ namespace PatchWorkSecure.CompanyOps
             var states=button.colors;states.normalColor=states.highlightedColor=states.selectedColor=states.disabledColor=Color.white;
             states.pressedColor=new Color(.96f,.96f,.96f);states.colorMultiplier=1;button.colors=states;
             button.GetComponent<Shadow>().effectColor=primary?Hex("d94a70"):Hex("c7d0e0");
+            button.GetComponent<Shadow>().effectDistance=new Vector2(0,-6);
             var label=button.GetComponentInChildren<TMPro.TextMeshProUGUI>();label.fontSizeMax=primary?24:button.name=="ContinueYear"?21:18;label.fontSizeMin=primary?20:14;label.fontSize=label.fontSizeMax;
             bool large=primary||button.name=="ContinueYear";float padding=large?58:26;var rect=button.GetComponent<RectTransform>();
             label.alignment=TMPro.TextAlignmentOptions.MidlineLeft;label.rectTransform.anchorMin=label.rectTransform.anchorMax=label.rectTransform.pivot=new Vector2(0,1);

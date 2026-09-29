@@ -78,7 +78,7 @@ namespace PatchWorkSecure.CompanyOps
             KitButton(b, bg);
             if (bg == Edge || bg == Panel || bg == Paper) t.color = Ink;
             if (bg == Accent || bg == PlanPink || bg == Coral || bg == Ink) t.color = Color.white;
-            b.onClick.AddListener(() => { if(ConsumePresentationClick())return;PlayCue(OpsCue.Click); action(); TutorialAction(id); }); return b;
+            b.onClick.AddListener(() => { StopVoice();if(ConsumePresentationClick())return;PlayCue(OpsCue.Click); action(); TutorialAction(id); }); return b;
         }
         private void RoundSurface(UnityEngine.UI.Image image, float radius)
         {
@@ -99,7 +99,7 @@ namespace PatchWorkSecure.CompanyOps
             PhasePresentationRunning=false;
             if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
-            if (Application.isPlaying) {StopAllCoroutines();StopPresentationSounds();}
+            if (Application.isPlaying) {if(!carryResolutionVoice)StopVoice();StopAllCoroutines();StopPresentationSounds();}
             if(outgoingScreen!=null)Destroy(outgoingScreen.gameObject);
             outgoingScreen=null;
             if(Application.isPlaying&&PortraitEntering&&screen!=null)
@@ -187,10 +187,12 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Update()
         {
+            TickVoice();
             TickMusic();
             AlignDialogFooter(); RefreshTutorial();
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
+                StopVoice();
                 if (modal != null) CloseDialog(); else Menu();
             }
             if (toast != null)

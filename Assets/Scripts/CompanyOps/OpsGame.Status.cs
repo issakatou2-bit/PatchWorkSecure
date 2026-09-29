@@ -25,6 +25,7 @@ namespace PatchWorkSecure.CompanyOps
             for (int i = 0; i < after.Length; i++) statChanges[i] = after[i] - before[i];
             budgetGainPending=statChanges[0]>0;
             rankAfter=CompanyRankMetrics();
+            rankVoicePending=previousRanks!=null&&Enumerable.Range(0,rankAfter.Length).Any(i=>rankAfter[i]>previousRanks[i]&&PlanningRank(rankAfter[i])!=PlanningRank(previousRanks[i]));
             statEffectPending=true;
             foreach(int i in new[]{3,4})if(PlanningRank(after[i])!=PlanningRank(before[i])&&after[i]>before[i])
                 pendingRankBenefit=StatNames[i]+" "+PlanningRank(before[i])+" → "+PlanningRank(after[i])+"  / "+RankUnlock(i,after[i]);

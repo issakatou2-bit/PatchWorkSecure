@@ -40,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
                 int selected=i;string[] labels={"小","標準","大"};PButton(text,"TextSize"+i,labels[i],184+i*78,9,72,44,()=>{TextSize=selected;StoreDisplaySettings();ApplyTextPreferences();Menu();},TextSize==i?PlanPink:PlanTrack,TextSize==i?Color.white:Hex("52607a"),16);
             }
             PText(text,"TextSizePreview","あいうえお  ABC 123",440,13,410,36,16,Hex("52607a"),false);
-            SettingsToggle(d,"CaptionToggle","字幕","ひなたの声を文字でも表示",462,CaptionsEnabled,()=>{CaptionsEnabled=!CaptionsEnabled;StoreDisplaySettings();Menu();});
+            SettingsToggle(d,"CaptionToggle","字幕","ひなたの声を文字でも表示",462,CaptionsEnabled,()=>{CaptionsEnabled=!CaptionsEnabled;ApplyVoiceCaption();StoreDisplaySettings();Menu();});
             SettingsSection(d,"MOTION",30,542,PlanMint);
             SettingsToggle(d,"ReduceMotion","動きを減らす","揺れ・粒子・画面の揺れを止める",572,ReducedMotion,()=>{ReducedMotion=!ReducedMotion;StoreFeedbackSettings();Menu();});
             SettingsToggle(d,"ShortenInterruptions","演出の短縮","2回目以降の割り込み演出を短くする",646,ShortenInterruptions,()=>{ShortenInterruptions=!ShortenInterruptions;StoreDisplaySettings();Menu();});
@@ -63,7 +63,7 @@ namespace PatchWorkSecure.CompanyOps
             var area=Rect(root,id+"HandleArea",0,31,612,0);var handle=PCard(area,id+"Knob",0,0,32,32,Color.white,20,false);handle.pivot=new Vector2(.5f,.5f);handle.anchoredPosition=Vector2.zero;var rim=handle.gameObject.AddComponent<Outline>();rim.effectColor=PlanPink;rim.effectDistance=new Vector2(3,-3);handle.GetComponent<Image>().raycastTarget=true;
             slider.handleRect=handle;slider.targetGraphic=handle.GetComponent<Image>();slider.SetValueWithoutNotify(value);
             var percent=PText(row,id+"Percent",Mathf.RoundToInt(value*100).ToString(),810,13,50,36,18,null,true,true);
-            slider.onValueChanged.AddListener(v=>{percent.text=Mathf.RoundToInt(v*100).ToString();changed(v);});
+            slider.onValueChanged.AddListener(v=>{StopVoice();percent.text=Mathf.RoundToInt(v*100).ToString();changed(v);});
         }
         private void SettingsToggle(Transform d,string id,string label,string hint,float y,bool value,Action changed)
         {

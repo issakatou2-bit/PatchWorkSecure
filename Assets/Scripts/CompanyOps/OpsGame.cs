@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
+        public void StartYear(int seed) { StopVoice();voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false; resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
         public void OpenTab(int next) { roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
@@ -58,7 +58,8 @@ namespace PatchWorkSecure.CompanyOps
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
             ActionStatParticles(origin);
-            if(action=="rest")foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
+            SpeakRankUp();
+            if(action=="rest"&&pendingVoice==null)foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
             {identity.GetComponent<OpsPortraitAnimator>().ChangePose("pose_coffee");}
         }
         public void Buy(int index)
@@ -73,6 +74,7 @@ namespace PatchWorkSecure.CompanyOps
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" :
                 OpsCatalog.Projects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました", true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Purchase);
             ShowInstallation(index);
+            SpeakRankUp();
         }
         public void BeginIncident()
         {
@@ -150,12 +152,12 @@ namespace PatchWorkSecure.CompanyOps
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
                 State.phase == OpsPhase.Incident || ResolutionActive ? Sounds.incidentMusic : Sounds.reviewMusic);
             NewScreen();CheckDangerSignal();
-            if (State.phase == OpsPhase.Planning) { PlanningScreen(); return; }
-            if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); return; }
+            if (State.phase == OpsPhase.Planning) { PlanningScreen(); ScreenVoice();return; }
+            if (State.phase == OpsPhase.Incident) { IncidentWorkspace(); ScreenVoice();return; }
             if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }
             resolutionActive = false;
-            if (State.phase == OpsPhase.Review) { MonthlyScreen(); return; }
-            if (State.phase == OpsPhase.Ended) { AnnualScreen(); return; }
+            if (State.phase == OpsPhase.Review) { MonthlyScreen();ScreenVoice();return; }
+            if (State.phase == OpsPhase.Ended) { AnnualScreen();ScreenVoice();return; }
             Header();
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }
@@ -451,8 +453,8 @@ namespace PatchWorkSecure.CompanyOps
                 () => { VoiceEnabled = !VoiceEnabled; if (!VoiceEnabled) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
             Button(d, "DiagnosticVoiceVolume", "ボイス " + Mathf.RoundToInt(voiceVolume * 100) + "% / 変更", 410, 338, 350, 48,
                 () => { voiceVolume = voiceVolume >= .99f ? 0 : Mathf.Min(1, voiceVolume + .1f); if (voiceAudio != null) voiceAudio.volume = voiceVolume; if (voiceVolume <= 0) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
-            Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ? "反応ボイス素材を使用中 / 字幕あり・連続再生を抑制" :
-                "反応ボイスは音源未投入 / 短い反応の字幕のみ", 32, 402, 748, 32, 18, Ink);
+            Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ? "Hinata V9-2 / ローカル試遊用・配布と公開は不可" :
+                "ひなたの声は音源未投入 / 台本v2の字幕で進行", 32, 402, 748, 32, 18, Ink);
             int musicCount = Sounds == null ? 0 : new[] { Sounds.titleMusic, Sounds.planningMusic, Sounds.incidentMusic, Sounds.reviewMusic }.Where(c => c != null).Distinct().Count();
             Text(d, "AudioStatus", musicCount > 0 ? "BGM " + musicCount + "曲 / 場面に応じて切り替え" : "効果音は試作の合成音。BGM素材は未設定です。", 32, 446, 748, 38, 18, Ink);
             Button(d, "PreviewSuccess", "試聴 / 達成", 32, 500, 232, 46, () => PlayCue(OpsCue.Growth));
@@ -461,7 +463,7 @@ namespace PatchWorkSecure.CompanyOps
             Button(d, "ViewHistory", "月ごとの記録", 32, 570, 350, 48, History, Edge, !homeVisible && State != null);
             Button(d, "PreviewVoice", "試聴 / 反応ボイス", 410, 570, 350, 48, () => React(OpsCue.Success), Edge,
                 ReactionBank != null && ReactionBank.HasAudio && VoiceEnabled && !muted && voiceVolume > 0);
-            Text(d, "VoicePreviewCaption", LastReactionCaption == "" ? "試聴の字幕はここに表示" : LastReactionCaption, 32, 631, 748, 42, 22, Ink);
+            Text(d, "VoicePreviewCaption", !CaptionsEnabled?"字幕はOFF":LastReactionCaption == "" ? "試聴の字幕はここに表示" : LastReactionCaption, 32, 631, 748, 42, 22, Ink);
             if (!homeVisible) Button(d, "Home", "保存してタイトルへ", 32, 685, 420, 48, () => { Save(); RenderHome(); }, Accent);
             if (!homeVisible && State != null && State.phase == OpsPhase.Planning) PlanningMenuLinks(d);
         }

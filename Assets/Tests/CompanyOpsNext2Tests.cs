@@ -14,6 +14,74 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
+            var bank=game.ActiveVoiceBank;var expected=OpsReactionBank.ScriptV2();Assert.AreEqual(105,bank.lines.Length);Assert.IsFalse(game.Navigator.Reactions.HasAudio);
+            foreach(var row in expected)
+            {
+                var line=bank.Find(row.id);Assert.AreEqual(row.caption,line.caption);Assert.AreEqual(row.faceId,line.faceId);Assert.AreEqual(row.poseId,line.poseId);
+                if(line.clip!=null){Assert.AreEqual(line.id,line.clip.name);Assert.Greater(line.clip.samples,0);Assert.Greater(line.clip.length,0);}
+            }
+            string before=JsonUtility.ToJson(game.State);
+            foreach(var line in bank.lines.Where(l=>l.fullSpeech))
+            {
+                game.SpeakSceneLine(line.id,0);yield return new WaitForSecondsRealtime(.08f);Assert.AreEqual(line.caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+                if(line.clip!=null)Assert.IsTrue(game.PortraitVoicePlaying,line.id);else Assert.IsFalse(game.PortraitVoicePlaying);
+                game.StopVoice();Assert.IsFalse(game.PortraitVoicePlaying);
+            }
+            Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
+        }
+        [Test] public void VoiceV2_台本は九場面六本と追加十一と全文四十で重複しない()
+        {
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(105,lines.Length);Assert.AreEqual(105,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(40,lines.Count(l=>l.fullSpeech));Assert.AreEqual(11,lines.Count(l=>l.extra));
+            foreach(var l in lines){Assert.IsNotEmpty(l.caption);Assert.IsNotEmpty(l.faceId);Assert.IsNotEmpty(l.poseId);Assert.IsNull(l.clip);}
+            foreach(OpsReaction r in System.Enum.GetValues(typeof(OpsReaction)))Assert.AreEqual(6,lines.Count(l=>!l.fullSpeech&&!l.extra&&l.reaction==r));
+            for(int m=0;m<12;m++){var s=new OpsState(1){month=m};Assert.AreEqual("mission_accept_"+(m+1).ToString("00"),OpsGame.MissionVoiceId(s));}
+            var random=new OpsState(14,true);SetEvent(random,"vuln-web");Assert.AreEqual("mission_accept_06",OpsGame.MissionVoiceId(random));
+        }
+        [UnityTest] public IEnumerator VoiceV2_素材なしでも全文字幕と台本のポーズで進み操作が予約を取り消す()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            Assert.AreEqual(105,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual(game.ActiveVoiceBank.Find("season_04").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
+            string before=JsonUtility.ToJson(game.State);game.SpeakSceneLine("incident_unconfirmed",2);Assert.IsTrue(game.VoicePending);Click("Stat_0");yield return null;Assert.IsFalse(game.VoicePending);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Click("CloseDialog");
+            Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual("tutorial_1",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_1").caption,Find<TextMeshProUGUI>("TutorialLine").text);
+            Click("Stat_0");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual("tutorial_2",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_2").caption,Find<TextMeshProUGUI>("TutorialLine").text);Capture("127-voice-tutorial-no-audio");LogAssert.NoUnexpectedReceived();
+        }
+        [UnityTest] public IEnumerator VoiceV2_全文再生とBGM減衰と設定と操作キャンセルがゲーム数値に触れない()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
+            var original=game.Navigator;var persona=Object.Instantiate(original);var bank=ScriptableObject.CreateInstance<OpsReactionBank>();bank.lines=OpsReactionBank.ScriptV2();var clip=AudioClip.Create("全文再生の検証用無音",144000,1,24000,false);bank.Find("rankup").clip=clip;bank.Find("tutorial_1").clip=clip;persona.Reactions=bank;game.Navigator=persona;
+            try
+            {
+                string before=JsonUtility.ToJson(game.State);var music=game.GetComponents<AudioSource>().First(s=>s.clip==game.Sounds.planningMusic);float volume=music.volume;
+                Assert.IsTrue(game.SpeakSceneLine("rankup",.2f));yield return new WaitForSecondsRealtime(.4f);Assert.IsTrue(game.PortraitVoicePlaying);Assert.Less(music.volume,volume*.7f);Assert.AreEqual("sparkle",Find<OpsPortraitAnimator>("NavigatorPortrait").ExpressionId);
+                var source=game.GetComponents<AudioSource>().Single(s=>s.clip==clip);Click("Menu");yield return null;Assert.IsFalse(source.isPlaying);Assert.IsFalse(game.VoicePending);
+                Find<Slider>("VoiceVolume").value=.36f;Assert.IsTrue(game.SpeakSceneLine("tutorial_1",0));yield return new WaitForSecondsRealtime(.15f);Assert.AreEqual(.36f,source.volume,.001f);Assert.IsTrue(source.isPlaying);
+                Click("CaptionToggle");yield return null;Assert.IsFalse(game.CaptionsEnabled);Assert.AreEqual("",Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.IsFalse(source.isPlaying);
+                Click("CaptionToggle");Find<Slider>("VoiceVolume").value=0;Assert.IsTrue(game.SpeakSceneLine("incident_unconfirmed",0));yield return new WaitForSecondsRealtime(.15f);Assert.IsFalse(game.PortraitVoicePlaying);Assert.AreEqual(bank.Find("incident_unconfirmed").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+                Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
+            }
+            finally{game.StopVoice();game.Navigator=original;Object.Destroy(persona);Object.Destroy(bank);Object.Destroy(clip);}
+        }
+        [UnityTest] public IEnumerator VoiceV2_依頼と事件と発動と月報は実際の場面に連動し音声なしで完走する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
+            game.Buy(OpsCatalog.Index("backup"));game.ChooseAction("audit");game.ChooseAction("map");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.4f);Click("AcceptMission");Assert.AreEqual(OpsGame.MissionVoiceId(game.State),game.LastReactionId);
+            game.BeginIncident();Assert.AreEqual("incident_start",game.LastReactionId);yield return new WaitForSecondsRealtime(3.7f);Assert.AreEqual("incident_unconfirmed",game.LastReactionId);Capture("128-voice-unconfirmed");
+            game.Resolve("recover");float limit=Time.realtimeSinceStartup+4;while(game.LastReactionId!="incident_activate"&&Time.realtimeSinceStartup<limit)yield return null;
+            Assert.AreEqual("incident_activate",game.LastReactionId);Assert.IsTrue(game.State.Latest.investmentEffects.Any(e=>e.avoidedLoss>0||e.avoidedDowntime>0));
+            limit=Time.realtimeSinceStartup+10;
+            while(game.ResolutionActive&&Time.realtimeSinceStartup<limit)
+            {
+                if(game.LastReactionId=="incident_activate"||game.LastReactionId=="incident_missing")Assert.AreEqual(game.LastReactionCaption,Find<TextMeshProUGUI>("ResolutionReaction").text);
+                yield return null;
+            }
+            Assert.IsFalse(game.ResolutionActive);yield return new WaitForSecondsRealtime(5.5f);
+            Assert.AreEqual("mission_done",game.LastReactionId);Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(game.ActiveVoiceBank.Find("mission_done").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
+            Click("NextMonth");yield return null;Assert.AreEqual("season_05",game.LastReactionId);Assert.AreEqual(1,game.State.month);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.4f);var game=Object.FindAnyObjectByType<OpsGame>();Capture("126-ui-title");

@@ -26,6 +26,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool MouthIsOpen => mouthOpen;
         public NavigatorPersona ActivePersona => Owner!=null?Owner.Navigator:Persona;
         public string PoseId => GetComponent<OpsPortraitIdentity>()?.PoseId??pose;
+        public string ExpressionId => expression;
         private NavigatorPersona.FaceAnimationFrames Frames => ActivePersona?.AnimationFrames?.FirstOrDefault(f=>f!=null &&
             (!string.IsNullOrEmpty(f.PoseId)?f.PoseId==PoseId:f.Expression==expression));
         public bool HasFrames => Frames!=null && (Frames.EyesClosed!=null || Frames.MouthClosed!=null || Frames.MouthOpen!=null);

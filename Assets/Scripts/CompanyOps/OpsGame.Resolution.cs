@@ -16,7 +16,7 @@ namespace PatchWorkSecure.CompanyOps
         private string resolutionLevelUp;
         public bool ResolutionActive => resolutionActive && State != null && State.phase == OpsPhase.Review;
         public bool CanSkipResolution => ResolutionActive && resolutionCount > 1;
-        public void SkipResolution() {if(CanSkipResolution) FinishResolution();}
+        public void SkipResolution() {if(CanSkipResolution){StopVoice();FinishResolution();}}
         private sealed class ResolutionStep { public string name,detail,member; public Color color; public bool equipment,staff,missing; }
         private static string EffectLine(OpsInvestmentEffect effect) =>
             (effect.avoidedLoss>0?"被害 −"+effect.avoidedLoss+"万円":"")+
@@ -125,6 +125,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ResolutionRoutine(List<ResolutionStep> steps,RectTransform flow,RectTransform cutin,RectTransform loss,RectTransform stop,RectTransform hinata,bool good,OpsOutcome outcome)
         {
+            bool equipmentSpoken=false;
             float stepDuration=(resolutionCount>1?(ShortenInterruptions?1.15f:2.3f):3.2f)/steps.Count;
             for(int index=0;index<steps.Count;index++)
             {
@@ -137,6 +138,7 @@ namespace PatchWorkSecure.CompanyOps
                     cutin.Find("CutinTitle").GetComponent<TextMeshProUGUI>().text=step.name;
                     cutin.Find("CutinEffect").GetComponent<TextMeshProUGUI>().text=step.detail;
                     PlayCue(step.staff?OpsCue.StaffHelp:OpsCue.Prepared);
+                    if(step.equipment&&!equipmentSpoken){equipmentSpoken=true;ResolutionVoice("incident_activate");}
                     for(int j=0;j<3;j++)
                     {
                         var spark=PCard(cutin,"CutinSpark"+j,j==0?1000:j==1?1060:40,j==0?-20:j==1?170:200,18,18,j==2?Color.white:IncidentYellow,20,false);
@@ -144,6 +146,7 @@ namespace PatchWorkSecure.CompanyOps
                     }
                 }
                 else if(index>0&&!step.missing)PlayCue(OpsCue.Action);
+                if(step.missing)ResolutionVoice("incident_missing");
                 float elapsed=0;bool impact=false;
                 while(elapsed<stepDuration)
                 {
@@ -176,6 +179,8 @@ namespace PatchWorkSecure.CompanyOps
         private void FinishResolution()
         {
             if(!ResolutionActive)return;
+            // 自動で月報に移っただけでは全文を切らない。次の操作なら即時停止する。
+            carryResolutionVoice=speakingPriority==5&&(VoicePending||PortraitVoicePlaying||Time.unscaledTime<voiceBusyUntil||followingVoice.Count>0)&&LastReactionId.StartsWith("incident_");
             resolutionActive=false;Render();
             if(Application.isPlaying)StartCoroutine(ReviewGrowthFeedback(State.Latest,resolutionLevelUp));
         }

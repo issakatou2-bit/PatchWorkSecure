@@ -30,10 +30,10 @@ namespace PatchWorkSecure.Tests
             var game=Object.FindAnyObjectByType<OpsGame>();Assert.AreSame(game.Navigator.Pose("pose_wave"),Find<Image>("HomePortrait").sprite);
             CheckRect("TitleLogoWordmark",90,40,640,246);CheckPointer("NewYear");CheckPointer("HomeSettings");Capture("90-v2-title");
             game.StartYear(14);yield return new WaitForSecondsRealtime(1.5f);
-            Assert.AreSame(game.Navigator.Pose("pose_fists"),Find<Image>("NavigatorPortrait").sprite);Assert.IsNotNull(Find<Image>("PlanningLogoIcon").sprite);
+            Assert.AreSame(game.Navigator.Pose(game.ActiveVoiceBank.Find("season_04").poseId),Find<Image>("NavigatorPortrait").sprite);Assert.IsNotNull(Find<Image>("PlanningLogoIcon").sprite);
             Assert.AreEqual("OfficeStage",Find<Transform>("PlanningCharacter").parent.name);CheckNewPortraits();CheckText();Capture("91-v2-planning");
             string state=JsonUtility.ToJson(game.State);Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(2);
-            Assert.AreSame(game.Navigator.Pose("pose_point"),Find<Image>("TutorialPortrait").sprite);CheckRect("TutorialSpeech",660,380,560,280);Capture("92-v2-tutorial");game.SkipTutorial();Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+            Assert.AreSame(game.Navigator.Pose(game.ActiveVoiceBank.Find("tutorial_1").poseId),Find<Image>("TutorialPortrait").sprite);CheckRect("TutorialSpeech",660,380,560,280);Capture("92-v2-tutorial");game.SkipTutorial();Assert.AreEqual(state,JsonUtility.ToJson(game.State));
             Click("Menu");yield return new WaitForSecondsRealtime(.6f);Assert.IsNotNull(Find<Image>("WindowLogoIcon").sprite);Capture("97-v2-settings");Click("CloseDialog");yield return new WaitForSecondsRealtime(.25f);
             game.BeginIncident();yield return new WaitForSecondsRealtime(1.5f);
             Assert.AreSame(game.Navigator.Pose("pose_startled"),Find<Image>("NavigatorPortrait").sprite);CheckNewPortraits();CheckText();Capture("93-v2-incident");

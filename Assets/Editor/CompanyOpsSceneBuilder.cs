@@ -38,13 +38,7 @@ namespace PatchWorkSecure.EditorTools
             controller.Navigator = AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
             if (controller.Navigator != null)
             {
-                const string reactionPath = "Assets/Personas/HinataReactions.asset";
-                var reactions = AssetDatabase.LoadAssetAtPath<OpsReactionBank>(reactionPath);
-                if (reactions == null)
-                {
-                    reactions = ScriptableObject.CreateInstance<OpsReactionBank>(); reactions.lines = OpsReactionBank.Defaults();
-                    AssetDatabase.CreateAsset(reactions, reactionPath);
-                }
+                var reactions=UpdateHinataVoice();
                 controller.Navigator.Reactions = reactions;
                 EditorUtility.SetDirty(controller.Navigator);
             }
@@ -75,6 +69,51 @@ namespace PatchWorkSecure.EditorTools
                 EditorBuildSettings.scenes = EditorBuildSettings.scenes.Concat(new[] { new EditorBuildSettingsScene(ScenePath, true) }).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("[CompanyOps] 保存完了: " + ScenePath);
+        }
+
+        [MenuItem("PatchWorkSecure/新しい試作/ひなたの台本と試遊用音声を更新")]
+        public static OpsReactionBank UpdateHinataVoice()
+        {
+            const string metadata="Assets/Personas/HinataReactions.asset";
+            var bank=AssetDatabase.LoadAssetAtPath<OpsReactionBank>(metadata);
+            if(bank==null){bank=ScriptableObject.CreateInstance<OpsReactionBank>();AssetDatabase.CreateAsset(bank,metadata);}
+            // 配布するアセットには非公開MP3への参照を保存しない。
+            bank.lines=ReadHinataScript();EditorUtility.SetDirty(bank);
+            const string source="Assets/Audio/CompanyYear/VoiceTest/Hinata";
+            if(Directory.Exists(source))
+            {
+                const string localPath=source+"/Resources/HinataVoiceTest.asset";
+                Directory.CreateDirectory(source+"/Resources");AssetDatabase.Refresh();
+                var local=AssetDatabase.LoadAssetAtPath<OpsReactionBank>(localPath);
+                if(local==null){local=ScriptableObject.CreateInstance<OpsReactionBank>();AssetDatabase.CreateAsset(local,localPath);}
+                local.lines=ReadHinataScript();
+                foreach(var line in local.lines)line.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(source+"/"+line.id+".mp3");
+                EditorUtility.SetDirty(local);
+            }
+            var persona=AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
+            if(persona!=null){persona.Reactions=bank;EditorUtility.SetDirty(persona);}
+            AssetDatabase.SaveAssets();return bank;
+        }
+        private static OpsReactionLine[] ReadHinataScript()
+        {
+            const string path="Docs/Voice/hinata-script-v2.csv";
+            if(!File.Exists(path))return OpsReactionBank.ScriptV2();
+            var result=new System.Collections.Generic.List<OpsReactionLine>();
+            foreach(var row in File.ReadAllLines(path,System.Text.Encoding.UTF8).Skip(1))
+            {
+                if(string.IsNullOrWhiteSpace(row))continue;
+                var cells=new System.Collections.Generic.List<string>();var cell=new System.Text.StringBuilder();bool quoted=false;
+                for(int i=0;i<row.Length;i++)
+                {
+                    if(row[i]=='"'){if(quoted&&i+1<row.Length&&row[i+1]=='"'){cell.Append('"');i++;}else quoted=!quoted;}
+                    else if(row[i]==','&&!quoted){cells.Add(cell.ToString());cell.Clear();}else cell.Append(row[i]);
+                }
+                cells.Add(cell.ToString());if(quoted||cells.Count!=8)throw new System.FormatException("ひなた台本のCSV形式が不正です。");
+                System.Enum.TryParse(cells[0].Split('_')[0],true,out OpsReaction reaction);
+                result.Add(new OpsReactionLine{id=cells[0],caption=cells[3],scene=cells[2],reaction=reaction,faceId=cells[4],poseId=cells[5],fullSpeech=cells[1]=="全文",extra=cells[0].StartsWith("extra_")});
+            }
+            if(result.Count!=105||result.Select(l=>l.id).Distinct().Count()!=105)throw new System.FormatException("台本v2は重複のない105行が必要です。");
+            return result.ToArray();
         }
 
         [MenuItem("PatchWorkSecure/新しい試作/情シスの一年を開く")]

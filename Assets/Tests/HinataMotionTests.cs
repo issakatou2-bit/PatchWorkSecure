@@ -18,7 +18,8 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
             var earlyMotion=Find<OpsPortraitMotion>("NavigatorPortrait");earlyMotion.ShowEmotion(3);Assert.IsTrue(earlyMotion.GetComponentsInChildren<OpsEmotionMotion>().Any(m=>m.Kind==3),"画面生成直後も感情マークを表示する");yield return new WaitForSecondsRealtime(2.5f);
-            var portrait=Find<Image>("NavigatorPortrait");var animator=portrait.GetComponent<OpsPortraitAnimator>();Assert.IsTrue(animator.HasFrames);
+            // 季節の声は別ポーズ。ここでは基本ポーズの文字送りによる口パクだけを検証する。
+            game.StopVoice();var portrait=Find<Image>("NavigatorPortrait");var animator=portrait.GetComponent<OpsPortraitAnimator>();animator.ChangePose("pose_fists");yield return new WaitForSecondsRealtime(.3f);Assert.IsTrue(animator.HasFrames);
             string state=JsonUtility.ToJson(game.State);var random=UnityEngine.Random.state;var sprite=portrait.sprite;
             animator.Blink();float deadline=Time.unscaledTime+.18f;while(animator.EyePhase!=2&&Time.unscaledTime<deadline)yield return null;
             Assert.AreEqual(2,animator.EyePhase);var eyes=portrait.GetComponentsInChildren<Image>().First(i=>i.name=="HinataEyes");var mouth=portrait.GetComponentsInChildren<Image>().First(i=>i.name=="HinataMouth");
@@ -37,7 +38,7 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(.6f);
             Click("Menu");Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);Assert.IsTrue(game.ReducedMotion);
             var portrait=Find<Image>("NavigatorPortrait");var animator=portrait.GetComponent<OpsPortraitAnimator>();var motion=portrait.GetComponent<OpsPortraitMotion>();
-            animator.Blink();float deadline=Time.unscaledTime+.18f;while(animator.EyePhase!=2&&Time.unscaledTime<deadline)yield return null;
+            animator.ChangePose("pose_fists");yield return new WaitForSecondsRealtime(.3f);animator.Blink();float deadline=Time.unscaledTime+.18f;while(animator.EyePhase!=2&&Time.unscaledTime<deadline)yield return null;
             Assert.AreEqual(2,animator.EyePhase);Assert.AreEqual(Vector3.one,portrait.transform.localScale);Assert.AreEqual(motion.LayoutPosition,portrait.rectTransform.anchoredPosition);Assert.AreEqual(Quaternion.identity,portrait.transform.localRotation);
             Capture("101-hinata-reduced-blink");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual(motion.LayoutPosition,portrait.rectTransform.anchoredPosition);LogAssert.NoUnexpectedReceived();
         }
@@ -56,6 +57,7 @@ namespace PatchWorkSecure.Tests
             var play=typeof(OpsGame).GetMethod("PlayCue",BindingFlags.NonPublic|BindingFlags.Instance);var pitches=new System.Collections.Generic.List<float>();var random=UnityEngine.Random.state;
             for(int i=0;i<8;i++){play.Invoke(game,new object[]{OpsCue.Click});yield return new WaitForSecondsRealtime(.05f);var source=game.GetComponents<AudioSource>().First(s=>s.clip==game.Sounds.click);Assert.That(source.pitch,Is.InRange(.95f,1.05f));pitches.Add(source.pitch);}
             Assert.Greater(pitches.Distinct().Count(),1);Assert.AreEqual(random,UnityEngine.Random.state);
+            game.StopVoice();yield return new WaitForSecondsRealtime(.35f);
             var music=game.GetComponents<AudioSource>().First(s=>s.clip==game.Sounds.planningMusic&&s.isPlaying);float volume=music.volume;game.DuckMusic(.3f);yield return new WaitForSecondsRealtime(.12f);Assert.Less(music.volume,volume*.8f);yield return new WaitForSecondsRealtime(.6f);Assert.AreEqual(volume,music.volume,.01f);Assert.AreEqual(scale,Time.timeScale);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator 残像ゲージとあと一つ表示は実際の支出と達成条件だけから出す()

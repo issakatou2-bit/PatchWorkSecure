@@ -328,7 +328,7 @@ namespace PatchWorkSecure.CompanyOps
             PButton(d,"OpenEventBrief","題材・根拠",500,280,200,26,EventBriefDialog,new Color(1,1,1,0),PlanGray,16);
             PButton(d,"EmployeeConsultation","社員の声",710,280,170,26,ConsultationDetails,new Color(1,1,1,0),PlanGray,16);
             PButton(d,"CloseDialog","閉じる",32,696,286,60,CloseDialog,Hex("eef2f8"),PlanInk,20);
-            var accept=PButton(d,"AcceptMission",State.acceptedMissionMonth==State.month?"引き受け済み":"引き受ける",332,696,576,60,()=>{State.acceptedMissionMonth=State.month;Save();CloseDialog();Toast("依頼を確認 / 条件を満たして今月を進めよう",true,OpsCue.Action);},PlanPink,Color.white);Shine(accept.transform,576,60);
+            var accept=PButton(d,"AcceptMission",State.acceptedMissionMonth==State.month?"引き受け済み":"引き受ける",332,696,576,60,()=>{State.acceptedMissionMonth=State.month;Save();CloseDialog();Toast("依頼を確認 / 条件を満たして今月を進めよう",true,OpsCue.Action);SpeakSceneLine(MissionVoiceId(State));},PlanPink,Color.white);Shine(accept.transform,576,60);
             Portrait(modal,"MissionPortrait",1255,455,320,440,"pose_point");
             var hint=PCard(modal,"MissionHint",1290,330,290,104,Color.white,20);SpeechName(hint,"MissionHintName");
             State.MissionProgress(true,out int a,out int at);State.MissionProgress(false,out int b,out int bt);

@@ -19,13 +19,14 @@ namespace PatchWorkSecure.CompanyOps
         public bool StartTutorial()
         {
             if (State == null || State.month != 0 || State.phase != OpsPhase.Planning || State.audited || State.capacity < 3) return false;
-            tutorialStep = 0; tutorialAwaitClose = false; tutorialPurchases = State.levels.Sum(); tutorialTarget = null;
+            StopVoice();lastTutorialVoice="";tutorialStep = 0; tutorialAwaitClose = false; tutorialPurchases = State.levels.Sum(); tutorialTarget = null;
             filter="all";
             if(!TestMode){PlayerPrefs.SetInt(TutorialKey,1);PlayerPrefs.Save();}
             RefreshTutorial(); return true;
         }
         public void SkipTutorial()
         {
+            StopVoice();
             tutorialStep = -1; tutorialAwaitClose = false;
             SkipTutorialVisual();
             if (!TestMode) { PlayerPrefs.SetInt(TutorialKey,1); PlayerPrefs.Save(); }
@@ -41,6 +42,7 @@ namespace PatchWorkSecure.CompanyOps
             if(screen!=null)
             {
                 var nav=screen.Find("Navigator");if(nav!=null)nav.gameObject.SetActive(true);
+                var tag=screen.Find("NavigatorNameTag");if(tag!=null)tag.gameObject.SetActive(true);
                 var character=screen.Find("OfficeStage/PlanningCharacter");if(character!=null)character.gameObject.SetActive(true);
                 var portrait=screen.Find("NavigatorPortrait");if(portrait!=null)portrait.gameObject.SetActive(true);
             }
@@ -94,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
             float x=Mathf.Clamp(a.x-8,0,1600), y=Mathf.Clamp(-a.y-8,0,900), w=Mathf.Min(1600-x,btm.x-a.x+16), h=Mathf.Min(900-y,a.y-btm.y+16);
             tutorialRoot = Rect(screen,"TutorialGuide",0,0,1600,900);
             var normalNav=screen.Find("Navigator");if(normalNav!=null)normalNav.gameObject.SetActive(false);
+            var normalTag=screen.Find("NavigatorNameTag");if(normalTag!=null)normalTag.gameObject.SetActive(false);
             var normalCharacter=screen.Find("OfficeStage/PlanningCharacter");if(normalCharacter!=null)normalCharacter.gameObject.SetActive(false);
             var normalPortrait=screen.Find("NavigatorPortrait");if(normalPortrait!=null)normalPortrait.gameObject.SetActive(false);
             TutorialShade(0,0,1600,y); TutorialShade(0,y+h,1600,900-y-h); TutorialShade(0,y,x,h); TutorialShade(x+w,y,1600-x-w,h);
@@ -119,6 +122,7 @@ namespace PatchWorkSecure.CompanyOps
             PButton(bubble,"SkipTutorial","説明を飛ばす",332,213,200,44,SkipTutorial,Color.white,PlanGray,16);
             // 絵文字フォントに頼らない指示マーカー。
             var finger=IncidentShape(tutorialRoot,"TutorialFinger","finger",Mathf.Clamp(x+w/2-28,20,1544),Mathf.Clamp(y-80,170,810),56,66,Hex("ffd85c"));Motion(finger,"bob",1.2f);
+            TutorialVoice();
         }
         private void TutorialShade(float x,float y,float w,float h)
         {

@@ -14,218 +14,947 @@ MonoBehaviour:
   m_EditorClassIdentifier: PatchWorkSecure::PatchWorkSecure.CompanyOps.OpsReactionBank
   lines:
   - id: think_01
-    caption: "\u3046\u30FC\u3093\u3002"
+    caption: "\u3046\u301C\u3093\u2026\u2026"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_normal
     poseId: pose_think
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
   - id: think_02
-    caption: "\u306A\u308B\u307B\u3069\uFF01"
+    caption: "\u306A\u308B\u307B\u3069\u306D\uFF01"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_sparkle
     poseId: pose_point
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
   - id: think_03
-    caption: "\u305D\u3063\u304B\u3002"
+    caption: "\u305D\u3063\u304B\u301C\u3002"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_normal
     poseId: pose_think
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
   - id: think_04
-    caption: "\u8003\u3048\u3066\u307F\u3088\u3046\u3002"
+    caption: "\u3061\u3087\u3063\u3068\u8003\u3048\u3088\u3063\u304B\u3002"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_think
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
+  - id: think_05
+    caption: "\u3069\u308C\u306B\u3057\u3088\u3063\u304B\u306A\u301C\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_think
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
+  - id: think_06
+    caption: "\u3075\u3080\u3075\u3080\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_magnifier
+    scene: "\u8003\u3048\u308B"
+    fullSpeech: 0
+    extra: 0
   - id: purchase_01
-    caption: "\u6E96\u5099\u3067\u304D\u305F\u306D\uFF01"
+    caption: "\u3088\u3057\u3063\u3001\u6E96\u5099\u30AA\u30C3\u30B1\u30FC\uFF01"
     reaction: 1
     clip: {fileID: 0}
     faceId: face_proud
     poseId: pose_fists
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
   - id: purchase_02
-    caption: "\u983C\u308A\u306B\u306A\u308A\u305D\u3046\uFF01"
-    reaction: 1
-    clip: {fileID: 0}
-    faceId: face_sparkle
-    poseId: pose_fists
-  - id: purchase_03
-    caption: "\u3088\u3057\u3063\uFF01"
-    reaction: 1
-    clip: {fileID: 0}
-    faceId: face_determined
-    poseId: pose_fists
-  - id: purchase_04
-    caption: "\u6574\u3063\u3066\u304D\u305F\u306D\u3002"
+    caption: "\u3053\u308C\u3067\u4E00\u5B89\u5FC3\u3060\u306D\uFF01"
     reaction: 1
     clip: {fileID: 0}
     faceId: face_relieved
     poseId: pose_laptop
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
+  - id: purchase_03
+    caption: "\u3044\u3044\u8CB7\u3044\u7269\u3057\u3061\u3083\u3063\u305F\uFF01"
+    reaction: 1
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_peace
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
+  - id: purchase_04
+    caption: "\u983C\u308A\u306B\u306A\u308B\u305E\u301C\uFF01"
+    reaction: 1
+    clip: {fileID: 0}
+    faceId: face_proud
+    poseId: pose_fists
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
+  - id: purchase_05
+    caption: "\u3055\u3063\u305D\u304F\u8A2D\u5B9A\u3059\u308B\u306D\uFF01"
+    reaction: 1
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_typing
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
+  - id: purchase_06
+    caption: "\u3075\u3075\u30FC\u3093\u3001\u3069\u3046\u3088\uFF01"
+    reaction: 1
+    clip: {fileID: 0}
+    faceId: face_doya
+    poseId: pose_armscross
+    scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
+    fullSpeech: 0
+    extra: 0
   - id: growth_01
-    caption: "\u3084\u3063\u305F\u30FC\uFF01"
+    caption: "\u3084\u3063\u305F\u301C\uFF01"
     reaction: 2
     clip: {fileID: 0}
     faceId: face_sparkle
     poseId: pose_jump
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
   - id: growth_02
-    caption: "\u6210\u9577\u3057\u305F\u306D\uFF01"
+    caption: "\u3044\u3044\u611F\u3058\u3058\u3083\u3093\uFF01"
     reaction: 2
     clip: {fileID: 0}
     faceId: face_proud
     poseId: pose_peace
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
   - id: growth_03
-    caption: "\u3044\u3044\u611F\u3058\uFF01"
+    caption: "\u4F1A\u793E\u3001\u5F37\u304F\u306A\u3063\u3066\u308B\uFF01"
     reaction: 2
     clip: {fileID: 0}
-    faceId: face_proud
+    faceId: face_sparkle
     poseId: pose_fists
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
   - id: growth_04
-    caption: "\u983C\u3082\u3057\u3044\u306D\uFF01"
+    caption: "\u3044\u3048\u30FC\u3044\u3063\uFF01"
     reaction: 2
     clip: {fileID: 0}
-    faceId: face_relieved
-    poseId: pose_fists
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
+  - id: growth_05
+    caption: "\u306D\u3001\u8A00\u3063\u305F\u3067\u3057\u3087\uFF01"
+    reaction: 2
+    clip: {fileID: 0}
+    faceId: face_doya
+    poseId: pose_point
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
+  - id: growth_06
+    caption: "\u3059\u3054\u3044\u3059\u3054\u3044\uFF01"
+    reaction: 2
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 0
+    extra: 0
   - id: alert_01
-    caption: "\u3042\u308C\u3063\uFF1F"
+    caption: "\u3048\u3047\u3063\uFF01\uFF1F"
     reaction: 3
     clip: {fileID: 0}
     faceId: face_alert
     poseId: pose_startled
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
   - id: alert_02
-    caption: "\u78BA\u8A8D\u3057\u3088\u3046\u3002"
-    reaction: 3
-    clip: {fileID: 0}
-    faceId: face_determined
-    poseId: pose_magnifier
-  - id: alert_03
-    caption: "\u6C17\u306B\u306A\u308B\u306D\u3002"
+    caption: "\u3042\u308C\u3063\uFF1F"
     reaction: 3
     clip: {fileID: 0}
     faceId: face_worried
     poseId: pose_think
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
+  - id: alert_03
+    caption: "\u308F\u308F\u3063\u3001\u3061\u3087\u3063\u3068\u5F85\u3063\u3066\uFF01"
+    reaction: 3
+    clip: {fileID: 0}
+    faceId: face_panic
+    poseId: pose_startled
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
   - id: alert_04
-    caption: "\u843D\u3061\u7740\u3044\u3066\u3044\u3053\u3046\u3002"
+    caption: "\u3093\uFF1F\u3000\u306A\u3093\u304B\u5909\u3058\u3083\u306A\u3044\uFF1F"
+    reaction: 3
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_magnifier
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
+  - id: alert_05
+    caption: "\u843D\u3061\u7740\u3044\u3066\u3001\u78BA\u8A8D\u3057\u3088\uFF01"
     reaction: 3
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_fists
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
+  - id: alert_06
+    caption: "\u3046\u305D\u3046\u305D\uFF01\uFF1F"
+    reaction: 3
+    clip: {fileID: 0}
+    faceId: face_alert
+    poseId: pose_startled
+    scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
+    fullSpeech: 0
+    extra: 0
   - id: success_01
-    caption: "\u3088\u304B\u3063\u305F\uFF01"
+    caption: "\u30BB\u30FC\u30D5\uFF01"
+    reaction: 4
+    clip: {fileID: 0}
+    faceId: face_relieved
+    poseId: pose_peace
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: success_02
+    caption: "\u3088\u304B\u3063\u305F\u301C\uFF01"
     reaction: 4
     clip: {fileID: 0}
     faceId: face_relieved
     poseId: pose_fists
-  - id: success_02
-    caption: "\u3046\u307E\u304F\u3044\u3063\u305F\u306D\uFF01"
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: success_03
+    caption: "\u3070\u3063\u3061\u308A\u3060\u306D\uFF01"
     reaction: 4
     clip: {fileID: 0}
     faceId: face_sparkle
     poseId: pose_peace
-  - id: success_03
-    caption: "\u307B\u3063\u3068\u3057\u305F\u3002"
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: success_04
+    caption: "\u3075\u3045\u301C\u3001\u3072\u3068\u5B89\u5FC3\u3002"
     reaction: 4
     clip: {fileID: 0}
     faceId: face_relieved
     poseId: pose_coffee
-  - id: success_04
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: success_05
+    caption: "\u3048\u3078\u3078\u3063\u3001\u3084\u3063\u305F\u306D\uFF01"
+    reaction: 4
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_peace
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: success_06
     caption: "\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
     reaction: 4
     clip: {fileID: 0}
     faceId: face_normal
     poseId: pose_wave
+    scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
   - id: recover_01
-    caption: "\u7ACB\u3066\u76F4\u305D\u3046\u3002"
+    caption: "\u3088\u3057\u3001\u7ACB\u3066\u76F4\u305D\uFF01"
     reaction: 5
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_fists
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
   - id: recover_02
-    caption: "\u3053\u3053\u304B\u3089\u3060\u306D\u3002"
+    caption: "\u3053\u3053\u304B\u3089\u3060\u3088\uFF01"
     reaction: 5
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_salute
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
   - id: recover_03
-    caption: "\u4E00\u7DD2\u306B\u8003\u3048\u3088\u3046\u3002"
-    reaction: 5
-    clip: {fileID: 0}
-    faceId: face_normal
-    poseId: pose_please
-  - id: recover_04
-    caption: "\u6B21\u306B\u5099\u3048\u3088\u3046\u3002"
+    caption: "\u5927\u4E08\u592B\u3001\u307E\u304B\u305B\u3066\uFF01"
     reaction: 5
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_shield
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
+  - id: recover_04
+    caption: "\u6B21\u306F\u8CA0\u3051\u306A\u3044\u3082\u3093\uFF01"
+    reaction: 5
+    clip: {fileID: 0}
+    faceId: face_pout
+    poseId: pose_fists
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
+  - id: recover_05
+    caption: "\u4E00\u7DD2\u306B\u8003\u3048\u3088\uFF01"
+    reaction: 5
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_please
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
+  - id: recover_06
+    caption: "\u307E\u3060\u307E\u3060\u3044\u3051\u308B\uFF01"
+    reaction: 5
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
+    fullSpeech: 0
+    extra: 0
   - id: month_01
-    caption: "\u4ECA\u6708\u3082\u3088\u308D\u3057\u304F\uFF01"
+    caption: "\u304A\u306F\u3088\u301C\uFF01"
     reaction: 6
     clip: {fileID: 0}
     faceId: face_normal
     poseId: pose_wave
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
   - id: month_02
-    caption: "\u3055\u3066\u3001\u3069\u3046\u3057\u3088\u3046\uFF1F"
+    caption: "\u4ECA\u6708\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
     reaction: 6
     clip: {fileID: 0}
     faceId: face_normal
-    poseId: pose_think
+    poseId: pose_wave
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
   - id: month_03
-    caption: "\u4E00\u7DD2\u306B\u78BA\u8A8D\u3057\u3088\u3046\u3002"
-    reaction: 6
-    clip: {fileID: 0}
-    faceId: face_normal
-    poseId: pose_point
-  - id: month_04
-    caption: "\u59CB\u3081\u3088\u3046\uFF01"
+    caption: "\u3055\u3001\u59CB\u3081\u3088\u3063\u304B\uFF01"
     reaction: 6
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_fists
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
+  - id: month_04
+    caption: "\u4ECA\u6708\u306F\u4F55\u3057\u3088\u3063\u304B\u306A\u301C\u3002"
+    reaction: 6
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_think
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
+  - id: month_05
+    caption: "\u304C\u3093\u3070\u308D\u301C\u3063\uFF01"
+    reaction: 6
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_fists
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
+  - id: month_06
+    caption: "\u65B0\u3057\u3044\u6708\u3001\u30B9\u30BF\u30FC\u30C8\uFF01"
+    reaction: 6
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_salute
+    scene: "\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 0
   - id: clear_01
     caption: "\u4E00\u5E74\u3001\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
     reaction: 7
     clip: {fileID: 0}
     faceId: face_relieved
     poseId: pose_wave
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
   - id: clear_02
     caption: "\u5B88\u308A\u304D\u3063\u305F\u306D\uFF01"
     reaction: 7
     clip: {fileID: 0}
     faceId: face_sparkle
     poseId: pose_jump
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
   - id: clear_03
-    caption: "\u307F\u3093\u306A\u3067\u9811\u5F35\u3063\u305F\u306D\uFF01"
+    caption: "\u307F\u3093\u306A\u306E\u304A\u304B\u3052\u3060\u3088\uFF01"
     reaction: 7
     clip: {fileID: 0}
     faceId: face_crying
     poseId: pose_jump
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
   - id: clear_04
-    caption: "\u3084\u3063\u305F\u306D\uFF01"
+    caption: "\u3084\u3063\u305F\u301C\u3063\u3001\u3044\u3048\u30FC\u3044\uFF01"
     reaction: 7
     clip: {fileID: 0}
-    faceId: face_proud
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
+  - id: clear_05
+    caption: "\u6700\u9AD8\u306E\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
+    reaction: 7
+    clip: {fileID: 0}
+    faceId: face_sparkle
     poseId: pose_peace
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
+  - id: clear_06
+    caption: "\u6765\u5E74\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
+    reaction: 7
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_wave
+    scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
+    fullSpeech: 0
+    extra: 0
   - id: failure_01
-    caption: "\u304A\u3064\u304B\u308C\u3055\u307E\u3002"
+    caption: "\u3046\u3045\u2026\u2026\u304F\u3084\u3057\u3044\uFF01"
     reaction: 8
     clip: {fileID: 0}
     faceId: face_sad
     poseId: pose_exhausted
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
   - id: failure_02
-    caption: "\u632F\u308A\u8FD4\u3063\u3066\u307F\u3088\u3046\u3002"
+    caption: "\u30AC\u30FC\u30F3\u2026\u2026\u3002"
     reaction: 8
     clip: {fileID: 0}
-    faceId: face_worried
-    poseId: pose_think
+    faceId: face_shocked
+    poseId: pose_exhausted
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
   - id: failure_03
-    caption: "\u307E\u305F\u6311\u6226\u3057\u3088\u3046\u3002"
+    caption: "\u6B21\u3001\u304C\u3093\u3070\u308D\uFF01"
     reaction: 8
     clip: {fileID: 0}
     faceId: face_determined
     poseId: pose_fists
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
   - id: failure_04
-    caption: "\u6B21\u306B\u3064\u306A\u3052\u3088\u3046\u3002"
+    caption: "\u632F\u308A\u8FD4\u3063\u3066\u307F\u3088\u3063\u304B\u3002"
     reaction: 8
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_think
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: failure_05
+    caption: "\u3082\u301C\u3001\u3064\u3044\u3066\u306A\u3044\u306A\u3041\uFF01"
+    reaction: 8
+    clip: {fileID: 0}
+    faceId: face_pout
+    poseId: pose_armscross
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: failure_06
+    caption: "\u5927\u4E08\u592B\u3001\u3053\u3053\u304B\u3089\uFF01"
+    reaction: 8
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
+    fullSpeech: 0
+    extra: 0
+  - id: extra_doya
+    caption: "\u3075\u3075\u30FC\u3093\u3001\u3069\u3046\u3088\u3063\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_doya
+    poseId: pose_armscross
+    scene: "\u5099\u3048\u304C\u52B9\u3044\u305F\u30FB\u5F97\u610F"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_akire
+    caption: "\u2026\u2026\u306F\u3041\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_akire
+    poseId: pose_armscross
+    scene: "\u653E\u7F6E\u30FB\u540C\u3058\u5931\u6557"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_akire_niyake
+    caption: "\u3082\u301C\u3001\u3057\u3087\u3046\u304C\u306A\u3044\u306A\u3041\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_akire_niyake
+    poseId: pose_armscross
+    scene: "\u3061\u3087\u3063\u3068\u629C\u3051\u305F\u9078\u629E"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_pout
+    caption: "\u3080\u3045\u301C\u2026\u2026\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_pout
+    poseId: pose_armscross
+    scene: "\u4E88\u7B97\u3092\u524A\u3089\u308C\u305F"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_embarrassed
+    caption: "\u3048\u3063\u3001\u305D\u3001\u305D\u3046\u304B\u306A\uFF1F"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_embarrassed
+    poseId: pose_please
+    scene: "\u307B\u3081\u3089\u308C\u305F"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_panic
+    caption: "\u308F\u308F\u308F\u3063\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_panic
+    poseId: pose_startled
+    scene: "\u5927\u304D\u306A\u4E8B\u4EF6\u306E\u767A\u751F"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_crying
+    caption: "\u3046\u308F\u301C\u3093\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_crying
+    poseId: pose_exhausted
+    scene: "\u5927\u304D\u306A\u88AB\u5BB3"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_tease
+    caption: "\u3079\u30FC\u3063\u3060\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_tease
+    poseId: pose_peace
+    scene: "\u5197\u8AC7"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_shocked
+    caption: "\u3072\u3083\u3063\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_shocked
+    poseId: pose_startled
+    scene: "\u60F3\u5B9A\u5916\u306E\u88AB\u5BB3"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_sleepy
+    caption: "\u3075\u3041\u2026\u2026\u306D\u3080\u2026\u2026\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sleepy
+    poseId: pose_exhausted
+    scene: "\u75B2\u52B4\u304C\u9AD8\u3044"
+    fullSpeech: 0
+    extra: 1
+  - id: extra_determined
+    caption: "\u3088\u3057\u3001\u3084\u308B\u3088\u3063\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_shield
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A"
+    fullSpeech: 0
+    extra: 1
+  - id: tutorial_1
+    caption: "\u3088\u3046\u3053\u305D\u3001\u60C5\u30B7\u30B9\u3078\uFF01\u3000\u4E0A\u306E\u6570\u5B57\u304C\u4E88\u7B97\u3068\u3053\u3046\u3059\u3046\u3001\u5DE6\u304C\u4F1A\u793E\u306E\u529B\u3060\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_wave
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB1"
+    fullSpeech: 1
+    extra: 0
+  - id: tutorial_2
+    caption: "\u307E\u305A\u306F\u300C\u8ABF\u3079\u308B\u300D\u3092\u62BC\u3057\u3066\u307F\u3066\uFF01\u3000\u4F1A\u793E\u306E\u4ECA\u306E\u72B6\u614B\u304C\u3001\u3071\u3063\u3068\u5206\u304B\u308B\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_point
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB2"
+    fullSpeech: 1
+    extra: 0
+  - id: tutorial_3
+    caption: "\u793E\u9577\u304B\u3089\u76F8\u8AC7\u304C\u6765\u3066\u308B\uFF01\u3000\u300C\u8A71\u3092\u805E\u304F\u300D\u3067\u3001\u4F9D\u983C\u3092\u30C1\u30A7\u30C3\u30AF\u3057\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_point
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB3"
+    fullSpeech: 1
+    extra: 0
+  - id: tutorial_4
+    caption: "\u300C\u8A2D\u5099\u3092\u5C0E\u5165\u300D\u304B\u3089\u3001\u3072\u3068\u3064\u5165\u308C\u3066\u307F\u3088\u3063\u304B\u3002\u5099\u3048\u306F\u3001\u4E8B\u4EF6\u306E\u3068\u304D\u306B\u52B9\u3044\u3066\u304F\u308B\u3093\u3060\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_proud
+    poseId: pose_laptop
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB4"
+    fullSpeech: 1
+    extra: 0
+  - id: tutorial_5
+    caption: "\u6E96\u5099\u3067\u304D\u305F\u3089\u300C\u6708\u3092\u9032\u3081\u308B\u300D\uFF01\u3000\u2026\u2026\u3055\u3042\u3001\u3069\u3046\u306A\u308B\u304B\u306A\uFF1F"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB5"
+    fullSpeech: 1
+    extra: 0
+  - id: tutorial_6
+    caption: "\u4E8B\u4EF6\u304C\u8D77\u304D\u305F\u3089\u3001\u65B9\u91DD\u3092\u9078\u3076\u3088\u3002\u5165\u308C\u3066\u304A\u3044\u305F\u5099\u3048\u304C\u3001\u3053\u3053\u3067\u50CD\u304F\u306E\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_shield
+    scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB6"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_01
+    caption: "\u7D0D\u54C1\u30C7\u30FC\u30BF\u3092\u623B\u3059\u624B\u6BB5\u3001\u4E00\u7DD2\u306B\u793A\u305D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_02
+    caption: "\u65B0\u4EBA\u3055\u3093\u306E\u30ED\u30B0\u30A4\u30F3\u3001\u3057\u3063\u304B\u308A\u5B88\u3063\u3066\u3042\u3052\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_point
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_03
+    caption: "\u6025\u304E\u306E\u4F9D\u983C\u3067\u3082\u3001\u5B89\u5168\u306B\u5224\u65AD\u3067\u304D\u308B\u3088\u3046\u306B\u3057\u305F\u3044\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_think
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_04
+    caption: "\u53D7\u6CE8\u3092\u6B62\u3081\u306A\u3044\u4F53\u5236\u3001\u4F5C\u3063\u3061\u3083\u304A\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_05
+    caption: "\u62C5\u5F53\u3055\u3093\u304C\u4F11\u3081\u308B\u3088\u3046\u306B\u3001\u4ED5\u7D44\u307F\u3092\u6574\u3048\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_relieved
+    poseId: pose_laptop
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_06
+    caption: "\u66F4\u65B0\u3059\u308B\u5BFE\u8C61\u3001\u307E\u305A\u306F\u7D5E\u308A\u8FBC\u3082\u3063\u304B\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_magnifier
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_07
+    caption: "\u53D6\u5F15\u5148\u304B\u3089\u306E\u5F71\u97FF\u3001\u5E83\u304C\u3089\u306A\u3044\u3088\u3046\u306B\u3057\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_shield
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_08
+    caption: "\u3069\u3053\u307E\u3067\u5171\u6709\u3057\u3066\u3044\u3044\u304B\u3001\u5224\u65AD\u306E\u76EE\u5B89\u3092\u4F5C\u308D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_think
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_09
+    caption: "\u5FD9\u3057\u3044\u3068\u304D\u3067\u3082\u3001\u3061\u3083\u3093\u3068\u5831\u544A\u3067\u304D\u308B\u8077\u5834\u306B\u3057\u305F\u3044\u306A\uFF01"
+    reaction: 0
     clip: {fileID: 0}
     faceId: face_normal
     poseId: pose_please
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_10
+    caption: "\u672C\u5F53\u306B\u623B\u305B\u308B\u304B\u3001\u78BA\u304B\u3081\u3066\u304A\u3053\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_magnifier
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_11
+    caption: "\u3042\u3084\u3057\u3044\u30ED\u30B0\u30A4\u30F3\u3001\u898B\u5206\u3051\u3089\u308C\u308B\u3088\u3046\u306B\u3057\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_magnifier
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_accept_12
+    caption: "\u5E74\u5EA6\u672B\u306E\u7D0D\u54C1\u3001\u307F\u3093\u306A\u3067\u5B88\u308A\u304D\u308D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_salute
+    scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_done
+    caption: "\u4F9D\u983C\u3001\u9054\u6210\u301C\u3063\uFF01\u3000\u793E\u9577\u3082\u559C\u3093\u3067\u304F\u308C\u308B\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u4F9D\u983C\u306E\u9054\u6210\uFF08\u6708\u5831\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: mission_miss
+    caption: "\u4ECA\u6708\u306F\u5C4A\u304B\u306A\u304B\u3063\u305F\u304B\u301C\u3002\u6765\u6708\u3001\u53D6\u308A\u8FD4\u305D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_think
+    scene: "\u4F9D\u983C\u306E\u672A\u9054\u6210\uFF08\u6708\u5831\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: incident_start
+    caption: "\u305F\u3044\u3078\u3093\u3001\u4F55\u304B\u8D77\u304D\u3066\u308B\uFF01\u3000\u307E\u305A\u306F\u6B62\u3081\u308B\u7BC4\u56F2\u3092\u6C7A\u3081\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_alert
+    poseId: pose_startled
+    scene: "\u4E8B\u4EF6\u306E\u767A\u751F"
+    fullSpeech: 1
+    extra: 0
+  - id: incident_unconfirmed
+    caption: "\u307E\u3060\u78BA\u8A8D\u4E2D\u3060\u3088\u3002\u666E\u901A\u306E\u64CD\u4F5C\u304B\u3082\u3057\u308C\u306A\u3044\u304B\u3089\u3001\u843D\u3061\u7740\u3044\u3066\u306D\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_magnifier
+    scene: "\u4E8B\u4EF6\u306E\u767A\u751F\uFF08\u672A\u78BA\u8A8D\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: incident_activate
+    caption: "\u5099\u3048\u304C\u52B9\u3044\u305F\uFF01\u3000\u5165\u308C\u3068\u3044\u3066\u3001\u307B\u3093\u3063\u3068\u3088\u304B\u3063\u305F\u301C\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_doya
+    poseId: pose_shield
+    scene: "\u5099\u3048\u306E\u767A\u52D5"
+    fullSpeech: 1
+    extra: 0
+  - id: incident_missing
+    caption: "\u3042\u308C\u304C\u3042\u3063\u305F\u3089\u3001\u3082\u3063\u3068\u65E9\u304F\u623B\u305B\u305F\u304B\u3082\u2026\u2026\u3002\u6B21\u306F\u5165\u308C\u3068\u3053\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_think
+    scene: "\u672A\u5C0E\u5165\u306E\u5099\u3048"
+    fullSpeech: 1
+    extra: 0
+  - id: rankup
+    caption: "\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7\uFF01\u3000\u4F1A\u793E\u304C\u3001\u307E\u305F\u3072\u3068\u3064\u5F37\u304F\u306A\u3063\u305F\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
+    fullSpeech: 1
+    extra: 0
+  - id: annual_a
+    caption: "\u904B\u7528\u30E9\u30F3\u30AFA\uFF01\u3000\u6700\u521D\u3088\u308A\u3001\u305A\u3063\u3068\u305A\u3063\u3068\u5F37\u3044\u4F1A\u793E\u306B\u306A\u3063\u305F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_crying
+    poseId: pose_jump
+    scene: "\u5E74\u9593\u8A55\u4FA1A"
+    fullSpeech: 1
+    extra: 0
+  - id: annual_b
+    caption: "\u904B\u7528\u30E9\u30F3\u30AFB\uFF01\u3000\u3057\u3063\u304B\u308A\u5B88\u308C\u305F\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_peace
+    scene: "\u5E74\u9593\u8A55\u4FA1B"
+    fullSpeech: 1
+    extra: 0
+  - id: annual_c
+    caption: "\u904B\u7528\u30E9\u30F3\u30AFC\u3002\u2026\u2026\u5927\u5909\u306A\u4E00\u5E74\u3060\u3063\u305F\u3051\u3069\u3001\u6B21\u306F\u3082\u3063\u3068\u3046\u307E\u304F\u3084\u308C\u308B\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_please
+    scene: "\u5E74\u9593\u8A55\u4FA1C"
+    fullSpeech: 1
+    extra: 0
+  - id: season_04
+    caption: "\u65B0\u5E74\u5EA6\u3060\u306D\uFF01\u3000\u685C\u3082\u304D\u308C\u3044\u3060\u3057\u3001\u304C\u3093\u3070\u308D\u301C\u3063\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_wave
+    scene: "4\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_05
+    caption: "\u65B0\u7DD1\u306E\u5B63\u7BC0\uFF01\u3000\u65B0\u4EBA\u3055\u3093\u3082\u3001\u305D\u308D\u305D\u308D\u6163\u308C\u3066\u304D\u305F\u304B\u306A\uFF1F"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_wave
+    scene: "5\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_06
+    caption: "\u6885\u96E8\u5165\u308A\u3060\u306D\u3002\u4ECA\u6708\u306F\u5C71\u5834\u3060\u304B\u3089\u3001\u6C17\u3092\u5F15\u304D\u3057\u3081\u3066\u3053\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_salute
+    scene: "6\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_07
+    caption: "\u590F\u304C\u6765\u305F\u301C\uFF01\u3000\u6691\u3044\u3051\u3069\u3001\u3072\u3068\u4F11\u307F\u3082\u5927\u4E8B\u3060\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_coffee
+    scene: "7\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_08
+    caption: "\u304A\u76C6\u4F11\u307F\u306E\u5B63\u7BC0\u3002\u4EBA\u304C\u5C11\u306A\u3044\u6642\u671F\u306F\u3001\u8981\u6CE8\u610F\u3060\u3088\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_worried
+    poseId: pose_think
+    scene: "8\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_09
+    caption: "\u4E0A\u671F\u306E\u7DE0\u3081\u3060\u3088\uFF01\u3000\u3053\u3053\u3001\u4E57\u308A\u5207\u308D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "9\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_10
+    caption: "\u79CB\u3060\u306D\u301C\u3002\u5F8C\u534A\u6226\u3001\u30B9\u30BF\u30FC\u30C8\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_salute
+    scene: "10\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_11
+    caption: "\u671D\u6669\u3001\u51B7\u3048\u3066\u304D\u305F\u306D\u3002\u5E74\u672B\u306B\u5411\u3051\u3066\u6E96\u5099\u3057\u3068\u3053\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_laptop
+    scene: "11\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_12
+    caption: "\u5E74\u672B\u3060\u301C\uFF01\u3000\u5927\u6383\u9664\u306E\u524D\u306B\u3001\u4F1A\u793E\u306E\u5B88\u308A\u3082\u898B\u76F4\u305D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_fists
+    scene: "12\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_01
+    caption: "\u3042\u3051\u307E\u3057\u3066\u3001\u304A\u3081\u3067\u3068\u301C\uFF01\u3000\u4ECA\u5E74\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_wave
+    scene: "1\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_02
+    caption: "\u5E74\u5EA6\u672B\u307E\u3067\u3001\u3042\u3068\u5C11\u3057\uFF01\u3000\u4E88\u7B97\u306E\u4F7F\u3044\u65B9\u3001\u614E\u91CD\u306B\u306D\u3002"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_normal
+    poseId: pose_think
+    scene: "2\u6708"
+    fullSpeech: 1
+    extra: 0
+  - id: season_03
+    caption: "\u4E00\u5E74\u306E\u96C6\u5927\u6210\u3060\u3088\uFF01\u3000\u6700\u5F8C\u307E\u3067\u3001\u4E00\u7DD2\u306B\u5B88\u308A\u304D\u308D\uFF01"
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_determined
+    poseId: pose_shield
+    scene: "3\u6708"
+    fullSpeech: 1
+    extra: 0

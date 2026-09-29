@@ -73,7 +73,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(captured);yield return new WaitForSecondsRealtime(.5f);CheckText();Capture("144-peak-clear");
             game.State.phase=OpsPhase.Ended;
             game.State.completedMissions=Enumerable.Range(0,12).ToList();
-            foreach(var pair in new[]{new{score=1000,rank="C"},new{score=1100,rank="B"},new{score=1450,rank="A"},new{score=1750,rank="S"},new{score=1950,rank="SS"}})
+            foreach(var pair in new[]{new{score=1000,rank="C"},new{score=OpsCatalog.AnnualB,rank="B"},new{score=OpsCatalog.AnnualA,rank="A"},new{score=OpsCatalog.AnnualS,rank="S"},new{score=OpsCatalog.AnnualSS,rank="SS"}})
             {
                 // 得点だけを表示用に構成。年間のルールを変更しない。
                 game.State.totalLoss=0;game.State.totalDowntime=0;game.State.budget=0;
@@ -123,7 +123,7 @@ namespace PatchWorkSecure.Tests
             var s=new OpsState(14,true);
             foreach(int threshold in new[]{OpsCatalog.AnnualB,OpsCatalog.AnnualA,OpsCatalog.AnnualS,OpsCatalog.AnnualSS})
                 Assert.AreNotEqual(s.RankAtScore(threshold-1),s.RankAtScore(threshold));
-            CollectionAssert.AreEqual(new[]{"C","B","A","S","SS"},new[]{0,1100,1450,1750,1950}.Select(s.RankAtScore));
+            CollectionAssert.AreEqual(new[]{"C","B","A","S","SS"},new[]{0,OpsCatalog.AnnualB,OpsCatalog.AnnualA,OpsCatalog.AnnualS,OpsCatalog.AnnualSS}.Select(s.RankAtScore));
             Assert.AreEqual("A",new OpsState(14){peakGoalRules=0}.RankAtScore(1350));
             foreach(int month in OpsCatalog.PeakMonths)
             {

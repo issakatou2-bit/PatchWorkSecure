@@ -22,7 +22,7 @@ public const int PeakRulesVersion=1, JunePeak=2, SeptemberPeak=5, DecemberPeak=8
 public const int JuneLossGoal=8, JuneStopGoal=8, SeptemberLossGoal=5, SeptemberStopGoal=6;
 public const int DecemberLossGoal=3, DecemberStopGoal=4, MarchLossGoal=6, MarchStopGoal=7;
 public const int PeakTrustReward=6, PeakBudgetReward=8, PeakScoreReward=60, PeakTrustPenalty=4;
-public const int AnnualSS=1950, AnnualS=1750, AnnualA=1450, AnnualB=1100, LegacyAnnualA=1350, LegacyAnnualB=750;
+public const int AnnualSS=2135, AnnualS=1880, AnnualA=1563, AnnualB=1151, LegacyAnnualA=1350, LegacyAnnualB=750;
 public const int NextRankVoiceDistance=50, VoiceScriptLineCount=117;
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};

@@ -52,4 +52,4 @@
 
 1. Polish-4（細部の16件）を先に直す。直す前後をモックと並べて確かめる（`Tools/Compare-Mock.py`）。
 2. ミニゲームを実装するときは、この表の★をそのまま入れる（Next-5の手本は、★を入れた後の`proto-b-incident.html`）。
-3. 質感の素材（光沢・縫い目・地紋・斜めの帯・箔押し）は、Claudeが`Assets/Art/UI/`に用意し、GPTが組み込む。
+3. 質感の素材は`Assets/Art/UI/Craft/`に用意済み（`stitch-frame`＝縫い目の9スライス・枠幅32、`gloss-top`＝上からの光沢、`foil-sheen`＝箔押しの光の帯、`ribbon-slant`＝右端を斜めに切った帯・左は9スライス、`paper-grain`＝紙の地紋・繰り返し、`halftone`＝網点・繰り返し、`scanline`＝走査線・繰り返し、`speed-lines`＝集中線）。すべて白で描いてあるので、Unityで色を付ける。GPTが組み込む。

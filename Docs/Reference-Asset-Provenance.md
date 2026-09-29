@@ -63,3 +63,4 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - 追加キャラ（社長秘書・金髪エンジニア）はオリジナルの設定。実在の人物・他作品のキャラの名前や画像は指示に使っていない（金髪エンジニアの方向性は加藤さんの参考作品の雰囲気を言葉で伝えただけ）。
 - 生成サービスの規約上の商用利用の可否は、販売前に確認すること。
 - `Assets/Art/UI/Bubbles/`の4PNG（困りごとの泡の青・ピンク・金と、金の点線の輪）は、`ArtSource/UI/bubbles.html`のCSS（放射グラデーション・縁・影）をClaude CodeがEdgeで背景透明のまま書き出したもの。AI画像生成・第三者素材は使っていない。
+- `Assets/Art/UI/Craft/`の8PNG（縫い目の枠・上からの光沢・箔押しの光・斜めの帯・紙の地紋・網点・走査線・集中線）は、`Tools/Make-CraftTextures.py`でClaude CodeがPillowで描いたもの。白で描き、Unity側で色を付けて使う。AI画像生成・第三者素材は使っていない。使い方は`Docs/Visual-Craft-2026-09-29.md`。

@@ -164,7 +164,7 @@ namespace PatchWorkSecure.CompanyOps
                 WorkingEquipment(card,id,working,w);
                 // 詳細はアイコンから開く。モックにない説明列は常設しない。
                 var details=PButton(card,"Power_"+id,"",20,20,56,56,()=>PowerReport(id),Color.clear,Color.clear,20);Hover(details,"抑制力の内訳を見る");
-                PButton(card,"Respond_"+id,"この方針で対応",20,500,w-40,56,()=>Resolve(id),PlanInk,Color.white,16,Hex("0c1226"));
+                PButton(card,"Respond_"+id,"この方針で対応",20,500,w-40,56,()=>ChooseResponse(id),PlanInk,Color.white,16,Hex("0c1226"));
             }
             PText(p,"NoTimer","見積もりは目安の幅で、確率ではありません。札と一覧は、この方針に効く導入済みの備えです。",0,724,928,43,14,Hex("e8c9d3"),false);
         }

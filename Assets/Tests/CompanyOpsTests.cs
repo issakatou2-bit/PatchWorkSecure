@@ -249,13 +249,20 @@ namespace PatchWorkSecure.Tests
             NavigatePlanningControl(name);
             var b = Find<Button>(name); Assert.IsTrue(b.interactable, "押せないボタン: " + name);
             b.onClick.Invoke();
+            // 既存の年間・画面テストは社員に任せる50点方針で継続。
+            // ミニゲーム自体の試遊は専用テストでこの補助を使わず操作する。
+            if(name.StartsWith("Respond_"))
+            {
+                var game=Object.FindAnyObjectByType<OpsGame>();
+                if(game!=null&&game.MinigameActive){Find<Button>("MinigameDelegate").onClick.Invoke();Find<Button>("MinigameContinue").onClick.Invoke();}
+            }
         }
-        private static void CheckPointer(string name)
+        private static void CheckPointer(string name,Vector2? localPoint=null)
         {
             NavigatePlanningControl(name);
             Canvas.ForceUpdateCanvases();
             var button = Find<Button>(name); var rect = button.GetComponent<RectTransform>();
-            var center = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
+            var center = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(localPoint??rect.rect.center));
             var pointer = new PointerEventData(EventSystem.current) { position = center };
             var hits = new List<RaycastResult>(); EventSystem.current.RaycastAll(pointer, hits);
             Assert.IsNotEmpty(hits, "クリック位置にUIがない: " + name);

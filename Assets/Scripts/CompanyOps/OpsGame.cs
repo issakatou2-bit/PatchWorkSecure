@@ -40,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
             SaveWarning = warning;
         }
         public void StartYear(int seed) { CancelMinigame();StopVoice();voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false; resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
-        public void OpenTab(int next) { roomFilter="";tab = next; Render(); }
+        public void OpenTab(int next) { if(MinigameActive)return;roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
             var origin=ActionOrigin("Action_"+action);
@@ -86,13 +86,15 @@ namespace PatchWorkSecure.CompanyOps
             bool achieved = State.MissionCount > before;
             Toast(achieved ? "社内依頼 達成 / 信頼 +3・年間 +45点"+(State.missionBudgetPaid>0?"・予算 +"+State.missionBudgetPaid+"万円":"") : "状況発生 / 対応方針を選択", achieved, achieved ? OpsCue.Growth : OpsCue.Alert);
         }
-        public void Resolve(string response)
+        public void Resolve(string response)=>Resolve(response,OpsCatalog.MinigameDelegateScore,true);
+        private void Resolve(string response,int score,bool delegated)
         {
             if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response))return;
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
             var estimate = State.Estimate(response);
-            if (!State.Resolve(response)) return;
+            if (!State.Resolve(response,score,delegated)) return;
+            CancelMinigame();
             RecordStatChanges(previous);
             Save(); resolutionEstimate = estimate; resolutionLevelUp = LevelUpNotice(oldLevels);
             resolutionActive = true; resolutionCount++; Render();
@@ -111,6 +113,7 @@ namespace PatchWorkSecure.CompanyOps
 
         private void RenderHome()
         {
+            CancelMinigame();
             StopVoice();
             resolutionActive = false;
             homeVisible = true; NewScreen(); SetMusic(Sounds == null ? null : Sounds.titleMusic);

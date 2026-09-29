@@ -66,6 +66,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         partial void RefreshTutorial()
         {
+            if(MinigameActive){if(tutorialRoot!=null)SkipTutorialVisual();return;}
             if (!TutorialActive || screen == null || homeVisible) return;
             AlignDialogFooter();
             if (State.month != 0 || State.phase == OpsPhase.Ended) { SkipTutorial(); return; }

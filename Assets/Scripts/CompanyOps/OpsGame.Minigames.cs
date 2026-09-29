@@ -17,24 +17,39 @@ namespace PatchWorkSecure.CompanyOps
         private float minigameResultAt;
         private bool minigameResultDrawn;
         private AudioSource minigameAudio;
+        public bool MinigameCounting {get;private set;}
+        public void ChooseResponse(string response)
+        {
+            if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response)||MinigameActive)return;
+            var session=State.CreateContainment();
+            if(session==null){Resolve(response);return;}
+            OpenMinigame(session,response,s=>Resolve(response,s.Score,s.Delegated));
+        }
         public bool OpenMinigame(OpsMinigame session,string response,Action<OpsMinigame> complete)
         {
             if(session==null||session.Phase!=OpsMinigamePhase.Brief||State==null||State.phase!=OpsPhase.Incident||MinigameActive||ResolutionActive)return false;
-            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;
+            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;
             StopVoice();homeVisible=false;NewScreen();
+            var shared=screen.Find("SharedBackground");if(shared!=null)shared.gameObject.SetActive(false);
+            KitGradient(screen.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));
             minigameCanvas=Box(screen,"MinigameCanvas",42.105f,0,1280,760,Hex("1d2a44"));minigameCanvas.localScale=Vector3.one*(900f/760f);
             KitGradient(minigameCanvas.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));
+            DrawMinigameBackground(minigameCanvas);
             IncidentShape(minigameCanvas,"MinigameHazard","tape",0,0,1280,14,Hex("ffc02e"));
             var top=PCard(minigameCanvas,"MinigameTop",0,24,1280,70,Color.white,20);
+            MinigameGloss(top,1280,70);
             var alert=PCard(top,"MinigameAlert",20,12,140,46,Hex("e0405f"),16,false);PText(alert,"MinigameAlertText","緊急対応",0,0,140,46,24,Color.white,true,true);
-            PText(top,"MinigameEvent",State.CurrentEvent?.title??State.Current.title,172,8,338,54,17,PlanInk,true,true);
+            KitGradient(alert.GetComponent<Image>(),Hex("ff7a93"),Hex("e0405f"));
+            var topic=PCard(top,"MinigameTopic",172,18,328,34,PlanInk,12,false);
+            PText(topic,"MinigameEvent",State.CurrentEvent?.title??State.Current.@event,10,0,308,34,17,Color.white,true,true);
             var timer=PCard(top,"MinigameTimer",520,26,310,18,Hex("e3e8f1"),12,false);
-            var fill=PCard(timer,"MinigameTimerFill",0,0,310,18,Hex("e0405f"),12,false);KitGradient(fill.GetComponent<Image>(),Hex("ffc02e"),Hex("e0405f"));
+            var fill=PCard(timer,"MinigameTimerFill",0,0,310,18,Hex("e0405f"),12,false);KitGradient(fill.GetComponent<Image>(),Hex("ffc02e"),Hex("e0405f"),true);
             PText(top,"MinigameTime","20.0",842,13,66,44,20,PlanInk,true,true);
             PText(top,"MinigameVisible","見えている感染 0",918,13,208,44,16,Hex("e0405f"),true,true);
             PText(top,"MinigameStopped","停止 0",1134,13,130,44,18,PlanInk,true,true);
             DrawMinigameBoard(minigameCanvas);
             var side=PCard(minigameCanvas,"MinigameSide",916,110,364,560,Color.white,20);
+            MinigameGloss(side,364,560);
             PText(side,"MinigameToolsHeading","道具",18,14,328,32,18);
             DrawMinigameTools(side);
             var speech=PCard(side,"MinigameSpeech",18,268,328,86,Color.white,16);
@@ -49,6 +64,7 @@ namespace PatchWorkSecure.CompanyOps
             minigameModal=Box(minigameCanvas,"MinigameModal",0,0,1280,760,new Color(.04f,.06f,.12f,.55f));
             minigameModal.GetComponent<Image>().raycastTarget=true;
             var card=PCard(minigameModal,"MinigameModalCard",300,156,680,440,Color.white,20);
+            MinigameGloss(card,680,440);
             PText(card,"MinigameModalTitle",title,26,20,628,46,28);return card;
         }
         private void MinigameBrief()
@@ -91,17 +107,24 @@ namespace PatchWorkSecure.CompanyOps
         private TextMeshProUGUI FindMinigameText(string name)=>minigameCanvas.GetComponentsInChildren<TextMeshProUGUI>(true).First(t=>t.name==name);
         private void ShowMinigameFinish()
         {
-            MinigameBanner(Minigame.Score>=OpsCatalog.MinigameGood?"封じ込め成功！":"対応完了",Minigame.Score>=OpsCatalog.MinigameGood?PlanMint:Hex("e0405f"));
-            MinigameSound(Minigame.Score>=OpsCatalog.MinigameGood?OpsCue.Success:OpsCue.Failure,1);
+            var containment=Minigame as OpsContainmentMinigame;
+            string title=containment!=null&&containment.TotalInfected==0?"確認完了":containment!=null&&containment.Uncontained>0?"広がってしまった…":"封じ込め成功！";
+            bool good=Minigame.Score>=OpsCatalog.MinigameGood;
+            MinigameBanner(title,good?PlanMint:Hex("e0405f"));
+            if(good)StartCoroutine(MinigameChord());else MinigameTone(150,"saw");
             SpeakSceneLine(Minigame.EndVoice,0);
         }
         private void MinigameResult()
         {
             minigameResultDrawn=true;var card=MinigameModal(Minigame.Delegated?"社員が対応しました":"感染の封じ込め / 結果");
-            PText(card,"MinigameGrade",Minigame.Grade,26,76,170,134,100,PlanPink,true,true);
+            var stamp=PCard(card,"MinigameRankStamp",26,88,170,116,Minigame.Grade=="S"?Hex("e0a100"):PlanPink,22,false);
+            KitGradient(stamp.GetComponent<Image>(),Minigame.Grade=="S"?Hex("ffe38a"):Hex("ffb3c6"),Minigame.Grade=="S"?Hex("e0a100"):PlanPink);
+            var depth=stamp.gameObject.AddComponent<Shadow>();depth.effectDistance=new Vector2(0,-8);depth.effectColor=Minigame.Grade=="S"?Hex("a87400"):Hex("d94a70");
+            PText(stamp,"MinigameGrade",Minigame.Grade,0,0,170,116,92,Color.white,true,true);Shine(stamp,170,116);
             PText(card,"MinigameScore",Minigame.Score+"点",222,94,432,76,48,PlanInk,true,true);
             PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,224,628,112,16,null,false);
             PButton(card,"MinigameContinue","結果を反映する",26,352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
+            if(!Minigame.Delegated)StartCoroutine(CountMinigameResult(stamp,Minigame.Score));
         }
         public void ConfirmMinigame()
         {
@@ -110,11 +133,12 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void CancelMinigame()
         {
-            Minigame=null;minigameDone=null;minigameResultDrawn=false;
+            Minigame=null;minigameDone=null;minigameResultDrawn=false;MinigameCounting=false;
             if(minigameAudio!=null)minigameAudio.Stop();
         }
         private string MinigameResultDetail(){string text="";DescribeMinigameResult(ref text);return text;}
         partial void DrawMinigameBoard(RectTransform parent);
+        partial void DrawMinigameBackground(RectTransform parent);
         partial void DrawMinigameTools(RectTransform parent);
         partial void RefreshMinigameBoard();
         partial void DescribeMinigameResult(ref string text);
@@ -131,6 +155,19 @@ namespace PatchWorkSecure.CompanyOps
             PlayCue(cue);if(eventAudio==null||eventAudio.clip==null)return;
             if(minigameAudio==null)minigameAudio=NewAudioSource();minigameAudio.Stop();minigameAudio.clip=eventAudio.clip;
             minigameAudio.pitch=pitch;minigameAudio.volume=soundVolume*.65f;minigameAudio.Play();eventAudio.Stop();
+        }
+        private System.Collections.IEnumerator CountMinigameResult(RectTransform stamp,int score)
+        {
+            var session=Minigame;var label=FindMinigameText("MinigameScore");stamp.gameObject.SetActive(false);MinigameCounting=true;
+            int value=0,step=Mathf.Max(1,Mathf.RoundToInt(score/25f));label.text="0点";
+            if(!ReducedMotion)while(value<score&&Minigame==session)
+            {
+                value=Mathf.Min(score,value+step);label.text=value+"点";MinigameTone(700+value*6,"triangle");
+                yield return new WaitForSecondsRealtime(.035f);
+            }
+            if(Minigame!=session||stamp==null)yield break;
+            label.text=score+"点";MinigameCounting=false;stamp.gameObject.SetActive(true);
+            MinigameVisual(stamp,"stamp",.5f);MinigameTone(180,"square");StartCoroutine(MinigameChord(.12f));
         }
     }
 }

@@ -19,7 +19,8 @@ namespace PatchWorkSecure.CompanyOps
             brand.localEulerAngles=new Vector3(0,0,2);
             var logo=PImage(brand,"TitleLogoWordmark",PlanningArt.logoWordmark,50,0,640,246);Reveal(logo);if(Application.isPlaying)logo.GetComponent<OpsUIReveal>().Duration=.9f;
             var icon=PImage(brand,"TitleLogoIcon",PlanningArt.logoIcon,-24,118,132,132);icon.pivot=new Vector2(.5f,.5f);icon.anchoredPosition+=new Vector2(66,-66);icon.localEulerAngles=new Vector3(0,0,8);
-            PText(brand,"TitlePinkShadow","情シスの一年",76,264,620,60,46,PlanPink);
+            // モックの text-shadow: 3px 3px 白、6px 6px 薄ピンク。ぼかしは入れない。
+            PText(brand,"TitlePinkShadow","情シスの一年",76,264,620,60,46,Hex("ffc4d3"));
             PText(brand,"TitleWhiteShadow","情シスの一年",73,261,620,60,46,Color.white);
             PText(brand,"Title","情シスの一年",70,258,620,60,46);
             var ribbon=PImage(brand,"TitleRibbon",PlanningArt.ribbonSlant,70,326,570,44,PlanPink);

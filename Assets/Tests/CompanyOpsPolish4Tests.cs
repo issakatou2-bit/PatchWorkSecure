@@ -33,6 +33,16 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [UnityTest] public IEnumerator Polish4_15_タイトル文字は白三ピクセルと薄ピンク六ピクセルの輪郭になる()
+        {
+            yield return PolishTitle();var title=Find<RectTransform>("Title");
+            foreach(string layer in new[]{"TitleWhiteShadow","TitlePinkShadow"})
+            {
+                int offset=layer=="TitleWhiteShadow"?3:6;var edge=Find<TextMeshProUGUI>(layer);
+                Assert.AreEqual(new Vector2(offset,-offset),edge.rectTransform.anchoredPosition-title.anchoredPosition);Assert.AreEqual("情シスの一年",edge.text);Assert.IsFalse(edge.raycastTarget);
+            }
+            ColorUtility.TryParseHtmlString("#ffc4d3",out var pink);Assert.AreEqual(pink,Find<TextMeshProUGUI>("TitlePinkShadow").color);PolishCapture(15);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_14_副題帯は単色ピンクの斜め切り素材になる()
         {
             yield return PolishTitle();var game=Object.FindAnyObjectByType<OpsGame>();var ribbon=Find<Image>("TitleRibbon");Assert.AreSame(game.PlanningArt.ribbonSlant,ribbon.sprite);Assert.IsNotNull(ribbon.sprite);

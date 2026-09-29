@@ -29,6 +29,17 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        [UnityTest] public IEnumerator Polish4_09_備えは未導入点線と導入済み緑と社員支援青を区別する()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
+            Assert.IsNotEmpty(game.Surface.GetComponentsInChildren<OpsIncidentGraphic>().Where(g=>g.name.StartsWith("MissingFrame_")));
+            Assert.AreEqual(Color.white,Find<Button>("OpenTeam").GetComponentInChildren<TextMeshProUGUI>().color);
+            ColorUtility.TryParseHtmlString("#3fa9f5",out var blue);Assert.AreEqual(blue,Find<Button>("OpenTeam").GetComponent<OpsKitGradient>().Bottom);PolishCapture(9);
+            game.State.levels[OpsCatalog.Index("backup")]=1;game.State.staffExperience[1]=OpsGrowthCatalog.StaffThresholds[1];game.State.supportOrder="investigate";game.OpenTab(0);yield return new WaitForSecondsRealtime(.5f);
+            var installed=game.Surface.GetComponentsInChildren<Image>().Where(i=>i.name.StartsWith("Ready_")).ToArray();Assert.IsNotEmpty(installed);
+            foreach(var tag in installed){ColorUtility.TryParseHtmlString("#2ec4a0",out var green);Assert.AreEqual(green,tag.color);Assert.AreEqual(Color.white,tag.GetComponentInChildren<TextMeshProUGUI>().color);}
+            Assert.IsNotNull(Find<Image>("SupportFace"));PolishCapture(9,"equipped");LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_08_未確認札は黄色地に紺文字で表示する()
         {
             yield return PolishIncident();var button=Find<Button>("IncidentEvidence");var text=button.GetComponentInChildren<TextMeshProUGUI>();

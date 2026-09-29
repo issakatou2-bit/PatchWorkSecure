@@ -116,12 +116,14 @@ namespace PatchWorkSecure.CompanyOps
             foreach(string id in missing.Where(id=>State.Level(id)==0).Take(relevant.Count==0?2:1))
             {
                 string name=OpsCatalog.Projects[OpsCatalog.Index(id)].name;float w=30+name.Length*14+42;if(x+w>694) break;
-                var tag=PCard(ready,"Missing_"+id,x,15,w,32,new Color(1,1,1,.18f),12,false);
+                var tag=PCard(ready,"Missing_"+id,x,15,w,32,new Color(1,1,1,.06f),12,false);
+                IncidentShape(tag,"MissingFrame_"+id,"round-dashed",0,0,w,32,Hex("a6afc0")).GetComponent<OpsIncidentGraphic>().StrokeWidth=1;
                 PText(tag,"MissingLabel_"+id,name+" 未導入",10,0,w-20,32,14,Hex("c9d3e3"));x+=w+10;
             }
             bool support=ResponseIds.Any(id=>State.ResponsePower(id).staff>0);
             string member=State.SupportSummary.Split('：')[0];
-            var staff=PButton(ready,"OpenTeam",support?member+"が支援できる":"社員の育成・支援",702,15,210,32,TeamDialog,support?PlanBlue:new Color(1,1,1,.18f),support?Color.white:Hex("c9d3e3"),12);
+            var staff=PButton(ready,"OpenTeam",support?member+"が支援できる":"社員の育成・支援",702,15,210,32,TeamDialog,PlanBlue,Color.white,12);
+            KitGradient(staff.GetComponent<Image>(),PlanBlue,PlanBlue);staff.transform.Find("KitTopLight").gameObject.SetActive(false);
             staff.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
             if(support)
             {

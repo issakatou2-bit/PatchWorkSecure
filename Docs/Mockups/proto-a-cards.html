@@ -148,12 +148,21 @@ const MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月',
 const PEAK=[2,5,8,11];
 const BASE=[4,5,7,5,6,9,7,8,12,8,10,14];
 let S;
+// ---- 終わりなき年度：年を重ねるほど脅威が強くなる（加速）。会社も少しずつ大きくなる ----
+// 自動の遊び手400年分で調整：考えて選ぶ方針は平均8年・最長11年、適当に選ぶ方針は平均1.4年
+const YEAR_K1=.35,YEAR_K2=.06,DECAY=2;
+function cap(){return 3+Math.floor((S.year-1)/3)}
+function scale(y){return 1+YEAR_K1*(y-1)+YEAR_K2*(y-1)*(y-1)}
+function income(){return 3+Math.floor((S.year-1)/2)+(hasRelic('bonus')?1:0)}
+const TITLES={first:'初年度クリア',nodmg:'無傷の一年',allpeak:'山場全勝',combo:'コンボの達人（コンボ4つ）',y3:'3年の守り',y5:'5年の守り',y10:'10年の守り',ss:'総合ランクSS',retire:'花道の引退（5年以上で引退）'};
+function loadBest(){try{return JSON.parse(localStorage.getItem('pws-protoA-best')||'{}')}catch(e){return {}}}
+function saveBest(b){try{localStorage.setItem('pws-protoA-best',JSON.stringify(b))}catch(e){}}
+function totalRank(v){return v>=22000?'SS':v>=15000?'S':v>=8000?'A':v>=2000?'B':'C'}
+function newSeq(){const kinds=Object.keys(KINDS);let seq=[],last='';for(let m=0;m<12;m++){let k;do{k=kinds[rnd(kinds.length)]}while(k===last);seq.push({kind:k,quiet:rnd(3)===0});last=k}return seq}
 function rnd(n){return Math.floor(Math.random()*n)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 function newRun(){
-  const kinds=Object.keys(KINDS);let seq=[],last='';
-  for(let m=0;m<12;m++){let k;do{k=kinds[rnd(kinds.length)]}while(k===last);seq.push({kind:k,quiet:rnd(3)===0});last=k}
-  S={m:0,trust:20,coins:5,owned:{},relics:[],seq,phase:'draft',draft:[],picked:false,log:'',peaks:0};
+  S={m:0,year:1,trust:20,coins:5,owned:{},relics:[],seq:newSeq(),phase:'draft',draft:[],picked:false,log:'',peaks:0,yearPeaks:0,yearDmg:0,yearScore:0,total:0,titles:[]};
   deal();render();say('新年度！　まずは今月の施策を1枚えらぼ！','pose_wave');
 }
 function lv(id){return S.owned[id]||0}
@@ -163,7 +172,7 @@ function deal(){const pool=shuffle(CARDS.slice());S.draft=pool.slice(0,3);S.pick
 function activeCombos(){return COMBOS.filter(c=>c.need.every(has))}
 function know(){let k=0;for(const c of CARDS)if(has(c.id)&&c.tag==='把握')k+=lv(c.id);if(has('desk'))k+=1;for(const c of activeCombos())k+=c.know||0;return k}
 function recov(){let k=0;for(const c of CARDS)if(has(c.id)&&c.tag==='復旧')k+=lv(c.id);return k}
-function threat(){const i=S.seq[S.m];let t=BASE[S.m];if(hasRelic('double')&&i.kind==='詐欺メール')t-=2;return Math.max(1,t)}
+function threat(m){m=m===undefined?S.m:m;const i=S.seq[m];let t=Math.round(BASE[m]*scale(S.year));if(hasRelic('double')&&i.kind==='詐欺メール')t-=2;return Math.max(1,t)}
 function baseDefense(){
   const kind=S.seq[S.m].kind;let d=0,parts=[];
   for(const c of CARDS){if(!has(c.id)||!c.t.includes(kind))continue;let v=c.p*lv(c.id);if(c.tag==='人'&&hasRelic('morning'))v+=1;d+=v;parts.push([c.name,v])}
@@ -180,7 +189,7 @@ function responses(){
   ].map(r=>({...r,total:b+r.add}));
 }
 function render(){
-  document.getElementById('month').textContent=MONTHS[S.m];
+  document.getElementById('month').innerHTML='<span style="font-size:15px">'+S.year+'年目</span> '+MONTHS[S.m];
   document.getElementById('track').innerHTML=MONTHS.map((n,i)=>`<div class="dot ${PEAK.includes(i)?'peak':''} ${i<S.m?'done':''} ${i===S.m?'now':''}">${PEAK.includes(i)?'山':''}</div>`).join('');
   document.getElementById('trust').textContent=S.trust;document.getElementById('trustBar').style.width=(S.trust/20*100)+'%';
   document.getElementById('coins').textContent=S.coins;
@@ -195,11 +204,11 @@ function render(){
    <div class="meter"><div class="row"><span class="r" style="width:64px">守り</span><div class="track2"><div class="fill" id="defFill" style="width:${Math.min(100,bd.d/Math.max(t,1)*100/1.3)}%"></div><div class="th" style="left:${100/1.3}%"></div></div><span class="r" style="width:40px">${bd.d}</span></div>
    <div style="font-size:12px;color:var(--gray)">${bd.parts.map(p=>(p[2]?'<b style="color:#b07a00">':'')+p[0]+' +'+p[1]+(p[2]?'</b>':'')).join('　')||'この事件に効く施策がまだない'}</div></div>`;
   const nx=S.seq[S.m+1];
-  document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${BASE[S.m+1]}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">決算の月。ここが最後</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
+  document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${threat(S.m+1)}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">決算の月。越えれば'+(S.year+1)+'年目へ（脅威 ×'+scale(S.year+1).toFixed(2)+'）</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
   const cards=document.getElementById('cards'),acts=document.getElementById('actions');
   if(S.phase==='draft'){
     document.getElementById('draftTitle').innerHTML=S.picked?'<span style="color:#2bb673">① 施策をえらんだ</span>　→　右下の「事件に向かう」を押す':'<span style="background:#ff6f91;color:#fff;border-radius:8px;padding:2px 10px">①</span> 施策を1枚えらぶ（コインで買う）　…えらばず「見送る」もできる';
-    cards.innerHTML=S.draft.map((c,k)=>{const l=lv(c.id);const combo=COMBOS.find(x=>x.need.includes(c.id)&&!x.need.every(has)&&x.need.filter(id=>id!==c.id).every(has));const eff=c.t.includes(i.kind);return `<div class="card ${S.picked||S.coins<c.cost?'cant':''}" style="animation-delay:${k*.08}s" data-k="${k}"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span><span class="cost r"><span class="coin">${c.cost}</span></span><h4 class="r">${c.name}</h4><div class="desc">${c.d}</div>${combo?`<div class="hint r">そろうと「${combo.name}」！</div>`:''}${l?`<div class="lv r">Lv${l} → Lv${l+1}</div>`:''}<div class="targets">${c.t.map(x=>`<span style="${x===i.kind?'background:#ffe3ec;color:#d23a5e;font-weight:700':''}">${x} +${c.p}</span>`).join('')}</div></div>`}).join('');
+    cards.innerHTML=S.draft.map((c,k)=>{const l=lv(c.id);const combo=COMBOS.find(x=>x.need.includes(c.id)&&!x.need.every(has)&&x.need.filter(id=>id!==c.id).every(has));const eff=c.t.includes(i.kind);const atCap=l>=cap();return `<div class="card ${S.picked||S.coins<c.cost||atCap?'cant':''}" style="animation-delay:${k*.08}s" data-k="${k}"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span><span class="cost r"><span class="coin">${c.cost}</span></span><h4 class="r">${c.name}</h4><div class="desc">${c.d}</div>${combo?`<div class="hint r">そろうと「${combo.name}」！</div>`:''}${atCap?`<div class="lv r">Lv上限（${cap()}）</div>`:l?`<div class="lv r">Lv${l} → Lv${l+1}</div>`:''}<div class="targets">${c.t.map(x=>`<span style="${x===i.kind?'background:#ffe3ec;color:#d23a5e;font-weight:700':''}">${x} +${c.p}</span>`).join('')}</div></div>`}).join('');
     cards.querySelectorAll('.card').forEach(el=>el.onclick=()=>pick(+el.dataset.k,el));
     acts.innerHTML=`<button id="reroll" ${S.picked||S.coins<1?'disabled':''}>引き直す（1）</button><button id="skip" ${S.picked?'disabled':''}>見送る（+1コイン）</button><div style="flex:1"></div><button class="pri" id="go">事件に向かう ▶</button>`;
     document.getElementById('reroll').onclick=()=>{S.coins-=1;beep(420);deal();render()};
@@ -213,7 +222,7 @@ function render(){
     acts.innerHTML='<div style="font-size:14px;color:var(--gray)">引く札と事件の順番だけがランダム。どの対応を選ぶと何点になるかは、上の数字のとおり。</div>';
   }
 }
-function pick(k,el){const c=S.draft[k];if(S.picked||S.coins<c.cost)return;const before=activeCombos().map(x=>x.name);S.coins-=c.cost;S.owned[c.id]=lv(c.id)+1;S.picked=true;beep(660);beep(880,.08);
+function pick(k,el){const c=S.draft[k];if(S.picked||S.coins<c.cost||lv(c.id)>=cap())return;const before=activeCombos().map(x=>x.name);S.coins-=c.cost;S.owned[c.id]=lv(c.id)+1;S.picked=true;beep(660);beep(880,.08);
   const after=activeCombos().filter(x=>!before.includes(x.name));render();
   if(after.length){banner('コンボ！ '+after[0].name,'linear-gradient(90deg,#ffb300,#ff6f91)');chord();say('やった！「'+after[0].name+'」がそろったよ！','pose_jump')}else say(c.name+'、入れたよ！','pose_fists')}
 function resolve(r){
@@ -221,20 +230,41 @@ function resolve(r){
   let dmg=Math.max(0,t-r.total);if(hasRelic('spare')&&['ランサム','システム障害'].includes(i.kind))dmg=Math.ceil(dmg/2);
   const fill=document.getElementById('defFill');if(fill)fill.style.width=Math.min(100,r.total/Math.max(t,1)*100/1.3)+'%';
   setTimeout(()=>{
+    const y=S.year;if(dmg===0){S.yearScore+=10*y;if(PEAK.includes(S.m)){S.yearScore+=60*y;S.yearPeaks++}}else S.yearDmg+=dmg;
     if(dmg===0){banner(PEAK.includes(S.m)?'山場、突破！':'防いだ！','linear-gradient(90deg,#2bb673,#3fa9f5)');chord();say(PEAK.includes(S.m)?'山場、突破〜っ！　みんなで守りきったね！':'よしっ、守りきった！','pose_jump');if(PEAK.includes(S.m)){S.peaks++;S.coins+=3}}
     else{S.trust=Math.max(0,S.trust-dmg);document.getElementById('app').classList.add('shake');setTimeout(()=>document.getElementById('app').classList.remove('shake'),450);banner('被害 信頼 -'+dmg,'linear-gradient(90deg,#d23a5e,#ff8a3d)');beep(180,0,'sawtooth');say('う〜、届かなかった……。次は備えよう！','pose_exhausted')}
     render();
     setTimeout(()=>{
       if(S.trust<=0)return end(false);
-      if(S.m===11)return end(true);
-      const wasPeak=PEAK.includes(S.m);S.m++;S.coins+=3+(hasRelic('bonus')?1:0);S.phase='draft';deal();render();
+      if(S.m===11)return yearEnd();
+      const wasPeak=PEAK.includes(S.m);S.m++;S.coins+=income();S.phase='draft';deal();render();
       if(wasPeak)relicPick();
     },1500);
   },650);
 }
 function relicPick(){const opts=shuffle(RELICS.filter(r=>!S.relics.includes(r.id))).slice(0,3);modal(`<h2 class="r">山場のごほうび：社内ルールを1つ</h2><div style="font-size:14px;color:var(--gray)">ずっと効き続ける。組み合わせで強くなる。</div><div class="cards" style="margin-top:14px">${opts.map(r=>`<div class="card" data-id="${r.id}" style="height:170px"><span class="tag r" style="background:var(--navy)">規</span><h4 class="r">${r.name}</h4><div class="desc">${r.d}</div></div>`).join('')}</div>`);
   document.querySelectorAll('#modalBox .card').forEach(el=>el.onclick=()=>{S.relics.push(el.dataset.id);closeModal();chord();render()})}
-function end(clear){const score=S.trust*60+S.peaks*120+Object.values(S.owned).reduce((a,b)=>a+b,0)*10;const rank=score>=1500?'SS':score>=1200?'S':score>=900?'A':score>=600?'B':'C';
+function award(id){if(!S.titles.includes(id))S.titles.push(id)}
+function yearEnd(){const y=S.year;S.yearScore+=150*y+S.trust*5*y;if(S.yearDmg===0)award('nodmg');if(S.yearPeaks===4)award('allpeak');if(activeCombos().length>=4)award('combo');if(y===1)award('first');if(y===3)award('y3');if(y===5)award('y5');if(y===10)award('y10');
+  S.total+=S.yearScore;const ys=S.yearScore;
+  // 設備の老朽化：持っている施策のうち1つがLvを1失う（サポート終了）
+  const own=shuffle(CARDS.filter(c=>has(c.id)));const olds=own.slice(0,DECAY);const old=olds[0];
+  modal(`<h2 class="r">${y}年目、クリア！</h2><div style="font-size:15px;line-height:1.9">この年の点数 <b class="r">${ys}</b>（年を重ねるほど1年あたりの点数が増える）／累計 <b class="r" style="color:var(--pink)">${S.total}</b>　総合ランク ${totalRank(S.total)}</div>
+   <div style="margin:10px 0;padding:10px 14px;border-radius:14px;background:#fff4f6;font-size:14px;line-height:1.8"><b class="r">${y+1}年目に起きること</b><br>・攻撃が強くなる：脅威 ×${scale(y).toFixed(2)} → ×${scale(y+1).toFixed(2)}<br>・会社が大きくなる：毎月のコイン ${3+Math.floor((y-1)/2)} → ${3+Math.floor(y/2)}${olds.length?`<br>・設備の老朽化：「${olds.map(o=>o.name).join('」「')}」のサポートが終わり、Lvが1下がる`:''}${Math.floor(y/3)>Math.floor((y-1)/3)?`<br>・新しい技術が出る：施策のLv上限 ${cap()} → ${cap()+1}`:''}<br>・信頼が少し戻る（+4）</div>
+   <div style="font-size:13px;color:var(--gray)">続けると、途中で信頼が尽きたとき<b>その年の点数が半分</b>になる。引退すれば、今の累計で確定。</div>
+   <div style="display:flex;gap:12px;margin-top:14px"><button class="pri" id="cont" style="flex:2">${y+1}年目へ続ける</button><button id="retire" style="flex:1">ここで引退する</button></div>`);
+  document.getElementById('cont').onclick=()=>{closeModal();for(const o of olds){S.owned[o.id]--;if(S.owned[o.id]<=0)delete S.owned[o.id]}S.year++;S.m=0;S.seq=newSeq();S.trust=Math.min(20,S.trust+4);S.yearPeaks=0;S.yearDmg=0;S.yearScore=0;S.coins+=income();S.phase='draft';deal();render();banner(S.year+'年目','linear-gradient(90deg,#6c63ff,#ff6f91)');chord();say(S.year+'年目！　攻撃も手ごわくなるよ。気を引きしめていこ！','pose_salute')};
+  document.getElementById('retire').onclick=()=>{if(S.year>=5)award('retire');end('retire')}}
+function end(clear){if(clear!=='retire'&&clear!==true){S.total+=Math.floor(S.yearScore/2)}if(totalRank(S.total)==='SS')award('ss');
+  const b=loadBest();const newT=S.titles.filter(t=>!(b.titles||[]).includes(t));const years=S.year-1+(clear==='retire'?1:S.m/12);
+  const recY=!(b.years>=years),recS=!(b.score>=S.total);b.years=Math.max(b.years||0,years);b.score=Math.max(b.score||0,S.total);b.titles=[...new Set([...(b.titles||[]),...S.titles])];saveBest(b);
+  const span=clear==='retire'?S.year+'年':((S.year-1)+'年と'+S.m+'か月');const rank=totalRank(S.total);
+  modal(`<h2 class="r">${clear==='retire'?'引退、おつかれさま！':'信頼がなくなってしまった……'}</h2>
+   <div style="display:flex;gap:24px;align-items:center"><div style="font-size:64px;color:var(--pink)" class="r">${rank}</div><div style="font-size:16px;line-height:1.9">守り続けた期間 <b class="r">${span}</b>${recY?' <span class="r" style="color:#e0a100">自己ベスト！</span>':''}<br>総合スコア <b class="r">${S.total}</b>${recS?' <span class="r" style="color:#e0a100">自己ベスト！</span>':''}</div></div>
+   <div style="margin-top:8px;font-size:14px">称号：${S.titles.length?S.titles.map(t=>`<span class="relic" style="background:${newT.includes(t)?'#e0a100':'#1d2a44'}">${TITLES[t]}${newT.includes(t)?' NEW':''}</span>`).join(' '):'なし'}</div>
+   <div style="margin-top:8px;font-size:13px;color:var(--gray)">自己ベスト：${(b.years||0).toFixed(1)}年／${b.score||0}点　集めた称号 ${b.titles.length} / ${Object.keys(TITLES).length}</div>
+   <div style="margin-top:16px"><button class="pri" id="again">最初の年度から</button></div>`);document.getElementById('again').onclick=()=>{closeModal();newRun()}}
+function endOld(clear){const score=S.trust*60+S.peaks*120+Object.values(S.owned).reduce((a,b)=>a+b,0)*10;const rank=score>=1500?'SS':score>=1200?'S':score>=900?'A':score>=600?'B':'C';
   modal(`<h2 class="r">${clear?'一年、おつかれさま！':'信頼がなくなってしまった……'}</h2><div style="font-size:64px;color:var(--pink)" class="r">ランク ${rank}</div><div>信頼 ${S.trust}／山場の突破 ${S.peaks}／点数 ${score}</div><div style="margin-top:10px;font-size:13px;color:var(--gray)">引く札と事件の順番は毎回かわる。別の組み立てを試してみよう。</div><div style="margin-top:16px"><button class="pri" id="again">もう1年</button></div>`);document.getElementById('again').onclick=()=>{closeModal();newRun()}}
 function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
 function closeModal(){document.getElementById('modal').classList.remove('on')}

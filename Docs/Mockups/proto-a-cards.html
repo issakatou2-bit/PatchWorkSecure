@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作A 施策カード</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作A：毎月3枚から施策カードを選び、コンボで事件を防ぐ1年。ランダムなのは引く札と事件の順番だけで、結果は選び方で決まる */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--gold:#ffc02e;--green:#2bb673;--gray:#6b7894;--bg1:#cfe9ff;--bg2:#ffe3ec}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh;overflow-x:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.94);border-radius:22px;box-shadow:0 0 0 3px #fff,0 0 0 4px #dfe5ef,0 12px 30px rgba(27,35,64,.15)}
+.top{position:absolute;left:0;top:0;right:0;height:74px;display:flex;align-items:center;gap:14px;padding:0 18px}
+.month{background:linear-gradient(180deg,#ff9ab3,var(--pink));color:#fff;border-radius:16px;padding:6px 16px;font-size:30px;box-shadow:0 5px 0 var(--pinkd)}
+.track{display:flex;gap:6px;align-items:center}
+.dot{width:22px;height:22px;border-radius:11px;background:#e3e8f1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.dot.peak{background:#f2c14e}.dot.done{background:var(--blue)}.dot.now{background:var(--pink);transform:scale(1.25)}
+.stat{display:flex;align-items:center;gap:8px;font-size:22px}
+.heart{width:18px;height:16px;position:relative;display:inline-block}
+.bar{width:220px;height:14px;border-radius:7px;background:#e3e8f1;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#ff9ab3,var(--pink));transition:width .5s}
+.coin{width:26px;height:26px;border-radius:13px;background:radial-gradient(circle at 35% 30%,#fff3b0,var(--gold));box-shadow:inset 0 -3px 0 #e0a100;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#8a5a00}
+.left{position:absolute;left:0;top:88px;width:300px;bottom:0;padding:16px}
+.left h3{margin:0 0 8px;font-size:16px}
+.owned{display:flex;flex-direction:column;gap:6px;max-height:430px;overflow:auto}
+.chip{display:flex;align-items:center;gap:8px;background:#f3f6fb;border-radius:12px;padding:6px 10px;font-size:14px}
+.tag{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0}
+.t-把握{background:#3fa9f5}.t-防御{background:#6c63ff}.t-復旧{background:#2bb673}.t-人{background:#ff8a3d}
+.combo{background:linear-gradient(90deg,#fff4c4,#ffe38a);border-radius:12px;padding:6px 10px;font-size:13px;margin-top:6px}
+.combo.off{background:#f3f6fb;color:#9aa6bd}
+.relics{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.relic{background:var(--navy);color:#fff;border-radius:10px;padding:4px 10px;font-size:12px}
+.center{position:absolute;left:316px;top:88px;right:0;bottom:0}
+.incident{position:absolute;left:0;top:0;width:560px;height:250px;padding:18px 22px;overflow:hidden}
+.incident .kind{display:inline-block;color:#fff;border-radius:10px;padding:3px 12px;font-size:14px}
+.incident h2{margin:10px 0 4px;font-size:28px}
+.threat{position:absolute;right:22px;top:18px;text-align:center}
+.threat b{display:block;font-size:56px;line-height:1;color:#d23a5e}
+.meter{margin-top:16px}
+.meter .row{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0}
+.meter .track2{flex:1;height:18px;border-radius:9px;background:#e3e8f1;position:relative;overflow:hidden}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#7fd0ff,var(--blue));transition:width .6s cubic-bezier(.2,1.4,.4,1)}
+.meter .th{position:absolute;top:-4px;bottom:-4px;width:3px;background:#d23a5e}
+.next{position:absolute;left:576px;top:0;right:0;height:250px;padding:16px}
+.next .small{font-size:13px;color:var(--gray)}
+.hinata{position:absolute;right:-10px;top:40px;height:220px;filter:drop-shadow(0 8px 14px rgba(27,35,64,.3));animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.say{position:absolute;left:14px;top:120px;width:190px;background:#fff;border-radius:16px;padding:10px 12px;font-size:14px;font-weight:700;box-shadow:0 0 0 3px #ffd3de}
+.draft{position:absolute;left:0;top:266px;right:0;height:300px}
+.draft h3{margin:0 0 8px 4px;font-size:18px}
+.cards{display:flex;gap:18px}
+.card{width:220px;height:250px;border-radius:20px;background:#fff;position:relative;cursor:pointer;padding:14px;box-shadow:0 0 0 3px #fff,0 0 0 5px #dfe5ef,0 10px 22px rgba(27,35,64,.18);transition:transform .15s;animation:deal .45s cubic-bezier(.2,1.5,.4,1) both}
+.card:hover{transform:translateY(-8px) rotate(-1deg)}
+.card.cant{opacity:.45;cursor:not-allowed}
+@keyframes deal{0%{transform:translateY(60px) rotateY(90deg);opacity:0}100%{transform:none;opacity:1}}
+.card .cost{position:absolute;right:12px;top:12px}
+.card h4{margin:10px 0 6px;font-size:20px}
+.card .desc{font-size:13px;line-height:1.5;color:#3b4a66}
+.card .targets{position:absolute;left:14px;bottom:14px;right:14px;display:flex;flex-wrap:wrap;gap:4px}
+.card .targets span{font-size:11px;background:#f3f6fb;border-radius:6px;padding:2px 6px}
+.card .lv{position:absolute;right:14px;bottom:44px;font-size:12px;color:var(--pink)}
+.card .hint{position:absolute;left:14px;bottom:44px;font-size:12px;color:#b07a00}
+.actions{position:absolute;left:0;right:0;bottom:0;height:120px;display:flex;align-items:center;gap:14px}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:18px;padding:14px 22px;color:var(--navy);background:#fff;box-shadow:0 5px 0 #c7d0e0}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #c7d0e0}
+button.pri{background:linear-gradient(180deg,#ff9ab3,var(--pink));color:#fff;box-shadow:0 5px 0 var(--pinkd)}
+button.navy{background:linear-gradient(180deg,#3b4d7a,var(--navy));color:#fff;box-shadow:0 5px 0 #0f172a}
+button:disabled{opacity:.4;cursor:not-allowed}
+.resp{display:flex;gap:14px}
+.resp button{width:250px;text-align:left;font-size:17px;padding:12px 16px;line-height:1.4}
+.resp button small{display:block;font-family:'Zen Kaku Gothic New';font-weight:700;font-size:13px;color:var(--gray)}
+.resp button.best{outline:3px solid var(--gold)}
+.banner{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:20;pointer-events:none;font-size:46px;color:#fff;padding:14px 40px;border-radius:24px;opacity:0}
+.banner.show{animation:ban 1.4s ease-out forwards}
+@keyframes ban{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(-2deg)}75%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-2deg)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.pop{position:absolute;z-index:21;font-size:22px;color:#fff;pointer-events:none;text-shadow:2px 2px 0 var(--c),-2px -2px 0 var(--c),2px -2px 0 var(--c),-2px 2px 0 var(--c);animation:up 1.1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1;transform:translateY(-10px) scale(1.15)}100%{opacity:0;transform:translateY(-70px)}}
+.modal{position:absolute;inset:0;background:rgba(27,35,64,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}
+.modal .box{width:760px;padding:26px}
+.modal h2{margin:0 0 6px}
+.log{font-size:13px;color:var(--gray);margin-top:6px;min-height:20px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel">
+    <div class="month r" id="month">4月</div>
+    <div class="track" id="track"></div>
+    <div style="flex:1"></div>
+    <div class="stat r">信頼 <div class="bar"><i id="trustBar"></i></div><span id="trust">20</span></div>
+    <div class="stat r"><span class="coin">¥</span><span id="coins">5</span></div>
+  </div>
+  <div class="left panel">
+    <h3 class="r">そろえた施策</h3>
+    <div class="owned" id="owned"></div>
+    <h3 class="r" style="margin-top:12px">コンボ</h3>
+    <div id="combos"></div>
+    <div class="relics" id="relics"></div>
+  </div>
+  <div class="center">
+    <div class="incident panel" id="incident"></div>
+    <div class="next panel" id="next"></div>
+    <div class="draft" id="draftWrap"><h3 class="r" id="draftTitle">今月の施策（1枚えらぶ）</h3><div class="cards" id="cards"></div></div>
+    <div class="actions" id="actions"></div>
+  </div>
+  <div class="banner r" id="banner"></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+const TAG_ICON={把握:'見',防御:'守',復旧:'戻',人:'人'};
+const KINDS={ランサム:'#d23a5e',詐欺メール:'#ff8a3d',脆弱性:'#6c63ff',システム障害:'#2bb673',情報漏えい:'#3fa9f5'};
+const CARDS=[
+ {id:'ledger',name:'資産台帳',tag:'把握',cost:2,p:1,t:['脆弱性','情報漏えい'],d:'何がどこにあるか分かる。範囲を絞る対応が強くなる。'},
+ {id:'monitor',name:'監視と通知',tag:'把握',cost:3,p:1,t:['ランサム','脆弱性','情報漏えい'],d:'異常に早く気づける。'},
+ {id:'mfa',name:'多要素認証',tag:'防御',cost:3,p:2,t:['詐欺メール','情報漏えい'],d:'パスワードが漏れても入られにくい。'},
+ {id:'patch',name:'更新の運用',tag:'防御',cost:3,p:2,t:['脆弱性','ランサム'],d:'穴をふさぐ。'},
+ {id:'segment',name:'ネットワーク分離',tag:'防御',cost:4,p:2,t:['ランサム','情報漏えい'],d:'一か所の侵入が全体に広がらない。'},
+ {id:'access',name:'権限の整理',tag:'防御',cost:2,p:1,t:['情報漏えい','ランサム'],d:'必要な人に必要な分だけ。'},
+ {id:'backup',name:'分離バックアップ',tag:'復旧',cost:3,p:2,t:['ランサム','システム障害'],d:'壊されても戻せる。'},
+ {id:'drill',name:'復元の訓練',tag:'復旧',cost:2,p:1,t:['ランサム','システム障害'],d:'本当に戻せるかを確かめる。'},
+ {id:'auto',name:'作業の自動化',tag:'復旧',cost:3,p:2,t:['システム障害'],d:'手作業のミスと待ち時間を減らす。'},
+ {id:'runbook',name:'手順書',tag:'人',cost:2,p:1,t:['システム障害','ランサム','詐欺メール'],d:'だれでも同じように動ける。'},
+ {id:'edu',name:'気づける研修',tag:'人',cost:2,p:2,t:['詐欺メール'],d:'怪しいと思ったら止まれる。'},
+ {id:'desk',name:'相談窓口',tag:'人',cost:2,p:1,t:['詐欺メール','情報漏えい'],d:'「これ大丈夫？」が集まる。把握+1。'},
+];
+const COMBOS=[
+ {name:'復元連携',need:['backup','drill'],bonus:3,t:['ランサム','システム障害']},
+ {name:'見える化',need:['ledger','monitor'],bonus:0,know:2,t:[]},
+ {name:'二段構え',need:['mfa','edu'],bonus:3,t:['詐欺メール']},
+ {name:'自動復旧',need:['auto','runbook'],bonus:3,t:['システム障害']},
+ {name:'封じ込め',need:['segment','access'],bonus:3,t:['ランサム','情報漏えい']},
+ {name:'早期発見',need:['monitor','desk'],bonus:2,t:['ランサム','詐欺メール','脆弱性','システム障害','情報漏えい']},
+];
+const RELICS=[
+ {id:'morning',name:'朝会',d:'「人」の施策の効果 +1'},
+ {id:'double',name:'二重確認',d:'詐欺メールの脅威 -2'},
+ {id:'logs',name:'ログは全部とる',d:'範囲を絞るときの把握の効果が1.5倍'},
+ {id:'spare',name:'予備機',d:'ランサム・障害の被害が半分'},
+ {id:'bonus',name:'改善の報奨',d:'毎月のコイン +1'},
+ {id:'night',name:'夜間当番',d:'広く止める対応の費用が0'},
+];
+const MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const PEAK=[2,5,8,11];
+const BASE=[4,5,7,5,6,9,7,8,12,8,10,14];
+let S;
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function newRun(){
+  const kinds=Object.keys(KINDS);let seq=[],last='';
+  for(let m=0;m<12;m++){let k;do{k=kinds[rnd(kinds.length)]}while(k===last);seq.push({kind:k,quiet:rnd(3)===0});last=k}
+  S={m:0,trust:20,coins:5,owned:{},relics:[],seq,phase:'draft',draft:[],picked:false,log:'',peaks:0};
+  deal();render();say('新年度！　まずは今月の施策を1枚えらぼ！','pose_wave');
+}
+function lv(id){return S.owned[id]||0}
+function has(id){return lv(id)>0}
+function hasRelic(id){return S.relics.includes(id)}
+function deal(){const pool=shuffle(CARDS.slice());S.draft=pool.slice(0,3);S.picked=false}
+function activeCombos(){return COMBOS.filter(c=>c.need.every(has))}
+function know(){let k=0;for(const c of CARDS)if(has(c.id)&&c.tag==='把握')k+=lv(c.id);if(has('desk'))k+=1;for(const c of activeCombos())k+=c.know||0;return k}
+function recov(){let k=0;for(const c of CARDS)if(has(c.id)&&c.tag==='復旧')k+=lv(c.id);return k}
+function threat(){const i=S.seq[S.m];let t=BASE[S.m];if(hasRelic('double')&&i.kind==='詐欺メール')t-=2;return Math.max(1,t)}
+function baseDefense(){
+  const kind=S.seq[S.m].kind;let d=0,parts=[];
+  for(const c of CARDS){if(!has(c.id)||!c.t.includes(kind))continue;let v=c.p*lv(c.id);if(c.tag==='人'&&hasRelic('morning'))v+=1;d+=v;parts.push([c.name,v])}
+  for(const c of activeCombos()){if(c.t.includes(kind)&&c.bonus){d+=c.bonus;parts.push(['コンボ '+c.name,c.bonus,true])}}
+  return {d,parts};
+}
+function responses(){
+  const i=S.seq[S.m],b=baseDefense().d,k=know(),rv=recov();
+  const kScale=hasRelic('logs')?3:2;const recHelps=['ランサム','システム障害','情報漏えい'].includes(i.kind);
+  return [
+    {id:'wide',name:'広く止める',add:3,cost:(i.quiet||hasRelic('night'))?0:3,note:i.quiet?'夜間・休日なので業務への影響が小さい':'業務を止めるので費用がかかる'},
+    {id:'narrow',name:'範囲を絞る',add:k*kScale,cost:0,note:'把握 '+k+' × '+kScale+'。見えていないと効かない'},
+    {id:'recover',name:'復旧を急ぐ',add:recHelps?rv*2:rv,cost:0,note:'復旧 '+rv+(recHelps?' × 2':'（この事件では弱い）')},
+  ].map(r=>({...r,total:b+r.add}));
+}
+function render(){
+  document.getElementById('month').textContent=MONTHS[S.m];
+  document.getElementById('track').innerHTML=MONTHS.map((n,i)=>`<div class="dot ${PEAK.includes(i)?'peak':''} ${i<S.m?'done':''} ${i===S.m?'now':''}">${PEAK.includes(i)?'山':''}</div>`).join('');
+  document.getElementById('trust').textContent=S.trust;document.getElementById('trustBar').style.width=(S.trust/20*100)+'%';
+  document.getElementById('coins').textContent=S.coins;
+  const own=CARDS.filter(c=>has(c.id));
+  document.getElementById('owned').innerHTML=own.length?own.map(c=>`<div class="chip"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span>${c.name}<span style="margin-left:auto;color:var(--pink)" class="r">Lv${lv(c.id)}</span></div>`).join(''):'<div class="chip" style="color:#9aa6bd">まだ何もない</div>';
+  document.getElementById('combos').innerHTML=COMBOS.map(c=>{const on=c.need.every(has);const n=c.need.map(id=>CARDS.find(x=>x.id===id).name).join('＋');return `<div class="combo ${on?'':'off'}"><b class="r">${c.name}</b>　${n}</div>`}).join('');
+  document.getElementById('relics').innerHTML=S.relics.map(id=>{const r=RELICS.find(x=>x.id===id);return `<span class="relic" title="${r.d}">${r.name}</span>`}).join('');
+  const i=S.seq[S.m],t=threat(),bd=baseDefense();
+  document.getElementById('incident').innerHTML=`<span class="kind r" style="background:${KINDS[i.kind]}">${i.kind}</span> ${PEAK.includes(S.m)?'<span class="kind r" style="background:#e0a100">山場</span>':''} <span class="kind r" style="background:${i.quiet?'#6c63ff':'#9aa6bd'}">${i.quiet?'夜間・休日':'業務時間'}</span>
+   <h2 class="r">今月の事件</h2><div style="font-size:14px;color:#3b4a66">月末にこの事件が来る。脅威より守りが大きければ防げる。</div>
+   <div class="threat"><span class="r" style="font-size:13px">脅威</span><b class="r">${t}</b></div>
+   <div class="meter"><div class="row"><span class="r" style="width:64px">守り</span><div class="track2"><div class="fill" id="defFill" style="width:${Math.min(100,bd.d/Math.max(t,1)*100/1.3)}%"></div><div class="th" style="left:${100/1.3}%"></div></div><span class="r" style="width:40px">${bd.d}</span></div>
+   <div style="font-size:12px;color:var(--gray)">${bd.parts.map(p=>(p[2]?'<b style="color:#b07a00">':'')+p[0]+' +'+p[1]+(p[2]?'</b>':'')).join('　')||'この事件に効く施策がまだない'}</div></div>`;
+  const nx=S.seq[S.m+1];
+  document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${BASE[S.m+1]}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">決算の月。ここが最後</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
+  const cards=document.getElementById('cards'),acts=document.getElementById('actions');
+  if(S.phase==='draft'){
+    document.getElementById('draftTitle').textContent=S.picked?'今月の施策をえらんだ':'今月の施策（1枚えらぶ）';
+    cards.innerHTML=S.draft.map((c,k)=>{const l=lv(c.id);const combo=COMBOS.find(x=>x.need.includes(c.id)&&!x.need.every(has)&&x.need.filter(id=>id!==c.id).every(has));const eff=c.t.includes(i.kind);return `<div class="card ${S.picked||S.coins<c.cost?'cant':''}" style="animation-delay:${k*.08}s" data-k="${k}"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span><span class="cost r"><span class="coin">${c.cost}</span></span><h4 class="r">${c.name}</h4><div class="desc">${c.d}</div>${combo?`<div class="hint r">そろうと「${combo.name}」！</div>`:''}${l?`<div class="lv r">Lv${l} → Lv${l+1}</div>`:''}<div class="targets">${c.t.map(x=>`<span style="${x===i.kind?'background:#ffe3ec;color:#d23a5e;font-weight:700':''}">${x} +${c.p}</span>`).join('')}</div></div>`}).join('');
+    cards.querySelectorAll('.card').forEach(el=>el.onclick=()=>pick(+el.dataset.k,el));
+    acts.innerHTML=`<button id="reroll" ${S.picked||S.coins<1?'disabled':''}>引き直す（1）</button><button id="skip" ${S.picked?'disabled':''}>見送る（+1コイン）</button><div style="flex:1"></div><button class="pri" id="go">事件に向かう ▶</button>`;
+    document.getElementById('reroll').onclick=()=>{S.coins-=1;beep(420);deal();render()};
+    document.getElementById('skip').onclick=()=>{S.coins+=1;S.picked=true;render()};
+    document.getElementById('go').onclick=()=>{S.phase='respond';render();say(PEAK.includes(S.m)?'山場だよ！　どの対応でいく？':'どう対応する？　守りの数字を見て決めよ！','pose_think')};
+  } else if(S.phase==='respond'){
+    cards.innerHTML='';document.getElementById('draftTitle').textContent='対応を選ぶ（結果は数字どおり。運ではない）';
+    const rs=responses();
+    cards.innerHTML=rs.map((r,k)=>{const ok=r.total>=t,can=S.coins>=r.cost;return `<div class="card ${can?'':'cant'}" style="animation-delay:${k*.08}s" data-id="${r.id}"><h4 class="r" style="margin-top:0">${r.name}</h4>${r.cost?`<span class="cost r"><span class="coin">${r.cost}</span></span>`:'<span class="cost r" style="font-size:12px;color:var(--gray)">費用なし</span>'}<div class="r" style="font-size:14px;color:var(--gray);margin-top:10px">守り</div><div class="r" style="font-size:54px;line-height:1;color:${ok?'#2bb673':'#d23a5e'}">${r.total}<span style="font-size:18px;color:var(--gray)"> / ${t}</span></div><div class="r" style="margin-top:6px;font-size:15px;color:${ok?'#2bb673':'#d23a5e'}">${ok?'防げる':'被害 '+(t-r.total)}</div><div class="desc" style="margin-top:10px">${r.note}</div></div>`}).join('');
+    cards.querySelectorAll('.card').forEach(el=>el.onclick=()=>{const r=rs.find(x=>x.id===el.dataset.id);if(S.coins>=r.cost&&S.phase==='respond'){S.phase='busy';resolve(r)}});
+    acts.innerHTML='<div style="font-size:14px;color:var(--gray)">引く札と事件の順番だけがランダム。どの対応を選ぶと何点になるかは、上の数字のとおり。</div>';
+  }
+}
+function pick(k,el){const c=S.draft[k];if(S.picked||S.coins<c.cost)return;const before=activeCombos().map(x=>x.name);S.coins-=c.cost;S.owned[c.id]=lv(c.id)+1;S.picked=true;beep(660);beep(880,.08);
+  const after=activeCombos().filter(x=>!before.includes(x.name));render();
+  if(after.length){banner('コンボ！ '+after[0].name,'linear-gradient(90deg,#ffb300,#ff6f91)');chord();say('やった！「'+after[0].name+'」がそろったよ！','pose_jump')}else say(c.name+'、入れたよ！','pose_fists')}
+function resolve(r){
+  const t=threat(),i=S.seq[S.m];S.coins-=r.cost;
+  let dmg=Math.max(0,t-r.total);if(hasRelic('spare')&&['ランサム','システム障害'].includes(i.kind))dmg=Math.ceil(dmg/2);
+  const fill=document.getElementById('defFill');if(fill)fill.style.width=Math.min(100,r.total/Math.max(t,1)*100/1.3)+'%';
+  setTimeout(()=>{
+    if(dmg===0){banner(PEAK.includes(S.m)?'山場、突破！':'防いだ！','linear-gradient(90deg,#2bb673,#3fa9f5)');chord();say(PEAK.includes(S.m)?'山場、突破〜っ！　みんなで守りきったね！':'よしっ、守りきった！','pose_jump');if(PEAK.includes(S.m)){S.peaks++;S.coins+=3}}
+    else{S.trust=Math.max(0,S.trust-dmg);document.getElementById('app').classList.add('shake');setTimeout(()=>document.getElementById('app').classList.remove('shake'),450);banner('被害 信頼 -'+dmg,'linear-gradient(90deg,#d23a5e,#ff8a3d)');beep(180,0,'sawtooth');say('う〜、届かなかった……。次は備えよう！','pose_exhausted')}
+    render();
+    setTimeout(()=>{
+      if(S.trust<=0)return end(false);
+      if(S.m===11)return end(true);
+      const wasPeak=PEAK.includes(S.m);S.m++;S.coins+=3+(hasRelic('bonus')?1:0);S.phase='draft';deal();render();
+      if(wasPeak)relicPick();
+    },1500);
+  },650);
+}
+function relicPick(){const opts=shuffle(RELICS.filter(r=>!S.relics.includes(r.id))).slice(0,3);modal(`<h2 class="r">山場のごほうび：社内ルールを1つ</h2><div style="font-size:14px;color:var(--gray)">ずっと効き続ける。組み合わせで強くなる。</div><div class="cards" style="margin-top:14px">${opts.map(r=>`<div class="card" data-id="${r.id}" style="height:170px"><span class="tag r" style="background:var(--navy)">規</span><h4 class="r">${r.name}</h4><div class="desc">${r.d}</div></div>`).join('')}</div>`);
+  document.querySelectorAll('#modalBox .card').forEach(el=>el.onclick=()=>{S.relics.push(el.dataset.id);closeModal();chord();render()})}
+function end(clear){const score=S.trust*60+S.peaks*120+Object.values(S.owned).reduce((a,b)=>a+b,0)*10;const rank=score>=1500?'SS':score>=1200?'S':score>=900?'A':score>=600?'B':'C';
+  modal(`<h2 class="r">${clear?'一年、おつかれさま！':'信頼がなくなってしまった……'}</h2><div style="font-size:64px;color:var(--pink)" class="r">ランク ${rank}</div><div>信頼 ${S.trust}／山場の突破 ${S.peaks}／点数 ${score}</div><div style="margin-top:10px;font-size:13px;color:var(--gray)">引く札と事件の順番は毎回かわる。別の組み立てを試してみよう。</div><div style="margin-top:16px"><button class="pri" id="again">もう1年</button></div>`);document.getElementById('again').onclick=()=>{closeModal();newRun()}}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function banner(text,bg){const b=document.getElementById('banner');b.textContent=text;b.style.background=bg;b.classList.remove('show');void b.offsetWidth;b.classList.add('show')}
+function say(t,pose){const s=document.getElementById('say');if(s)s.textContent=t;const h=document.getElementById('hin');if(h&&pose)h.src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+let ac=null;function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.15,s);g.gain.exponentialRampToValueAtTime(.001,s+.25);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.26)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+// 画面の大きさに合わせて全体を縮める（1280×760を基準に作ってある）
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+newRun();
+</script>
+</body>
+</html>

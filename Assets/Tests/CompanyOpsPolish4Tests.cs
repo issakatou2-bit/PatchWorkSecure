@@ -29,6 +29,12 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        [UnityTest] public IEnumerator Polish4_08_未確認札は黄色地に紺文字で表示する()
+        {
+            yield return PolishIncident();var button=Find<Button>("IncidentEvidence");var text=button.GetComponentInChildren<TextMeshProUGUI>();
+            ColorUtility.TryParseHtmlString("#1d2a44",out var ink);Assert.AreEqual(ink,text.color);Assert.IsFalse(button.transform.Find("KitTopLight").gameObject.activeSelf);
+            var gradient=button.GetComponent<OpsKitGradient>();Assert.AreEqual(gradient.Top,gradient.Bottom);CheckPointer("IncidentEvidence");PolishCapture(8);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_07_攻撃種別は題名の直後のピンク札になる()
         {
             yield return PolishIncident();var topic=Find<RectTransform>("IncidentTopic");var title=Find<TextMeshProUGUI>("IncidentTitle");

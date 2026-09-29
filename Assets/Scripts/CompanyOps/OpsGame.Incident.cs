@@ -100,7 +100,9 @@ namespace PatchWorkSecure.CompanyOps
                 PText(goal,"IncidentPeakGoalText",State.PeakGoalText(State.month),16,0,896,29,16,Hex("7a5a00"));
             }
             PText(p,"DecisionHeading","対応方針を選ぶ",0,0,235,39,26,Color.white);
-            PButton(p,"IncidentEvidence","未確認：正常な操作の可能性もある",247,5,340,29,IncidentEvidence,IncidentYellow,Hex("5c4000"),16).GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+            var evidence=PButton(p,"IncidentEvidence","未確認：正常な操作の可能性もある",247,5,340,29,IncidentEvidence,IncidentYellow,PlanInk,16);
+            KitGradient(evidence.GetComponent<Image>(),IncidentYellow,IncidentYellow);evidence.transform.Find("KitTopLight").gameObject.SetActive(false);
+            var evidenceText=evidence.GetComponentInChildren<TextMeshProUGUI>();evidenceText.fontSizeMax=14;evidenceText.transform.SetAsLastSibling();
             var ready=PCard(p,"Readiness",0,53,928,62,new Color(1,1,1,.1f),20,false);
             PText(ready,"ReadinessTitle","あなたの備え",16,0,112,62,15,Color.white);
             var relevant=Enumerable.Range(0,State.levels.Length).Where(i=>ResponseIds.Any(r=>EquipmentHelps(i,r))).Take(3).ToList();

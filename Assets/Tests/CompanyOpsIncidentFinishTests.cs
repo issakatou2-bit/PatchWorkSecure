@@ -119,7 +119,10 @@ namespace PatchWorkSecure.Tests
             {
                 Plan(game.State);game.BeginIncident();game.Resolve(game.State.Current.kind=="outage"?"recover":"scope");game.Next();yield return null;
             }
-            Assert.IsTrue(game.State.IsClear);yield return new WaitForSecondsRealtime(.3f);
+            Assert.IsTrue(game.State.IsClear);
+            // 12か月の点灯の後にランクを押す。固定の0.3秒ではなく実際の判子を待つ。
+            float stampLimit=Time.realtimeSinceStartup+3;
+            while(!game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.stamp&&s.isPlaying)&&Time.realtimeSinceStartup<stampLimit)yield return null;
             Assert.IsTrue(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.clear&&s.isPlaying),"判子は年度ファンファーレを止めない");
             Assert.IsTrue(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.stamp&&s.isPlaying));
             Click("Menu");yield return null;Find<Slider>("SoundVolume").value=0;yield return null;

@@ -25,7 +25,7 @@ namespace PatchWorkSecure.CompanyOps
                 for(int i=0;i<ids.Length;i++)
                 {
                     int level=State.Level(ids[i]);float x=16+i*34;
-                    var device=PCard(room.transform,"RoomDevice_"+ids[i],x,area.height-44,24,30,level==0?Hex("a6afc0"):level==1?Hex("2774a8"):Hex("1a7c63"),12,false);
+                    var device=Box(room.transform,"RoomDevice_"+ids[i],x,area.height-44,24,30,level==0?Hex("a6afc0"):level==1?Hex("2774a8"):Hex("1a7c63"));
                     device.GetComponent<Image>().color=new Color(device.GetComponent<Image>().color.r,device.GetComponent<Image>().color.g,device.GetComponent<Image>().color.b,level==0?.5f:1);
                     for(int n=0;n<2;n++)PCard(device,"DeviceLight"+n,5,8+n*9,14,4,n<level?n==1?Hex("ffd23f"):Hex("5dff9c"):Hex("6b7894"),12,false);
                 }
@@ -116,5 +116,17 @@ namespace PatchWorkSecure.CompanyOps
         public OpsGame Owner;public string TargetRoom;private float elapsed;
         private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(elapsed/.45f));
             ((RectTransform)transform).anchoredPosition=new Vector2(Owner.ReducedMotion?290:Mathf.Lerp(20,290,t),-70+(Owner.ReducedMotion?0:22*Mathf.Sin(t*Mathf.PI)));if(t>=1)enabled=false;}
+    }
+    public sealed class OpsStatSpark : MonoBehaviour
+    {
+        public OpsGame Owner;public Vector2 From,To;public float Delay;public int Stat;private float elapsed;
+        private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01((elapsed-Delay)/.6f);var rect=(RectTransform)transform;
+            rect.anchoredPosition=Owner.ReducedMotion?To:Vector2.Lerp(From,To,Mathf.SmoothStep(0,1,t))+Vector2.up*120*Mathf.Sin(t*Mathf.PI);
+            GetComponent<Image>().color=new Color(GetComponent<Image>().color.r,GetComponent<Image>().color.g,GetComponent<Image>().color.b,elapsed<Delay?0:1-t*.7f);if(t>=1)Destroy(gameObject);}
+    }
+    public sealed class OpsStatGaugeGrow : MonoBehaviour
+    {
+        public OpsGame Owner;public float From,To;private float elapsed;
+        private void Update(){elapsed+=Time.unscaledDeltaTime;((RectTransform)transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,Owner.ReducedMotion?To:Mathf.Lerp(From,To,Mathf.SmoothStep(0,1,elapsed/.45f)));if(elapsed>=.45f)Destroy(this);}
     }
 }

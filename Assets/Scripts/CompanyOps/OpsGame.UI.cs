@@ -29,7 +29,7 @@ namespace PatchWorkSecure.CompanyOps
             if (color == Ink && name != "OpsScreen") color = Hex("f3f6fb");
             img.color = color; img.sprite = null; img.raycastTarget = name == "ModalBlocker";
             // 背景・ゲージは直線、情報のまとまりは角丸。標準の9-sliceを再利用する。
-            if (w > 35 && h > 24 && name != "OpsScreen" && name != "ModalBlocker" && name != "CrisisTint")
+            if (w > 35 && h > 24 && name != "OpsScreen" && name != "ModalBlocker" && name != "CrisisTint" && name != "PhasePresentation")
                 RoundSurface(img, name == "Dialog" ? 28 : name == "Navigator" || name == "HomeGreeting" ? 18 : h > 160 ? 14 : 8);
             if (outline || name == "Dialog") KitPanel(r, color, name == "Dialog");
             if (name == "Dialog" || name == "DecisionPanel" || name == "Navigator")
@@ -78,7 +78,7 @@ namespace PatchWorkSecure.CompanyOps
             KitButton(b, bg);
             if (bg == Edge || bg == Panel || bg == Paper) t.color = Ink;
             if (bg == Accent || bg == PlanPink || bg == Coral || bg == Ink) t.color = Color.white;
-            b.onClick.AddListener(() => { PlayCue(OpsCue.Click); action(); TutorialAction(id); }); return b;
+            b.onClick.AddListener(() => { if(ConsumePresentationClick())return;PlayCue(OpsCue.Click); action(); TutorialAction(id); }); return b;
         }
         private void RoundSurface(UnityEngine.UI.Image image, float radius)
         {
@@ -96,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            PhasePresentationRunning=false;
             if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
             if (Application.isPlaying) {StopAllCoroutines();StopPresentationSounds();}

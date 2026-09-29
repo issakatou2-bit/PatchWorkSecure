@@ -27,7 +27,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.AreEqual("2EC4A0", ColorUtility.ToHtmlStringRGB(Find<TextMeshProUGUI>("StatHint5").color));
             CheckPointer("ConsultationDetails"); Click("ConsultationDetails"); yield return null;
-            StringAssert.Contains(game.State.Current.news, Find<TextMeshProUGUI>("DialogBody").text);
+            StringAssert.Contains(game.State.Current.boss, Find<TextMeshProUGUI>("MissionBoss").text);
             Click("EmployeeConsultation"); yield return null;
             StringAssert.Contains(game.State.StaffVoice, Find<TextMeshProUGUI>("DialogBody").text);
             CheckText(); Click("CloseDialog"); yield return null;

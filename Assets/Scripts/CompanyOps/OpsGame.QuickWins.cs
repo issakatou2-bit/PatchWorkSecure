@@ -123,7 +123,7 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsBlockedTag : MonoBehaviour
     {
         private CanvasGroup group;private float started;
-        private void Start(){started=Time.realtimeSinceStartup;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;}
+        private void Start(){started=Time.realtimeSinceStartup;group=GetComponent<CanvasGroup>();if(group==null)group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;}
         private void Update(){float t=Time.realtimeSinceStartup-started;group.alpha=1-Mathf.Clamp01((t-1.1f)/.2f);if(t>=1.3f)Destroy(gameObject);}
     }
     public sealed class OpsDangerPulse : MonoBehaviour

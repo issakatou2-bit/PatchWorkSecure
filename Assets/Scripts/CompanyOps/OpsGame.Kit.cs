@@ -112,33 +112,39 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ScreenWipe(RectTransform target)
         {
+            PhasePresentationRunning=true;
             yield return null;
-            if (target == null) yield break;
+            if (target == null) {PhasePresentationRunning=false;yield break;}
             string kind=homeVisible?"screen":State.phase==OpsPhase.Planning?"month":State.phase==OpsPhase.Incident?"incident":"screen";
             bool skipAllowed=presentationVisits.ContainsKey("transition_"+kind);
             RepeatDuration("transition_"+kind,1,1);
             phasePresentationSkipped=false;PhasePresentationCanSkip=skipAllowed;
             PlayPresentationCue(OpsCue.Transition);
-            var cover = IncidentShape(Surface, "ScreenWipe", "cutin", -1900, 0, 1900, 900, PlanPink);
-            var group = cover.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
-            for (float t = 0; t < .3f; t += Time.unscaledDeltaTime)
+            // 月替わり・事件は専用の入口だけを使い、通常の帯を重ねて待たせない。
+            if(kind=="screen")
             {
-                if (ReducedMotion) group.alpha = Mathf.Sin(t / .3f * Mathf.PI) * .25f;
-                else cover.anchoredPosition = new Vector2(Mathf.Lerp(-1900, 1700, t / .3f), 0);
-                if(t>=.15f&&outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
-                if(t>=.15f&&skipAllowed&&(phasePresentationSkipped||PresentationPressed()))break;
-                yield return null;
+                var cover = IncidentShape(Surface, "ScreenWipe", "cutin", -1900, 0, 1900, 900, PlanPink);
+                var group = cover.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
+                for (float t = 0; t < .3f; t += Time.unscaledDeltaTime)
+                {
+                    if (ReducedMotion) group.alpha = Mathf.Sin(t / .3f * Mathf.PI) * .25f;
+                    else cover.anchoredPosition = new Vector2(Mathf.Lerp(-1900, 1700, t / .3f), 0);
+                    if(t>=.15f&&outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
+                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+.35f;
+                    if(t>=.15f&&skipAllowed&&(phasePresentationSkipped||PresentationPressed()))break;
+                    yield return null;
+                }
+                if (cover != null) Destroy(cover.gameObject);
             }
-            if (cover != null) Destroy(cover.gameObject);
-            if(outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
             if(kind=="month"||kind=="incident")
             {
                 var overlay=Box(Surface,"PhasePresentation",0,0,1600,900,kind=="month"?Color.black:new Color(.76f,.07f,.2f,.22f));
                 var alpha=overlay.gameObject.AddComponent<CanvasGroup>();alpha.blocksRaycasts=false;
-                RectTransform page=null;
+                RectTransform page=null;CanvasGroup pageAlpha=null;
                 if(kind=="month")
                 {
                     page=PCard(overlay,"CalendarPage",610,255,380,330,Color.white,28);
+                    pageAlpha=page.gameObject.AddComponent<CanvasGroup>();pageAlpha.alpha=0;pageAlpha.blocksRaycasts=false;
                     PCard(page,"CalendarHeader",0,0,380,56,PlanPink,28,false);
                     PText(page,"CalendarMonth",State.Current.name,0,68,380,126,90,PlanInk,true,true);
                     string[] seasons={"新年度の準備","連休後の点検","雨の季節","夏の備え","夏休みの当番","上期の締め","下期スタート","年末への備え","年末の繁忙期","年始の確認","年度末の準備","一年の総仕上げ"};
@@ -154,18 +160,31 @@ namespace PatchWorkSecure.CompanyOps
                 float duration=kind=="month"?1.5f:.8f;
                 for(float t=0;t<duration&&!phasePresentationSkipped;t+=Time.unscaledDeltaTime)
                 {
-                    alpha.alpha=Mathf.Min(t/.12f,(duration-t)/.18f,1);
-                    if(page!=null&&!ReducedMotion)page.localRotation=Quaternion.Euler(Mathf.Lerp(65,0,Mathf.Clamp01(t/.5f)),0,0);
+                    alpha.alpha=Mathf.Min(t/(kind=="month"?.5f:.12f),(duration-t)/.18f,1);
+                    if(outgoingScreen!=null&&t>=(kind=="month"?.5f:.12f)){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
+                    if(pageAlpha!=null)pageAlpha.alpha=Mathf.Clamp01((t-.5f)/.12f);
+                    if(page!=null&&!ReducedMotion)page.localRotation=Quaternion.Euler(Mathf.Lerp(65,0,Mathf.Clamp01((t-.5f)/.2f)),0,0);
+                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+.35f;
                     if(skipAllowed&&PresentationPressed())break;
                     yield return null;
                 }
                 if(overlay!=null)Destroy(overlay.gameObject);
             }
+            if(outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
             PhasePresentationCanSkip=false;
+            PhasePresentationRunning=false;
         }
         private RectTransform outgoingScreen;
         private bool phasePresentationSkipped;
         public bool PhasePresentationCanSkip {get;private set;}
+        public bool PhasePresentationRunning {get;private set;}
+        private float presentationInputGuardUntil;
+        private bool ConsumePresentationClick()
+        {
+            bool actualInput=UnityEngine.InputSystem.Mouse.current?.leftButton.wasReleasedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.spaceKey.wasPressedThisFrame==true;
+            if(!actualInput||!PhasePresentationRunning&&Time.unscaledTime>=presentationInputGuardUntil)return false;
+            SkipPhasePresentation();return true;
+        }
         public void SkipPhasePresentation(){if(PhasePresentationCanSkip)phasePresentationSkipped=true;}
         public bool AnnualPresentationCanSkip {get;private set;}
         public bool AnnualPresentationSkipped {get;private set;}

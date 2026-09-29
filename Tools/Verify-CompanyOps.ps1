@@ -24,3 +24,7 @@ if ($LASTEXITCODE -ne 0) { throw 'ランダム年度の検証に失敗' }
 if ($LASTEXITCODE -ne 0) { throw '臨時予算の比較のコンパイルに失敗' }
 & "$opsMono/bin/mono.exe" Artifacts/CompanyOps/RewardChecks.exe
 if ($LASTEXITCODE -ne 0) { throw '臨時予算の比較に失敗' }
+& "$opsMono/bin/mono.exe" "$opsMono/lib/mono/4.5/csc.exe" -nologo -out:Artifacts/CompanyOps/RankChecks.exe Assets/Scripts/CompanyOps/OpsCatalog.cs Assets/Scripts/CompanyOps/OpsEventCatalog.cs Assets/Scripts/CompanyOps/OpsState.cs Assets/Scripts/CompanyOps/OpsState.Events.cs Assets/Scripts/CompanyOps/OpsState.Growth.cs Tools/CompanyOpsRankChecks.cs
+if ($LASTEXITCODE -ne 0) { throw 'ランクの恩恵のコンパイルに失敗' }
+& "$opsMono/bin/mono.exe" Artifacts/CompanyOps/RankChecks.exe
+if ($LASTEXITCODE -ne 0) { throw 'ランクの恩恵の検証に失敗' }

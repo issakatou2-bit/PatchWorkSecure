@@ -60,6 +60,7 @@ namespace PatchWorkSecure.CompanyOps
             PImage(screen,"OfficeBlur",PlanningArt.officeBlur,-100,-450,1800,1800,new Color(1,1,1,.45f));
             PlanningStage(); PlanningHeader(); PlanningCompany(); PlanningConsultation(); PlanningNavigator(); PlanningActions();
             WorkCompleteEffect();
+            RankBenefitBand();
             if(tab!=0) PlanningOverlay();
             if(SaveWarning!="") PText(screen,"SaveWarning",SaveWarning,24,866,600,28,15,Hex("c23a60"),false);
         }
@@ -73,6 +74,11 @@ namespace PatchWorkSecure.CompanyOps
             PImage(stage,"StageShade",PlanningArt.stageShade,0,492,900,300);
             SeasonLayer(stage,900,792,State.month);
             PlanningRooms(stage);
+            if(State.CultureEarlySignal)
+            {
+                var upcoming=State.EventAt(State.month+1);string category=upcoming==null?"システムの運用":OpsEventCatalog.Profile(upcoming.profile).category;
+                var signal=PButton(stage,"CultureEarlySignal","?",220,172,40,40,()=>Dialog("社員の兆候報告 / 次月への備え",OpsCatalog.Months[State.month+1].name+"は、"+category+"の周りを点検しておきたいね。\n\n社員の報告から得た点検のヒント。攻撃や侵害が確定したという意味ではありません。",420),Color.white,PlanPink,20);Hover(signal,"相談文化 C以上 / 次月の点検ヒント");
+            }
             for(int j=0;j<3;j++)
             {
                 bool installed=State.Level(j==0?"backup":j==1?"monitor":"redundancy")>0;
@@ -181,7 +187,12 @@ namespace PatchWorkSecure.CompanyOps
                 PText(row.transform,"MetricTitle",labels[j],62,7,150,28,16);
                 PCard(row.transform,"Track",62,37,150,6,PlanTrack,12,false);
                 if(j==0)LossTrail(row.transform,"StabilityLossTrail",62,37,150,6,State.stability-statChanges[2],State.stability,100);
-                if(values[j]>0) PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
+                if(values[j]>0)
+                {
+                    var fill=PCard(row.transform,"Fill",62,37,150*values[j]/100f,6,colors[j],12,false);
+                    int delta=j==2?statChanges[4]:j==3?statChanges[3]:0;
+                    if(statEffectPending&&delta>0&&Application.isPlaying){var grow=fill.gameObject.AddComponent<OpsStatGaugeGrow>();grow.Owner=this;grow.From=150*Mathf.Max(0,values[j]-delta)/100f;grow.To=150*values[j]/100f;}
+                }
                 if(j==0)DangerGauge(row.transform,"StabilityDanger",62,37,150*values[j]/100f,6);
                 PText(row.transform,labels[j]+"Value",values[j].ToString(),217,0,47,58,24,null,true,true);
             }

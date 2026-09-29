@@ -57,6 +57,12 @@ namespace PatchWorkSecure.CompanyOps
         public int situationRules;
         // 旧年度は0。受諾は目印のみで、達成判定を後付けで制限しない。
         public int missionBudgetRules, missionBudgetPaid, acceptedMissionMonth=-1;
+        public int rankBenefitRules, rankQuarterBonusPaid;
+        public int ProposalRankBonus=>rankBenefitRules>0&&trust>=50?1:0;
+        public int QuarterTrustBonus=>rankBenefitRules>0&&trust>=65?1:0;
+        public bool CultureEarlySignal=>rankBenefitRules>0&&culture>=50&&month<11;
+        public int ForecastRankPrecision=>rankBenefitRules>0&&culture>=65&&!audited?1:0;
+        public int EstimateMargin=>(audited?2:Level("monitor")>0?6:9)-ForecastRankPrecision;
         public const int MissionBudgetReward=1;
         public int MissionBudgetOffer=>missionBudgetRules>0?MissionBudgetReward:0;
         public bool situationPrepared;
@@ -69,7 +75,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1; staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
         public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
@@ -249,7 +255,7 @@ namespace PatchWorkSecure.CompanyOps
                     Note(Situation.action + " / 今月の" + (Situation.stopLossCap > 0 ? "停止に伴う追加損失" : "少人数対応による追加疲労") + "を防ぐ準備ができた。" +
                         (Situation.extraFatigue > 0 ? "休息も確保し、疲労 -18。" : "")); break;
                 case "proposal": proposed = true; promiseGroup = group; promiseBaseline = GroupLevels(group);
-                    int grant = 12 + Evidence * 3; proposalGrant = grant; budget += grant;
+                    int grant = 12 + Evidence * 3+ProposalRankBonus; proposalGrant = grant; budget += grant;
                     Note("根拠を示した提案で追加予算 +" + grant + "万円。今月中に約束した分野の整備を1段階進めよう。"); break;
             }
             GainFromWork(action);
@@ -293,7 +299,7 @@ namespace PatchWorkSecure.CompanyOps
         // Previewは未確認の真相も使うため、購入前・対応前の画面には使わない。
         public OpsEstimate Estimate(string response)
         {
-            int margin = audited ? 2 : Level("monitor") > 0 ? 6 : 9;
+            int margin = EstimateMargin;
             int center = audited ? Severity : Current.@base + SeasonPressure + 6;
             var low = Calculate(response, Math.Max(0, center - margin), false);
             var high = Calculate(response, center + margin, false);
@@ -419,6 +425,7 @@ namespace PatchWorkSecure.CompanyOps
             situationPrepared = false;
             ticketResolution = "";
             missionBudgetPaid=0;
+            rankQuarterBonusPaid=0;
             phase = budget < 0 ? OpsPhase.Ended : OpsPhase.Planning;
             Note("月次予算 +" + income + "万円 / 維持費 -" + upkeep + "万円。今月の工数 " + capacity + "。" +
                 (situationRules > 0 ? "社内事情「" + Situation.title + "」も確認しよう。" : "")); CheckMilestones(); monthStartMetrics = ReportMetrics; return true;
@@ -426,9 +433,10 @@ namespace PatchWorkSecure.CompanyOps
         public bool Valid()
         {
             if(missionBudgetRules<0||missionBudgetRules>1||missionBudgetPaid<0||missionBudgetPaid>MissionBudgetReward||acceptedMissionMonth < -1||acceptedMissionMonth>month)return false;
+            if(rankBenefitRules<0||rankBenefitRules>1||rankQuarterBonusPaid<0||rankQuarterBonusPaid>1||rankQuarterBonusPaid>0&&(!quarterRewardClaimed||!QuarterPeak))return false;
             if (version != SaveVersion || situationRules < 0 || situationRules > 1 || month < 0 || month > 11 || !Enum.IsDefined(typeof(OpsPhase), phase) ||
                 budget < -500 || budget > 5000 || capacity < 0 || capacity > 8 ||
-                proposalGrant < 0 || proposalGrant > 21 || (proposalGrant != 0 && !proposed) ||
+                proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0) || (proposalGrant != 0 && !proposed) ||
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
@@ -439,6 +447,7 @@ namespace PatchWorkSecure.CompanyOps
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;
             if (learned.Any(t => OpsCatalog.Term(t) == null) || journal.Any(t => t == null || t.Length > 1500)) return false;
             if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > 200 || r.downtime < 0 || r.downtime > 200 ||
+                r.missionBonus<0||r.missionBonus>MissionBudgetReward||
                 !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
                 (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > 5000 || r.closingStability < 0 || r.closingStability > 100)) ||
                 (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > 200 || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > 200 || r.forecast.cost < 0 || r.forecast.cost > 200)) ||

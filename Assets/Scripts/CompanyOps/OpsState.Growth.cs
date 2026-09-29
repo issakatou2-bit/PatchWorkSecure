@@ -42,6 +42,8 @@ namespace PatchWorkSecure.CompanyOps
             quarterRewardClaimed = true;
             if (reward == "budget") budget += OpsGrowthCatalog.QuarterBudget;
             else nextMonthExtraCapacity = 1;
+            rankQuarterBonusPaid=QuarterTrustBonus;budget+=rankQuarterBonusPaid;
+            if(rankQuarterBonusPaid>0)Note("経営の信頼B以上 / 四半期の臨時予算 +"+rankQuarterBonusPaid+"万円。");
             Note("四半期の山場を完了。報酬 / " + (reward == "budget" ? "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円" : "翌月の支援枠 +1工数") + "。");
             return true;
         }

@@ -21,6 +21,7 @@ public static class CompanyOpsRewardChecks
             {
                 var s=new OpsState(seed,true);
                 s.missionBudgetRules=0;
+                s.rankBenefitRules=0;
                 for(int m=0;m<12&&s.phase!=OpsPhase.Ended;m++)
                 {
                     if(policy>0)

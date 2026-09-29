@@ -84,16 +84,17 @@ namespace PatchWorkSecure.CompanyOps
         {
             var d = Dialog("四半期の山場をクリア", "6・9・12月の完了報酬。次の整備期間に欲しいものを一つ選ぼう。\n翌月は季節負荷が下がります。3月は一年の総力対応です。", 480);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 89);
-            Button(d, "Reward_budget", "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円\n<size=17>導入費・維持費に使える</size>", 32, 223, 364, 93, () => TakeQuarterReward("budget"), Accent);
-            Button(d, "Reward_capacity", "翌月の支援枠 +1工数\n<size=17>共同練習や整備をもう一つ</size>", 420, 223, 364, 93, () => TakeQuarterReward("capacity"), Mint);
+            Button(d, "Reward_budget", "改善予算 +" + (OpsGrowthCatalog.QuarterBudget+State.QuarterTrustBonus) + "万円\n<size=17>導入費・維持費に使える"+(State.QuarterTrustBonus>0?" / 信頼の恩恵 +1":"")+"</size>", 32, 223, 364, 93, () => TakeQuarterReward("budget"), Accent);
+            Button(d, "Reward_capacity", "翌月の支援枠 +1工数\n<size=17>共同練習や整備をもう一つ"+(State.QuarterTrustBonus>0?" / 予算 +1万円":"")+"</size>", 420, 223, 364, 93, () => TakeQuarterReward("capacity"), Mint);
             Text(d, "QuarterRewardHelp", "どちらも1回限り。支援枠は翌月だけ有効で、繰り越せません。\n選ばず自動進行する場合の既定報酬は改善予算です。", 32, 336, 748, 57, 18, Ink);
         }
         private void TakeQuarterReward(string reward)
         {
             var previous=ReadStats();
             if (!State.ClaimQuarterReward(reward)) return;
+            int trustBonus=State.rankQuarterBonusPaid;
             Save(); AdvanceMonth(previous);
-            Toast("山場クリア報酬 / " + (reward == "budget" ? "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円" : "今月の支援枠 +1工数"), true, OpsCue.Growth);
+            Toast("山場クリア報酬 / " + (reward == "budget" ? "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円" : "今月の支援枠 +1工数")+(trustBonus>0?" / 信頼の臨時予算 +1万円":""), true, OpsCue.Growth);
         }
 
         private string PowerLine(OpsResponsePower p) => "設備 +" + p.equipment + "  / 自分 +" + p.player + "  / 社員 +" + p.staff;

@@ -6,12 +6,28 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using PatchWorkSecure.CompanyOps;
 
 namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator NextScreens4_ランクの恩恵と行動の粒は実状態に連動し省演出でも動く()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();
+            foreach(bool reduced in new[]{false,true})
+            {
+                game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");game.State.culture=49;game.OpenTab(0);
+                Assert.IsFalse(game.State.CultureEarlySignal);game.ChooseAction("listen");yield return new WaitForSecondsRealtime(.15f);
+                Assert.IsTrue(game.State.CultureEarlySignal);Assert.IsNotEmpty(UnityEngine.Object.FindObjectsByType<OpsStatSpark>());StringAssert.Contains("次月の兆候",Find<TextMeshProUGUI>("RankBenefitBandText").text);Capture(reduced?"125-next-rank-reduced":"125-next-rank-up");
+                yield return new WaitForSecondsRealtime(.9f);CheckPointer("CultureEarlySignal");Click("CultureEarlySignal");yield return new WaitForSecondsRealtime(.4f);StringAssert.Contains("確定",Find<TextMeshProUGUI>("DialogBody").text);Click("CloseDialog");
+                game.State.culture=65;game.State.audited=false;Assert.AreEqual(8,game.State.EstimateMargin);game.OpenTab(0);Click("Stat_3");yield return new WaitForSecondsRealtime(.5f);StringAssert.Contains("1狭める",Find<TextMeshProUGUI>("CurrentRankBenefit").text);Capture("125-next-rank-details");Click("CloseDialog");
+                game.State.trust=50;game.State.capacity=4;game.State.audited=true;game.State.proposed=false;int money=game.State.budget;int grant=12+game.State.Evidence*3+1;game.ChooseAction("proposal");Assert.AreEqual(money+grant,game.State.budget);
+            }
+            var old=new OpsState(14){culture=100,trust=100,rankBenefitRules=0};Assert.IsFalse(old.CultureEarlySignal);Assert.AreEqual(0,old.ProposalRankBonus);Assert.IsTrue(old.Valid());LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator NextScreens3_部屋から関連改善を導入し段階と社員の支援先が一致する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
@@ -24,7 +40,7 @@ namespace PatchWorkSecure.Tests
                 var cards=UnityEngine.Object.FindObjectsByType<RectTransform>().Where(t=>t.name.StartsWith("Project_")).ToArray();Assert.IsNotEmpty(cards);foreach(var c in cards)Assert.AreEqual(room,OpsGame.ProjectRoom(c.name.Substring(8)));
                 Click("ClosePlanner");yield return null;
             }
-            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(.8f);Assert.AreNotEqual(Find<UnityEngine.UI.Image>("RoomDevice_mfa").color,Find<UnityEngine.UI.Image>("RoomDevice_inventory").color);Capture("124-next-office-rooms");
+            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(1.6f);Assert.AreNotEqual(Find<UnityEngine.UI.Image>("RoomDevice_mfa").color,Find<UnityEngine.UI.Image>("RoomDevice_inventory").color);Capture("124-next-office-rooms");
             Click("Room_office");yield return new WaitForSecondsRealtime(.5f);Click("Details_inventory");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Buy_inventory");Click("Buy_inventory");yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual(1,game.State.Level("inventory"));
             game.OpenTab(0);Click("Room_reception");yield return new WaitForSecondsRealtime(.5f);CheckPointer("ReceptionBrief");Click("CloseDialog");
             game.OpenTab(0);SetEvent(game.State,"ransom-backup");game.State.staffExperience[1]=3;game.State.supportOrder="investigate";game.BeginIncident();game.Resolve("scope");
@@ -42,15 +58,23 @@ namespace PatchWorkSecure.Tests
         }
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);var game=Object.FindAnyObjectByType<OpsGame>();
             Assert.AreEqual("title-veil",Find<OpsIncidentGraphic>("TitleVeil").Kind);Assert.AreEqual(.9f,Find<OpsUIReveal>("TitleLogoWordmark").Duration);Capture("122-next-title");
-            game.StartYear(14);string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.6f);
+            game.StartYear(14);string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.8f);
             Assert.AreEqual(game.State.Current.name,Find<TextMeshProUGUI>("CalendarMonth").text);Assert.IsFalse(game.PhasePresentationCanSkip);Capture("122-next-calendar");
+            // スキップに使った入力を、背後の行動ボタンへ通さない。初回は短縮しない。
+            var keyboard=InputSystem.AddDevice<Keyboard>();
+            try{InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
+            finally{InputSystem.RemoveDevice(keyboard);}
             yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));game.BeginIncident();state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.6f);
             Assert.AreEqual("緊急",Find<TextMeshProUGUI>("IncidentEntryTitle").text);Capture("122-next-incident-entry");yield return new WaitForSecondsRealtime(.9f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
             game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);
             StringAssert.Contains(game.State.Latest.loss==0?"金銭被害なし":game.State.Latest.loss.ToString(),Find<TextMeshProUGUI>("MonthlyDamageStampText").text);
-            game.Next();yield return new WaitForSecondsRealtime(.6f);Assert.IsTrue(game.PhasePresentationCanSkip);game.SkipPhasePresentation();yield return null;yield return null;
+            game.Next();yield return new WaitForSecondsRealtime(.6f);Assert.IsTrue(game.PhasePresentationCanSkip);state=JsonUtility.ToJson(game.State);
+            keyboard=InputSystem.AddDevice<Keyboard>();
+            try{InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
+            finally{InputSystem.RemoveDevice(keyboard);}
+            yield return null;yield return null;
             Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="PhasePresentation"));CheckPointer("Action_listen");LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator チュートリアルは実操作だけで六段階を完了する()

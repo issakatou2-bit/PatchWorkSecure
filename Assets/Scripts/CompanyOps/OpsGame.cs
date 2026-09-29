@@ -39,10 +39,11 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { resolutionActive = false; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
+        public void StartYear(int seed) { resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
         public void OpenTab(int next) { roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
+            var origin=ActionOrigin("Action_"+action);
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
             int before = State.milestones.Count;
@@ -56,6 +57,7 @@ namespace PatchWorkSecure.CompanyOps
             bool growth = State.milestones.Count > before;
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
+            ActionStatParticles(origin);
             if(action=="rest")foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
             {identity.GetComponent<OpsPortraitAnimator>().ChangePose("pose_coffee");}
         }
@@ -350,13 +352,13 @@ namespace PatchWorkSecure.CompanyOps
         private static string GroupName(string group) => group == "protect" ? "防御" : group == "recover" ? "復旧" : group == "people" ? "組織" : "運用";
         private void Proposal()
         {
-            var d = Dialog("追加予算の申請", "追加予算 +" + (12 + State.Evidence * 3) + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5。未達は信頼 -7・交付額を全額返却。", 560);
+            var d = Dialog("追加予算の申請", "追加予算 +" + (12 + State.Evidence * 3+State.ProposalRankBonus) + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5。未達は信頼 -7・交付額を全額返却。", 560);
             string[] groups = { "recover", "protect", "people", "operations" };
             for (int i = 0; i < groups.Length; i++)
             {
                 string g = groups[i];
                 bool possible = OpsCatalog.Projects.Select((p, j) => new { p, j }).Any(x => x.p.group == g && State.levels[x.j] < 2 &&
-                    State.capacity - 1 >= State.WorkCost(x.j) && State.budget + 12 + State.Evidence * 3 >= State.Cost(x.j) &&
+                    State.capacity - 1 >= State.WorkCost(x.j) && State.budget + 12 + State.Evidence * 3+State.ProposalRankBonus >= State.Cost(x.j) &&
                     (string.IsNullOrEmpty(x.p.requires) || State.Level(x.p.requires) > 0));
                 Button(d, "Propose_" + g, GroupName(g) + "を改善する" + (possible ? "" : " / 今月は工数等が不足"), 32, 260 + i * 51, 552, 44, () => ChooseAction("proposal", g), Edge, possible);
             }

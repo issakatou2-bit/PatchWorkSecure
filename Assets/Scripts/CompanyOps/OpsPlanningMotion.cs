@@ -46,7 +46,7 @@ namespace PatchWorkSecure.CompanyOps
             if (rect == null) return;
             if (Owner == null || Owner.ReducedMotion)
             {
-                rect.anchoredPosition = origin; rect.localScale = Vector3.one; rect.localRotation = Quaternion.identity;
+                rect.anchoredPosition = origin; rect.localScale = Vector3.one*(Kind=="kv"?1.02f:1); rect.localRotation = Quaternion.identity;
                 if (image != null) image.color = Kind == "petal" || Kind == "snow" || Kind == "rain" || Kind == "ripple" || Kind == "mote" || Kind == "haze" || Kind == "shine" || Kind == "pulse" ? new Color(color.r,color.g,color.b,0) : color;
                 return;
             }
@@ -57,6 +57,11 @@ namespace PatchWorkSecure.CompanyOps
                 float drift=.5f-.5f*Mathf.Cos(t*Mathf.PI*2);
                 rect.anchoredPosition=origin+new Vector2(-14,-8)*drift;
                 rect.localScale=Vector3.one*Mathf.Lerp(1.04f,1.08f,drift);
+            }
+            if(Kind=="kv")
+            {
+                float drift=.5f-.5f*Mathf.Cos(t*Mathf.PI*2);
+                rect.anchoredPosition=origin+new Vector2(-10,6)*drift;rect.localScale=Vector3.one*Mathf.Lerp(1.02f,1.06f,drift);
             }
             if (Kind == "shake") rect.anchoredPosition = origin + Vector2.right * (t < .35f ? Mathf.Sin(t * Mathf.PI * 18) * 3 : 0);
             if (Kind == "alarm" && image != null) image.color = new Color(color.r,color.g,color.b,.7f+.3f*Mathf.Sin(t*Mathf.PI*2));

@@ -27,8 +27,8 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator 実装済み全画面の新ひなたとロゴを撮影し操作と数値を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
-            var game=Object.FindAnyObjectByType<OpsGame>();Assert.AreSame(game.Navigator.Pose("pose_wave"),Find<Image>("HomePortrait").sprite);
-            CheckRect("TitleLogoWordmark",90,40,640,246);CheckPointer("NewYear");CheckPointer("HomeSettings");Capture("90-v2-title");
+            var game=Object.FindAnyObjectByType<OpsGame>();Assert.AreSame(game.PlanningArt.titleKeyVisual,Find<Image>("TitleKeyVisual").sprite);
+            CheckRect("TitleLogoWordmark",50,0,640,246);Assert.AreEqual(.84f,Find<RectTransform>("TitleBrand").localScale.x);CheckPointer("NewYear");CheckPointer("HomeSettings");Capture("90-v2-title");
             game.StartYear(14);yield return new WaitForSecondsRealtime(1.5f);
             Assert.AreSame(game.Navigator.Pose(game.ActiveVoiceBank.Find("season_04").poseId),Find<Image>("NavigatorPortrait").sprite);Assert.IsNotNull(Find<Image>("PlanningLogoIcon").sprite);
             Assert.AreEqual("OfficeStage",Find<Transform>("PlanningCharacter").parent.name);CheckNewPortraits();CheckText();Capture("91-v2-planning");

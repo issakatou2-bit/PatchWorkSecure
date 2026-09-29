@@ -14,6 +14,16 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next3Title_承認済み一枚絵と縮尺と字幕と低減設定を確認する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            var kv=Find<Image>("TitleKeyVisual");Assert.AreSame(game.PlanningArt.titleKeyVisual,kv.sprite);Assert.AreEqual(new Vector2(1672,941),kv.sprite.rect.size);Assert.AreEqual(new Vector2(.7f,.6f),kv.rectTransform.pivot);
+            Assert.AreEqual("kv",kv.GetComponent<OpsPlanningMotion>().Kind);Assert.AreEqual(20,kv.GetComponent<OpsPlanningMotion>().Period);Assert.That(kv.rectTransform.localScale.x,Is.InRange(1.02f,1.06f));Assert.AreEqual(.84f,Find<RectTransform>("TitleBrand").localScale.x);
+            Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="HomePortrait"||t.name=="HomeGreeting"));CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");Capture("134-title-kv");
+            game.SpeakSceneLine("think_01",0);yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("TitleCaption").text);Assert.IsFalse(game.PortraitVoicePlaying);
+            Click("HomeSettings");yield return new WaitForSecondsRealtime(.5f);Click("CaptionToggle");Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.5f);
+            game.SpeakSceneLine("think_02",0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual("",Find<TextMeshProUGUI>("TitleCaption").text);Assert.AreEqual(1.02f,Find<RectTransform>("TitleKeyVisual").localScale.x);CheckText();Capture("134-title-kv-reduced");LogAssert.NoUnexpectedReceived();
+        }
         [Test] public void Next3Bubbles_固定抽選と一度だけの報酬と旧保存を検証する()
         {
             int rare=0,consult=0,total=0;
@@ -163,7 +173,7 @@ namespace PatchWorkSecure.Tests
                 var b=Find<Button>(id);Assert.AreEqual(Color.white,b.colors.disabledColor);Assert.AreEqual(Color.white,b.GetComponent<Image>().color);
                 var g=b.GetComponent<OpsKitGradient>();Assert.Greater(g.Top.r,.95f);if(id!="NewYear")Assert.AreEqual(Color.white,g.Top);else Assert.Less(g.Bottom.g,.4f);
             }
-            AssertSpeechName("HomeGreeting","HomeGreetingName");
+            Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="HomeGreeting"));Assert.IsNotNull(Find<Image>("TitleKeyVisual").sprite);
             game.StartYear(14);yield return new WaitForSecondsRealtime(2);Capture("126-ui-planning");
             Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);Capture("126-ui-brief");AssertSpeechName("MissionHint","MissionHintName");
             Assert.AreEqual(-280,Find<RectTransform>("OpenEventBrief").anchoredPosition.y);Assert.AreEqual(-280,Find<RectTransform>("EmployeeConsultation").anchoredPosition.y);CheckPointer("OpenEventBrief");CheckPointer("EmployeeConsultation");Click("CloseDialog");yield return null;
@@ -227,7 +237,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);var game=Object.FindAnyObjectByType<OpsGame>();
-            Assert.AreEqual("title-veil",Find<OpsIncidentGraphic>("TitleVeil").Kind);Assert.AreEqual(.9f,Find<OpsUIReveal>("TitleLogoWordmark").Duration);Capture("122-next-title");
+            Assert.AreEqual("title-kv-veil",Find<OpsIncidentGraphic>("TitleVeil").Kind);Assert.AreEqual(.9f,Find<OpsUIReveal>("TitleLogoWordmark").Duration);Capture("122-next-title");
             game.StartYear(14);string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.8f);
             Assert.AreEqual(game.State.Current.name,Find<TextMeshProUGUI>("CalendarMonth").text);Assert.IsFalse(game.PhasePresentationCanSkip);Capture("122-next-calendar");
             // スキップに使った入力を、背後の行動ボタンへ通さない。初回は短縮しない。

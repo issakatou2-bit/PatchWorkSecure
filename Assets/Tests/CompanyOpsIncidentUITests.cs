@@ -21,7 +21,7 @@ namespace PatchWorkSecure.Tests
             {
                 var a = s.Estimate(response);
                 Assert.AreEqual("被害 " + a.lossMin + "～" + a.lossMax + "万円 / 停止 " + a.stopMin + "～" + a.stopMax + "h", s.Forecast(response));
-                Assert.AreEqual(response == "contain" ? 6 : response == "scope" ? 3 : 4, a.cost);
+                Assert.AreEqual(response == "contain" ? OpsCatalog.ContainCost : response == "scope" ? OpsCatalog.ScopeCost+s.Blindness*OpsCatalog.ScopeCostPerBlind : OpsCatalog.RecoverCost, a.cost);
                 Assert.GreaterOrEqual(a.lossMin, 0); Assert.GreaterOrEqual(a.lossMax, a.lossMin);
                 Assert.GreaterOrEqual(a.stopMin, 0); Assert.GreaterOrEqual(a.stopMax, a.stopMin);
                 // 公開条件を固定して乱数の真相だけを変更。未調査の幅は同じ。

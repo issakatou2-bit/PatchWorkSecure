@@ -155,7 +155,7 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.8f);
             Capture("01-title");
             var game = Object.FindAnyObjectByType<OpsGame>(); Assert.IsNotNull(game);
-            Assert.IsNotNull(Find<Image>("HomePortrait").sprite, "ひなたの暫定立ち絵が設定されていない");
+            Assert.IsNotNull(Find<Image>("TitleKeyVisual").sprite, "承認済みのタイトル一枚絵が設定されていない");
             Find<Button>("NewYear").onClick.Invoke(); yield return null;
             // 年度の乱数を固定してスクリーンショットと年間検証を再現可能にする。
             game.StartYear(14); yield return null;

@@ -78,7 +78,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void BeginVoice(OpsReactionLine line,float delay,int priority,string target)
         {
-            LastReactionId=line.id;LastReactionCaption=line.caption;voiceCaptionTarget=target;speakingPriority=priority;
+            LastReactionId=line.id;LastReactionCaption=line.caption;voiceCaptionTarget=homeVisible&&target=="NavigatorSpeech"?"TitleCaption":target;speakingPriority=priority;
             ApplyVoiceCaption();ApplyReactionFace(line.reaction,line);
             pendingVoice=line;voiceStartAt=Time.unscaledTime+Mathf.Max(0,delay);
             // 音声なしでも字幕を読める。操作や次の画面への進行は待たせない。

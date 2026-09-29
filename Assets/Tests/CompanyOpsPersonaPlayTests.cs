@@ -107,7 +107,12 @@ namespace PatchWorkSecure.Tests
         }
         private static IEnumerator ExecutePersonaCommand(PersonaCommand c)
         {
-            if(c.kind=="act")
+            if(c.kind=="bubble")
+            {
+                yield return PersonaClick("Tab0");yield return new WaitForSecondsRealtime(2);
+                yield return PersonaClick("OfficeBubble"+c.id);yield return null;
+            }
+            else if(c.kind=="act")
             {
                 if(c.id=="prepare") { yield return PersonaClick("OpenSituation"); yield return null; yield return PersonaClick("PrepareSituation"); yield return null; }
                 else { yield return PersonaClick("Tab0"); yield return null; yield return PersonaClick("Action_"+c.id); yield return null; }

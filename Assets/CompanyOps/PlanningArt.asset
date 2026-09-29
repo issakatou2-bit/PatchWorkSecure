@@ -41,3 +41,4 @@ MonoBehaviour:
   markerBubble: {fileID: 21300000, guid: 1340a5ac320883b498dcb2a70272b038, type: 3}
   logoIcon: {fileID: 21300000, guid: 091baccbd643c3b4ea45daa240edbee1, type: 3}
   logoWordmark: {fileID: 21300000, guid: d566bfb9ba57e8d4ea675630b72448eb, type: 3}
+  titleKeyVisual: {fileID: 21300000, guid: e6a847928ac5c004e907d30b1b1d3c65, type: 3}

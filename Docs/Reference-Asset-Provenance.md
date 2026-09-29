@@ -52,3 +52,7 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - 基本ポーズの目口差分は、Claude Codeが用意した`ArtSource/Hinata/gen-20260929/final/pose_fists*.png`（`Mockups/Hinata-Motion.md`と`Tools/Make-FaceFrames.py`）をそのまま利用。新たな生成・顔の描き直しは行わず、目と口の範囲をUnityのマスクで重ねている。原画の生成由来・商用利用前の確認は上の記録を引き継ぐ。
 - `Assets/Art/UI/HinataEmotions/`の6PNGは`Tools/Generate-Hinata-Emotions.py`で、紺`#1d2a44`の輪郭の独自図形を描画。キャラクター画像・第三者素材・フォント・AI画像生成は使用していない。新たな素材ライセンスやクレジットはない。キャラの手描き完成原画とは扱わない。
 - 演出は既存のUnity UI・画像・B案SEを使用。音程差とBGMの音量変化を追加したが、原音・曲・未承認のA案は変更していない。実装と検証は`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。
+
+## 2026-09-29 Quick-Wins-2の表示と音
+
+コイン・前月比の矢印はUnity UIの図形と文字で描画。社員の顔マークは既存の図形アイコンを実際の支援者に結び付けて使用。新しい画像・第三者素材は追加していない。心音・無効操作の短い二打は登録済みB案のダメージ音の再生時間・音程・音量を調整し、原音とアセット登録は変更していない。専用の新しいSEを承認前に投入したものではない。

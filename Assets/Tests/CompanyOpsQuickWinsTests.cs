@@ -32,6 +32,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(OpsGame.IsGoodMonthlyChange(-5,false));Assert.IsFalse(OpsGame.IsGoodMonthlyChange(5,false));Assert.IsTrue(OpsGame.IsGoodMonthlyChange(5,true));
             var color=Find<TextMeshProUGUI>("GrowthTrend4Amount").color;if(fatigueDelta<0)Assert.Greater(color.g,color.r);
             Capture("118-quickwins8-monthly");Assert.AreEqual(state,JsonUtility.ToJson(game.State));Click("Menu");if(!game.ReducedMotion)Click("ReduceMotion");Click("CloseDialog");game.OpenTab(0);yield return new WaitForSecondsRealtime(.8f);Capture("118-quickwins8-reduced");Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+            Assert.IsFalse(Object.FindObjectsByType<OpsRankChange>().Any(),"月報の再表示では昇格演出を繰り返さない");
             first.metricsAfter=null;game.OpenTab(0);yield return null;StringAssert.Contains("未記録",Find<TextMeshProUGUI>("GrowthTrendHeading").text);Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="GrowthTrend4"));
             LogAssert.NoUnexpectedReceived();
         }
@@ -83,6 +84,10 @@ namespace PatchWorkSecure.Tests
                 if(reduced)Assert.AreEqual(pos,((RectTransform)button.transform).anchoredPosition);
                 Capture(reduced?"115-quickwins5-reduced":"115-quickwins5-disabled");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual(pos,((RectTransform)button.transform).anchoredPosition);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
                 ExecuteEvents.Execute(button.gameObject,new BaseEventData(EventSystem.current),ExecuteEvents.submitHandler);Assert.AreEqual(count+2,game.RejectedPressCount);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
+                Click("Menu");Find<Slider>("SoundVolume").value=.4f;
+                Assert.IsTrue(game.GetComponents<AudioSource>().Where(s=>s.clip==game.Sounds.damage).All(s=>s.volume<=.4f*.25f+.001f));
+                Find<Slider>("SoundVolume").value=0;yield return new WaitForSecondsRealtime(.3f);Assert.IsFalse(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.damage&&s.isPlaying));
+                Find<Slider>("SoundVolume").value=.6f;Click("CloseDialog");
                 yield return new WaitForSecondsRealtime(1.5f);Assert.IsFalse(Object.FindObjectsByType<OpsBlockedTag>().Any());
             }
             LogAssert.NoUnexpectedReceived();
@@ -96,9 +101,14 @@ namespace PatchWorkSecure.Tests
                 game.State.stability=35;game.OpenTab(0);Assert.AreEqual(0,game.DangerPulseCount);
                 game.State.stability=34;game.OpenTab(0);yield return null;Assert.AreEqual(1,game.DangerPulseCount);
                 var pulse=Find<Image>("StabilityDanger");var pos=pulse.rectTransform.anchoredPosition;float alpha=pulse.color.a;
+                Click("Menu");Find<Slider>("SoundVolume").value=.4f;
+                Assert.IsTrue(game.GetComponents<AudioSource>().Where(s=>s.clip==game.Sounds.damage).All(s=>s.volume<=.4f*.12f+.001f));
+                Find<Slider>("SoundVolume").value=0;yield return new WaitForSecondsRealtime(.3f);Assert.IsFalse(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.damage&&s.isPlaying));
+                Find<Slider>("SoundVolume").value=.6f;Click("CloseDialog");
                 string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.5f);Assert.AreNotEqual(alpha,pulse.color.a);Assert.AreEqual(pos,pulse.rectTransform.anchoredPosition);Assert.AreEqual(Vector3.one,pulse.transform.localScale);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
                 Capture(reduced?"114-quickwins4-reduced":"114-quickwins4-danger");game.OpenTab(0);Assert.AreEqual(1,game.DangerPulseCount);
                 game.State.stability=33;game.OpenTab(0);Assert.AreEqual(2,game.DangerPulseCount);game.State.stability=34;game.OpenTab(0);Assert.AreEqual(2,game.DangerPulseCount);
+                game.State.stability=33;game.OpenTab(0);Assert.AreEqual(3,game.DangerPulseCount,"一度回復して再び悪化した場合も一打だけ知らせる");
                 yield return new WaitForSecondsRealtime(.5f);Assert.IsFalse(game.GetComponents<AudioSource>().Any(s=>s.clip==game.Sounds.damage&&s.isPlaying));
                 game.State.stability=36;game.OpenTab(0);Assert.IsFalse(Object.FindObjectsByType<OpsDangerPulse>().Any());
             }
@@ -129,8 +139,8 @@ namespace PatchWorkSecure.Tests
                 game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
                 game.State.culture=33;game.OpenTab(0);game.ChooseAction("listen");yield return null;
                 var effect=Object.FindObjectsByType<OpsRankChange>().First(e=>e.Before=="E"&&e.After=="D");Assert.IsTrue(effect.Up);
-                var label=effect.GetComponent<TextMeshProUGUI>();string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.1f);
-                if(reduced)Assert.AreEqual(Vector3.one,label.transform.localScale);else Assert.Less(label.transform.localScale.x,1);
+                var label=effect.GetComponent<TextMeshProUGUI>();var badgeColor=effect.Badge.color;string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.1f);
+                if(reduced){Assert.AreEqual(Vector3.one,label.transform.localScale);Assert.AreEqual(badgeColor,effect.Badge.color,"省演出は透明度のみ");}else Assert.Less(label.transform.localScale.x,1);
                 Capture(reduced?"112-quickwins2-reduced":"112-quickwins2-rank");yield return new WaitForSecondsRealtime(.45f);Assert.AreEqual("D",label.text);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
                 game.OpenTab(0);yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsRankChange>().Any());
                 // 降格は同じ表示部品の単体条件でも確認する。
@@ -155,6 +165,27 @@ namespace PatchWorkSecure.Tests
                 game.Buy(OpsCatalog.Index("backup"));yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());
             }
             LogAssert.NoUnexpectedReceived();
+        }
+        [UnityTest] public IEnumerator QuickWins1_四半期報酬を含む実増収を既存ルールのまま演出する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
+            for(int month=0;month<3;month++)
+            {
+                game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);
+                if(month<2)game.Next();
+            }
+            Assert.IsTrue(game.State.QuarterRewardPending);
+            // 報酬なしの月次収支は赤字だが、報酬を含む実際の予算は増える表示条件。
+            game.State.budget=100;game.State.trust=0;
+            for(int i=0;i<game.State.levels.Length&&game.State.Upkeep<=game.State.MonthlyGrant;i++)game.State.levels[i]=2;
+            Assert.Greater(game.State.Upkeep,game.State.MonthlyGrant);
+            Assert.Less(game.State.Upkeep,game.State.MonthlyGrant+OpsGrowthCatalog.QuarterBudget);
+            int before=game.State.budget;var expected=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(game.State));
+            Assert.IsTrue(expected.ClaimQuarterReward("budget"));Assert.IsTrue(expected.NextMonth());
+            game.OpenTab(0);Click("NextMonth");yield return null;CheckPointer("Reward_budget");Click("Reward_budget");yield return null;
+            Assert.AreEqual(JsonUtility.ToJson(expected),JsonUtility.ToJson(game.State),"状態・報酬額は既存ルールと一致する");
+            Assert.Greater(game.State.budget,before);Assert.IsNotNull(Find<OpsBudgetGain>("BudgetGainEffect"));Capture("119-quickwins1-quarter-reward");
+            yield return new WaitForSecondsRealtime(.7f);Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator QuickWins0_全事件の説明札はひなたと重ならず読める()
         {

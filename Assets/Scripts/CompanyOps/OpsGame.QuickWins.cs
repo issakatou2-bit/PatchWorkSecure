@@ -19,6 +19,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(row,id+"Amount",System.Math.Abs(delta).ToString(),17,0,45,24,14,tone);
         }
         private int[] rankBefore,rankAfter;
+        private readonly System.Collections.Generic.HashSet<int> rankedReports=new System.Collections.Generic.HashSet<int>();
         private bool workCompletePending;private int workCompleteMonth=-1;
         private int lastDanger=100;private OpsState dangerState;private AudioSource dangerAudio;
         public int DangerPulseCount {get;private set;}
@@ -49,15 +50,16 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(muted||soundVolume<=0||Sounds?.damage==null)yield break;
             if(rejectAudio==null)rejectAudio=NewAudioSource();
-            for(int i=0;i<2;i++){rejectAudio.clip=Sounds.damage;rejectAudio.volume=soundVolume*.25f;rejectAudio.pitch=.8f;rejectAudio.Play();yield return new WaitForSecondsRealtime(.07f);rejectAudio.Stop();if(i==0)yield return new WaitForSecondsRealtime(.05f);}
+            for(int i=0;i<2;i++){if(muted||soundVolume<=0)yield break;rejectAudio.clip=Sounds.damage;rejectAudio.volume=soundVolume*.25f;rejectAudio.pitch=.8f;rejectAudio.Play();yield return new WaitForSecondsRealtime(.07f);rejectAudio.Stop();if(i==0)yield return new WaitForSecondsRealtime(.05f);}
         }
         private void CheckDangerSignal()
         {
             if(!Application.isPlaying)return;
             if(dangerState!=State){dangerState=State;lastDanger=100;DangerPulseCount=0;}
             if(State.stability>=35){lastDanger=100;return;}
-            if(State.stability>=lastDanger)return;
-            lastDanger=State.stability;DangerPulseCount++;StartCoroutine(QuietHeartbeat());
+            bool fell=State.stability<lastDanger;lastDanger=State.stability;
+            if(!fell)return;
+            DangerPulseCount++;StartCoroutine(QuietHeartbeat());
         }
         private IEnumerator QuietHeartbeat()
         {
@@ -66,6 +68,7 @@ namespace PatchWorkSecure.CompanyOps
             if(dangerAudio==null)dangerAudio=NewAudioSource();
             for(int i=0;i<2;i++)
             {
+                if(muted||soundVolume<=0)yield break;
                 dangerAudio.clip=Sounds.damage;dangerAudio.pitch=.65f;dangerAudio.volume=soundVolume*(i==0?.12f:.08f);dangerAudio.Play();
                 yield return new WaitForSecondsRealtime(.09f);dangerAudio.Stop();
                 if(i==0)yield return new WaitForSecondsRealtime(.1f);
@@ -156,7 +159,7 @@ namespace PatchWorkSecure.CompanyOps
             float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.4f);label.text=Up&&t<.5f?Before:After;
             label.transform.localScale=new Vector3(Up&&!Owner.ReducedMotion?Mathf.Abs(1-2*t):1,1,1);
             label.alpha=Owner.ReducedMotion?Mathf.Abs(1-2*t)*.65f+.35f:1;
-            Badge.color=Color.Lerp(original,Up?Color.white:Color.gray,Mathf.Sin(t*Mathf.PI)*.6f);
+            Badge.color=Owner.ReducedMotion?original:Color.Lerp(original,Up?Color.white:Color.gray,Mathf.Sin(t*Mathf.PI)*.6f);
             if(t>=1){label.text=After;label.alpha=1;label.transform.localScale=Vector3.one;Badge.color=original;Destroy(this);}
         }
     }

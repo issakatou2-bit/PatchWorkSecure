@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で111件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で121件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -88,7 +88,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-29）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.10：共通UI・初回ガイド・月報・年間評価・設定を移行し、事件の備え表示と6月の雨を仕上げた。新ひなた・ロゴ・質感も更新し、動き①②と演出調査◎9技法を実装。PlayMode111/111、最後の差分位置・感情マーク補正後も追加5件各1/1、Verify4系統・コンパイル成功。報酬・難易度は変更なし。詳細は`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。社員の事件支援・工数追加・日常委任は実装済みだが、計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
+- 新試作v0.10：共通UI・次画面・新ひなた・ロゴ・質感、ひなたの動き①②と演出調査◎9技法、Quick-Wins-2の0〜8を実装済み。PlayMode121/121、最後の音量補正後も追加10件10/10、Verify4系統・コンパイル成功。報酬・難易度は変更なし。詳細は`Docs/Quick-Wins-2-Implementation-2026-09-29.md`と`Docs/Hinata-Motion-and-Feel-2026-09-29.md`。社員の事件支援・顔マーク・工数追加・日常委任は実装済み。計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。
 - 自動方針では放置6/300、他の方針は300/300が完走。限定対応に偏り、慣れた方針には易しい。**人間の初見プレイはまだ誰もしていない**（自動で完走できる＝面白い、ではない）。
 - ひなた：承認済み新デザイン（太線アニメ塗り・3頭身）の表情18・ポーズ18を`Assets/Sprites/Hinata/v2/`へ投入し、新試作・旧版とも置き換え済み。旧画像は`ArtSource/Hinata/legacy/`。基本ポーズ`pose_fists`は4素材の目口差分、他17ポーズは1枚絵で動く。移動・拡縮・回転を減らしてもまばたきは残る。来歴は`Docs/Hinata-Replacement-2026-09-29.md`と`Docs/Reference-Asset-Provenance.md`。学生服は不可。ボイス台本は`Docs/Voice/`。
 - 音：SEは加藤さんの試聴後の指定でB-brightの11音を試遊用に登録（`Docs/Sfx-Candidates-2026-09-29.md`）。A案は未投入。BGMはGemini / Lyriaの生成2曲。声はLが基準案で未投入。目・口の差分は`NavigatorPersona.AnimationFrames`で設定する。

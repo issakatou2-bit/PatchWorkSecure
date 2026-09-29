@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { resolutionActive = false; budgetGainPending=false; rankBefore=rankAfter=null; workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
+        public void StartYear(int seed) { resolutionActive = false; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
         public void OpenTab(int next) { tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
@@ -95,7 +95,11 @@ namespace PatchWorkSecure.CompanyOps
         }
         public void Next()
         {
-            var previous = ReadStats(); if (!State.NextMonth()) return;
+            AdvanceMonth(ReadStats());
+        }
+        private void AdvanceMonth(int[] previous)
+        {
+            if (!State.NextMonth()) return;
             RecordStatChanges(previous); tab = 0; Save(); Render();
             if (State.phase == OpsPhase.Ended) Feedback(State.IsClear ? OpsCue.Clear : OpsCue.Failure);
             else Toast(State.Current.name + "の計画 / 月次予算・工数を更新しました", true, OpsCue.Month);

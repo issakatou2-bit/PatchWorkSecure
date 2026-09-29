@@ -90,8 +90,9 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void TakeQuarterReward(string reward)
         {
+            var previous=ReadStats();
             if (!State.ClaimQuarterReward(reward)) return;
-            Save(); Next();
+            Save(); AdvanceMonth(previous);
             Toast("山場クリア報酬 / " + (reward == "budget" ? "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円" : "今月の支援枠 +1工数"), true, OpsCue.Growth);
         }
 

@@ -152,17 +152,38 @@ let S;
 // 自動の遊び手400年分で調整：考えて選ぶ方針は平均8年・最長11年、適当に選ぶ方針は平均1.4年
 const YEAR_K1=.35,YEAR_K2=.06,DECAY=2;
 function cap(){return 3+Math.floor((S.year-1)/3)}
-function scale(y){return 1+YEAR_K1*(y-1)+YEAR_K2*(y-1)*(y-1)}
-function income(){return 3+Math.floor((S.year-1)/2)+(hasRelic('bonus')?1:0)}
+// 本編（3年）は短い分、上がり方を急にする。数値は自動の遊び手で調整（Docs/Endless-Years-Design-2026-09-29.md）
+// 自動の遊び手（初心者相当＝半分くらい良い判断）で、初回クリア約4割→4回目約6割。考えて選ぶ方針は約7割→8割台
+let STORY_K1=.8,STORY_K2=.18;
+function scale(y){return S&&S.mode==='story'?1+STORY_K1*(y-1)+STORY_K2*(y-1)*(y-1):1+YEAR_K1*(y-1)+YEAR_K2*(y-1)*(y-1)}
+// ---- 引き継ぎ（ウマ娘の因子のようなもの）。挑戦のたびに1つ選んで貯める。最大3つ ----
+const PERKS=[
+ {id:'card',name:'前の年度の置き土産',d:'施策を1枚、Lv2で持って始める'},
+ {id:'coins',name:'予算の前倒し',d:'始めのコイン +8'},
+ {id:'trust',name:'社長の信頼',d:'信頼の上限 +8（最初から満タン）'},
+ {id:'rule',name:'定着した社内ルール',d:'社内ルールを1つ持って始める'},
+ {id:'staff',name:'育った後輩',d:'毎月のコイン +2'},
+];
+function loadInh(){return JSON.parse(getK('pws-protoA-inherit','[]'))}
+function saveInh(a){setK('pws-protoA-inherit',JSON.stringify(a))}
+function unlocked(){return getK('pws-protoA-unlock','0')==='1'}
+function setUnlocked(){setK('pws-protoA-unlock','1')}
+function maxTrust(){return 20+(S.inh||[]).filter(x=>x.id==='trust').length*8}
+function income(){return 3+Math.floor((S.year-1)/2)+(hasRelic('bonus')?1:0)+(S.inh||[]).filter(x=>x.id==='staff').length*2}
 const TITLES={first:'初年度クリア',nodmg:'無傷の一年',allpeak:'山場全勝',combo:'コンボの達人（コンボ4つ）',y3:'3年の守り',y5:'5年の守り',y10:'10年の守り',ss:'総合ランクSS',retire:'花道の引退（5年以上で引退）'};
-function loadBest(){try{return JSON.parse(localStorage.getItem('pws-protoA-best')||'{}')}catch(e){return {}}}
-function saveBest(b){try{localStorage.setItem('pws-protoA-best',JSON.stringify(b))}catch(e){}}
+const MEM={};
+function getK(k,d){try{const v=localStorage.getItem(k);if(v!==null)return v}catch(e){}return k in MEM?MEM[k]:d}
+function setK(k,v){MEM[k]=v;try{localStorage.setItem(k,v)}catch(e){}}
+function loadBest(){return JSON.parse(getK('pws-protoA-best','{}'))}
+function saveBest(b){setK('pws-protoA-best',JSON.stringify(b))}
 function totalRank(v){return v>=22000?'SS':v>=15000?'S':v>=8000?'A':v>=2000?'B':'C'}
 function newSeq(){const kinds=Object.keys(KINDS);let seq=[],last='';for(let m=0;m<12;m++){let k;do{k=kinds[rnd(kinds.length)]}while(k===last);seq.push({kind:k,quiet:rnd(3)===0});last=k}return seq}
 function rnd(n){return Math.floor(Math.random()*n)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
-function newRun(){
-  S={m:0,year:1,trust:20,coins:5,owned:{},relics:[],seq:newSeq(),phase:'draft',draft:[],picked:false,log:'',peaks:0,yearPeaks:0,yearDmg:0,yearScore:0,total:0,titles:[]};
+function newRun(mode){mode=mode||'story';
+  S={mode,m:0,year:1,trust:20,coins:5,owned:{},relics:[],seq:newSeq(),phase:'draft',draft:[],picked:false,log:'',peaks:0,yearPeaks:0,yearDmg:0,yearScore:0,total:0,titles:[],inh:mode==='story'?loadInh():[]};
+  for(const x of S.inh){if(x.id==='card'&&x.card)S.owned[x.card]=Math.max(2,S.owned[x.card]||0);if(x.id==='coins')S.coins+=8;if(x.id==='rule'&&x.rule&&!S.relics.includes(x.rule))S.relics.push(x.rule)}
+  S.trust=maxTrust();
   deal();render();say('新年度！　まずは今月の施策を1枚えらぼ！','pose_wave');
 }
 function lv(id){return S.owned[id]||0}
@@ -189,9 +210,9 @@ function responses(){
   ].map(r=>({...r,total:b+r.add}));
 }
 function render(){
-  document.getElementById('month').innerHTML='<span style="font-size:15px">'+S.year+'年目</span> '+MONTHS[S.m];
+  document.getElementById('month').innerHTML='<span style="font-size:15px">'+(S.mode==='story'?S.year+'/3年目':'エンドレス '+S.year+'年目')+'</span> '+MONTHS[S.m];
   document.getElementById('track').innerHTML=MONTHS.map((n,i)=>`<div class="dot ${PEAK.includes(i)?'peak':''} ${i<S.m?'done':''} ${i===S.m?'now':''}">${PEAK.includes(i)?'山':''}</div>`).join('');
-  document.getElementById('trust').textContent=S.trust;document.getElementById('trustBar').style.width=(S.trust/20*100)+'%';
+  document.getElementById('trust').textContent=S.trust;document.getElementById('trustBar').style.width=(S.trust/maxTrust()*100)+'%';
   document.getElementById('coins').textContent=S.coins;
   const own=CARDS.filter(c=>has(c.id));
   document.getElementById('owned').innerHTML=own.length?own.map(c=>`<div class="chip"><span class="tag t-${c.tag} r">${TAG_ICON[c.tag]}</span>${c.name}<span style="margin-left:auto;color:var(--pink)" class="r">Lv${lv(c.id)}</span></div>`).join(''):'<div class="chip" style="color:#9aa6bd">まだ何もない</div>';
@@ -204,7 +225,7 @@ function render(){
    <div class="meter"><div class="row"><span class="r" style="width:64px">守り</span><div class="track2"><div class="fill" id="defFill" style="width:${Math.min(100,bd.d/Math.max(t,1)*100/1.3)}%"></div><div class="th" style="left:${100/1.3}%"></div></div><span class="r" style="width:40px">${bd.d}</span></div>
    <div style="font-size:12px;color:var(--gray)">${bd.parts.map(p=>(p[2]?'<b style="color:#b07a00">':'')+p[0]+' +'+p[1]+(p[2]?'</b>':'')).join('　')||'この事件に効く施策がまだない'}</div></div>`;
   const nx=S.seq[S.m+1];
-  document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${threat(S.m+1)}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">決算の月。越えれば'+(S.year+1)+'年目へ（脅威 ×'+scale(S.year+1).toFixed(2)+'）</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
+  document.getElementById('next').innerHTML=`<div class="r" style="font-size:16px">来月の予告</div>${nx?`<div style="margin-top:8px"><span class="kind r" style="background:${KINDS[nx.kind]};color:#fff;border-radius:10px;padding:3px 12px;font-size:14px">${nx.kind}</span></div><div class="small" style="margin-top:6px">脅威 ${threat(S.m+1)}${PEAK.includes(S.m+1)?'（山場）':''}</div>`:'<div class="small">'+(S.mode==='story'&&S.year===3?'3年目の決算。越えればエンディング！':'決算の月。越えれば'+(S.year+1)+'年目へ（脅威 ×'+scale(S.year+1).toFixed(2)+'）')+'</div>'}<div class="say" id="say"></div><img class="hinata" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_wave.png" alt="ひなた">`;
   const cards=document.getElementById('cards'),acts=document.getElementById('actions');
   if(S.phase==='draft'){
     document.getElementById('draftTitle').innerHTML=S.picked?'<span style="color:#2bb673">① 施策をえらんだ</span>　→　右下の「事件に向かう」を押す':'<span style="background:#ff6f91;color:#fff;border-radius:8px;padding:2px 10px">①</span> 施策を1枚えらぶ（コインで買う）　…えらばず「見送る」もできる';
@@ -245,17 +266,34 @@ function resolve(r){
 function relicPick(){const opts=shuffle(RELICS.filter(r=>!S.relics.includes(r.id))).slice(0,3);modal(`<h2 class="r">山場のごほうび：社内ルールを1つ</h2><div style="font-size:14px;color:var(--gray)">ずっと効き続ける。組み合わせで強くなる。</div><div class="cards" style="margin-top:14px">${opts.map(r=>`<div class="card" data-id="${r.id}" style="height:170px"><span class="tag r" style="background:var(--navy)">規</span><h4 class="r">${r.name}</h4><div class="desc">${r.d}</div></div>`).join('')}</div>`);
   document.querySelectorAll('#modalBox .card').forEach(el=>el.onclick=()=>{S.relics.push(el.dataset.id);closeModal();chord();render()})}
 function award(id){if(!S.titles.includes(id))S.titles.push(id)}
-function yearEnd(){const y=S.year;S.yearScore+=150*y+S.trust*5*y;if(S.yearDmg===0)award('nodmg');if(S.yearPeaks===4)award('allpeak');if(activeCombos().length>=4)award('combo');if(y===1)award('first');if(y===3)award('y3');if(y===5)award('y5');if(y===10)award('y10');
+function yearEnd(){const y=S.year;S.yearScore+=150*y+S.trust*5*y;if(S.mode==='story'&&y===3){if(S.yearDmg===0)award('nodmg');if(S.yearPeaks===4)award('allpeak');award('y3');S.total+=S.yearScore;return ending(true)}if(S.yearDmg===0)award('nodmg');if(S.yearPeaks===4)award('allpeak');if(activeCombos().length>=4)award('combo');if(y===1)award('first');if(y===3)award('y3');if(y===5)award('y5');if(y===10)award('y10');
   S.total+=S.yearScore;const ys=S.yearScore;
   // 設備の老朽化：持っている施策のうち1つがLvを1失う（サポート終了）
   const own=shuffle(CARDS.filter(c=>has(c.id)));const olds=own.slice(0,DECAY);const old=olds[0];
   modal(`<h2 class="r">${y}年目、クリア！</h2><div style="font-size:15px;line-height:1.9">この年の点数 <b class="r">${ys}</b>（年を重ねるほど1年あたりの点数が増える）／累計 <b class="r" style="color:var(--pink)">${S.total}</b>　総合ランク ${totalRank(S.total)}</div>
    <div style="margin:10px 0;padding:10px 14px;border-radius:14px;background:#fff4f6;font-size:14px;line-height:1.8"><b class="r">${y+1}年目に起きること</b><br>・攻撃が強くなる：脅威 ×${scale(y).toFixed(2)} → ×${scale(y+1).toFixed(2)}<br>・会社が大きくなる：毎月のコイン ${3+Math.floor((y-1)/2)} → ${3+Math.floor(y/2)}${olds.length?`<br>・設備の老朽化：「${olds.map(o=>o.name).join('」「')}」のサポートが終わり、Lvが1下がる`:''}${Math.floor(y/3)>Math.floor((y-1)/3)?`<br>・新しい技術が出る：施策のLv上限 ${cap()} → ${cap()+1}`:''}<br>・信頼が少し戻る（+4）</div>
-   <div style="font-size:13px;color:var(--gray)">続けると、途中で信頼が尽きたとき<b>その年の点数が半分</b>になる。引退すれば、今の累計で確定。</div>
-   <div style="display:flex;gap:12px;margin-top:14px"><button class="pri" id="cont" style="flex:2">${y+1}年目へ続ける</button><button id="retire" style="flex:1">ここで引退する</button></div>`);
-  document.getElementById('cont').onclick=()=>{closeModal();for(const o of olds){S.owned[o.id]--;if(S.owned[o.id]<=0)delete S.owned[o.id]}S.year++;S.m=0;S.seq=newSeq();S.trust=Math.min(20,S.trust+4);S.yearPeaks=0;S.yearDmg=0;S.yearScore=0;S.coins+=income();S.phase='draft';deal();render();banner(S.year+'年目','linear-gradient(90deg,#6c63ff,#ff6f91)');chord();say(S.year+'年目！　攻撃も手ごわくなるよ。気を引きしめていこ！','pose_salute')};
-  document.getElementById('retire').onclick=()=>{if(S.year>=5)award('retire');end('retire')}}
-function end(clear){if(clear!=='retire'&&clear!==true){S.total+=Math.floor(S.yearScore/2)}if(totalRank(S.total)==='SS')award('ss');
+   <div style="font-size:13px;color:var(--gray)">${S.mode==='endless'?'続けると、途中で信頼が尽きたとき<b>その年の点数が半分</b>になる。引退すれば、今の累計で確定。':'3年目の決算を越えるとエンディング。'}</div>
+   <div style="display:flex;gap:12px;margin-top:14px"><button class="pri" id="cont" style="flex:2">${y+1}年目へ続ける</button>${S.mode==='endless'?'<button id="retire" style="flex:1">ここで引退する</button>':''}</div>`);
+  document.getElementById('cont').onclick=()=>{closeModal();for(const o of olds){S.owned[o.id]--;if(S.owned[o.id]<=0)delete S.owned[o.id]}S.year++;S.m=0;S.seq=newSeq();S.trust=Math.min(maxTrust(),S.trust+4);S.yearPeaks=0;S.yearDmg=0;S.yearScore=0;S.coins+=income();S.phase='draft';deal();render();banner(S.year+'年目','linear-gradient(90deg,#6c63ff,#ff6f91)');chord();say(S.year+'年目！　攻撃も手ごわくなるよ。気を引きしめていこ！','pose_salute')};
+  const rb=document.getElementById('retire');if(rb)rb.onclick=()=>{if(S.year>=5)award('retire');end('retire')}}
+// ---- 本編のエンディングと引き継ぎ ----
+const ENDINGS={SS:['伝説の情シス','3年間、会社は大きな被害を一度も出さなかった。社長「うちの守りは、君たちのおかげだ」'],S:['頼られる情シス','困ったらまず情シスへ。社員みんなが、そう言うようになった。'],A:['安心して任せられる情シス','大きな事件も、備えと手順で乗り越えた3年間。'],B:['なんとか守りきった3年','危ない場面もあった。でも、会社は今日も動いている。'],C:['ぎりぎりの3年','満身創痍。それでも、最後まで守りきった。']};
+function storyRank(v){return v>=STORY_TH[0]?'SS':v>=STORY_TH[1]?'S':v>=STORY_TH[2]?'A':v>=STORY_TH[3]?'B':'C'}
+let STORY_TH=[3700,3450,3150,2800];
+function ending(clear){const rank=clear?storyRank(S.total):'－';if(clear){setUnlocked();if(rank==='SS')award('ss')}
+  const b=loadBest();b.storyClears=(b.storyClears||0)+(clear?1:0);b.storyBest=clear?Math.max(b.storyBest||0,S.total):(b.storyBest||0);b.titles=[...new Set([...(b.titles||[]),...S.titles])];saveBest(b);
+  const [title,text]=clear?ENDINGS[rank]:['会社を守りきれなかった',(S.year)+'年目の'+MONTHS[S.m]+'、信頼が尽きてしまった。でも、この経験は次に活きる。'];
+  const opts=shuffle(PERKS.slice()).slice(0,3).map(p=>({...p,card:p.id==='card'?(Object.keys(S.owned).sort((a,b)=>S.owned[b]-S.owned[a])[0]||CARDS[rnd(CARDS.length)].id):null,rule:p.id==='rule'?(S.relics[0]||RELICS[rnd(RELICS.length)].id):null}));
+  const inh=loadInh();
+  modal(`<div style="text-align:center"><div class="r" style="font-size:14px;color:var(--gray)">${clear?'エンディング':'挑戦おわり'}</div><h2 class="r" style="font-size:34px;margin:4px 0">${title}</h2>${clear?`<div class="r" style="font-size:72px;color:var(--pink);line-height:1">${rank}</div>`:''}<div style="font-size:15px;margin:8px 0">${text}</div><div style="font-size:14px">総合スコア <b class="r">${S.total}</b>${clear&&!b.unlockedShown?'　<span class="r" style="color:#e0a100">エンドレスが開いた！</span>':''}</div></div>
+   <div style="margin-top:14px"><b class="r">引き継ぎを1つ選ぶ</b><span style="font-size:12px;color:var(--gray)">（次の本編に持っていける。最大3つ。いま ${inh.length}/3${inh.length>=3?'：いちばん古いものと入れ替わる':''}）</span></div>
+   <div class="cards" style="margin-top:8px">${opts.map((o,k)=>`<div class="card" data-k="${k}" style="height:150px;width:220px"><h4 class="r">${o.name}</h4><div class="desc">${o.d}${o.card?'<br>（'+CARDS.find(c=>c.id===o.card).name+'）':''}${o.rule?'<br>（'+RELICS.find(r=>r.id===o.rule).name+'）':''}</div></div>`).join('')}</div>`);
+  if(clear){b.unlockedShown=true;saveBest(b)}
+  document.querySelectorAll('#modalBox .card').forEach(el=>el.onclick=()=>{const a=loadInh();a.push(opts[+el.dataset.k]);while(a.length>3)a.shift();saveInh(a);chord();menu()})}
+function menu(){const inh=loadInh(),b=loadBest();modal(`<h2 class="r">情シスの3年間（試作A）</h2><div style="font-size:14px;line-height:1.8">本編は3年間。3年目の決算を越えるとエンディング。<br>引き継ぎ：${inh.length?inh.map(x=>'<span class="relic">'+x.name+'</span>').join(' '):'まだない（挑戦するたびに1つもらえる）'}<br>本編クリア ${b.storyClears||0}回　本編の最高点 ${b.storyBest||0}　エンドレスの最長 ${(b.years||0).toFixed(1)}年</div>
+  <div style="display:flex;gap:12px;margin-top:14px"><button class="pri" id="mStory" style="flex:2">本編をはじめる</button><button id="mEndless" style="flex:1" ${unlocked()?'':'disabled'}>${unlocked()?'エンドレス':'エンドレス（本編クリアで開く）'}</button></div>`);
+  document.getElementById('mStory').onclick=()=>{closeModal();newRun('story')};document.getElementById('mEndless').onclick=()=>{if(unlocked()){closeModal();newRun('endless')}}}
+function end(clear){if(S.mode==='story')return ending(false);if(clear!=='retire'&&clear!==true){S.total+=Math.floor(S.yearScore/2)}if(totalRank(S.total)==='SS')award('ss');
   const b=loadBest();const newT=S.titles.filter(t=>!(b.titles||[]).includes(t));const years=S.year-1+(clear==='retire'?1:S.m/12);
   const recY=!(b.years>=years),recS=!(b.score>=S.total);b.years=Math.max(b.years||0,years);b.score=Math.max(b.score||0,S.total);b.titles=[...new Set([...(b.titles||[]),...S.titles])];saveBest(b);
   const span=clear==='retire'?S.year+'年':((S.year-1)+'年と'+S.m+'か月');const rank=totalRank(S.total);
@@ -263,7 +301,7 @@ function end(clear){if(clear!=='retire'&&clear!==true){S.total+=Math.floor(S.yea
    <div style="display:flex;gap:24px;align-items:center"><div style="font-size:64px;color:var(--pink)" class="r">${rank}</div><div style="font-size:16px;line-height:1.9">守り続けた期間 <b class="r">${span}</b>${recY?' <span class="r" style="color:#e0a100">自己ベスト！</span>':''}<br>総合スコア <b class="r">${S.total}</b>${recS?' <span class="r" style="color:#e0a100">自己ベスト！</span>':''}</div></div>
    <div style="margin-top:8px;font-size:14px">称号：${S.titles.length?S.titles.map(t=>`<span class="relic" style="background:${newT.includes(t)?'#e0a100':'#1d2a44'}">${TITLES[t]}${newT.includes(t)?' NEW':''}</span>`).join(' '):'なし'}</div>
    <div style="margin-top:8px;font-size:13px;color:var(--gray)">自己ベスト：${(b.years||0).toFixed(1)}年／${b.score||0}点　集めた称号 ${b.titles.length} / ${Object.keys(TITLES).length}</div>
-   <div style="margin-top:16px"><button class="pri" id="again">最初の年度から</button></div>`);document.getElementById('again').onclick=()=>{closeModal();newRun()}}
+   <div style="margin-top:16px"><button class="pri" id="again">最初の年度から</button></div>`);document.getElementById('again').onclick=()=>menu()}
 function endOld(clear){const score=S.trust*60+S.peaks*120+Object.values(S.owned).reduce((a,b)=>a+b,0)*10;const rank=score>=1500?'SS':score>=1200?'S':score>=900?'A':score>=600?'B':'C';
   modal(`<h2 class="r">${clear?'一年、おつかれさま！':'信頼がなくなってしまった……'}</h2><div style="font-size:64px;color:var(--pink)" class="r">ランク ${rank}</div><div>信頼 ${S.trust}／山場の突破 ${S.peaks}／点数 ${score}</div><div style="margin-top:10px;font-size:13px;color:var(--gray)">引く札と事件の順番は毎回かわる。別の組み立てを試してみよう。</div><div style="margin-top:16px"><button class="pri" id="again">もう1年</button></div>`);document.getElementById('again').onclick=()=>{closeModal();newRun()}}
 function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
@@ -276,7 +314,7 @@ function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
 function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
 addEventListener('resize',fit);fit();
 newRun();
-modal(`<h2 class="r">遊び方（試作A）</h2><div style="font-size:15px;line-height:1.9">1年（12か月）で会社を守る。毎月2ステップ。<br><b>① 施策を1枚えらぶ</b>：3枚から1枚をコインで買う。持っている施策は、ずっと守りに加わる。2枚そろうと<b>コンボ</b>で大きく強くなる。<br><b>② 事件への対応をえらぶ</b>：「広く止める／範囲を絞る／復旧を急ぐ」。守りが脅威を上回れば防げる。足りない分だけ<b>信頼</b>が減る。<br>コインは毎月+3。信頼が0になると終わり。山場（6・9・12・3月）を越えると<b>社内ルール</b>がもらえる。来月の事件は右上に予告される。</div><div style="margin-top:14px"><button class="pri" onclick="closeModal()">はじめる</button></div>`);
+modal(`<h2 class="r">遊び方（試作A）</h2><div style="font-size:15px;line-height:1.9">1年（12か月）で会社を守る。毎月2ステップ。<br><b>① 施策を1枚えらぶ</b>：3枚から1枚をコインで買う。持っている施策は、ずっと守りに加わる。2枚そろうと<b>コンボ</b>で大きく強くなる。<br><b>② 事件への対応をえらぶ</b>：「広く止める／範囲を絞る／復旧を急ぐ」。守りが脅威を上回れば防げる。足りない分だけ<b>信頼</b>が減る。<br>コインは毎月+3。信頼が0になると終わり。山場（6・9・12・3月）を越えると<b>社内ルール</b>がもらえる。来月の事件は右上に予告される。</div><div style="margin-top:14px"><button class="pri" onclick="menu()">つぎへ</button></div>`);
 </script>
 </body>
 </html>

@@ -17,6 +17,9 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+        public const int BubblesPerMonth=4, BubbleReward=1, ConsultationChance=50, RareBubbleChance=3;
+        public static readonly string[] BubbleNames={"紙づまり","PCが重い","パスワード","来客Wi-Fi","プロジェクタ","宅配の端末","相談があるよ","？？？"};
+        public static readonly string[] BubbleRewards={"信頼 +1","疲労 −1","相談文化 +1","信頼 +1","疲労 −1","相談文化 +1","手がかり","お礼カード"};
 // 判断の深さ。旧年度には遡及適用しない。
 public const int KnowledgeMax=4, UnauditedBlindness=2, MissingEvidenceBlindness=1, ClueBlindnessCut=1;
 public const int BlindLossPerPoint=3, ScopeCostPerBlind=2, QuietContainStop=2, SegmentContainStopCut=2, MinimumContainStop=3;

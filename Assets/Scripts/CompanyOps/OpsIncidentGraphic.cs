@@ -12,7 +12,25 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="heart")
+            if(Kind=="bubble-glass"||Kind=="bubble-ring")
+            {
+                var center=r.center;float radius=Mathf.Min(w,h)*.48f;
+                if(Kind=="bubble-glass")
+                {
+                    int start=vh.currentVertCount;Add(vh,center+new Vector2(-w*.16f,h*.18f),Color.white);
+                    for(int i=0;i<=64;i++){float a=i*Mathf.PI*2/64;Add(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,Color.Lerp(Color.white,color,.33f));if(i>0)vh.AddTriangle(start,start+i,start+i+1);}
+                }
+                for(int i=0;i<64;i++){if(Kind=="bubble-ring"&&i%4>1)continue;float a=i*Mathf.PI*2/64,b=(i+1)*Mathf.PI*2/64;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*radius,Kind=="bubble-ring"?3:2);}
+            }
+            else if(Kind=="bubble-icon")
+            {
+                int k=(int)Offset;System.Action<float,float,float,float> line=(a,b,c,d)=>Line(vh,new Vector2(r.xMin+a*w,r.yMin+b*h),new Vector2(r.xMin+c*w,r.yMin+d*h),2.3f);
+                if(k==7){for(int i=0;i<10;i++){float a=(90+i*36)*Mathf.Deg2Rad,b=(90+(i+1)*36)*Mathf.Deg2Rad;float ra=i%2==0?.45f:.2f,rb=i%2==0?.2f:.45f;Line(vh,r.center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*w*ra,r.center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*w*rb,2.3f);}}
+                else if(k==2){for(int i=0;i<32;i++){float a=i*Mathf.PI/16,b=(i+1)*Mathf.PI/16;Line(vh,new Vector2(r.xMin+w*.3f,r.center.y)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*w*.22f,new Vector2(r.xMin+w*.3f,r.center.y)+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*w*.22f,2.3f);}line(.52f,.5f,.95f,.5f);line(.85f,.5f,.85f,.3f);}
+                else if(k==3){for(int ring=0;ring<3;ring++)for(int i=0;i<16;i++){float a=(40+i*6)*Mathf.Deg2Rad,b=(40+(i+1)*6)*Mathf.Deg2Rad,ra=w*(.3f+ring*.25f);Line(vh,new Vector2(r.center.x,r.yMin)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*ra,new Vector2(r.center.x,r.yMin)+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*ra,2.3f);}}
+                else{line(.1f,.25f,.9f,.25f);line(.9f,.25f,.9f,.8f);line(.9f,.8f,.1f,.8f);line(.1f,.8f,.1f,.25f);if(k==6){line(.1f,.8f,.5f,.45f);line(.5f,.45f,.9f,.8f);}else if(k==0){line(.25f,.8f,.25f,1);line(.25f,1,.75f,1);line(.75f,1,.75f,.8f);line(.3f,.5f,.7f,.5f);}else{line(.5f,.25f,.5f,.05f);line(.3f,.05f,.7f,.05f);}}
+            }
+            else if(Kind=="heart")
             {
                 var p=new[]{new Vector2(.5f,.73f),new Vector2(.35f,.94f),new Vector2(.18f,.97f),new Vector2(.04f,.83f),new Vector2(.03f,.64f),new Vector2(.17f,.4f),new Vector2(.5f,.05f),new Vector2(.83f,.4f),new Vector2(.97f,.64f),new Vector2(.96f,.83f),new Vector2(.82f,.97f),new Vector2(.65f,.94f)};
                 Polygon(vh,System.Array.ConvertAll(p,v=>new Vector2(r.xMin+v.x*w,r.yMin+v.y*h)),color);

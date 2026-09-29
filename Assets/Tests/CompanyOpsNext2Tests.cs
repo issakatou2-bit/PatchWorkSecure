@@ -14,6 +14,39 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Test] public void Next3Bubbles_固定抽選と一度だけの報酬と旧保存を検証する()
+        {
+            int rare=0,consult=0,total=0;
+            for(int seed=0;seed<200;seed++)
+            {
+                var state=new OpsState(seed,true);var same=new OpsState(seed,true);CollectionAssert.AreEqual(state.bubbleSchedule,same.bubbleSchedule);
+                rare+=state.bubbleSchedule.Count(k=>k==7);consult+=state.bubbleSchedule.Count(k=>k==6);total+=48;
+                for(int i=0;i<4;i++)
+                {
+                    int kind=state.BubbleKind(i),work=state.capacity,knowledge=state.SituationKnowledge;var metrics=state.ReportMetrics;
+                    Assert.IsTrue(state.PopBubble(i));Assert.IsFalse(state.PopBubble(i));Assert.AreEqual(work,state.capacity);
+                    if(kind==7)CollectionAssert.AreEqual(metrics,state.ReportMetrics);
+                    if(kind==6)Assert.AreEqual(knowledge+1,state.SituationKnowledge);
+                    Assert.IsTrue(state.Valid());
+                }
+                var copy=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(state));Assert.IsTrue(copy.Valid());Assert.AreEqual(4,copy.BubbleDone);Assert.AreEqual(state.clueCollected,copy.clueCollected);
+                state.BeginIncident();Assert.IsFalse(state.PopBubble(0));state.Resolve("contain");state.NextMonth();if(state.phase==OpsPhase.Planning){Assert.IsFalse(state.clueCollected);Assert.AreEqual(0,state.BubbleDone);}
+            }
+            Assert.That(rare/(float)total,Is.InRange(.02f,.04f));Assert.That(consult/(200f*12),Is.InRange(.44f,.54f));
+            var legacy=new OpsState(14){bubbleRules=0,bubbleSchedule=null,poppedBubbles=null};Assert.IsTrue(legacy.Valid());Assert.AreEqual(-1,legacy.BubbleKind(0));Assert.IsFalse(legacy.PopBubble(0));
+            var invalid=new OpsState(14);invalid.poppedBubbles[11]=1;Assert.IsFalse(invalid.Valid());invalid.poppedBubbles[11]=0;invalid.clueCollected=true;Assert.IsFalse(invalid.Valid());
+        }
+        [UnityTest] public IEnumerator Next3Bubbles_出現と弾ける瞬間と手がかりとレアを撮影する()
+        {
+            int seed=Enumerable.Range(0,10000).First(s=>{var a=new OpsState(s,true).bubbleSchedule.Take(4);return a.Contains(6)&&a.Contains(7);});
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(seed);yield return new WaitForSecondsRealtime(3);
+            Assert.AreEqual(4,Find<RectTransform>("OfficeStage").GetComponentsInChildren<Button>().Count(b=>b.name.StartsWith("OfficeBubble")));Capture("133-bubbles-appear");
+            for(int i=0;i<4;i++){CheckPointer("OfficeBubble"+i);Assert.AreEqual(70,Find<RectTransform>("OfficeBubble"+i).rect.width);}
+            int normal=Enumerable.Range(0,4).First(i=>game.State.BubbleKind(i)<6);int work=game.State.capacity;Click("OfficeBubble"+normal);yield return new WaitForSecondsRealtime(.12f);Assert.AreEqual(8,Object.FindObjectsByType<RectTransform>().Count(t=>t.name.StartsWith("BubbleDrop")));Capture("133-bubbles-pop");yield return new WaitForSecondsRealtime(.5f);
+            int clue=Enumerable.Range(0,4).First(i=>game.State.BubbleKind(i)==6);int before=game.State.SituationKnowledge;Click("OfficeBubble"+clue);yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual(before+1,game.State.SituationKnowledge);Assert.AreEqual(game.State.Current.staff,Find<TextMeshProUGUI>("BubbleClueText").text);Capture("133-bubbles-clue");
+            int gold=Enumerable.Range(0,4).First(i=>game.State.BubbleKind(i)==7);CheckPointer("OfficeBubble"+gold);Click("OfficeBubble"+gold);yield return new WaitForSecondsRealtime(.12f);Capture("133-bubbles-rare");yield return new WaitForSecondsRealtime(.5f);Assert.IsNotNull(Find<TextMeshProUGUI>("BubbleThanksText"));StringAssert.StartsWith("extra_",game.LastReactionId);Assert.AreEqual(work,game.State.capacity);Assert.IsTrue(game.State.Valid());CheckText();
+            game.OpenTab(0);yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual("困りごと 3 / 4",Find<TextMeshProUGUI>("BubbleDone").text);Assert.IsNotNull(Find<TextMeshProUGUI>("BubbleClueText"));game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);Assert.IsFalse(Object.FindObjectsByType<Button>().Any(b=>b.name.StartsWith("OfficeBubble")));Assert.AreEqual(game.State.SituationKnowledge+" / 4",Find<TextMeshProUGUI>("KnowledgeValue").text);Capture("133-bubbles-incident-clue");LogAssert.NoUnexpectedReceived();
+        }
         [Test] public void Next3Depth_五規則と旧年度と保存の境界を確認する()
         {
             var state=new OpsState(14,true);SetEvent(state,"ransom-extortion");Assert.AreEqual(4,state.Blindness);Assert.AreEqual(11,state.Estimate("scope").cost);Assert.AreEqual(24,state.ScopeOversight);Assert.AreEqual(2,state.Preview("recover").cost);

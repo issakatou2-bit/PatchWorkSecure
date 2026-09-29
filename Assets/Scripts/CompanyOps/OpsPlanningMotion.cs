@@ -3,6 +3,27 @@ using UnityEngine.UI;
 
 namespace PatchWorkSecure.CompanyOps
 {
+    public sealed class OpsBubbleMotion : MonoBehaviour
+    {
+        public OpsGame Owner;public string Kind="bubble";public float ArrivalAt,PopAt=-1;public Vector2 Direction;
+        private RectTransform rect;private Vector2 origin;private CanvasGroup group;private float started;
+        private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;started=Time.unscaledTime;group=gameObject.AddComponent<CanvasGroup>();}
+        private void Update()
+        {
+            float now=Time.unscaledTime,t=now-started;bool reduced=Owner!=null&&Owner.ReducedMotion;
+            if(Kind=="drop"||Kind=="reward")
+            {
+                float duration=Kind=="drop"?.5f:1f,p=Mathf.Clamp01(t/duration);group.blocksRaycasts=false;group.alpha=1-p;
+                rect.anchoredPosition=origin+(Kind=="drop"?new Vector2(Direction.x,-Direction.y)*p:Vector2.up*70*p);rect.localScale=Vector3.one*(Kind=="drop"?1-.7f*p:1);
+                if(p>=1)Destroy(gameObject);return;
+            }
+            if(PopAt>=0){float p=Mathf.Clamp01((now-PopAt)/.32f);group.blocksRaycasts=false;rect.localScale=Vector3.one*(p<.3f?1-.18f*p/.3f:.82f+(p-.3f)*1.1f);group.alpha=1-p;if(p>=1)Destroy(gameObject);return;}
+            float age=now-ArrivalAt;group.blocksRaycasts=age>=0;group.alpha=age<0?0:1;
+            if(age<0){rect.localScale=Vector3.zero;return;}
+            float a=Mathf.Clamp01(age/.5f);rect.localScale=Vector3.one*(reduced?1:a<.7f?a/.7f*1.12f:Mathf.Lerp(1.12f,1,(a-.7f)/.3f));
+            rect.anchoredPosition=origin+(reduced?Vector2.zero:new Vector2(Mathf.Sin(age*2)*3,Mathf.Sin(age*2)*5));
+        }
+    }
     // UIだけで再現するモックの動き。ゲームの乱数・判定には触れない。
     public sealed class OpsPlanningMotion : MonoBehaviour
     {

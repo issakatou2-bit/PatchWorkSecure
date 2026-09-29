@@ -52,6 +52,7 @@ public static class CompanyOpsDepthChecks
     static PersonaCommand Next(OpsState s,Profile p,PersonaTurn turn)
     {
         if(s.phase!=OpsPhase.Planning||turn.steps>=24)return null;
+        if(p.depth>0||s.month%2==0)for(int i=0;i<4;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)return Command("bubble",i.ToString());
         if(string.IsNullOrEmpty(s.supportOrder)&&p.depth>0)
         {
             string order=p.role==0?"routine":s.DataRecoveryApplies||s.RestartApplies?"recover":"investigate";

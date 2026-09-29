@@ -75,7 +75,7 @@ namespace PatchWorkSecure.CompanyOps
         public List<OpsOutcome> history = new List<OpsOutcome>();
         public int[] monthStartMetrics;
         public OpsState() { }
-        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1;InitializeDecisionDepth(yearSeed); staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
+        public OpsState(int yearSeed) { seed = yearSeed; situationRules = 1; growthRules = 1; missionBudgetRules=1;rankBenefitRules=1;InitializeDecisionDepth(yearSeed);InitializeBubbles(yearSeed); staffExperience = new int[3]; monthStartMetrics = ReportMetrics; }
         public int[] ReportMetrics => new[] { Preparedness, Resilience, culture, trust, 100-fatigue, Organization };
         public OpsMonth Current => MonthAt(month);
         public OpsSituation Situation => SituationAt(month);
@@ -443,7 +443,7 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
-            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
+            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;

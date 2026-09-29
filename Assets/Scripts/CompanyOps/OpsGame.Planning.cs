@@ -116,6 +116,94 @@ namespace PatchWorkSecure.CompanyOps
                 ticket.GetComponent<Image>().sprite=PlanningArt.markerBubble;ticket.GetComponent<Image>().type=Image.Type.Simple;
                 Border(ticket,PlanBlue,3); Motion((RectTransform)ticket.transform,"pop",1.6f,.7f);Hover(ticket,State.Ticket.title);
             }
+            PlanningBubbles(stage);
+        }
+        private string bubbleMonthKey="";
+        private float bubbleArrivalAt,lastBubblePop=-10;
+        private int bubbleStreak;
+        private AudioSource bubbleAudio;
+        private void PlanningBubbles(RectTransform stage)
+        {
+            if(State.bubbleRules==0)return;
+            string key=State.seed+":"+State.month;
+            if(bubbleMonthKey!=key){bubbleMonthKey=key;bubbleArrivalAt=Time.unscaledTime;bubbleStreak=0;}
+            var counter=PCard(stage,"BubbleCounter",16,16,220,34,Color.white,16,false);
+            PText(counter,"BubbleDone","困りごと "+State.BubbleDone+" / 4",12,0,196,34,16);
+            // 時間帯はカウンターの右へ。どちらもマップの公開情報。
+            var clock=stage.Find("PlanningTimeBadge") as RectTransform;if(clock!=null)clock.anchoredPosition=new Vector2(250,-18);
+            for(int i=0;i<4;i++)if(State.BubbleAvailable(i))
+            {
+                int index=i,kind=State.BubbleKind(i);Color tint=kind==7?Hex("e0a100"):kind==6?PlanPink:PlanBlue;
+                Vector2 position=BubblePosition(kind,index);
+                var b=PButton(stage,"OfficeBubble"+i,"",position.x,position.y,70,70,()=>PopOfficeBubble(index),new Color(1,1,1,.9f),tint,28);
+                b.GetComponent<Image>().sprite=PlanningArt.round28;b.GetComponent<Image>().color=new Color(1,1,1,.01f);
+                IncidentShape(b.transform,"BubbleGlass","bubble-glass",0,0,70,70,tint);
+                IncidentShape(b.transform,"BubbleIcon","bubble-icon",20,20,30,30,tint).GetComponent<OpsIncidentGraphic>().Offset=kind;
+                var tag=PCard(b.transform,"BubbleTag",-28,74,126,22,tint,12,false);PText(tag,"BubbleName",OpsCatalog.BubbleNames[kind],0,0,126,22,12,Color.white,true,true);
+                if(kind==7){var ring=IncidentShape(b.transform,"BubbleRareRing","bubble-ring",-9,-9,88,88,Hex("ffc02e"));ring.pivot=new Vector2(.5f,.5f);ring.anchoredPosition+=new Vector2(44,-44);Motion(ring,"rotate",6);}
+                var motion=b.gameObject.AddComponent<OpsBubbleMotion>();motion.Owner=this;motion.ArrivalAt=bubbleArrivalAt+i*.6f;
+            }
+            if(State.clueCollected)BubbleClue(stage,false);
+        }
+        private Vector2 BubblePosition(int kind,int index)
+        {
+            Vector2[] rooms={new Vector2(95,110),new Vector2(245,190),new Vector2(280,290),new Vector2(505,300),new Vector2(705,200),new Vector2(760,420),new Vector2(600,235)};
+            if(kind<7)return rooms[kind];
+            var occupied=Enumerable.Range(0,4).Where(i=>State.BubbleKind(i)<7).Select(i=>rooms[State.BubbleKind(i)]).ToList();
+            int rareIndex=Enumerable.Range(0,index).Count(i=>State.BubbleKind(i)==7);
+            return rooms.Where(p=>!occupied.Contains(p)).Reverse().ElementAt(rareIndex);
+        }
+        public bool PopOfficeBubble(int index)
+        {
+            if(State==null||!State.BubbleAvailable(index))return false;
+            var button=screen.GetComponentsInChildren<Button>().FirstOrDefault(b=>b.name=="OfficeBubble"+index);if(button==null)return false;
+            int kind=State.BubbleKind(index);if(!State.PopBubble(index))return false;
+            button.interactable=false;button.GetComponent<OpsBubbleMotion>().PopAt=Time.unscaledTime;
+            float now=Time.unscaledTime;bubbleStreak=now-lastBubblePop<2.5f?bubbleStreak+1:1;lastBubblePop=now;
+            BubbleSound(kind==7,Mathf.Pow(1.122f,Mathf.Max(0,bubbleStreak-2)));
+            var stage=button.transform.parent;var p=BubblePosition(kind,index);Color tint=kind==7?Hex("e0a100"):kind==6?PlanPink:PlanBlue;
+            for(int j=0,n=kind==7?14:8;j<n;j++)
+            {
+                float angle=j*Mathf.PI*2/n;var drop=PCard(stage,"BubbleDrop"+j,p.x+30,p.y+30,10,10,tint,12,false);
+                var fx=drop.gameObject.AddComponent<OpsBubbleMotion>();fx.Owner=this;fx.Kind="drop";fx.Direction=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*54;
+            }
+            var reward=PText(stage,"BubbleReward",OpsCatalog.BubbleRewards[kind],p.x-70,p.y-30,210,34,22,Color.white,true,true);
+            var outline=reward.gameObject.AddComponent<Outline>();outline.effectColor=tint;outline.effectDistance=new Vector2(2,-2);
+            var rewardMotion=reward.gameObject.AddComponent<OpsBubbleMotion>();rewardMotion.Owner=this;rewardMotion.Kind="reward";
+            screen.GetComponentsInChildren<TextMeshProUGUI>().First(t=>t.name=="BubbleDone").text="困りごと "+State.BubbleDone+" / 4";
+            if(kind==6)BubbleClue(stage,true);
+            if(kind==7)
+            {
+                var prior=stage.Find("BubbleThanks");if(prior!=null){prior.gameObject.SetActive(false);Destroy(prior.gameObject);}
+                var clue=stage.Find("BubbleClue");if(clue!=null)clue.gameObject.SetActive(false);
+                var thanks=PCard(stage,"BubbleThanks",186,58,420,104,Color.white,20);PText(thanks,"BubbleThanksText","社員からのお礼\n助かった！ いつもありがとう。",20,12,380,76,18,PlanInk,false);
+                Reveal(thanks);StartCoroutine(FinishBubbleThanks(thanks,clue));SpeakSceneLine(LastReactionId=="extra_embarrassed"?"extra_doya":"extra_embarrassed",.25f);
+            }
+            // HUDだけ更新し、他の泡の出現や弾ける演出を再起動しない。
+            var company=screen.Find("CompanyGrowth");if(company!=null){company.gameObject.SetActive(false);Destroy(company.gameObject);}
+            var companyShadow=screen.Find("CompanyGrowthShadow");if(companyShadow!=null){companyShadow.gameObject.SetActive(false);Destroy(companyShadow.gameObject);}
+            PlanningCompany();
+            var goal=screen.Find("YearGoals/Goal2/GoalProgress");if(goal!=null)goal.GetComponent<TextMeshProUGUI>().text=State.culture+"/65";
+            Save();return true;
+        }
+        private void BubbleClue(Transform stage,bool reveal)
+        {
+            if(stage.Find("BubbleClue")!=null)return;
+            var card=PCard(stage,"BubbleClue",186,58,420,104,Color.white,20);
+            PText(card,"BubbleClueTitle","今月の手がかり（事件のときに効く）",16,8,388,24,13,PlanPink);
+            PText(card,"BubbleClueText",State.Current.staff,16,32,388,64,16,PlanInk,false);if(reveal)Reveal(card);
+        }
+        private void BubbleSound(bool rare,float pitch)
+        {
+            if(!Application.isPlaying||muted||soundVolume<=0)return;
+            if(bubbleAudio==null)bubbleAudio=NewAudioSource();PlayCue(OpsCue.Click);bubbleAudio.clip=buttonAudio.clip;bubbleAudio.pitch=pitch;bubbleAudio.volume=soundVolume*.65f;bubbleAudio.Play();buttonAudio.Stop();
+            if(rare)StartCoroutine(BubbleChime(pitch));
+        }
+        private System.Collections.IEnumerator FinishBubbleThanks(RectTransform thanks,Transform clue)
+        {yield return new WaitForSecondsRealtime(3);if(thanks!=null)Destroy(thanks.gameObject);if(clue!=null)clue.gameObject.SetActive(true);}
+        private System.Collections.IEnumerator BubbleChime(float pitch)
+        {
+            for(int i=0;i<2;i++){yield return new WaitForSecondsRealtime(.09f);if(muted||soundVolume<=0)yield break;bubbleAudio.pitch=pitch*(i==0?1.5f:2);bubbleAudio.Play();}
         }
         private void Border(Button b,Color color,float size)
         { var edge=b.gameObject.AddComponent<Outline>();edge.effectColor=color;edge.effectDistance=new Vector2(size,-size); }

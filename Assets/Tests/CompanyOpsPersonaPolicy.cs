@@ -37,6 +37,7 @@ namespace PatchWorkSecure.Tests
             int role=memory.role;
             bool familiar=memory.readTerms.Contains(s.Current.lesson);
             bool experienced=memory.cycle>0;
+            if(experienced||role==2||s.month%2==0)for(int i=0;i<4;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)return Command("bubble",i.ToString());
             if (string.IsNullOrEmpty(s.supportOrder) && (role==2 || experienced))
             {
                 string order=role==0 || role==1 ? "routine" : s.DataRecoveryApplies || s.RestartApplies ? "recover" : "investigate";
@@ -85,7 +86,7 @@ namespace PatchWorkSecure.Tests
                 return s.Current.kind=="outage" ? "recover" : "contain";
             int lossWeight=memory.role==0 ? 7 : memory.role==1 ? 4 : 3;
             int stopWeight=memory.role==0 ? 4 : memory.role==1 ? 1 : 3;
-            return Responses.OrderBy(r=> { var f=PublicForecast(s,r); int fee=r=="contain"?6:r=="scope"?3:4;
+            return Responses.OrderBy(r=> { var f=PublicForecast(s,r); int fee=s.Estimate(r).cost;
                 return lossWeight*f[1]+stopWeight*f[3]+fee*2; }).First();
         }
         public static bool ReadLesson(OpsState s, PersonaMemory memory) => memory.role!=0 || memory.cycle>0 || s.Latest.loss>6;
@@ -96,6 +97,6 @@ namespace PatchWorkSecure.Tests
         }
         public static bool ApplyRule(OpsState s, PersonaCommand c) => c.kind=="act" ? s.Act(c.id) : c.kind=="proposal" ? s.Act("proposal",c.id) :
             c.kind=="buy" ? s.Upgrade(OpsCatalog.Index(c.id)) : c.kind=="support" ? s.AssignSupport(c.id) : c.kind=="practice" ?
-            s.Practice(int.Parse(c.id)) : s.ResolveTicket(c.id=="delegate");
+            s.Practice(int.Parse(c.id)) : c.kind=="bubble"?s.PopBubble(int.Parse(c.id)):s.ResolveTicket(c.id=="delegate");
     }
 }

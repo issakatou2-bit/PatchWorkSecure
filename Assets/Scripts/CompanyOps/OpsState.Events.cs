@@ -5,6 +5,40 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsState
     {
+        public int bubbleRules;
+        public int[] bubbleSchedule, poppedBubbles;
+        private void InitializeBubbles(int yearSeed)
+        {
+            bubbleRules=1;bubbleSchedule=new int[12*OpsCatalog.BubblesPerMonth];poppedBubbles=new int[12];
+            var random=new Random(unchecked(yearSeed^0x4B0BB1E));
+            for(int m=0;m<12;m++)
+            {
+                var kinds=Enumerable.Range(0,6).OrderBy(_=>random.Next()).Take(4).ToArray();
+                if(random.Next(100)<OpsCatalog.ConsultationChance)kinds[3]=6;
+                for(int i=0;i<4;i++)bubbleSchedule[m*4+i]=random.Next(100)<OpsCatalog.RareBubbleChance?7:kinds[i];
+            }
+        }
+        public int BubbleKind(int index)=>bubbleRules==0||index<0||index>=4?-1:bubbleSchedule[month*4+index];
+        public bool BubbleAvailable(int index)=>phase==OpsPhase.Planning&&BubbleKind(index)>=0&&(poppedBubbles[month]&(1<<index))==0;
+        public int BubbleDone=>bubbleRules==0?0:Enumerable.Range(0,4).Count(i=>(poppedBubbles[month]&(1<<i))!=0);
+        public bool PopBubble(int index)
+        {
+            if(!BubbleAvailable(index))return false;int kind=BubbleKind(index);poppedBubbles[month]|=1<<index;
+            if(kind==6)clueCollected=true;
+            else if(kind<6)
+            {
+                if(kind==0||kind==3)trust=Clamp(trust+OpsCatalog.BubbleReward);
+                else if(kind==1||kind==4)fatigue=Clamp(fatigue-OpsCatalog.BubbleReward);
+                else culture=Clamp(culture+OpsCatalog.BubbleReward);
+            }
+            // 金の泡はお礼と反応だけ。経験値・追加予算・能力補正を与えない。
+            Note("困りごと「"+OpsCatalog.BubbleNames[kind]+"」 / "+OpsCatalog.BubbleRewards[kind]);CheckMilestones();return true;
+        }
+        private bool ValidBubbles()=>bubbleRules>=0&&bubbleRules<=1&&(bubbleRules==0?
+            (bubbleSchedule==null||bubbleSchedule.Length==0)&&(poppedBubbles==null||poppedBubbles.Length==0):
+            bubbleSchedule!=null&&bubbleSchedule.Length==48&&bubbleSchedule.All(k=>k>=0&&k<=7)&&poppedBubbles!=null&&poppedBubbles.Length==12&&
+            poppedBubbles.All(bits=>bits>=0&&bits<16)&&poppedBubbles.Skip(month+1).All(bits=>bits==0)&&
+            (!clueCollected||Enumerable.Range(0,4).Any(i=>BubbleKind(i)==6&&(poppedBubbles[month]&(1<<i))!=0)));
         public int decisionDepthRules;
         public int[] incidentTimes;
         public bool clueCollected;

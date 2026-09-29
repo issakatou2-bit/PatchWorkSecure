@@ -156,8 +156,9 @@ namespace PatchWorkSecure.CompanyOps
                 PText(card,"ResponseName_"+id,ResponseTitles[i],88,18,w-108,32,22);
                 PText(card,"ResponseType_"+id,State.CurrentProfile==null?ResponseLines[i]:State.ResponseName(id),88,51,w-108,37,14,PlanGray,false);
                 PText(card,"CostLabel_"+id,"対応費",20,105,98,38,15,PlanGray);
-                PText(card,"ResponseCost_"+id,e.cost.ToString(),112,105,w-174,38,26,State.budget<e.cost?IncidentRed:PlanInk,true,true).alignment=TextAlignmentOptions.MidlineRight;
-                PText(card,"CostUnit_"+id,"万円",w-57,105,37,38,14,PlanGray).alignment=TextAlignmentOptions.MidlineLeft;
+                var cost=PText(card,"ResponseCost_"+id,e.cost.ToString(),112,105,w-174,38,26,State.budget<e.cost?IncidentRed:PlanInk,true,true);cost.alignment=TextAlignmentOptions.MidlineRight;
+                var costUnit=PText(card,"CostUnit_"+id,"万円",w-57,105,37,38,14,PlanInk);costUnit.alignment=TextAlignmentOptions.MidlineLeft;
+                InlineMetric(cost,costUnit,w-20);
                 EstimateMetric(card,"Stop_"+id,"業務停止",e.stopMin,e.stopMax,stopScale,159,PlanPink,w);
                 EstimateMetric(card,"Loss_"+id,"被害",e.lossMin,e.lossMax,lossScale,227,Hex("ff9f43"),w);
                 PText(card,"ResponseCaution_"+id,State.budget<e.cost?"手元予算が対応費に不足\n"+caution[i]:caution[i],20,305,w-40,State.HasPeakGoal?44:70,14,PlanInk,false);
@@ -210,12 +211,18 @@ namespace PatchWorkSecure.CompanyOps
         {
             float w=width-40;
             PText(parent,"EstimateLabel_"+id,title,20,y,95,30,15,PlanGray);
-            PText(parent,"EstimateValue_"+id,min==max?min.ToString():min+"～"+max,112,y,width-174,30,18,PlanInk,true,true).alignment=TextAlignmentOptions.MidlineRight;
-            PText(parent,"EstimateUnit_"+id,id.StartsWith("Stop")?"時間":"万円",width-57,y,37,30,13,PlanGray).alignment=TextAlignmentOptions.MidlineLeft;
+            var value=PText(parent,"EstimateValue_"+id,min==max?min.ToString():min+"～"+max,112,y,width-174,30,18,PlanInk,true,true);value.alignment=TextAlignmentOptions.MidlineRight;
+            var unit=PText(parent,"EstimateUnit_"+id,id.StartsWith("Stop")?"時間":"万円",width-57,y,37,30,13,PlanInk);unit.alignment=TextAlignmentOptions.MidlineLeft;
+            InlineMetric(value,unit,width-20);
             var track=PCard(parent,"EstimateTrack_"+id,20,y+44,w,10,Hex("e6eaf2"),12,false);
             // 帯は下限から上限まで。3方針の尺度は同一で、確率に見える塗り分けはしない。
             PCard(track,"EstimateBand_"+id,w*min/scale,0,w*(max-min)/scale,10,color,12,false);
             if(min==max) PCard(track,"EstimateFloor_"+id,Mathf.Min(w-3,w*min/scale),0,3,10,color,12,false);
+        }
+        private void InlineMetric(TextMeshProUGUI number,TextMeshProUGUI unit,float right)
+        {
+            number.textWrappingMode=unit.textWrappingMode=TextWrappingModes.NoWrap;
+            var flow=number.gameObject.AddComponent<OpsInlineMetric>();flow.Number=number;flow.Unit=unit;flow.Right=right;
         }
         private void Glyph(Transform parent,string name,string key,float x,float y,float size)
         {

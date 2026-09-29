@@ -29,6 +29,23 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
         }
+        [UnityTest] public IEnumerator Polish4_10_数字と小さい単位は同じ行で隙間なくつながる()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
+            foreach(int size in new[]{0,2})
+            {
+                Click("Menu");Click("TextSize"+size);Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);
+                var metrics=game.Surface.GetComponentsInChildren<OpsInlineMetric>();Assert.AreEqual(9,metrics.Length);
+                foreach(var flow in metrics)
+                {
+                    Assert.AreEqual(flow.Number.rectTransform.anchoredPosition.y,flow.Unit.rectTransform.anchoredPosition.y);
+                    Assert.AreEqual(flow.Number.rectTransform.anchoredPosition.x+flow.Number.rectTransform.rect.width,flow.Unit.rectTransform.anchoredPosition.x,.01f);
+                    Assert.Less(flow.Unit.fontSize,flow.Number.fontSize);Assert.IsFalse(flow.Unit.isTextOverflowing);
+                }
+                if(size==0)PolishCapture(10);
+            }
+            Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_09_備えは未導入点線と導入済み緑と社員支援青を区別する()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();

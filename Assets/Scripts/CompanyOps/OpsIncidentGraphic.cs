@@ -9,6 +9,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         public string Kind;
         public float Offset;
+        public float StrokeWidth=2;
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
@@ -80,12 +81,13 @@ namespace PatchWorkSecure.CompanyOps
             }
             else if(Kind=="dashed"||Kind=="round-dashed")
             {
-                for(float x=12;x<w-12;x+=16) {Quad(vh,r.xMin+x,r.yMin,Mathf.Min(9,w-12-x),2,color,color);Quad(vh,r.xMin+x,r.yMax-2,Mathf.Min(9,w-12-x),2,color,color);}
-                for(float y=8;y<h-8;y+=16) {Quad(vh,r.xMin,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);Quad(vh,r.xMax-2,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);}
+                float line=StrokeWidth;
+                for(float x=12;x<w-12;x+=16) {Quad(vh,r.xMin+x,r.yMin,Mathf.Min(9,w-12-x),line,color,color);Quad(vh,r.xMin+x,r.yMax-line,Mathf.Min(9,w-12-x),line,color,color);}
+                for(float y=8;y<h-8;y+=16) {Quad(vh,r.xMin,r.yMin+y,line,Mathf.Min(9,h-8-y),color,color);Quad(vh,r.xMax-line,r.yMin+y,line,Mathf.Min(9,h-8-y),color,color);}
                 if(Kind=="round-dashed")for(int c=0;c<4;c++)
                 {
                     var center=new Vector2(c==0||c==3?r.xMax-6:r.xMin+6,c<2?r.yMax-6:r.yMin+6);
-                    for(int k=0;k<5;k++){float a=(c*90+k*18)*Mathf.Deg2Rad,b=a+18*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*5,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*5,2);}
+                    for(int k=0;k<5;k++){float a=(c*90+k*18)*Mathf.Deg2Rad,b=a+18*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*5,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*5,line);}
                 }
             }
             else if(Kind=="finger")

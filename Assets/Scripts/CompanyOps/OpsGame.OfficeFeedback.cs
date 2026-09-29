@@ -28,9 +28,10 @@ namespace PatchWorkSecure.CompanyOps
                     int level=State.Level(ids[i]);if(level==0&&placeholders++>=3)continue;float x=16+slot++*34;
                     if(level==0)
                     {
-                        var device=Rect(room.transform,"RoomDevice_"+ids[i],x,area.height-44,26,30);
-                        IncidentShape(device,"UninstalledFrame","round-dashed",0,0,26,30,Color.white);
-                        PText(device,"UninstalledPlus","+",0,0,26,30,20,Color.white,true,true);
+                        var device=Rect(room.transform,"RoomDevice_"+ids[i],area.width-40-(placeholders-1)*34,area.height-44,26,30);
+                        var frame=IncidentShape(device,"UninstalledFrame","round-dashed",0,0,26,30,new Color(1,1,1,.5f));
+                        frame.GetComponent<OpsIncidentGraphic>().StrokeWidth=1;
+                        PText(device,"UninstalledPlus","+",0,0,26,30,20,new Color(1,1,1,.5f),true,true);
                     }
                     else
                     {

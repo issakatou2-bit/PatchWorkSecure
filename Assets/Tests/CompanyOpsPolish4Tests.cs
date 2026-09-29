@@ -24,6 +24,18 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(PolishBubbleSeed);yield return new WaitForSecondsRealtime(3);
         }
+        [UnityTest] public IEnumerator Polish4_04_未導入枠は一ピクセル半透明で部屋の隅に収まる()
+        {
+            yield return PolishPlanning();
+            foreach(var frame in Find<RectTransform>("OfficeStage").GetComponentsInChildren<OpsIncidentGraphic>().Where(g=>g.name=="UninstalledFrame"))
+            {
+                Assert.AreEqual(1,frame.StrokeWidth);Assert.AreEqual(.5f,frame.color.a);
+                var device=(RectTransform)frame.transform.parent;var room=(RectTransform)device.parent;
+                Assert.That(device.anchoredPosition.x,Is.InRange(room.rect.width-110,room.rect.width-26));
+                Assert.LessOrEqual(room.GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.name=="UninstalledFrame"),3);
+            }
+            PolishCapture(4);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_03_ランプはサーバー室の名札の下に収まる()
         {
             yield return PolishPlanning();var room=Find<RectTransform>("Room_server");var label=room.Find("RoomLabel").GetComponent<RectTransform>();

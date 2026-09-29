@@ -33,6 +33,9 @@ public const float ContainmentStep=.1f, ContainmentScanSeconds=3, ContainmentRev
 public const float ContainmentHitStop=.07f, MinigameDangerSeconds=6, MinigameUrgentSeconds=3;
 public const double ContainmentRoomSpread=.028, ContainmentCrossSpread=.012;
 public static readonly string[] ContainmentRoomNames={"執務室","営業","制作","経理"};
+public const float MailSeconds=40, MailFeedbackSeconds=1.6f, MailRightDelay=.3f;
+public const int MailCount=10, MailGoodPoints=10, MailMissPenalty=15, MailFalsePenalty=5, MailPracticeXp=2;
+public const int MailS=95, MailA=75, MailB=50;
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
 public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};

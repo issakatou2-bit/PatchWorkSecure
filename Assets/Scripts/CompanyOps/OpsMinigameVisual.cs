@@ -54,8 +54,12 @@ namespace PatchWorkSecure.CompanyOps
                 rect.localScale=originalScale*(reduced?1:p<.6f?Mathf.Lerp(2.4f,.92f,p/.6f):Mathf.Lerp(.92f,1,(p-.6f)/.4f));
                 rect.localEulerAngles=new Vector3(0,0,reduced?0:Mathf.Lerp(-12,-4,p));
             }
+            if(Kind=="enter")
+            {rect.anchoredPosition=origin+Vector2.down*(reduced?0:40*(1-p));rect.localScale=originalScale*(reduced?1:Mathf.Lerp(.95f,1,p));}
+            if(Kind=="mail-out")
+            {rect.anchoredPosition=origin+Vector2.right*(reduced?0:Direction.x*rect.rect.width*1.2f*p);rect.localEulerAngles=new Vector3(0,0,reduced?0:-Direction.x*10*p);var group=GetComponent<CanvasGroup>();if(group==null)group=gameObject.AddComponent<CanvasGroup>();group.alpha=1-p;}
             if(p<1)return;
-            if(Kind=="hit"||Kind=="shake"){Stop();Destroy(this);}
+            if(Kind=="hit"||Kind=="shake"||Kind=="enter"){Stop();Destroy(this);}
             else if(Kind=="stamp"){rect.localScale=originalScale;Destroy(this);}
             else Destroy(gameObject);
         }

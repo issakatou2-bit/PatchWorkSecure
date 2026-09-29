@@ -12,15 +12,16 @@ namespace PatchWorkSecure.CompanyOps
         public int Score { get; private set; } = OpsCatalog.MinigameDelegateScore;
         public bool Delegated { get; private set; }
         public float Elapsed { get; protected set; }
-        public float Remaining => Math.Max(0, OpsCatalog.MinigameSeconds - Elapsed);
+        public float Duration { get; private set; }
+        public float Remaining => Math.Max(0, Duration - Elapsed);
         public bool Monitor { get; private set; }
         public bool Segment { get; private set; }
         public bool Backup { get; private set; }
-        public string Grade => Score >= OpsCatalog.MinigameS ? "S" : Score >= OpsCatalog.MinigameA ? "A" : Score >= OpsCatalog.MinigameB ? "B" : "C";
+        public virtual string Grade => Score >= OpsCatalog.MinigameS ? "S" : Score >= OpsCatalog.MinigameA ? "A" : Score >= OpsCatalog.MinigameB ? "B" : "C";
         public string EndVoice => Score >= OpsCatalog.MinigameGood ? "mg_end_good" : Score >= OpsCatalog.MinigameDelegateScore ? "mg_end_ok" : "mg_end_bad";
-        public OpsMinigame(string title, OpsState state)
+        public OpsMinigame(string title, OpsState state, float duration=OpsCatalog.MinigameSeconds)
         {
-            Title=title;Monitor=state.Level("monitor")>0;Segment=state.Level("segment")>0;Backup=state.Level("backup")>0;
+            Title=title;Duration=duration;Monitor=state.Level("monitor")>0;Segment=state.Level("segment")>0;Backup=state.Level("backup")>0;
         }
         public virtual bool Start()
         {
@@ -35,7 +36,7 @@ namespace PatchWorkSecure.CompanyOps
         public virtual void Tick(float delta)
         {
             if(Phase!=OpsMinigamePhase.Playing||float.IsNaN(delta)||float.IsInfinity(delta)||delta<=0)return;
-            Elapsed=Math.Min(OpsCatalog.MinigameSeconds,Elapsed+delta);
+            Elapsed=Math.Min(Duration,Elapsed+delta);
             if(Remaining<=0)OnTimeUp();
         }
         protected virtual void OnTimeUp()=>Complete(OpsCatalog.MinigameDelegateScore);

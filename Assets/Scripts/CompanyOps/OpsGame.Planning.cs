@@ -463,9 +463,9 @@ namespace PatchWorkSecure.CompanyOps
         {
             var nav=PCard(d,"PlanningMenuLinks",-274,0,250,760);
             PText(nav,"LinksTitle","会社の情報",20,25,210,38,24);
-            string[] ids={"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide"},labels={"運用チーム・育成","日常チケット","運用ノート","仕事を分担する目標","今月の社内事情","遊び方"};
-            Action[] actions={TeamDialog,TicketDialog,()=>OpenTab(2),()=>GrowthPlan(1),SituationDialog,Guide};
-            for(int j=0;j<ids.Length;j++)PButton(nav,ids[j],labels[j],16,92+j*72,218,58,actions[j],Hex("f3f6fb"),PlanInk,16,null,j!=1||State.Ticket!=null);
+            string[] ids={"OpenTeam","OpenTicket","Tab2","Goal1","OpenSituation","OpenGuide","MailTraining"},labels={"運用チーム・育成","日常チケット","運用ノート","仕事を分担する目標","今月の社内事情","遊び方","メール研修 / 1工数"};
+            Action[] actions={TeamDialog,TicketDialog,()=>OpenTab(2),()=>GrowthPlan(1),SituationDialog,Guide,OpenMailTraining};
+            for(int j=0;j<ids.Length;j++)PButton(nav,ids[j],labels[j],16,92+j*72,218,58,actions[j],Hex("f3f6fb"),PlanInk,16,null,(j!=1||State.Ticket!=null)&&(j!=6||State.MailTrainingBlock==""));
             PText(nav,"SavingNotice",SaveWarning==""?"行動ごとに自動保存":"保存について確認が必要",20,654,210,65,16,PlanGray,false);
         }
     }

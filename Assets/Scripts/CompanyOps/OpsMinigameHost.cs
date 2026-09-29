@@ -6,6 +6,6 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsMinigameHost : MonoBehaviour
     {
         public OpsGame Owner;
-        private void Update(){if(Owner!=null)Owner.TickMinigame(Time.unscaledDeltaTime);}
+        private void Update(){if(Owner!=null){Owner.TickMinigame(Time.unscaledDeltaTime);Owner.TickMinigameInput();}}
     }
 }

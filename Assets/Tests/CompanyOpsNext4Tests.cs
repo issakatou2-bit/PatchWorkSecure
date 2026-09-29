@@ -56,7 +56,10 @@ namespace PatchWorkSecure.Tests
             // テストでは真相を使って未達の固定ケースを選ぶ。プレイヤーの見込みには使用しない。
             int seed=game.State.seed;while(game.State.Preview("recover").loss<=OpsCatalog.JuneLossGoal&&game.State.Preview("recover").downtime<=OpsCatalog.JuneStopGoal)game.State.seed=++seed;
             game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.5f);
-            Assert.IsFalse(game.State.Latest.peakGoalMet);StringAssert.Contains("未達",Find<TextMeshProUGUI>("PeakResultText").text);CheckText();Capture("142-peak-miss");
+            Assert.IsFalse(game.State.Latest.peakGoalMet);StringAssert.Contains("未達",Find<TextMeshProUGUI>("PeakResultText").text);
+            Assert.AreEqual(new Vector2(1250,-784),Find<RectTransform>("PeakResultBadge").anchoredPosition);
+            Assert.AreEqual("四半期の報酬を選ぶ",Find<Button>("NextMonth").GetComponentInChildren<TextMeshProUGUI>().text);
+            CheckText();Capture("142-peak-miss");
             game.StartYear(14);game.State.month=2;game.State.culture=100;game.State.fatigue=0;
             for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;
             game.OpenTab(0);game.BeginIncident();game.Resolve("scope");Assert.IsTrue(game.State.Latest.peakGoalMet);
@@ -79,7 +82,9 @@ namespace PatchWorkSecure.Tests
                 game.State.budget=pair.score-(baseScore-game.State.totalLoss*7);
                 game.OpenTab(0);yield return new WaitForSecondsRealtime(1.2f);
                 Assert.AreEqual(pair.rank,game.State.RankCode);Assert.AreEqual(pair.rank,Find<TextMeshProUGUI>("CompanyRank").text);
-                Assert.IsNotNull(Find<RectTransform>("PeakMedal0"));CheckText();Capture("145-annual-"+pair.rank);
+                Assert.IsNotNull(Find<RectTransform>("PeakMedal0"));Assert.AreSame(game.PlanningArt.logoIcon,Find<Image>("PeakShield").sprite);
+                Assert.Greater(Find<RectTransform>("PeakMedalHeading").GetSiblingIndex(),Find<RectTransform>("AnnualTimeline").GetSiblingIndex());
+                CheckText();Capture("145-annual-"+pair.rank);
             }
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }

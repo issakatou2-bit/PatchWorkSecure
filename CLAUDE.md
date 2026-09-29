@@ -20,7 +20,7 @@ PatchWorkSecure — 企業の情シス担当として日常業務をこなしな
 
 | シーン | 中身 | コード | 詳細 |
 |---|---|---|---|
-| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.13。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
+| `Assets/Scenes/CompanyYear.unity` | **現在の試遊対象**「情シスの一年」v0.14。12か月、工数と予算で改善の順番を選ぶ | `Assets/Scripts/CompanyOps/`、生成は`Assets/Editor/CompanyOpsSceneBuilder.cs` | `Docs/CompanyYear-Prototype.md` |
 | `Assets/Scenes/SampleScene.unity` | 旧版。36期、攻撃10種×対策8種、パリィ、教育クイズ。オフィス背景に改修済み | `Assets/Scripts/`直下、生成は`Assets/Editor/SceneBuilder*.cs` | `Docs/Office-Rework.md` |
 
 - 新試作：`OpsCatalog`(内容) → `OpsState`(Unity非依存のルール) → `OpsGame`(画面。partialで分割) / `OpsSaveStore`(保存)。旧版の`GameState`には依存しない。キャラデータの共有は`NavigatorPersona`、表示用の`OpsPortraitAnimator`／`OpsPortraitMotion`も両版で再利用。
@@ -62,7 +62,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で139件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で145件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -90,23 +90,23 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 ## 6. 現状（2026-09-29）— 詳細は`Docs/Dev-Status.md`
 
-- 新試作v0.13：Next-3①〜④を個別コミット済み。月報・計画の8件、判断の深さA〜E、月4個の困りごとの泡、承認済みタイトル一枚絵を実装。結果・撮影・最終検証は`Docs/Next-3-Implementation-2026-09-29.md`。Windows版は据え置き。
-- 全139件を一度実行して132成功、7失敗を修正して個別に全成功。追加のNext-3も7/7。Verify4系統・3アセンブリのコンパイル成功。最終版の139件一括成功とは区別する。3視点各5年度の自動画面操作は完走、文字の収まり指摘0。
-- 新年度は把握不足が限定対応の見落とし・調査費に効き、12か月中4か月が夜間/休日。復旧費2万円。数値はOpsCatalog。旧年度の計算は維持。未確認の真相を公開表示へ使わない。
-- 泡は無料の通常報酬/公開の手がかり/数値報酬なしのお礼。抽選・解決済み・手がかりを保存し、旧保存は泡なし。計測の9方針は深度1以上で相談を必ず、深度0で半分の月に拾う（通常泡を全回収する計測とは区別）。
-- 900年度：限定50.31%、非優越候補平均1.983、v0.12比の完走率差は最大2ポイントで指定基準内。**人間の初見プレイ・楽しさ・学習効果の測定ではない**。旧版は変更せず回帰検証を継続。
-- 共通UI、次画面、設備・社員支援、ランク恩恵、Quick-Wins-2、声は以前の実装を維持。計画行動の追加効果と顔マークは未実装（ルール追加は確認中）。過去の経緯はDocsへ。
-- ひなた：新デザインの表情18・ポーズ18を両版へ適用。基本ポーズは目口差分、他は1枚絵フォールバック。タイトルだけは3頭身立ち絵と吹き出しを出さず、承認済みKVを使う。`Docs/Hinata-Replacement-2026-09-29.md`、`Docs/Reference-Asset-Provenance.md`。
-- SEは承認済みB-bright、BGMはGemini/Lyriaの生成2曲。声はElevenLabs「Hinata V9-2」105本（無料プランの私的試遊限定、音源・音声入りResourcesはgit追跡対象外）。配布・公開・動画投稿は禁止。音声なし/消音でも字幕と操作で進む。`Docs/Voice/Integration.md`。
-- UI・UXの評価と改善候補は`Docs/UI-UX-Review-2026-09-28.md`、総合評価の背景は`Docs/Evaluation-2026-09-29.md`。その「限定85〜90%」等は変更前の計測で、現在の数値と混同しない。
+- 新試作v0.14：Next-4①ルール、②画面、③声を別コミット。四つの山場目標と報酬、年間SS/S/A/B/C、目標と見込み・達成カットイン・盾の勲章・未達の改善候補、声12行追加を実装。④の比較・撮影記録は`Docs/Next-4-Implementation-2026-09-29.md`。Windows版は据え置き。
+- 新規年度だけ`peakGoalRules=1`。旧保存は目標なし・従来の得点/ランク。数値はOpsCatalog。見込みは公開Estimateだけで出し、未来の事件や確定被害を先読みしない。未来の山場は現在の公開見積もりを将来の目標に当てはめた参考と明記する。
+- 山場の達成率は深度0/深度1・2の集約8比較で目安±10ポイント以内。900年度で限定50.25%、非優越候補平均1.980。①前は山場なしの同じ種・同じ方針で再計測する。
+- **完走率差は最適化方針で58%→85%（+27pt）、SSは28.78%で目安約10%を超える**。加藤さんは結果確認後「指定数値を維持して試遊」を選択。Depthsは±5pt基準で失敗するまま残し、成功扱いにしない。Verifyの他3系統とコンパイルは成功。
+- PlayMode全145件を1回実行して144成功。残った仮想キー入力の1件はデバイス指定を明示して個別再実行1/1成功、最後の表示補正と再撮影もNext4UIの2/2成功。最終版の全件一括成功とは区別する。3視点各5年度の画面操作は180か月・2,091操作を完走、文字の収まり指摘0。**人間の初見プレイ・楽しさ・学習効果の測定ではない**。
+- Next-3の表示8件・判断A〜E・月4個の泡・承認済みタイトルKV、共通UI、次画面、設備/社員支援、ランク恩恵、Quick-Wins-2は維持。旧版は変更せず回帰検証。計画行動への社員の追加効果と顔マークは未実装。
+- ひなた：新デザインの表情18・ポーズ18を両版へ適用。基本ポーズは目口差分、他は1枚絵フォールバック。タイトルは承認済みKV。SEは承認済みB-bright、BGMはGemini/Lyriaの生成2曲。
+- 声はElevenLabs「Hinata V9-2」117行。音声なし/消音でも字幕・表情・ポーズと操作で進む。音源・音声入りResourcesはgit除外。無料プランの私的試遊限定で**配布・公開・動画投稿は禁止**。利用条件を満たす公開用音源は別途再制作。
+- UI評価と過去の計測は`Docs/UI-UX-Review-2026-09-28.md`、`Docs/Evaluation-2026-09-29.md`。変更前の「限定85〜90%」等と現在を混同しない。
 
 ## 7. 次にやること（優先順）
 
-1. 加藤さんがUnity EditorのCompanyYearを私的試遊し、判断の迷い方・泡の手応え・一枚絵・文字量・テンポを確認する。本命の旧版/新試作の選択は未決定。
-2. 声105本・目口・SE/BGMのミックスを確認する。配布前には利用条件を満たした公開用音声を再制作し、VoiceTestのResourcesは除く。Windows版の更新は依頼があったときだけ。
-3. Next-3とNext-Screensの実装済み項目を繰り返し作らない。旧保存の継続と新年度で追加される規則を区別。臨時予算1万円は今回は維持し、見直す場合は別途設計・比較する。
-4. 次の設計候補は山場の目標/年間ランク（`Docs/Peak-Goals-Design-2026-09-29.md`）、難易度、兆候の連鎖、複数年、図鑑・会話。設計案を実装済みと扱わず、承認を得てから進める。追加キャラの本格着手も後。
-5. Player Settings（Steam向け）、ブランチ整理。旧版を自動で新試作へ置き換えない。`planning-bubbles.html`と`title-screen-kv.html`はNext-3で承認され実装済み。
+1. 加藤さんがUnity EditorのCompanyYearを私的試遊する。山場への準備・達成/未達・次ランクへの動機・声・テンポを確認。数値は指定のままで、上記の完走率/SSの偏りも評価する。本命の旧版/新試作の選択は未決定。
+2. 声117行・目口・SE/BGMのミックスを確認。配布前に公開可能な音声を再制作し、VoiceTestのResourcesは除く。Windows版更新は依頼時だけ。
+3. Next-3/Next-4/Next-Screensの実装済み項目を繰り返し作らない。旧保存と新年度の追加ルールを区別。臨時予算1万円は維持し、見直しは別途設計・比較する。検証基準を数値変更に合わせて勝手に緩めない。
+4. 難易度、兆候の連鎖、複数年、図鑑・会話、追加キャラは設計候補。承認後に進める。山場の目標/年間5段ランクは実装済み。
+5. Player Settings（Steam向け）、ブランチ整理。旧版を新試作へ自動置換しない。`planning-bubbles.html`と`title-screen-kv.html`はNext-3で承認・実装済み。
 
 ## 8. 対話スタイル
 

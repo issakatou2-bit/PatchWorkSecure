@@ -29,7 +29,6 @@ namespace PatchWorkSecure.CompanyOps
             StyleAnnualRank(rank);
             var rankText=PText(rank,"CompanyRank",State.RankCode,0,103,360,225,State.RankCode=="SS"?150:200,Color.white,true,true);var shadow=rankText.gameObject.AddComponent<Shadow>();shadow.effectColor=State.RankCode=="SS"?Hex("986000"):Hex("c23a60");shadow.effectDistance=new Vector2(0,-8);
             PText(screen,"ScoreHeading","年間得点",110,540,440,32,16,PlanGray,true,true);
-            PeakAnnualMedals();
             ReportNumber(screen,"AnnualScoreValue",State.AnnualScore,"<size=26>点</size>",110,580,440,72,PlanInk);
             PButton(screen,"AnnualDetails","評価の内訳を見る",110,690,440,48,AnnualDetails,Color.white,PlanInk,20);
             var timeline=ReportPanel("AnnualTimeline",610,140,940,190,.04f);ReportHeading(timeline,"12 MONTHS","乗り越えた "+State.history.Count+"か月",PlanBlue);
@@ -43,6 +42,8 @@ namespace PatchWorkSecure.CompanyOps
                 var cell=PCard(timeline,"AnnualMonth"+i,22+i*75.33f,67,67.33f,74,bg,16,false);if(record!=null)Reveal(cell,i*.08f);
                 PText(cell,"AnnualMonthName"+i,OpsCatalog.Months[i].name,0,9,67,29,15,fg,true,true);PText(cell,"AnnualMonthResult"+i,label,0,40,67,25,12,fg,true,true);
             }
+            // 盾の見出しをタイムラインの背景より後に描画し、白いパネルで隠さない。
+            PeakAnnualMedals();
             var mvp=ReportPanel("AnnualMvp",610,356,301.33f,174,.12f);
             PText(mvp,"MvpCategory","MVP",20,14,260,26,12,PlanMint);PText(mvp,"MvpHeading","一番効いた備え",20,46,260,26,16,PlanGray);
             var best=summary.Mvp;

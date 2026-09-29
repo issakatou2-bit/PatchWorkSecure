@@ -40,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(!result.peakGoalRecorded)return;
             Color tint=result.peakGoalMet?Hex("fff6d6"):Hex("ffe9ee"),text=result.peakGoalMet?Hex("7a5a00"):Hex("b24968");
-            var badge=PCard(screen,"PeakResultBadge",1250,120,320,46,tint,16,false);
+            var badge=PCard(screen,"PeakResultBadge",1250,784,320,46,tint,16,false);
             PText(badge,"PeakResultText",result.peakGoalMet?"山場の盾 獲得 / 年間 +"+result.peakScoreBonus+"点":"山場の目標は未達 / 信頼 −"+OpsCatalog.PeakTrustPenalty,10,0,300,46,15,text,true,true);
             Reveal(badge,.3f,true);
         }
@@ -70,7 +70,7 @@ namespace PatchWorkSecure.CompanyOps
             for(int i=0;i<medals.Length;i++)
             {
                 var medal=PCard(screen,"PeakMedal"+i,110+i*112,740,104,30,Hex("fff6d6"),12,false);
-                IncidentShape(medal,"PeakShield","stop",6,6,18,18,Hex("c68c16"));PText(medal,"PeakMedalMonth",OpsCatalog.Months[medals[i].month].name,30,0,68,30,14,Hex("7a5a00"),true,true);Reveal(medal,i*.1f);
+                PImage(medal,"PeakShield",PlanningArt.logoIcon,6,6,18,18);PText(medal,"PeakMedalMonth",OpsCatalog.Months[medals[i].month].name,30,0,68,30,14,Hex("7a5a00"),true,true);Reveal(medal,i*.1f);
             }
         }
     }

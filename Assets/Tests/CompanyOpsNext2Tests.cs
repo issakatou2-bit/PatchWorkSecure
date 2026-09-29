@@ -247,7 +247,8 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(game.State.Current.name,Find<TextMeshProUGUI>("CalendarMonth").text);Assert.IsFalse(game.PhasePresentationCanSkip);Capture("122-next-calendar");
             // スキップに使った入力を、背後の行動ボタンへ通さない。初回は短縮しない。
             var keyboard=InputSystem.AddDevice<Keyboard>();
-            try{InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
+            // 仮想キーボードを明示的に現在のデバイスにし、実入力の押下を確認してから検証する。
+            try{keyboard.MakeCurrent();InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Assert.IsTrue(keyboard.enterKey.wasPressedThisFrame);Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
             finally{InputSystem.RemoveDevice(keyboard);}
             yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));game.BeginIncident();state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.6f);
             Assert.AreEqual("緊急",Find<TextMeshProUGUI>("IncidentEntryTitle").text);Capture("122-next-incident-entry");yield return new WaitForSecondsRealtime(.9f);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
@@ -255,7 +256,7 @@ namespace PatchWorkSecure.Tests
             StringAssert.Contains(game.State.Latest.loss==0?"金銭被害なし":game.State.Latest.loss.ToString(),Find<TextMeshProUGUI>("MonthlyDamageStampText").text);
             game.Next();yield return new WaitForSecondsRealtime(.6f);Assert.IsTrue(game.PhasePresentationCanSkip);state=JsonUtility.ToJson(game.State);
             keyboard=InputSystem.AddDevice<Keyboard>();
-            try{InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
+            try{keyboard.MakeCurrent();InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Enter));InputSystem.Update();Assert.IsTrue(keyboard.enterKey.wasPressedThisFrame);Click("Action_listen");Assert.AreEqual(state,JsonUtility.ToJson(game.State));}
             finally{InputSystem.RemoveDevice(keyboard);}
             yield return null;yield return null;
             Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="PhasePresentation"));CheckPointer("Action_listen");LogAssert.NoUnexpectedReceived();

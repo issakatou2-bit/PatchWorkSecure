@@ -142,7 +142,7 @@ namespace PatchWorkSecure.CompanyOps
             Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
-            PButton(screen,"NextMonth",State.QuarterRewardPending?"山場クリア / 報酬を選ぶ":State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
+            PButton(screen,"NextMonth",State.QuarterRewardPending?(State.peakGoalRules>0?"四半期の報酬を選ぶ":"山場クリア / 報酬を選ぶ"):State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
         }
         public static string ReportMissionTitle(string title)
         {

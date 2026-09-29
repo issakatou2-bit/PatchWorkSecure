@@ -104,3 +104,15 @@ season_12,全文,12月,年末だ〜！　大掃除の前に、会社の守りも
 season_01,全文,1月,あけまして、おめでと〜！　今年もよろしくね！,face_sparkle,pose_wave,[cheerful],
 season_02,全文,2月,年度末まで、あと少し！　予算の使い方、慎重にね。,face_normal,pose_think,[serious],
 season_03,全文,3月,一年の集大成だよ！　最後まで、一緒に守りきろ！,face_determined,pose_shield,[determined],
+peak_goal_06,全文,山場の月の始まり（6月）,今月は最初の山場だよ！　目標、ちゃんと見ておいてね！,face_determined,pose_point,[excited],山場＝やまば
+peak_goal_09,全文,山場の月の始まり（9月）,上期のしめくくり、二つ目の山場！　ここは落とせないね！,face_determined,pose_fists,[determined],上期＝かみき
+peak_goal_12,全文,山場の月の始まり（12月）,年末の山場！　みんな忙しい時期だから、気を引きしめていこ！,face_alert,pose_salute,[energetic],
+peak_goal_03,全文,山場の月の始まり（3月・決算）,いよいよ決算の山場！　一年の集大成、見せちゃお！,face_determined,pose_shield,[determined],決算＝けっさん
+peak_clear_01,全文,山場の目標を達成,山場、突破〜っ！　みんなで守りきったね！,face_sparkle,pose_jump,[cheering],
+peak_clear_02,全文,山場の目標を達成,よしっ、目標クリア！　備えてきたかいがあったね！,face_proud,pose_peace,[proud],
+peak_clear_final,全文,決算の山場を達成,決算の山場、突破！　この一年、ほんとにおつかれさま！,face_crying,pose_jump,[emotional],
+peak_miss_01,全文,山場の目標に届かず,う〜ん、今回は届かなかったか……。でも、次の山場で取り返そ！,face_worried,pose_please,[encouraging],
+peak_miss_02,全文,山場の目標に届かず,惜しかった〜！　何があれば届いたか、月報で一緒に見てみよ？,face_sad,pose_think,[gentle],
+next_rank,全文,次のランクが近い,次のランクまで、あとちょっと！,face_determined,pose_fists,[excited],
+annual_ss,全文,年間評価SS,運用ランクSS！　……うそ、ほんとに？　最高の一年だよ！,face_crying,pose_jump,[overjoyed],
+annual_s,全文,年間評価S,運用ランクS！　胸を張っていい一年だったね！,face_proud,pose_jump,[proud],

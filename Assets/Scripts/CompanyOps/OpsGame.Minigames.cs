@@ -96,7 +96,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 card.anchoredPosition=new Vector2(300,-200);card.sizeDelta=new Vector2(680,360);DecisionPanel(card);
                 FindMinigameText("MinigameModalTitle").rectTransform.anchoredPosition=new Vector2(26,-48);
-                PText(card,"MinigameInstructions","社員のパスワードが漏れた。攻撃者が承認依頼を送ってくる。\n左の「社員の今の様子」を見て、本人がログインしようとしているときだけ<b>許可</b>（→）、それ以外は<b>拒否</b>（←）。\n本人を拒否すると仕事が止まる。30秒、だんだん速くなる。",26,94,628,120,15,null,false);
+                PText(card,"MinigameInstructions","届いた承認依頼を、本人の今の行動と照らし合わせよう。\n左の「社員の今の様子」を見て、本人がログインしようとしているときだけ<b>許可</b>（→）、それ以外は<b>拒否</b>（←）。\n本人を拒否すると仕事が止まる。30秒、だんだん速くなる。",26,94,628,120,15,null,false);
                 PText(card,"MinigameEquipment",(mfa.NumberMatch?"導入済み":"未導入")+"：番号の一致（本人の画面の番号を入力しないと承認できない）",26,230,628,42,15,null,false);
                 PButton(card,"MinigameStart","はじめる",26,276,628,64,StartMinigame,Hex("2bb673"),Color.white,22,Hex("1d8a55"));
                 PButton(minigameModal,"MinigameDelegate","社員に任せる / 50点",854,602,222,38,DelegateMinigame,Color.white,PlanInk,16);return;

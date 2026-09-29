@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作E ログの間違い探し</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作E（日常の「調べる」）：流れてくるログから、おかしな行を見つけて押す。見つけるほど「把握」が上がる */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:linear-gradient(160deg,#cfe9ff,#e8e3ff);min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 0 0 4px #dfe5ef,0 12px 30px rgba(27,35,64,.15)}
+.top{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;gap:16px;padding:0 20px}
+.badge{background:linear-gradient(180deg,#7fd0ff,var(--blue));color:#fff;border-radius:16px;padding:6px 16px;font-size:24px;box-shadow:0 5px 0 #1f7fc4}
+.timer{flex:1;height:16px;border-radius:8px;background:#e3e8f1;overflow:hidden}.timer i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#8f86ff);transition:width .1s linear}
+.stat{font-size:19px}
+/* 端末風の画面。走査線とわずかな発光で「画面の中」を感じさせる */
+.term{position:absolute;left:0;top:92px;width:860px;height:650px;border-radius:24px;background:#0e1628;overflow:hidden;box-shadow:0 0 0 3px #fff,0 16px 36px rgba(27,35,64,.35)}
+.term::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 40%,rgba(63,169,245,.08),transparent 70%)}
+.thead{height:44px;display:flex;align-items:center;gap:8px;padding:0 16px;background:#16213a;color:#9fb3d6;font-size:13px}
+.thead i{width:12px;height:12px;border-radius:6px;display:inline-block}
+.lines{position:absolute;left:0;right:0;top:44px;bottom:0;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:15px}
+.line{display:flex;gap:14px;padding:7px 10px;border-radius:8px;color:#cfe0ff;cursor:pointer;white-space:nowrap;animation:in .3s ease-out both;position:relative}
+.line:hover{background:rgba(63,169,245,.14)}
+@keyframes in{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+.line .t{color:#7f93b8;width:70px}.line .u{color:#ffd48a;width:92px}.line .ip{color:#9fd9ff;width:190px}.line .ev{flex:1}
+.line.found{background:rgba(224,64,95,.28);color:#fff}
+.line.found::before{content:'';position:absolute;inset:-2px;border-radius:9px;box-shadow:0 0 0 2px #ff7a93,0 0 16px rgba(255,122,147,.6);animation:ring .5s ease-out}
+@keyframes ring{0%{transform:scale(1.06);opacity:0}100%{transform:none;opacity:1}}
+.line.wrong{animation:no .35s}
+@keyframes no{25%{transform:translateX(-6px);background:rgba(255,255,255,.12)}75%{transform:translateX(5px)}}
+.line.hint .ev::after{content:' ●';color:#ffc02e;font-size:11px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.line.gone{opacity:.25}
+.side{position:absolute;left:880px;top:92px;width:400px;height:650px;padding:18px}
+.side h3{margin:0 0 8px;font-size:17px}
+.clues{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto}
+.clues div{background:#fff4c4;border-radius:10px;padding:6px 10px;font-size:13px;animation:in .3s both}
+.say{background:#fff;border-radius:16px;padding:10px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px #ffd3de;margin-top:12px;min-height:60px;width:240px}
+.hin{position:absolute;right:6px;bottom:6px;height:230px;filter:drop-shadow(0 8px 14px rgba(27,35,64,.3))}
+.gauge{display:flex;gap:6px;margin:4px 0 10px}.gauge span{flex:1;height:12px;border-radius:6px;background:#e3e8f1;transition:background .4s}.gauge span.on{background:linear-gradient(90deg,#7fd0ff,var(--blue));box-shadow:0 0 10px rgba(63,169,245,.6)}
+.pop{position:absolute;z-index:21;font-size:22px;color:#fff;pointer-events:none;white-space:nowrap;text-shadow:2px 2px 0 var(--c),-2px -2px 0 var(--c),2px -2px 0 var(--c),-2px 2px 0 var(--c);animation:up 1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-12px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px)}}
+.modal{position:absolute;inset:0;background:rgba(27,35,64,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:680px;padding:26px}
+.prep label{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 0}
+button{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:20px;padding:14px;color:#fff;background:linear-gradient(180deg,#7fd0ff,var(--blue));box-shadow:0 5px 0 #1f7fc4;width:100%}
+button:active{transform:translateY(3px)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top panel"><div class="badge r">ログを調べる</div><div class="timer"><i id="timer"></i></div><div class="stat r" id="left">35</div><div class="stat r">発見 <span id="found" style="color:var(--green)">0</span> / <span id="total">0</span></div><div class="stat r">空振り <span id="wrong" style="color:#ff8a3d">0</span></div></div>
+  <div class="term"><div class="thead"><i style="background:#ff6f91"></i><i style="background:#ffc02e"></i><i style="background:#2bb673"></i><span style="margin-left:10px">auth.log — ねっとわーく商事 認証サーバー</span></div><div class="lines" id="lines"></div></div>
+  <div class="side panel"><h3 class="r">状況の把握</h3><div class="gauge" id="gauge"><span></span><span></span><span></span><span></span></div><h3 class="r">見つけた手がかり</h3><div class="clues" id="clues"></div><div class="say" id="say">…</div><img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_magnifier.png" alt="ひなた"></div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+const USERS=['tanaka','mori','ono','aida','ogawa','saeki'];
+const OK_IP=['10.0.1.24','10.0.1.31','10.0.2.12','10.0.2.40','192.168.5.18'];
+const NORMAL=[u=>['ログイン成功',OK_IP],u=>['ログアウト',OK_IP],u=>['ファイル共有にアクセス（見積書.xlsx）',OK_IP],u=>['パスワード変更',OK_IP],u=>['ログイン成功（多要素認証あり）',OK_IP],u=>['メールを送信（取引先 1件）',OK_IP],u=>['VPN接続 成功',['203.0.113.5']]];
+// 怪しい行。hourを指定したものは深夜・早朝
+const BAD=[
+ {ev:'ログイン失敗（パスワード誤り）×27',ip:'185.220.101.7',why:'短時間に何十回もの失敗。パスワードの総当たり'},
+ {ev:'ログイン成功',ip:'185.220.101.7',why:'失敗が続いた同じ海外のIPから、急に成功。突破された可能性',after:0},
+ {ev:'ログイン成功',ip:'10.0.1.24',hour:3,why:'深夜3時のログイン。本人の勤務時間ではない'},
+ {ev:'ファイル共有から一括ダウンロード（顧客名簿 ほか 842件）',ip:'10.0.2.40',why:'普段の何百倍ものダウンロード。持ち出しの疑い'},
+ {ev:'管理者権限を付与（admin_tmp）',ip:'10.0.2.12',why:'見覚えのない管理者アカウントの作成'},
+ {ev:'監査ログの記録を停止',ip:'10.0.2.12',why:'記録を止めるのは、痕跡を消したい攻撃者の定番'},
+ {ev:'ログイン成功',ip:'45.83.64.12',why:'5分前は社内から。移動できない距離の国からログイン（あり得ない移動）'},
+ {ev:'メール転送ルールを追加（すべて→外部アドレス）',ip:'10.0.1.31',why:'全メールを外部へ転送する設定。情報の持ち出し'},
+];
+let G,tid,feed,ac;
+function rnd(n){return Math.floor(Math.random()*n)}
+function pick(a){return a[rnd(a.length)]}
+function start(){G={t:35,found:0,wrong:0,total:0,mon:document.getElementById('pMon').checked,over:false,h:9,m:0,rows:[],clues:[]};closeModal();document.getElementById('lines').innerHTML='';document.getElementById('clues').innerHTML='';gauge();
+  say('おかしな行を見つけたら押してね。普段と違うところがポイント！','pose_magnifier');
+  const bads=BAD.slice().sort(()=>Math.random()-.5).slice(0,6);
+  // 流れる順番：普通の行の間に怪しい行を混ぜる。総当たり→成功は続けて出す
+  const q=[];for(let i=0;i<34;i++)q.push(null);let pos=3;for(const b of bads){q.splice(Math.min(pos,q.length),0,b);pos+=3+rnd(4)}
+  G.queue=q;clearInterval(tid);clearInterval(feed);
+  tid=setInterval(()=>{if(G.over)return;G.t=Math.max(0,G.t-.1);document.getElementById('timer').style.width=(G.t/35*100)+'%';document.getElementById('left').textContent=Math.ceil(G.t);if(G.t<=0)finish()},100);
+  feed=setInterval(push,850);push();push();push()}
+function push(){if(G.over)return;if(!G.queue.length){if(!document.querySelector('.line:not(.gone)'))finish();return}
+  const b=G.queue.shift();G.m+=3+rnd(9);if(G.m>=60){G.m-=60;G.h=(G.h+1)%24}
+  let row;if(b){const h=b.hour!==undefined?b.hour:G.h;row={bad:true,why:b.why,t:String(h).padStart(2,'0')+':'+String(G.m).padStart(2,'0'),u:pick(USERS),ip:b.ip,ev:b.ev};G.total++;document.getElementById('total').textContent=G.total}
+  else{const n=pick(NORMAL)(),row0=n;row={bad:false,t:String(G.h).padStart(2,'0')+':'+String(G.m).padStart(2,'0'),u:pick(USERS),ip:pick(row0[1]),ev:row0[0]}}
+  const el=document.createElement('div');el.className='line'+(row.bad&&G.mon?' hint':'');el.innerHTML=`<span class="t">${row.t}</span><span class="u">${row.u}</span><span class="ip">${row.ip}</span><span class="ev">${row.ev}</span>`;
+  el.onclick=()=>hit(row,el);row.el=el;
+  const box=document.getElementById('lines');box.prepend(el);
+  // 画面の外へ流れた行は押せなくなる。怪しい行を見逃したら数える
+  const all=[...box.children];if(all.length>15){const last=all[all.length-1];if(last._row&&last._row.bad&&!last._row.hit){say('あっ、今の行、流れちゃった……','pose_startled')}last.remove()}
+  el._row=row}
+function hit(row,el){if(G.over||row.hit)return;row.hit=true;const r=el.getBoundingClientRect(),a=document.getElementById('app').getBoundingClientRect(),s=a.width/1280;
+  if(row.bad){G.found++;el.classList.add('found');beep(600*Math.pow(1.1,G.found));beep(900*Math.pow(1.1,G.found),.06);pop((r.left+r.width*.6-a.left)/s,(r.top-a.top)/s,'発見！','#e0405f');clue(row.why);gauge();if(G.found===3)say('いい目してる！　あと少し！','pose_fists')}
+  else{G.wrong++;el.classList.add('wrong');beep(220,0,'square');say('それは普段どおりの行みたい','pose_think')}
+  document.getElementById('found').textContent=G.found;document.getElementById('wrong').textContent=G.wrong}
+function clue(t){const d=document.createElement('div');d.textContent=t;document.getElementById('clues').prepend(d)}
+function gauge(){const lv=Math.min(4,Math.floor(G.found*4/6+.01));document.querySelectorAll('#gauge span').forEach((e,i)=>e.classList.toggle('on',i<lv))}
+function finish(){if(G.over)return;G.over=true;clearInterval(tid);clearInterval(feed);const score=Math.max(0,Math.round(G.found/Math.max(1,G.total)*100)-G.wrong*6);const rank=score>=90?'S':score>=70?'A':score>=45?'B':'C';const lv=Math.min(4,Math.floor(G.found*4/6+.01));
+  if(score>=70){chord();say('ばっちり！　状況がよく見えてきたね','pose_jump')}else say('見逃した手口、覚えておこうね','pose_think');
+  setTimeout(()=>modal(`<h2 class="r">調査の結果　評価 <span style="color:var(--pink)">${rank}</span></h2><div style="font-size:16px;line-height:1.9">怪しい行 ${G.found} / ${G.total} を発見／空振り ${G.wrong}<br>状況の把握 <b class="r" style="color:var(--blue)">${lv} / 4</b>（今月の事件で「範囲を絞る」が効きやすくなる）</div><div style="font-size:13px;color:var(--gray);margin:6px 0 12px">深夜のログイン、失敗の連続、あり得ない移動、大量のダウンロード、記録の停止。「普段と違う」を見つけるのが監視の基本。</div>${prep()}<button id="again" style="margin-top:10px">もう一度</button>`),600);setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=start},700)}
+function prep(){return `<div class="prep"><label><input type="checkbox" id="pMon" ${G&&G.mon?'checked':''}>備え：監視と通知（怪しい行に黄色の印が付く）</label></div>`}
+function pop(x,y,t,c){const d=document.createElement('div');d.className='pop r';d.textContent=t;d.style.cssText='left:'+x+'px;top:'+y+'px;--c:'+c;document.getElementById('app').appendChild(d);setTimeout(()=>d.remove(),1000)}
+function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
+function modal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modal').classList.add('on')}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.13,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+modal(`<h2 class="r">ログを調べる（試作・日常業務）</h2><div style="font-size:15px;line-height:1.9">認証サーバーの記録が上から流れてくる。<b>おかしな行</b>を見つけたら押す。<br>見つけるほど「状況の把握」が上がり、今月の事件で「範囲を絞る」が効きやすくなる。<br>普段どおりの行を押すと空振り。下へ流れた行は押せない。</div><div style="margin:12px 0">${prep()}</div><button id="startBtn">調べはじめる</button>`);
+document.getElementById('startBtn').onclick=start;
+</script>
+</body>
+</html>

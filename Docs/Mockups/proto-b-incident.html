@@ -58,6 +58,37 @@ button small{display:block;font-family:'Zen Kaku Gothic New';font-weight:700;fon
 .modal .box{width:680px;padding:26px}
 .shake{animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+
+/* ---- 凝り演出（Docs/Visual-Craft-2026-09-29.md の見本） ---- */
+/* 背景：ゆっくり流れる格子と光の粒で「ネットワークの中」を感じさせる */
+body::before{content:'';position:fixed;inset:-50%;background:repeating-linear-gradient(90deg,rgba(63,169,245,.06) 0 1px,transparent 1px 48px),repeating-linear-gradient(0deg,rgba(63,169,245,.06) 0 1px,transparent 1px 48px);animation:grid 30s linear infinite;pointer-events:none}
+@keyframes grid{to{transform:translate(48px,48px)}}
+.mote{position:absolute;width:4px;height:4px;border-radius:2px;background:#7fd0ff;box-shadow:0 0 8px #7fd0ff;opacity:.5;pointer-events:none;animation:mote linear infinite}
+@keyframes mote{0%{transform:translateY(0);opacity:0}20%{opacity:.6}100%{transform:translateY(-240px);opacity:0}}
+/* パネルの縁に細い光沢の線（上からの光） */
+.box.panel{position:relative}
+.panel::before{content:'';position:absolute;left:14px;right:14px;top:3px;height:40%;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0));pointer-events:none}
+/* 感染が広がる瞬間の赤い線 */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:12}
+#fx line{stroke:#ff4d6d;stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 6px #ff4d6d);animation:zap .7s ease-out forwards}
+@keyframes zap{0%{stroke-dasharray:0 400;opacity:1}40%{stroke-dasharray:400 0;opacity:1}100%{opacity:0}}
+/* 切り離しの破片と光の輪 */
+.shard{position:absolute;width:9px;height:9px;background:#ff7a93;border-radius:2px;pointer-events:none;z-index:13;animation:shard .55s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes shard{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(260deg) scale(.3);opacity:0}}
+.ringfx{position:absolute;width:20px;height:20px;border-radius:50%;border:4px solid #fff;pointer-events:none;z-index:13;transform:translate(-50%,-50%);animation:ringfx .45s ease-out forwards}
+@keyframes ringfx{0%{width:20px;height:20px;opacity:1}100%{width:130px;height:130px;opacity:0;border-width:1px}}
+.pc.hitstop{transform:scale(1.18);transition:none;z-index:5}
+/* 残り時間が少ないときの赤い縁の脈動 */
+#danger{position:absolute;inset:0;pointer-events:none;z-index:11;box-shadow:inset 0 0 0 0 rgba(224,64,95,0);border-radius:22px}
+#danger.on{animation:danger .8s ease-in-out infinite}
+@keyframes danger{50%{box-shadow:inset 0 0 90px 20px rgba(224,64,95,.45)}}
+.timer.low i{background:linear-gradient(90deg,#ff4d6d,#ff9ab3);animation:pulse .5s infinite}
+/* 結果：点数の数え上げと、判子のように押されるランク（箔押しの光が走る） */
+.rankstamp{display:inline-block;font-size:92px;line-height:1;padding:4px 22px;border-radius:22px;color:#fff;background:linear-gradient(115deg,#ff6f91 0%,#ffb3c6 30%,#fff 38%,#ffb3c6 46%,#ff6f91 70%);background-size:300% 100%;animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both,foil 2.4s ease-in-out .5s infinite;text-shadow:0 3px 0 rgba(160,40,80,.45);box-shadow:0 8px 0 #d94a70,0 14px 30px rgba(217,74,112,.35)}
+.rankstamp.S{background-image:linear-gradient(115deg,#e0a100 0%,#ffe38a 30%,#fff 38%,#ffe38a 46%,#e0a100 70%);box-shadow:0 8px 0 #a87400,0 14px 30px rgba(224,161,0,.45)}
+@keyframes stamp{0%{transform:scale(2.4) rotate(-12deg);opacity:0}60%{transform:scale(.92) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-4deg)}}
+@keyframes foil{0%{background-position:100% 0}60%,100%{background-position:-100% 0}}
+.count{font-family:'M PLUS Rounded 1c';font-weight:800;font-size:40px;color:var(--navy)}
 </style>
 </head>
 <body>
@@ -71,7 +102,7 @@ button small{display:block;font-family:'Zen Kaku Gothic New';font-weight:700;fon
     <div class="stat r">見えている感染 <span id="inf" style="color:var(--red)">0</span></div>
     <div class="stat r">停止 <span id="off">0</span></div>
   </div>
-  <div class="office panel"><div class="rooms" id="rooms"></div></div>
+  <div class="office panel"><div class="rooms" id="rooms"></div><div id="danger"></div></div><svg id="fx" width="1280" height="760"></svg>
   <div class="side panel">
     <h3 class="r">道具</h3>
     <div class="tools">
@@ -101,12 +132,12 @@ function setup(){
 function seen(p){if(!p.inf)return false;if(G.scanRoom===p.r&&G.elapsed<G.scanUntil)return true;return G.prep.monitor?true:G.elapsed-p.infAt>2.2}
 function suspect(p){return p.inf&&!seen(p)&&G.elapsed-p.infAt>1.0}
 function tick(){
-  if(G.over)return;G.elapsed+=.1;G.t=Math.max(0,20-G.elapsed);
+  if(G.over||G.stopUntil>performance.now())return;G.elapsed+=.1;G.t=Math.max(0,20-G.elapsed);
   // 感染の広がり：同じ部屋の隣は速く、別の部屋は遅い。分離があれば部屋をまたがない
   const live=G.pcs.filter(p=>p.inf&&!p.cut);
   for(const p of live){
-    if(Math.random()<.028){const n=G.pcs.filter(q=>!q.inf&&!q.cut&&q.r===p.r&&Math.abs(q.i-p.i)===1);if(n.length){const q=n[rnd(n.length)];q.inf=true;q.infAt=G.elapsed}}
-    if(!G.prep.segment&&Math.random()<.012){const n=G.pcs.filter(q=>!q.inf&&!q.cut&&Math.abs(q.r-p.r)===1&&q.i===p.i);if(n.length){const q=n[rnd(n.length)];q.inf=true;q.infAt=G.elapsed}}
+    if(Math.random()<.028){const n=G.pcs.filter(q=>!q.inf&&!q.cut&&q.r===p.r&&Math.abs(q.i-p.i)===1);if(n.length){const q=n[rnd(n.length)];q.inf=true;q.infAt=G.elapsed;zap(p,q)}}
+    if(!G.prep.segment&&Math.random()<.012){const n=G.pcs.filter(q=>!q.inf&&!q.cut&&Math.abs(q.r-p.r)===1&&q.i===p.i);if(n.length){const q=n[rnd(n.length)];q.inf=true;q.infAt=G.elapsed;zap(p,q)}}
   }
   const liveNow=G.pcs.filter(p=>p.inf&&!p.cut).length;
   if(liveNow===0)return finish(true);
@@ -122,7 +153,7 @@ function render(light){
   }
   el.querySelectorAll('.room').forEach((x,r)=>{x.classList.toggle('scan',selRoom===r||(G.scanRoom===r&&G.elapsed<G.scanUntil));x.querySelector('h4 span').textContent=selRoom===r?'選択中':'部屋を選ぶ'});
   el.querySelectorAll('.pc').forEach(x=>{const p=G.pcs[+x.dataset.k];x.className='pc'+(p.cut?' cut':'')+(p.cut&&p.inf?' wasbad':'')+(!p.cut&&seen(p)?' infected seen':'')+(!p.cut&&suspect(p)?' suspect':'')});
-  document.getElementById('timer').style.width=(G.t/20*100)+'%';document.getElementById('tleft').textContent=G.t.toFixed(1);
+  document.getElementById('timer').style.width=(G.t/20*100)+'%';const low=G.t<6&&!G.over;document.getElementById('danger').classList.toggle('on',low);document.querySelector('.timer').classList.toggle('low',low);if(low&&G.elapsed-(G.lastBeat||0)>(G.t<3?.45:.75)){G.lastBeat=G.elapsed;beep(90,0,'sine');beep(70,.09,'sine')}document.getElementById('tleft').textContent=G.t.toFixed(1);
   document.getElementById('inf').textContent=G.pcs.filter(p=>p.inf&&!p.cut&&seen(p)).length;
   document.getElementById('off').textContent=G.pcs.filter(p=>p.cut).length;
   document.getElementById('scanLeft').textContent=G.scan;document.getElementById('scanBtn').disabled=G.scan<=0||G.over;document.getElementById('wideBtn').disabled=G.over;
@@ -130,7 +161,7 @@ function render(light){
 function cut(k,el){if(G.over)return;const p=G.pcs[k];if(p.cut)return;p.cut=true;
   const rect=el.getBoundingClientRect(),app=document.getElementById('app').getBoundingClientRect(),s=app.width/1280;
   const x=(rect.left+rect.width/2-app.left)/s,y=(rect.top-app.top)/s;
-  if(p.inf){G.streak++;beep(520*Math.pow(1.12,Math.min(G.streak,8)));pop(x,y,G.streak>=2?'ナイス遮断 ×'+G.streak:'ナイス遮断！','#2bb673');if(G.streak===3)say('その調子！　連続で止めてるよ！','pose_fists')}
+  if(p.inf){G.stopUntil=performance.now()+70;el.classList.add('hitstop');setTimeout(()=>el.classList.remove('hitstop'),90);burst(x,y+rect.height/(2*s));G.streak++;beep(520*Math.pow(1.12,Math.min(G.streak,8)));pop(x,y,G.streak>=2?'ナイス遮断 ×'+G.streak:'ナイス遮断！','#2bb673');if(G.streak===3)say('その調子！　連続で止めてるよ！','pose_fists')}
   else{G.streak=0;beep(200,0,'square');pop(x,y,'正常な端末…','#9aa6bd');document.getElementById('app').classList.add('shake');setTimeout(()=>document.getElementById('app').classList.remove('shake'),350)}
   render(true)}
 document.getElementById('scanBtn').onclick=()=>{if(G.scan<=0||G.over)return;G.scan--;G.scanRoom=selRoom;G.scanUntil=G.elapsed+3;beep(880);beep(1175,.08);say(ROOMS[selRoom]+'を調べたよ。3秒だけ全部見える！','pose_magnifier');render(true)};
@@ -138,12 +169,12 @@ document.getElementById('wideBtn').onclick=()=>{if(G.over)return;let n=0,bad=0;f
 function finish(ok){G.over=true;clearInterval(loopId);
   const infected=G.pcs.filter(p=>p.inf).length,live=G.pcs.filter(p=>p.inf&&!p.cut).length,stopped=G.pcs.filter(p=>p.cut&&!p.inf).length;
   let loss=live*3+infected;if(G.prep.backup)loss=Math.ceil(loss/2);
-  const score=Math.max(0,100-loss*4-stopped*3);const rank=score>=85?'S':score>=70?'A':score>=50?'B':'C';
+  const score=Math.max(0,100-loss*4-stopped*3);const rank=score>=85?'S':score>=70?'A':score>=50?'B':'C';document.getElementById('danger').classList.remove('on');
   if(ok){banner('封じ込め成功！','linear-gradient(90deg,#2bb673,#3fa9f5)');chord();say('止めきった〜っ！','pose_jump')}else{banner('広がってしまった…','linear-gradient(90deg,#e0405f,#ff8a3d)');beep(150,0,'sawtooth');say('う〜、次は早めに調べよ…','pose_exhausted')}
-  setTimeout(()=>modal(`<h2 class="r">${ok?'封じ込め成功':'時間切れ'}　評価 <span style="color:var(--pink)">${rank}</span></h2>
+  setTimeout(()=>modal(`<div style="display:flex;align-items:center;gap:24px"><div><h2 class="r" style="margin:0">${ok?'封じ込め成功':'時間切れ'}</h2><div class="count" id="count">0</div><div style="font-size:13px;color:var(--gray)">点</div></div><span class="rankstamp r ${rank}" id="stamp" style="visibility:hidden">${rank}</span></div>
    <div style="font-size:16px;line-height:1.9">感染した端末 ${infected}台（止めきれず ${live}台）／正常なのに止めた端末 ${stopped}台<br>被害 ${loss}万円${G.prep.backup?'（バックアップで半分）':''}　／　点数 ${score}</div>
    <div style="font-size:13px;color:var(--gray);margin:8px 0 14px">止めすぎると業務が止まり、遅いと広がる。備えを変えるとやり方が変わる。</div>${prepHtml()}<button class="pri" id="again" style="margin-top:12px;width:100%">もう一度</button>`),1100);
-  setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=setup},1200)}
+  setTimeout(()=>{const b=document.getElementById('again');if(b)b.onclick=setup;countUp(score)},1200)}
 function prepHtml(){return `<div class="prep"><div class="r" style="font-size:15px">備え（事件の前にそろえた設備）</div>
  <label><input type="checkbox" id="pMon" ${G&&G.prep.monitor?'checked':''}>監視と通知：感染がすぐ赤く見える</label>
  <label><input type="checkbox" id="pSeg" ${G&&G.prep.segment?'checked':''}>ネットワーク分離：部屋をまたいで広がらない</label>
@@ -155,6 +186,14 @@ function pop(x,y,t,c){const d=document.createElement('div');d.className='pop r';
 function say(t,pose){document.getElementById('say').textContent=t;if(pose)document.getElementById('hin').src='../../ArtSource/Hinata/gen-20260929/cut/'+pose+'.png'}
 function beep(f,t=0,type='sine'){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.14,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
 function chord(){beep(523);beep(659,.07);beep(784,.14);beep(1046,.21)}
+
+// ---- 凝り演出の関数 ----
+function center(p){const el=document.querySelector('.pc[data-k="'+(p.r*ROWS+p.i)+'"]');const r=el.getBoundingClientRect(),a=document.getElementById('app').getBoundingClientRect(),s=a.width/1280;return [(r.left+r.width/2-a.left)/s,(r.top+r.height/2-a.top)/s]}
+function zap(p,q){const [x1,y1]=center(p),[x2,y2]=center(q);const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);document.getElementById('fx').appendChild(l);setTimeout(()=>l.remove(),720);beep(1400,0,'triangle')}
+function burst(x,y){const app=document.getElementById('app');const r=document.createElement('div');r.className='ringfx';r.style.left=x+'px';r.style.top=y+'px';app.appendChild(r);setTimeout(()=>r.remove(),460);
+  for(let i=0;i<10;i++){const d=document.createElement('div');d.className='shard';const a=i/10*Math.PI*2+Math.random()*.4,v=50+Math.random()*50;d.style.cssText='left:'+x+'px;top:'+y+'px;--dx:'+Math.cos(a)*v+'px;--dy:'+Math.sin(a)*v+'px;background:'+(i%2?'#ff7a93':'#fff');app.appendChild(d);setTimeout(()=>d.remove(),560)}}
+function countUp(score){const el=document.getElementById('count');if(!el)return;let v=0;const step=Math.max(1,Math.round(score/25));const id=setInterval(()=>{v=Math.min(score,v+step);el.textContent=v;beep(700+v*6,0,'triangle');if(v>=score){clearInterval(id);const st=document.getElementById('stamp');if(st){st.style.visibility='visible';beep(180,0,'square');setTimeout(chord,120)}}},35)}
+(function motes(){const app=document.getElementById('app');for(let i=0;i<18;i++){const m=document.createElement('div');m.className='mote';m.style.left=(Math.random()*1280)+'px';m.style.top=(300+Math.random()*460)+'px';m.style.animationDuration=(6+Math.random()*8)+'s';m.style.animationDelay=(-Math.random()*10)+'s';app.appendChild(m)}})();
 function fit(){const a=document.getElementById('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
 addEventListener('resize',fit);fit();
 modal(`<h2 class="r">事件の対応（試作）</h2><div style="font-size:15px;line-height:1.8">社内の端末に、ランサムの疑い。20秒で広がりを止める。<br>・端末を押す：1台ずつ切り離す<br>・部屋を選んで「調べる」：隠れた感染が3秒見える<br>・「部屋ごと止める」：速いが、正常な端末も止まる</div><div style="margin:12px 0">${prepHtml()}</div><button class="pri" id="start" style="width:100%">対応を始める</button>`);

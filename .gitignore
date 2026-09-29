@@ -1,4 +1,7 @@
-﻿[Ll]ibrary/
+﻿# 無料プランで作った試遊用の声（配布・公開しない）
+Assets/Audio/CompanyYear/VoiceTest/
+Assets/Audio/CompanyYear/VoiceTest.meta
+[Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/

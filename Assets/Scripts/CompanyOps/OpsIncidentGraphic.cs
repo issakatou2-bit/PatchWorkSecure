@@ -43,10 +43,15 @@ namespace PatchWorkSecure.CompanyOps
                 for(float x=-h;x<w;x+=24)
                     Polygon(vh,new[]{new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+x+10,r.yMin),new Vector2(r.xMin+x+h+10,r.yMax),new Vector2(r.xMin+x+h,r.yMax)},color);
             }
-            else if(Kind=="dashed")
+            else if(Kind=="dashed"||Kind=="round-dashed")
             {
                 for(float x=12;x<w-12;x+=16) {Quad(vh,r.xMin+x,r.yMin,Mathf.Min(9,w-12-x),2,color,color);Quad(vh,r.xMin+x,r.yMax-2,Mathf.Min(9,w-12-x),2,color,color);}
                 for(float y=8;y<h-8;y+=16) {Quad(vh,r.xMin,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);Quad(vh,r.xMax-2,r.yMin+y,2,Mathf.Min(9,h-8-y),color,color);}
+                if(Kind=="round-dashed")for(int c=0;c<4;c++)
+                {
+                    var center=new Vector2(c==0||c==3?r.xMax-6:r.xMin+6,c<2?r.yMax-6:r.yMin+6);
+                    for(int k=0;k<5;k++){float a=(c*90+k*18)*Mathf.Deg2Rad,b=a+18*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*5,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*5,2);}
+                }
             }
             else if(Kind=="finger")
             {

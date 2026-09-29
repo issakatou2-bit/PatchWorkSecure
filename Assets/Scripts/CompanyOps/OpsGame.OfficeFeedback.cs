@@ -22,12 +22,21 @@ namespace PatchWorkSecure.CompanyOps
                 Hover(room,RoomName(id)+" / "+(id=="reception"?"社外との連絡・日常業務":"この部屋の設備・運用を整える"));
                 var label=PCard(room.transform,"RoomLabel",8,6,Mathf.Min(area.width-16,132),24,new Color(1,1,1,.92f),12,false);PText(label,"RoomLabelText",RoomName(id),0,0,label.rect.width,24,13,PlanInk,true,true);
                 var ids=OpsCatalog.Projects.Where(p=>ProjectRoom(p.id)==id).Select(p=>p.id).ToArray();
+                int placeholders=0,slot=0;
                 for(int i=0;i<ids.Length;i++)
                 {
-                    int level=State.Level(ids[i]);float x=16+i*34;
-                    var device=Box(room.transform,"RoomDevice_"+ids[i],x,area.height-44,24,30,level==0?Hex("a6afc0"):level==1?Hex("2774a8"):Hex("1a7c63"));
-                    device.GetComponent<Image>().color=new Color(device.GetComponent<Image>().color.r,device.GetComponent<Image>().color.g,device.GetComponent<Image>().color.b,level==0?.5f:1);
-                    for(int n=0;n<2;n++)PCard(device,"DeviceLight"+n,5,8+n*9,14,4,n<level?n==1?Hex("ffd23f"):Hex("5dff9c"):Hex("6b7894"),12,false);
+                    int level=State.Level(ids[i]);if(level==0&&placeholders++>=3)continue;float x=16+slot++*34;
+                    if(level==0)
+                    {
+                        var device=Rect(room.transform,"RoomDevice_"+ids[i],x,area.height-44,26,30);
+                        IncidentShape(device,"UninstalledFrame","round-dashed",0,0,26,30,Color.white);
+                        PText(device,"UninstalledPlus","+",0,0,26,30,20,Color.white,true,true);
+                    }
+                    else
+                    {
+                        var device=Box(room.transform,"RoomDevice_"+ids[i],x,area.height-44,24,30,level==1?Hex("2774a8"):Hex("1a7c63"));
+                        for(int n=0;n<2;n++)PCard(device,"DeviceLight"+n,5,8+n*9,14,4,n<level?n==1?Hex("ffd23f"):Hex("5dff9c"):Hex("6b7894"),12,false);
+                    }
                 }
             }
             PButton(stage,"Room_officeLower","",86,308,220,222,()=>OpenRoomProjects("office"),Color.clear,Color.clear,16);

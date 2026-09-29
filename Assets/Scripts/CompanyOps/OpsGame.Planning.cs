@@ -32,9 +32,13 @@ namespace PatchWorkSecure.CompanyOps
             var t=Text(p,name,value,x,y,w,h,size,c??PlanInk); t.font=heading&&HeadingFont!=null?HeadingFont:Font;
             t.alignment=center?TextAlignmentOptions.Midline:TextAlignmentOptions.MidlineLeft;
             if(heading) t.fontStyle=FontStyles.Bold;
-            if(name=="NavigatorSpeech" || name=="TutorialLine" || name=="ResolutionReaction")PortraitSpeech(t);
+            if(name=="NavigatorSpeech" || name=="TutorialLine" || name=="ResolutionReaction")
+            {
+                t.text=SpeechLines(value);t.textWrappingMode=TextWrappingModes.NoWrap;t.fontSizeMin=12;PortraitSpeech(t);
+            }
             return t;
         }
+        public static string SpeechLines(string value)=>value.Replace("、","、\n").Replace("！","！\n").Replace("。","。\n").Replace("？","？\n").Replace("\n\n","\n").TrimEnd('\n');
         private Button PButton(Transform p,string id,string label,float x,float y,float w,float h,Action action,Color bg,Color fg,float radius=20,Color? shadow=null,bool enabled=true)
         {
             var b=Button(p,id,label,x,y,w,h,action,bg,enabled); var i=b.GetComponent<Image>();
@@ -94,7 +98,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             PlanningPin(stage,"Pin_backup","復旧基盤",430,190,52,State.Level("backup")+State.Level("drill"),()=>OfficePinDialog("復旧基盤",State.Level("backup")+State.Level("drill"),"backup","recover"));
             PlanningPin(stage,"Pin_culture","相談できる現場",650,365,42,State.Level("education"),()=>OfficePinDialog("相談できる現場",State.Level("education"),"culture","people"));
-            PlanningPin(stage,"Pin_change","運用のしくみ",74,415,42,State.Level("automation")+State.Level("runbook"),()=>OfficePinDialog("運用のしくみ",State.Level("automation")+State.Level("runbook"),"change","operations"));
+            PlanningPin(stage,"Pin_change","運用のしくみ",330,410,42,State.Level("automation")+State.Level("runbook"),()=>OfficePinDialog("運用のしくみ",State.Level("automation")+State.Level("runbook"),"change","operations"));
             var consultation=PButton(stage,"OfficeConsultation","!",700,36,56,56,PlanningBriefDialog,PlanPink,Color.white,20,Hex("c1536c"));
             var mark=consultation.GetComponentInChildren<TextMeshProUGUI>();mark.fontSize=mark.fontSizeMax=34;mark.fontSizeMin=34;
             consultation.GetComponent<Image>().sprite=PlanningArt.markerBubble;consultation.GetComponent<Image>().type=Image.Type.Simple;
@@ -152,8 +156,8 @@ namespace PatchWorkSecure.CompanyOps
             var budget=PButton(screen,"Stat_0","",budgetX,24,budgetWidth,64,()=>StatusDetail(0),new Color(1,1,1,.92f),PlanInk,20);
             var coin=PCard(budget.transform,"BudgetCoin",22,17,30,30,Hex("ffd23f"),20,false);
             PText(coin,"CoinLabel","円",0,0,30,30,16,Hex("7a5a00"),true,true);
-            PText(budget.transform,"予算Value",State.budget.ToString(),62,0,budgetWidth-112,64,34);
-            PText(budget.transform,"BudgetUnit","万円",budgetWidth-64,0,52,64,16,PlanGray);
+            PText(budget.transform,"予算Value",State.budget.ToString(),62,2,budgetWidth-126,48,32);
+            PText(budget.transform,"BudgetUnit","万円",budgetWidth-58,2,46,48,16,PlanGray);
             BudgetGainEffect((RectTransform)budget.transform);
             if(statChanges[0]<0)
             {

@@ -59,8 +59,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var bubble=PCard(screen,"Navigator",x,y,w,120,Color.white,20);
             SpeechName(bubble);
-            var icon=PImage(bubble,"HinataFaceIcon",Navigator?.Face(face),12,24,52,52);icon.GetComponent<Image>().preserveAspect=true;icon.gameObject.AddComponent<OpsPortraitIdentity>().FaceIcon=true;
-            PText(bubble,"NavigatorSpeech",line,76,15,w-94,92,18,null,false);
+            PText(bubble,"NavigatorSpeech",line,18,15,w-36,92,18,null,false);
         }
         private void MonthlyScreen()
         {
@@ -93,10 +92,14 @@ namespace PatchWorkSecure.CompanyOps
             }
             var effect=PButton(incident,"EffectDetails","",26,236,648,66,()=>InvestmentReport(r),Hex("e3faf3"),PlanInk,16);
             KitGradient(effect.GetComponent<Image>(),Hex("e3faf3"),Hex("e3faf3"));effect.GetComponent<Shadow>().enabled=false;
-            PText(effect.transform,"EffectTag","効いた備え",16,6,128,28,14,Hex("1a7c63"));
             var best=r.investmentEffects?.OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault(e=>e.avoidedLoss>0||e.avoidedDowntime>0);
-            PText(effect.transform,"ImpactNumbers",best==null?"今月の有効な設備はなし":OpsCatalog.Projects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level,16,34,396,24,17);
-            PText(effect.transform,"ImpactSummary",r.hasInvestmentComparison?"被害 −"+r.avoidedLoss+"万円\n停止 −"+r.avoidedDowntime+"時間":"比較未記録",430,6,200,52,15,Hex("1a7c63"));
+            PText(effect.transform,"EffectTag",best==null?"次に効きそうな備え":"効いた備え",16,6,240,28,14,Hex("1a7c63"));
+            var potential=r.potentialInvestmentEffects?.FirstOrDefault();
+            string equipment=best!=null?OpsCatalog.Projects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level:
+                potential!=null?OpsCatalog.Projects[OpsCatalog.Index(potential.projectId)].name+" / 未導入":"次の計画で備えを確認しよう";
+            PText(effect.transform,"ImpactNumbers",equipment,16,34,best==null?616:396,24,17);
+            if(best==null)IncidentShape(effect.transform,"PotentialEquipmentFrame","dashed",4,4,640,58,Hex("1a7c63"));
+            else PText(effect.transform,"ImpactSummary",r.hasInvestmentComparison?"被害 −"+r.avoidedLoss+"万円\n停止 −"+r.avoidedDowntime+"時間":"比較未記録",430,6,200,52,15,Hex("1a7c63"));
             MonthlyGrowth(r);
             var mission=ReportPanel("MonthlyMission",770,140,440,330,.04f);ReportHeading(mission,"MISSION","社内依頼",PlanPink);
             PText(mission,"MissionTitle",ReportMissionTitle(State.CurrentMission.title),26,62,225,100,22);
@@ -108,7 +111,8 @@ namespace PatchWorkSecure.CompanyOps
                 IncidentShape(stamp,"StampStitch","dashed",7,7,136,136,PlanPink);PText(stamp,"StampText","達成",0,0,150,150,42,PlanPink,true,true);
                 ReportChip(mission,"MissionReward","信頼 +3",26,267,164,Hex("f0ecfb"),Hex("5a4a9a"));ReportChip(mission,"MissionPoints","年間 +45点",200,267,214,Hex("e4f3ff"),Hex("1f6fb0"));
                 if(r.missionBonus>0)PText(mission,"MissionBudgetPaid","臨時予算 +"+r.missionBonus+"万円（受領済み）",26,230,224,26,14,Hex("7a5a00"));
-                PButton(mission,"MissionConversation","ひなたの会話",26,304,388,22,MissionConversation,new Color(1,1,1,0),PlanPink,16);
+                var conversation=PButton(mission,"MissionConversation","ひなたとふりかえる",264,224,150,34,MissionConversation,Color.white,PlanPink,16);
+                conversation.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=13;
             }
             else PText(mission,"MissionNoReward","報酬なし / 来月の計画に活かそう",26,260,388,48,15,PlanGray);
             var team=ReportPanel("MonthlyTeam",770,494,440,250,.12f);ReportHeading(team,"TEAM","活躍した社員",PlanMint);
@@ -122,7 +126,15 @@ namespace PatchWorkSecure.CompanyOps
                 PText(team,"SupportTask",r.power.support.Contains("：")?r.power.support.Split('：')[1]:"対応を助けた",104,100,310,62,15,PlanGray,false);
                 PText(team,"SupportPower","抑制力 +"+r.power.staff,104,156,310,28,15,Hex("1f6fb0"));
             }
-            else PText(team,"SupportNone",r.power==null?"社員の支援は未記録":"今月は支援なし",26,80,388,90,22,PlanGray);
+            else
+            {
+                for(int i=0;i<3;i++)
+                {
+                    var face=PCard(team,"NextSupportFace"+i,26+i*116,64,58,58,Hex("edf1f7"),24,false);
+                    PText(face,"NextSupportInitial"+i,OpsGrowthCatalog.StaffNames[i].Substring(0,1),0,0,58,58,24,new Color(.42f,.47f,.57f,.45f),true,true);
+                }
+                PText(team,"SupportNone",r.power==null?"社員の支援は未記録":"次の月は支援を頼める",26,136,388,36,17,PlanGray);
+            }
             PButton(team,"ReviewPower","対応力の内訳を見る",26,190,388,44,()=>PowerReport(r.response,r),Color.white,PlanInk,16);
             Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");

@@ -14,6 +14,16 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next3Polish_月報と計画の八件を同条件で撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.State.budget=59;game.OpenTab(0);game.StopVoice();game.SpeakSceneLine("growth_01",0);yield return new WaitForSecondsRealtime(1.4f);Capture("130-polish-planning");
+            var budget=Find<RectTransform>("予算Value");var unit=Find<RectTransform>("BudgetUnit");Assert.Greater(unit.anchoredPosition.x,budget.anchoredPosition.x+budget.rect.width+4);Assert.Less(budget.rect.height-budget.anchoredPosition.y,56);
+            foreach(var room in Find<RectTransform>("OfficeStage").GetComponentsInChildren<RectTransform>().Where(r=>r.name.StartsWith("Room_")))Assert.LessOrEqual(room.GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.name=="UninstalledFrame"),3);
+            Assert.Greater(Find<RectTransform>("Pin_change").anchoredPosition.x,283);Assert.AreEqual(TextWrappingModes.NoWrap,Find<TextMeshProUGUI>("NavigatorSpeech").textWrappingMode);
+            game.ChooseAction("audit");game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);game.StopVoice();yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-empty");
+            Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="ImpactSummary"));Assert.IsNotNull(Find<RectTransform>("PotentialEquipmentFrame"));Assert.IsFalse(Object.FindObjectsByType<OpsPortraitIdentity>().Any(i=>i.FaceIcon));Assert.AreEqual(3,Find<RectTransform>("MonthlyTeam").GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("NextSupportFace")));CheckText();
+            game.StartYear(14);game.ChooseAction(game.State.CurrentMission.actionA);game.ChooseAction(game.State.CurrentMission.actionB);game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectA));game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectB));game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-mission");Assert.IsTrue(game.State.CurrentMissionCompleted);CheckPointer("MissionConversation");Assert.GreaterOrEqual(Find<Button>("MissionConversation").GetComponent<RectTransform>().rect.height,32);CheckText();LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
@@ -26,7 +36,7 @@ namespace PatchWorkSecure.Tests
             string before=JsonUtility.ToJson(game.State);
             foreach(var line in bank.lines.Where(l=>l.fullSpeech))
             {
-                game.SpeakSceneLine(line.id,0);yield return new WaitForSecondsRealtime(.08f);Assert.AreEqual(line.caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+                game.SpeakSceneLine(line.id,0);yield return new WaitForSecondsRealtime(.08f);Assert.AreEqual(OpsGame.SpeechLines(line.caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);
                 if(line.clip!=null)Assert.IsTrue(game.PortraitVoicePlaying,line.id);else Assert.IsFalse(game.PortraitVoicePlaying);
                 game.StopVoice();Assert.IsFalse(game.PortraitVoicePlaying);
             }
@@ -44,12 +54,12 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
             Assert.AreEqual(105,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
-            Assert.AreEqual(game.ActiveVoiceBank.Find("season_04").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
+            Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("season_04").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
             game.StartYear(14);Assert.IsTrue(game.VoicePending,"新年度を始め直したら同じ季節でも読み直す");yield return new WaitForSecondsRealtime(2);
-            Assert.AreEqual(game.ActiveVoiceBank.Find("season_04").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+            Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("season_04").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);
             string before=JsonUtility.ToJson(game.State);game.SpeakSceneLine("incident_unconfirmed",2);Assert.IsTrue(game.VoicePending);Click("Stat_0");yield return null;Assert.IsFalse(game.VoicePending);Assert.AreEqual(before,JsonUtility.ToJson(game.State));Click("CloseDialog");
-            Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual("tutorial_1",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_1").caption,Find<TextMeshProUGUI>("TutorialLine").text);
-            Click("Stat_0");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual("tutorial_2",game.LastReactionId);Assert.AreEqual(game.ActiveVoiceBank.Find("tutorial_2").caption,Find<TextMeshProUGUI>("TutorialLine").text);Capture("127-voice-tutorial-no-audio");LogAssert.NoUnexpectedReceived();
+            Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual("tutorial_1",game.LastReactionId);Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("tutorial_1").caption),Find<TextMeshProUGUI>("TutorialLine").text);
+            Click("Stat_0");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual("tutorial_2",game.LastReactionId);Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("tutorial_2").caption),Find<TextMeshProUGUI>("TutorialLine").text);Capture("127-voice-tutorial-no-audio");LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator VoiceV2_全文再生とBGM減衰と設定と操作キャンセルがゲーム数値に触れない()
         {
@@ -63,7 +73,7 @@ namespace PatchWorkSecure.Tests
                 var source=game.GetComponents<AudioSource>().Single(s=>s.clip==clip);Click("Menu");yield return null;Assert.IsFalse(source.isPlaying);Assert.IsFalse(game.VoicePending);
                 Find<Slider>("VoiceVolume").value=.36f;Assert.IsTrue(game.SpeakSceneLine("tutorial_1",0));yield return new WaitForSecondsRealtime(.15f);Assert.AreEqual(.36f,source.volume,.001f);Assert.IsTrue(source.isPlaying);
                 Click("CaptionToggle");yield return null;Assert.IsFalse(game.CaptionsEnabled);Assert.AreEqual("",Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.IsFalse(source.isPlaying);
-                Click("CaptionToggle");Find<Slider>("VoiceVolume").value=0;Assert.IsTrue(game.SpeakSceneLine("incident_unconfirmed",0));yield return new WaitForSecondsRealtime(.15f);Assert.IsFalse(game.PortraitVoicePlaying);Assert.AreEqual(bank.Find("incident_unconfirmed").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+                Click("CaptionToggle");Find<Slider>("VoiceVolume").value=0;Assert.IsTrue(game.SpeakSceneLine("incident_unconfirmed",0));yield return new WaitForSecondsRealtime(.15f);Assert.IsFalse(game.PortraitVoicePlaying);Assert.AreEqual(OpsGame.SpeechLines(bank.Find("incident_unconfirmed").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);
                 Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
             }
             finally{game.StopVoice();game.Navigator=original;Object.Destroy(persona);Object.Destroy(bank);Object.Destroy(clip);}
@@ -78,11 +88,11 @@ namespace PatchWorkSecure.Tests
             limit=Time.realtimeSinceStartup+10;
             while(game.ResolutionActive&&Time.realtimeSinceStartup<limit)
             {
-                if(game.LastReactionId=="incident_activate"||game.LastReactionId=="incident_missing")Assert.AreEqual(game.LastReactionCaption,Find<TextMeshProUGUI>("ResolutionReaction").text);
+                if(game.LastReactionId=="incident_activate"||game.LastReactionId=="incident_missing")Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("ResolutionReaction").text);
                 yield return null;
             }
             Assert.IsFalse(game.ResolutionActive);yield return new WaitForSecondsRealtime(5.5f);
-            Assert.AreEqual("mission_done",game.LastReactionId);Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(game.ActiveVoiceBank.Find("mission_done").caption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
+            Assert.AreEqual("mission_done",game.LastReactionId);Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("mission_done").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
             Click("NextMonth");yield return null;Assert.AreEqual("season_05",game.LastReactionId);Assert.AreEqual(1,game.State.month);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()
@@ -138,7 +148,7 @@ namespace PatchWorkSecure.Tests
                 var cards=UnityEngine.Object.FindObjectsByType<RectTransform>().Where(t=>t.name.StartsWith("Project_")).ToArray();Assert.IsNotEmpty(cards);foreach(var c in cards)Assert.AreEqual(room,OpsGame.ProjectRoom(c.name.Substring(8)));
                 Click("ClosePlanner");yield return null;
             }
-            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(1.6f);Assert.AreNotEqual(Find<UnityEngine.UI.Image>("RoomDevice_mfa").color,Find<UnityEngine.UI.Image>("RoomDevice_inventory").color);Capture("124-next-office-rooms");
+            game.Buy(OpsCatalog.Index("mfa"));yield return new WaitForSecondsRealtime(1.6f);Assert.IsNotNull(Find<UnityEngine.UI.Image>("RoomDevice_mfa"));Assert.IsNotNull(Find<RectTransform>("RoomDevice_inventory").Find("UninstalledFrame"));Capture("124-next-office-rooms");
             Click("Room_office");yield return new WaitForSecondsRealtime(.5f);Click("Details_inventory");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Buy_inventory");Click("Buy_inventory");yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual(1,game.State.Level("inventory"));
             game.OpenTab(0);Click("Room_reception");yield return new WaitForSecondsRealtime(.5f);CheckPointer("ReceptionBrief");Click("CloseDialog");
             game.OpenTab(0);SetEvent(game.State,"ransom-backup");game.State.staffExperience[1]=3;game.State.supportOrder="investigate";game.BeginIncident();game.Resolve("scope");
@@ -201,7 +211,7 @@ namespace PatchWorkSecure.Tests
             var r=game.State.Latest;Assert.AreEqual(r.loss+"<size=17>万円</size>",Find<TextMeshProUGUI>("MonthlyLossValue").text);
             Assert.AreEqual(r.downtime+"<size=17>時間</size>",Find<TextMeshProUGUI>("MonthlyStopValue").text);
             Assert.AreEqual(new Vector2(40,-140),Find<RectTransform>("MonthlyIncident").anchoredPosition);
-            Assert.IsNotNull(r.metricsBefore);Assert.IsNotNull(r.forecast);Assert.AreEqual("今月は支援なし",Find<TextMeshProUGUI>("SupportNone").text);
+            Assert.IsNotNull(r.metricsBefore);Assert.IsNotNull(r.forecast);Assert.AreEqual("次の月は支援を頼める",Find<TextMeshProUGUI>("SupportNone").text);
             CheckPointer("EffectDetails");CheckPointer("ReviewDetails");CheckPointer("NextMonth");Capture("75-monthly-report");CheckText();
             Click("ReviewDetails");yield return new WaitForSecondsRealtime(.5f);CheckPointer("MonthlyLesson");CheckPointer("ViewHistory");CheckText();Click("CloseDialog");yield return new WaitForSecondsRealtime(.25f);
             game.Next();game.State.staffExperience[1]=OpsGrowthCatalog.StaffThresholds[1];game.State.supportOrder="investigate";game.OpenTab(0);game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(1);

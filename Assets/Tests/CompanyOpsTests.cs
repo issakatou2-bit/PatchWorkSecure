@@ -188,7 +188,8 @@ namespace PatchWorkSecure.Tests
             Click("Respond_scope"); yield return WaitForResolution(game);
             Capture("06-review"); CheckText();
             Assert.IsTrue(game.State.Latest.hasInvestmentComparison);
-            StringAssert.Contains("被害 −"+game.State.Latest.avoidedLoss, Find<TextMeshProUGUI>("ImpactSummary").text);
+            if(game.State.Latest.avoidedLoss>0||game.State.Latest.avoidedDowntime>0)StringAssert.Contains("被害 −"+game.State.Latest.avoidedLoss, Find<TextMeshProUGUI>("ImpactSummary").text);
+            else Assert.IsNotNull(Find<RectTransform>("PotentialEquipmentFrame"));
             Click("NextMonth"); yield return null;
             Capture("07-may-compact", 1280, 720);
             while (game.State.phase != OpsPhase.Ended)

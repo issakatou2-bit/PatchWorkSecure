@@ -34,7 +34,7 @@ namespace PatchWorkSecure.Tests
             game.ChooseAction("listen"); yield return null;
             var feedback=Find<RectTransform>("Navigator").GetComponentsInChildren<RectTransform>(true).Single(r=>r.name=="Feedback");
             Assert.AreEqual("Navigator",feedback.parent.name);Assert.IsFalse(feedback.gameObject.activeSelf,"字幕に旧通知を重ねない");
-            Assert.AreEqual(game.LastReactionCaption,Find<TextMeshProUGUI>("NavigatorSpeech").text);
+            Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("NavigatorSpeech").text);
             var change = Find<RectTransform>("StatChangeEffect3");
             Assert.Less(-change.anchoredPosition.y + change.rect.height, 429, "差分が相談文化の行からはみ出す");
             Capture("42-compact-planning", 1280, 720); CheckText();

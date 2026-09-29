@@ -105,31 +105,34 @@ namespace PatchWorkSecure.CompanyOps
             KitGradient(evidence.GetComponent<Image>(),IncidentYellow,IncidentYellow);evidence.transform.Find("KitTopLight").gameObject.SetActive(false);
             var evidenceText=evidence.GetComponentInChildren<TextMeshProUGUI>();evidenceText.fontSizeMax=14;evidenceText.transform.SetAsLastSibling();
             var ready=PCard(p,"Readiness",0,53,928,62,new Color(1,1,1,.1f),20,false);
-            PText(ready,"ReadinessTitle","あなたの備え",16,0,112,62,15,Color.white);
+            var readyTitle=PText(ready,"ReadinessTitle","あなたの備え",16,0,112,62,15,Color.white);
             var relevant=Enumerable.Range(0,State.levels.Length).Where(i=>ResponseIds.Any(r=>EquipmentHelps(i,r))).Take(3).ToList();
             string[] missing=State.DataRecoveryApplies?new[]{"backup","drill","monitor"}:new[]{"monitor","education","runbook"};float x=134;
+            bool support=ResponseIds.Any(id=>State.ResponsePower(id).staff>0);
+            string member=State.SupportSummary.Split('：')[0],staffCaption=support?member+"が支援できる":"社員の育成・支援";
+            // 字形の実幅＋左右12px。支援札の場所を先に確保し、すべて同じ列を左から詰める。
+            Func<string,float> tagWidth=value=>Mathf.Ceil(readyTitle.GetPreferredValues("<size=14>"+value+"</size>").x)+24;
+            float staffWidth=tagWidth(staffCaption)+(support?22:0),gearRight=928-16-staffWidth-10;
             foreach(int i in relevant)
             {
-                var item=OpsCatalog.Projects[i];float w=Mathf.Min(220,30+item.name.Length*14+40);if(x+w>694) break;
+                var item=OpsCatalog.Projects[i];string caption=item.name+" Lv."+State.levels[i];float w=tagWidth(caption);if(x+w>gearRight) break;
                 var tag=PCard(ready,"Ready_"+item.id,x,15,w,32,PlanMint,12,false);
-                PText(tag,"ReadyLabel_"+item.id,item.name+" Lv."+State.levels[i],10,0,w-20,32,14,Color.white);x+=w+10;
+                PText(tag,"ReadyLabel_"+item.id,caption,12,0,w-24,32,14,Color.white);x+=w+10;
             }
-            foreach(string id in missing.Where(id=>State.Level(id)==0).Take(relevant.Count==0?2:1))
+            foreach(string id in missing.Where(id=>State.Level(id)==0).Take(2))
             {
-                string name=OpsCatalog.Projects[OpsCatalog.Index(id)].name;float w=30+name.Length*14+42;if(x+w>694) break;
-                var tag=PCard(ready,"Missing_"+id,x,15,w,32,new Color(1,1,1,.06f),12,false);
-                IncidentShape(tag,"MissingFrame_"+id,"round-dashed",0,0,w,32,Hex("a6afc0")).GetComponent<OpsIncidentGraphic>().StrokeWidth=1;
-                PText(tag,"MissingLabel_"+id,name+" 未導入",10,0,w-20,32,14,Hex("c9d3e3"));x+=w+10;
+                string caption=OpsCatalog.Projects[OpsCatalog.Index(id)].name+" 未導入";float w=tagWidth(caption);if(x+w>gearRight) break;
+                var tag=PCard(ready,"Missing_"+id,x,15,w,32,Color.white,12,false);
+                IncidentShape(tag,"MissingFrame_"+id,"round-dashed",0,0,w,32,PlanGray).GetComponent<OpsIncidentGraphic>().StrokeWidth=1;
+                PText(tag,"MissingLabel_"+id,caption,12,0,w-24,32,14,PlanInk);x+=w+10;
             }
-            bool support=ResponseIds.Any(id=>State.ResponsePower(id).staff>0);
-            string member=State.SupportSummary.Split('：')[0];
-            var staff=PButton(ready,"OpenTeam",support?member+"が支援できる":"社員の育成・支援",702,15,210,32,TeamDialog,PlanBlue,Color.white,12);
+            var staff=PButton(ready,"OpenTeam",staffCaption,x,15,staffWidth,32,TeamDialog,PlanBlue,Color.white,12);
             KitGradient(staff.GetComponent<Image>(),PlanBlue,PlanBlue);staff.transform.Find("KitTopLight").gameObject.SetActive(false);
-            staff.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+            var staffText=staff.GetComponentInChildren<TextMeshProUGUI>();staffText.fontSize=staffText.fontSizeMin=staffText.fontSizeMax=14;staffText.fontStyle=FontStyles.Bold;
             if(support)
             {
                 PImage(staff.transform,"SupportFace",PlanningArt.morale,10,5,22,22,Color.white);
-                staff.GetComponentInChildren<TextMeshProUGUI>().margin=new Vector4(30,0,0,0);
+                staffText.margin=new Vector4(34,0,8,0);
             }
             var estimates=ResponseIds.Select(State.Estimate).ToArray();int lossScale=Math.Max(1,estimates.Max(e=>e.lossMax)),stopScale=Math.Max(1,estimates.Max(e=>e.stopMax));
             string[] caution={"正常な業務も止め、\n広がりを抑える",State.ScopeOversight>0?"見落としの恐れを含む\n範囲を絞る備えが重要":"業務を続けやすいが、\n範囲を絞る備えが重要","安全確認の後に再開。\n戻せる備えが重要"};

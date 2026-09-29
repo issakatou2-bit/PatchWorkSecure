@@ -33,6 +33,30 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [UnityTest] public IEnumerator Polish4_18_備えの札は白緑青を区別し左から一列に詰まる()
+        {
+            yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
+            for(int mode=0;mode<3;mode++)
+            {
+                if(mode>0){game.State.levels[OpsCatalog.Index("backup")]=mode;game.State.staffExperience[1]=OpsGrowthCatalog.StaffThresholds[1];game.State.supportOrder="investigate";}
+                if(mode==2)foreach(var project in OpsCatalog.Projects)game.State.levels[OpsCatalog.Index(project.id)]=2;
+                game.OpenTab(0);yield return new WaitForSecondsRealtime(.3f);string before=JsonUtility.ToJson(game.State);
+                var row=Find<RectTransform>("Readiness");var tags=row.GetComponentsInChildren<Image>().Where(t=>t.name.StartsWith("Ready_")||t.name.StartsWith("Missing_")||t.name=="OpenTeam").OrderBy(t=>t.rectTransform.anchoredPosition.x).ToArray();
+                Assert.IsNotEmpty(tags);float x=134;
+                foreach(var tag in tags)
+                {
+                    Assert.AreEqual(x,tag.rectTransform.anchoredPosition.x,.01f);Assert.AreEqual(-15,tag.rectTransform.anchoredPosition.y);Assert.AreEqual(32,tag.rectTransform.rect.height);
+                    var label=tag.GetComponentInChildren<TextMeshProUGUI>();label.ForceMeshUpdate();Assert.AreEqual(1,label.textInfo.lineCount);Assert.IsFalse(label.isTextOverflowing);
+                    bool missing=tag.name.StartsWith("Missing_");ColorUtility.TryParseHtmlString(missing?"#1d2a44":"#ffffff",out var textColor);Assert.AreEqual(textColor,label.color);
+                    if(missing){Assert.AreEqual(Color.white,tag.color);Assert.AreEqual("round-dashed",tag.GetComponentInChildren<OpsIncidentGraphic>().Kind);}
+                    if(tag.name.StartsWith("Ready_")){ColorUtility.TryParseHtmlString("#2ec4a0",out var green);Assert.AreEqual(green,tag.color);StringAssert.Contains("Lv.",label.text);}
+                    x+=tag.rectTransform.rect.width+10;
+                }
+                Assert.AreEqual("OpenTeam",tags.Last().name);Assert.LessOrEqual(x-10,row.rect.width-16);CheckPointer("OpenTeam");CheckText();
+                PolishCapture(18,mode==0?"after":mode==1?"equipped":"full");Assert.AreEqual(before,JsonUtility.ToJson(game.State));
+            }
+            LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Polish4_16_四つのタイトルボタンは六ピクセルの厚みがある()
         {
             yield return PolishTitle();

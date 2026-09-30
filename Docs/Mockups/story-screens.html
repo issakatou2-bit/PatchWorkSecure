@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>3年の本編の画面</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 3年の本編（Next-9）の手本：タイトルの遊び方選び／年度替わり（目標の結果・引き継ぎ・見直し）／挑戦の終わり／因子を選ぶ／エンディング。#shot=で状態を開く */
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44;background:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.en{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:12px;letter-spacing:.32em}
+.stage{position:relative;width:1600px;height:900px;overflow:hidden;display:none}
+.stage.on{display:block}
+.panel{position:relative;border-radius:24px;background:linear-gradient(180deg,#ffffff,#f6f8fc);box-shadow:0 0 0 3px #ffffff,0 0 0 4px #e2e7f0,0 14px 34px rgba(27,35,64,.16);box-sizing:border-box}
+.btn{position:relative;overflow:hidden;border:0;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:20px;height:62px;border-radius:18px;padding:0 26px}
+.btn::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.pink{color:#fff;background:linear-gradient(180deg,#ff94ae 0%,#ff6f91 55%,#f45a80 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #c9486c,0 10px 18px rgba(201,72,108,.35);text-shadow:0 2px 0 rgba(160,40,80,.45)}
+.blue{color:#fff;background:linear-gradient(180deg,#7fc4ff,#3fa9f5 60%,#2f93dc);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #1f75b8,0 10px 18px rgba(31,117,184,.3);text-shadow:0 2px 0 rgba(20,80,140,.4)}
+.white{color:#1d2a44;background:linear-gradient(180deg,#ffffff,#eef2f8);box-shadow:inset 0 2px 0 #fff,0 0 0 2px #dfe5ef,0 6px 0 #c3ccdc}
+.btn.lock{color:#9aa3b5;background:#e9edf4;box-shadow:0 0 0 2px #dfe5ef,0 6px 0 #c9d0dc;cursor:default}.btn.lock::after{display:none}
+@keyframes stamp{0%{transform:scale(2.6) rotate(-16deg);opacity:0}55%{transform:scale(.92) rotate(-6deg);opacity:1}75%{transform:scale(1.04) rotate(-6deg)}100%{transform:scale(1) rotate(-6deg)}}
+@keyframes rays{to{transform:rotate(360deg)}}
+@keyframes rise{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
+@keyframes hop{0%,100%{transform:translateY(0)}30%{transform:translateY(-20px)}55%{transform:translateY(0)}}
+@keyframes foil{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes pulse{50%{box-shadow:0 0 0 3px #fff,0 0 0 7px rgba(63,169,245,.35),0 14px 34px rgba(27,35,64,.16)}}
+@keyframes fall{0%{transform:translate(0,-30px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate(-60px,940px) rotate(720deg);opacity:0}}
+@keyframes mote{0%{transform:translateY(0);opacity:0}20%{opacity:.9}100%{transform:translateY(-260px);opacity:0}}
+.conf{position:absolute;top:0;width:12px;height:18px;border-radius:3px;animation:fall linear infinite}
+.say{position:absolute;border-radius:20px;background:#fff;padding:14px 18px;box-sizing:border-box;box-shadow:0 8px 24px rgba(27,35,64,.2)}
+.say b.tag{position:absolute;left:16px;top:-13px;background:#ff6f91;color:#fff;font-size:13px;border-radius:9px;padding:2px 10px;font-family:'M PLUS Rounded 1c';font-weight:800}
+.say p{margin:4px 0 0;font-size:18px;line-height:1.55;font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:14px}
+/* 年の道のり（1年目→2年目→3年目） */
+.road{display:flex;align-items:center;gap:0}
+.road .yr{width:150px;height:92px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:'M PLUS Rounded 1c';font-weight:800;box-shadow:0 0 0 3px #fff,0 6px 14px rgba(27,35,64,.18)}
+.road .yr small{font-size:13px;opacity:.85}.road .yr big{font-size:30px;line-height:1}
+.road .bar{width:46px;height:8px;border-radius:4px;background:#dfe5ef}
+.road .bar.done{background:linear-gradient(90deg,#ffd23f,#ff9f43)}
+.done-y{background:linear-gradient(180deg,#fff6d6,#ffe7a3);color:#7a5a00}
+.now-y{background:linear-gradient(180deg,#e3f2ff,#bfe2ff);color:#1f5f99;animation:pulse 1.6s ease-in-out infinite}
+.next-y{background:#eef2f8;color:#9aa3b5}
+.fail-y{background:linear-gradient(180deg,#ffe9ee,#ffc9d6);color:#c23a60}
+/* 設備の札 */
+.eq{position:relative;height:66px;border-radius:14px;background:#fff;box-shadow:0 0 0 2px #e6ebf3;display:flex;align-items:center;gap:10px;padding:0 12px;box-sizing:border-box;animation:rise .4s ease-out both}
+.eq i{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px}
+.eq .nm{font-size:14px;font-weight:700;line-height:1.25}
+.eq .lv{margin-left:auto;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px;white-space:nowrap}
+.eq.renew{box-shadow:0 0 0 2px #7fc4ff;background:linear-gradient(180deg,#f3f9ff,#e6f3ff)}
+.eq.renew .lv{color:#1f75b8}
+.eq.renew::before{content:'見直し';position:absolute;right:10px;top:-10px;background:#3fa9f5;color:#fff;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:11px;border-radius:7px;padding:1px 8px}
+.eq.none{opacity:.45}
+/* 因子のカード */
+.card{position:absolute;width:360px;height:560px;border-radius:26px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 4px #fff,0 18px 40px rgba(0,0,0,.35);transition:transform .2s;animation:rise .5s ease-out both}
+.card:hover{transform:translateY(-10px)}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+.card .foil{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.5) 45%,rgba(255,240,180,.35) 50%,transparent 62%);background-size:200% 100%;animation:foil 3.6s linear infinite;mix-blend-mode:screen}
+.card .band{position:absolute;left:0;right:0;bottom:0;padding:18px 20px 20px;background:linear-gradient(180deg,rgba(29,42,68,0),rgba(29,42,68,.92) 30%);color:#fff}
+.card .stars{font-size:22px;color:#ffd23f;letter-spacing:2px;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.card.sel{box-shadow:0 0 0 4px #fff,0 0 0 10px #ff6f91,0 18px 40px rgba(0,0,0,.35);transform:translateY(-12px)}
+.slot{width:210px;height:74px;border-radius:16px;border:3px dashed rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px;box-sizing:border-box}
+.slot.full{border:0;background:linear-gradient(180deg,#fff6d6,#ffe7a3);color:#7a5a00;box-shadow:0 0 0 3px #fff}
+#nav{position:fixed;left:8px;bottom:8px;z-index:99;display:flex;gap:6px;flex-wrap:wrap}
+#nav button{font:700 12px 'Zen Kaku Gothic New';border:0;border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ① タイトル：遊び方を選ぶ（承認済み title-screen-kv.html の配置：絵は右寄せ、ロゴとメニューは左） -->
+<div class="stage" id="title-mode" style="background:linear-gradient(160deg,#fff4ec,#ffe3ec 60%,#dcefff)">
+  <img src="../../Assets/Art/KeyVisual/title-kv.png" alt="ひなた・秘書・エンジニア" style="position:absolute;left:80px;top:0;width:1600px;height:900px;object-fit:cover">
+  <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,244,236,.94) 0%,rgba(255,244,236,.78) 30%,rgba(255,244,236,0) 44%)"></div>
+  <img src="../../Assets/Art/UI/Logo/wordmark.png" alt="PatchWork Secure" style="position:absolute;left:50px;top:0;width:640px;height:246px">
+  <img src="../../Assets/Art/UI/Logo/icon.png" alt="" style="position:absolute;left:-24px;top:118px;width:132px;height:132px;transform:rotate(-8deg);filter:drop-shadow(0 8px 14px rgba(201,72,108,.35))">
+  <div style="position:absolute;left:90px;top:292px;width:470px;display:flex;flex-direction:column;gap:14px">
+    <button class="btn pink" style="height:92px;text-align:left;padding:0 26px;animation:rise .5s both"><span style="display:block;font-size:30px">3年の本編</span><span style="display:block;font-size:14px;font-weight:700;opacity:.95;text-shadow:none">年度ごとの目標を越えて、3年間会社を守り抜く</span></button>
+    <button class="btn white" style="height:74px;text-align:left;padding:0 26px;animation:rise .5s .08s both"><span style="display:block;font-size:23px">1年だけ遊ぶ</span><span style="display:block;font-size:13px;font-weight:700;color:#6b7894">いつもの「情シスの一年」。練習にも</span></button>
+    <button class="btn lock" style="height:74px;text-align:left;padding:0 26px;animation:rise .5s .16s both"><span style="display:block;font-size:23px">終わりなき年度 <span class="chip" style="background:#dfe5ef;color:#6b7894;font-size:12px;padding:3px 10px;vertical-align:3px">本編クリアで解放</span></span><span style="display:block;font-size:13px;font-weight:700">年を重ねるほど手強くなる。自己ベストと称号を競う</span></button>
+    <div class="panel" style="padding:12px 16px;display:flex;align-items:center;gap:10px;animation:rise .5s .24s both"><span class="en" style="color:#ffb020;letter-spacing:.2em">FACTORS</span><span class="r" style="font-size:14px;white-space:nowrap">因子 2/3</span><span class="chip" style="background:#fff6d6;color:#7a5a00;white-space:nowrap">分離バックアップ</span><span class="chip" style="background:#fff6d6;color:#7a5a00;white-space:nowrap">台帳</span></div>
+    <div style="display:flex;gap:12px"><button class="btn white" style="flex:1;height:52px;font-size:17px">つづきから</button><button class="btn white" style="flex:1;height:52px;font-size:17px">遊び方</button><button class="btn white" style="flex:1;height:52px;font-size:17px">設定</button></div>
+  </div>
+</div>
+
+<!-- ② 年度替わり：目標の結果と、新しい年度へ持っていくもの -->
+<div class="stage" id="year-renew" style="background:linear-gradient(160deg,#fff4d6 0%,#ffe3ec 55%,#dcefff 100%)">
+  <div style="position:absolute;left:300px;top:250px;width:1600px;height:1600px;margin:-800px 0 0 -800px;background:repeating-conic-gradient(rgba(255,210,63,.16) 0 8deg,transparent 8deg 16deg);animation:rays 40s linear infinite"></div>
+  <span class="conf" style="left:160px;background:#ff6f91;animation-duration:7s"></span><span class="conf" style="left:430px;background:#3fa9f5;animation-duration:9s;animation-delay:1s"></span><span class="conf" style="left:980px;background:#ffd23f;animation-duration:8s;animation-delay:2s"></span><span class="conf" style="left:1380px;background:#2ec4a0;animation-duration:10s;animation-delay:.5s"></span>
+  <div style="position:absolute;left:60px;top:36px;display:flex;flex-direction:column"><span class="en" style="color:#ff6f91">YEAR 1 CLEAR</span><span class="r" style="font-size:42px">1年目　目標達成！</span></div>
+  <div class="road" style="position:absolute;left:640px;top:36px"><div class="yr done-y"><small>1年目</small><big>S</big><small>目標B 達成</small></div><div class="bar done"></div><div class="yr now-y"><small>2年目</small><big>A<span style="font-size:16px">以上</span></big><small>今年の目標</small></div><div class="bar"></div><div class="yr next-y"><small>3年目</small><big>A<span style="font-size:16px">以上</span></big><small>最終目標</small></div></div>
+  <!-- 左：今年の結果 -->
+  <div style="position:absolute;left:120px;top:170px;width:300px;height:300px">
+    <div style="position:absolute;inset:0;border-radius:56px;background:linear-gradient(160deg,#ff94ae,#f45a80);box-shadow:0 0 0 8px #fff,0 20px 40px rgba(201,72,108,.4);animation:stamp 1.6s cubic-bezier(.2,.8,.2,1) both">
+      <span style="position:absolute;inset:14px;border:5px dashed rgba(255,255,255,.7);border-radius:44px"></span>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span class="r" style="font-size:22px;color:#fff;letter-spacing:.2em">運用ランク</span><span class="r" style="font-size:170px;line-height:1;color:#fff;text-shadow:0 6px 0 #c9486c">S</span></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:80px;top:500px;width:380px;text-align:center"><span class="r" style="font-size:15px;color:#6b7894">年間得点</span><br><span class="r" style="font-size:60px;line-height:1">1,944<span style="font-size:22px">点</span></span><br><span class="chip" style="background:#e3faf3;color:#1a7c63;margin-top:8px">目標 B以上（1,151点）を 793点 上回った</span></div>
+  <!-- 右：持っていくもの -->
+  <div class="panel" style="position:absolute;left:520px;top:170px;width:1020px;height:470px;padding:20px 24px">
+    <div style="display:flex;align-items:baseline;gap:12px"><span class="en" style="color:#3fa9f5">NEXT YEAR</span><span class="r" style="font-size:21px">2年目へ持っていくもの</span><span style="margin-left:auto;font-size:14px;color:#6b7894">2年目は攻撃が手強くなる（脅威 +12）</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px">
+      <div class="panel" style="padding:12px 14px;box-shadow:0 0 0 2px #e6ebf3"><span style="font-size:13px;color:#6b7894;font-weight:700">予算</span><div class="r" style="font-size:28px">114<span style="font-size:15px">万円</span></div><span style="font-size:12px;color:#1a7c63;font-weight:700">毎年の76万円＋残りの38万円を全額持ち越し</span></div>
+      <div class="panel" style="padding:12px 14px;box-shadow:0 0 0 2px #e6ebf3"><span style="font-size:13px;color:#6b7894;font-weight:700">社員の経験</span><div class="r" style="font-size:15px;margin-top:6px;line-height:1.5">森 Lv3　佐伯 Lv2<br>小川 Lv2</div><span style="font-size:12px;color:#1a7c63;font-weight:700">そのまま</span></div>
+      <div class="panel" style="padding:12px 14px;box-shadow:0 0 0 2px #e6ebf3"><span style="font-size:13px;color:#6b7894;font-weight:700">相談文化</span><div class="r" style="font-size:28px">68</div><span style="font-size:12px;color:#1a7c63;font-weight:700">そのまま</span></div>
+      <div class="panel" style="padding:12px 14px;box-shadow:0 0 0 2px #e6ebf3"><span style="font-size:13px;color:#6b7894;font-weight:700">経営の信頼</span><div class="r" style="font-size:28px">58</div><span style="font-size:12px;color:#6b7894;font-weight:700">新しい経営計画で、改めて築く</span></div>
+    </div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:10px"><span class="r" style="font-size:16px">設備</span><span style="font-size:13px;color:#1f5f99;font-weight:700;background:#e6f3ff;border-radius:8px;padding:3px 10px">新しい手口が出たので、Lv2の設備は見直してLv1から。更新すればLv2へ戻せる</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px">
+      <div class="eq renew"><i style="background:#2ec4a0">戻</i><span class="nm">分離バックアップ</span><span class="lv">Lv2→1</span></div>
+      <div class="eq renew" style="animation-delay:.05s"><i style="background:#ffb020">練</i><span class="nm">復元・連絡の訓練</span><span class="lv">Lv2→1</span></div>
+      <div class="eq" style="animation-delay:.1s"><i style="background:#8b7cf6">台</i><span class="nm">資産と業務の台帳</span><span class="lv">Lv1</span></div>
+      <div class="eq" style="animation-delay:.15s"><i style="background:#3fa9f5">認</i><span class="nm">多要素認証の展開</span><span class="lv">Lv1</span></div>
+      <div class="eq renew" style="animation-delay:.2s"><i style="background:#ff6f91">手</i><span class="nm">引継ぎと対応手順</span><span class="lv">Lv2→1</span></div>
+      <div class="eq" style="animation-delay:.25s"><i style="background:#f0803c">自</i><span class="nm">定型業務の自動化</span><span class="lv">Lv1</span></div>
+      <div class="eq" style="animation-delay:.3s"><i style="background:#2f93dc">教</i><span class="nm">相談できる教育</span><span class="lv">Lv1</span></div>
+      <div class="eq none" style="animation-delay:.35s"><i style="background:#9aa3b5">＋</i><span class="nm">未導入 4つ</span><span class="lv"></span></div>
+    </div>
+  </div>
+  <img src="../../ArtSource/Hinata/gen-20260929/cut/pose_peace.png" alt="ひなた" style="position:absolute;left:1300px;top:600px;width:260px;height:300px;object-fit:contain;animation:hop 1.6s ease-out 1">
+  <div class="say" style="left:930px;top:668px;width:360px"><b class="tag">ひなた</b><p>1年目、おつかれさま！<br>守り方も、毎年見直すものだよ。</p></div>
+  <div style="position:absolute;left:120px;top:780px;width:760px;display:flex;gap:16px"><button class="btn white" style="flex:1">1年目を振り返る</button><button class="btn pink" style="flex:1.4">2年目をはじめる</button></div>
+</div>
+
+<!-- ③ 挑戦の終わり：目標に届かなかった -->
+<div class="stage" id="year-fail" style="background:linear-gradient(160deg,#eef2f8 0%,#e6ecf8 55%,#f3e8f6 100%)">
+  <div style="position:absolute;left:60px;top:36px;display:flex;flex-direction:column"><span class="en" style="color:#6b7894">CHALLENGE RECORD</span><span class="r" style="font-size:42px">挑戦の記録　2年目で終了</span></div>
+  <div class="road" style="position:absolute;left:640px;top:36px"><div class="yr done-y"><small>1年目</small><big>A</big><small>目標B 達成</small></div><div class="bar done"></div><div class="yr fail-y"><small>2年目</small><big>B</big><small>目標A に届かず</small></div><div class="bar"></div><div class="yr next-y"><small>3年目</small><big>—</big><small>次の挑戦で</small></div></div>
+  <div class="panel" style="position:absolute;left:80px;top:170px;width:700px;height:470px;padding:22px 26px">
+    <span class="en" style="color:#ff6f91">WHAT HAPPENED</span><div class="r" style="font-size:21px;margin-top:2px">2年目、あと少しだった</div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:14px"><span class="r" style="font-size:56px;color:#c23a60;line-height:1">1,402</span><div style="flex:1"><div style="height:16px;border-radius:8px;background:#eef2f8;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:89.7%;background:linear-gradient(90deg,#ffb3c4,#ff6f91)"></div><div style="position:absolute;left:89.7%;top:-4px;bottom:-4px;width:3px;background:#1d2a44"></div></div><div style="font-size:13px;color:#6b7894;margin-top:6px;font-weight:700">目標 A（1,563点）まで あと161点</div></div></div>
+    <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:12px;align-items:center;background:#ffe9ee;border-radius:14px;padding:10px 14px"><span class="chip" style="background:#fff;color:#c23a60">一番痛かった月</span><span style="font-weight:700;font-size:15px">12月 ランサム攻撃　被害 34万円・停止 18時間</span></div>
+      <div style="display:flex;gap:12px;align-items:center;background:#e6f3ff;border-radius:14px;padding:10px 14px"><span class="chip" style="background:#fff;color:#1f75b8">次に効きそうな備え</span><span style="font-weight:700;font-size:15px">復元・連絡の訓練（入れていれば停止 −12時間の見込み）</span></div>
+      <div style="display:flex;gap:12px;align-items:center;background:#fff6d6;border-radius:14px;padding:10px 14px"><span class="chip" style="background:#fff;color:#7a5a00">よくできた</span><span style="font-weight:700;font-size:15px">山場 4つ中 3つ達成・メールの仕分け 平均84点</span></div>
+    </div>
+  </div>
+  <div class="panel" style="position:absolute;left:820px;top:170px;width:700px;height:470px;padding:22px 26px;background:linear-gradient(180deg,#1d2a44,#2b3a5e);box-shadow:0 0 0 3px #fff,0 14px 34px rgba(27,35,64,.3);color:#fff">
+    <span class="en" style="color:#ffd23f">FACTOR GET</span><div class="r" style="font-size:21px;margin-top:2px">因子を1つ持ち帰れる</div>
+    <div style="font-size:14px;opacity:.85;margin-top:6px;line-height:1.6">次の挑戦は、選んだ設備を最初からLv1で始められる。<br>届いた年が進むほど、候補の星が増える。</div>
+    <div style="display:flex;gap:14px;margin-top:22px">
+      <div style="flex:1;border-radius:18px;background:rgba(255,255,255,.1);padding:16px;text-align:center;box-shadow:0 0 0 2px rgba(255,210,63,.6)"><div style="color:#ffd23f;font-size:20px">★★</div><div class="r" style="font-size:18px;margin-top:6px">復元・連絡の訓練</div><div style="font-size:12px;opacity:.8;margin-top:4px">いちばん効きそう</div></div>
+      <div style="flex:1;border-radius:18px;background:rgba(255,255,255,.1);padding:16px;text-align:center"><div style="color:#ffd23f;font-size:20px">★★</div><div class="r" style="font-size:18px;margin-top:6px">監視と通知の整理</div><div style="font-size:12px;opacity:.8;margin-top:4px">把握が足りなかった</div></div>
+      <div style="flex:1;border-radius:18px;background:rgba(255,255,255,.1);padding:16px;text-align:center"><div style="color:#ffd23f;font-size:20px">★</div><div class="r" style="font-size:18px;margin-top:6px">相談できる教育</div><div style="font-size:12px;opacity:.8;margin-top:4px">1年目のMVP</div></div>
+    </div>
+    <div style="margin-top:22px;display:flex;gap:10px;align-items:center"><span style="font-size:13px;opacity:.8">持っている因子</span><div class="slot full" style="width:180px;height:56px">分離バックアップ</div><div class="slot" style="width:150px;height:56px">空き</div><div class="slot" style="width:150px;height:56px">空き</div></div>
+  </div>
+  <img src="../../ArtSource/Hinata/gen-20260929/cut/pose_fists.png" alt="ひなた" style="position:absolute;left:1310px;top:610px;width:250px;height:290px;object-fit:contain">
+  <div class="say" style="left:920px;top:676px;width:380px"><b class="tag">ひなた</b><p>ここまで来られたのは本物だよ。<br>次は12月に備えて、もう一回！</p></div>
+  <div style="position:absolute;left:80px;top:780px;width:800px;display:flex;gap:16px"><button class="btn white" style="flex:1">タイトルへ</button><button class="btn pink" style="flex:1.4">因子を選んで次の挑戦へ</button></div>
+</div>
+
+<!-- ④ 因子を選ぶ（ガチャ風の1枚絵カード） -->
+<div class="stage" id="factor" style="background:radial-gradient(ellipse at 50% 40%,#3b4f7d 0%,#1d2a44 70%)">
+  <div style="position:absolute;left:800px;top:430px;width:1800px;height:1800px;margin:-900px 0 0 -900px;background:repeating-conic-gradient(rgba(255,210,63,.08) 0 6deg,transparent 6deg 12deg);animation:rays 60s linear infinite"></div>
+  <span style="position:absolute;left:220px;bottom:0;width:6px;height:6px;border-radius:3px;background:#ffd23f;animation:mote 4s linear infinite"></span><span style="position:absolute;left:760px;bottom:0;width:5px;height:5px;border-radius:3px;background:#fff;animation:mote 5s 1s linear infinite"></span><span style="position:absolute;left:1320px;bottom:0;width:6px;height:6px;border-radius:3px;background:#ffd23f;animation:mote 4.5s 2s linear infinite"></span>
+  <div style="position:absolute;left:0;right:0;top:34px;text-align:center;color:#fff"><span class="en" style="color:#ffd23f">CHOOSE A FACTOR</span><div class="r" style="font-size:40px;margin-top:4px">持ち帰る因子を1つ選ぶ</div><div style="font-size:15px;opacity:.8;margin-top:4px;font-weight:700">次の挑戦は、選んだ設備を最初から Lv1 で始められる</div></div>
+  <div class="card" style="left:190px;top:170px;animation-delay:.05s"><img src="../../Assets/Art/KeyVisual/focus-engineer.png" alt=""><div class="foil"></div><div class="band"><div class="stars">★★</div><div class="r" style="font-size:26px">復元・連絡の訓練</div><div style="font-size:14px;opacity:.9;margin-top:4px;font-weight:700">エンジニアの推薦：12月の停止を縮められた</div></div></div>
+  <div class="card sel" style="left:620px;top:170px;animation-delay:.12s"><img src="../../Assets/Art/KeyVisual/focus-hinata.png" alt=""><div class="foil"></div><div class="band"><div class="stars">★★</div><div class="r" style="font-size:26px">監視と通知の整理</div><div style="font-size:14px;opacity:.9;margin-top:4px;font-weight:700">ひなたの推薦：「いつもと違う」に早く気づける</div></div></div>
+  <div class="card" style="left:1050px;top:170px;animation-delay:.19s"><img src="../../Assets/Art/KeyVisual/focus-secretary.png" alt=""><div class="foil"></div><div class="band"><div class="stars">★</div><div class="r" style="font-size:26px">相談できる教育</div><div style="font-size:14px;opacity:.9;margin-top:4px;font-weight:700">秘書の推薦：相談が集まる会社は強いわ</div></div></div>
+  <div style="position:absolute;left:0;right:0;bottom:36px;display:flex;justify-content:center;gap:16px;align-items:center"><span class="r" style="color:#fff;font-size:15px;opacity:.85">持っている因子</span><div class="slot full">分離バックアップ</div><div class="slot" style="border-color:#ff6f91;color:#ff94ae">＋ 監視と通知の整理</div><div class="slot">空き</div><button class="btn pink" style="width:260px;margin-left:24px">これにする</button></div>
+</div>
+
+<!-- ⑤ エンディング（3年目SS） -->
+<div class="stage" id="ending-ss" style="background:#1d2a44">
+  <img src="../../Assets/Art/KeyVisual/title-kv.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb 18s ease-out both">
+  <style>@keyframes kb{from{transform:scale(1.12)}to{transform:scale(1)}}@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}</style>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(29,42,68,0) 45%,rgba(29,42,68,.82) 78%,rgba(29,42,68,.95))"></div>
+  <span class="conf" style="left:180px;background:#ffd23f;animation-duration:8s"></span><span class="conf" style="left:640px;background:#ff94ae;animation-duration:10s;animation-delay:1.5s"></span><span class="conf" style="left:1100px;background:#7fc4ff;animation-duration:9s;animation-delay:.6s"></span><span class="conf" style="left:1460px;background:#ffd23f;animation-duration:11s;animation-delay:2.4s"></span>
+  <div style="position:absolute;left:70px;top:44px;animation:fadeup 1s .4s both"><span class="chip" style="background:linear-gradient(90deg,#ffe38a,#ffd23f,#fff3c4,#ffd23f);background-size:200% 100%;animation:foil 3s linear infinite;color:#7a5a00;font-size:16px;padding:7px 16px">SPECIAL ENDING</span></div>
+  <div style="position:absolute;left:70px;right:70px;top:560px;color:#fff;animation:fadeup 1.2s .8s both">
+    <div class="r" style="font-size:52px;text-shadow:0 4px 18px rgba(0,0,0,.4)">なにごともない、いつもの平穏。</div>
+    <div style="font-size:19px;font-weight:700;margin-top:8px;opacity:.95;line-height:1.7">3年間、事件は毎月やってきた。それでも、誰も責められず、仕事は止まらなかった。<br>ツギハギを重ねた会社は、いつのまにか、ちゃんと強くなっていた。</div>
+  </div>
+  <div style="position:absolute;left:70px;top:780px;display:flex;gap:12px;animation:fadeup 1s 1.4s both">
+    <div class="yr" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-radius:14px;padding:8px 16px;color:#fff"><span style="font-size:13px;opacity:.8">1年目</span><span class="r" style="font-size:26px;color:#ffd23f">S</span></div>
+    <div class="yr" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-radius:14px;padding:8px 16px;color:#fff"><span style="font-size:13px;opacity:.8">2年目</span><span class="r" style="font-size:26px;color:#ffd23f">S</span></div>
+    <div class="yr" style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-radius:14px;padding:8px 16px;color:#fff"><span style="font-size:13px;opacity:.8">3年目</span><span class="r" style="font-size:26px;background:linear-gradient(90deg,#ffe38a,#fff,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent">SS</span></div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-radius:14px;padding:8px 16px;color:#fff"><span style="font-size:13px;opacity:.8">3年の合計</span><span class="r" style="font-size:24px">6,512点</span></div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,210,63,.22);border-radius:14px;padding:8px 16px;color:#ffe38a"><span class="r" style="font-size:15px">終わりなき年度 解放！</span></div>
+  </div>
+  <div style="position:absolute;right:70px;top:780px;display:flex;gap:14px;animation:fadeup 1s 1.8s both"><button class="btn white" style="width:220px">3年を振り返る</button><button class="btn pink" style="width:260px">タイトルへ</button></div>
+</div>
+
+<!-- ⑥ エンディング（3年目A・S：クリア） -->
+<div class="stage" id="ending-a" style="background:linear-gradient(160deg,#fff4d6 0%,#ffe3ec 55%,#dcefff 100%)">
+  <div style="position:absolute;left:800px;top:330px;width:1800px;height:1800px;margin:-900px 0 0 -900px;background:repeating-conic-gradient(rgba(255,210,63,.16) 0 8deg,transparent 8deg 16deg);animation:rays 40s linear infinite"></div>
+  <div style="position:absolute;left:0;right:0;top:40px;text-align:center"><span class="en" style="color:#ff6f91">3 YEARS CLEAR</span><div class="r" style="font-size:46px;margin-top:4px">3年間、守り抜いた</div></div>
+  <div class="road" style="position:absolute;left:50%;top:170px;transform:translateX(-50%)"><div class="yr done-y"><small>1年目</small><big>B</big><small>目標B 達成</small></div><div class="bar done"></div><div class="yr done-y"><small>2年目</small><big>A</big><small>目標A 達成</small></div><div class="bar done"></div><div class="yr done-y"><small>3年目</small><big>A</big><small>目標A 達成</small></div></div>
+  <img src="../../ArtSource/Hinata/gen-20260929/cut/pose_jump.png" alt="ひなた" style="position:absolute;left:640px;top:320px;width:320px;height:380px;object-fit:contain;animation:hop 1.4s ease-out infinite">
+  <div class="say" style="left:1000px;top:380px;width:420px"><b class="tag">ひなた</b><p>3年間、本当にありがとう！<br>次は「特別な結末」も見てみたいね。<br>3年目で運用ランクSSが目印だよ。</p></div>
+  <div class="panel" style="position:absolute;left:180px;top:420px;width:400px;padding:18px 22px"><span class="en" style="color:#ffb020">UNLOCK</span><div class="r" style="font-size:22px;margin-top:4px">終わりなき年度 解放</div><div style="font-size:14px;color:#6b7894;margin-top:6px;line-height:1.6;font-weight:700">4年目から先へ。年を重ねるほど手強くなり、自己ベストと称号を競う。</div></div>
+  <div style="position:absolute;left:0;right:0;top:760px;display:flex;justify-content:center;gap:16px"><button class="btn white" style="width:240px">3年を振り返る</button><button class="btn blue" style="width:280px">終わりなき年度へ</button><button class="btn pink" style="width:240px">タイトルへ</button></div>
+</div>
+
+<div id="nav"></div>
+<script>
+const ids=[...document.querySelectorAll('.stage')].map(e=>e.id);
+function show(id){document.querySelectorAll('.stage').forEach(e=>e.classList.toggle('on',e.id===id))}
+// 撮影用（#shot=title-mode / year-renew / year-fail / factor / ending-ss / ending-a）
+const m=location.hash.match(/^#shot=([\w-]+)/);
+if(m&&ids.includes(m[1]))show(m[1]);else{show(ids[0]);document.getElementById('nav').innerHTML=ids.map(i=>`<button onclick="show('${i}')">${i}</button>`).join('')}
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.querySelectorAll('.card').forEach(x=>x.classList.remove('sel'));c.classList.add('sel')});
+</script>
+</body>
+</html>

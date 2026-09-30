@@ -166,6 +166,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private bool ValidGrowth()
         {
+            if(yearPressure<0||yearPressure>OpsCatalog.StoryPressures[OpsCatalog.StoryYears-1])return false;
             if (growthRules < 0 || growthRules > 1 || monthExtraCapacity < 0 || monthExtraCapacity > 1 || nextMonthExtraCapacity < 0 || nextMonthExtraCapacity > 1 ||
                 (nextMonthExtraCapacity > 0 && !quarterRewardClaimed) || (quarterRewardClaimed && (!QuarterPeak || month == 11))) return false;
             if (history != null && !history.All(r => r != null && ValidGrowthResult(r))) return false;

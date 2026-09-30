@@ -102,7 +102,9 @@ public static class CompanyOpsThreeYears
     }
     // 3年の本編の試算。1年目は現行と同じ。2年目以降は脅威を上乗せし、設備・社員・組織の一部を引き継ぐ。
     // 人間の技能・面白さの測定ではない。数値の置き場所を決めるための仮説。
-    sealed class Carry { public int[] levels; public int[] staff; public int culture, trust, budget; }
+    sealed class Carry { public int[] levels; public int[] staff; public int culture, trust, budget; public OpsState state; }
+    static bool Production;
+    static int ComparedYears, ComparedChallenges, LargestCarry;
     static int P2=12, P3=24, Decay=1, BudgetCarryDiv=1, BudgetCarryMax=999;
     static OpsState NewYear(int seed,int year,Carry c,int[] inherit)
     {
@@ -117,7 +119,11 @@ public static class CompanyOpsThreeYears
             s.budget+=Math.Min(BudgetCarryMax,Math.Max(0,c.budget)/BudgetCarryDiv);
         }
         if(inherit!=null)for(int i=0;i<inherit.Length;i++)s.levels[inherit[i]]=Math.Max(s.levels[inherit[i]],1);
-        return s;
+        if(!Production)return s;
+        var actual=OpsState.NewStoryYear(seed,year,c==null?null:c.state,inherit==null?null:inherit.Select(i=>OpsCatalog.Projects[i].id));
+        Check(actual.Valid(),"本実装の年度が不正");
+        Check(actual.yearPressure==s.yearPressure&&actual.seed==s.seed&&actual.budget==s.budget&&actual.culture==s.culture&&actual.trust==s.trust&&actual.fatigue==s.fatigue&&actual.capacity==s.capacity&&actual.levels.SequenceEqual(s.levels)&&actual.staffExperience.SequenceEqual(s.staffExperience),"試算と本実装の引き継ぎが違う");
+        if(c!=null)LargestCarry=Math.Max(LargestCarry,c.budget);ComparedYears++;return actual;
     }
     static void PlayYear(OpsState s,Profile p)
     {
@@ -136,12 +142,21 @@ public static class CompanyOpsThreeYears
     static string[] Run(int seed,Profile p,int[] inherit,out int total)
     {
         Carry c=null;total=0;var ranks=new List<string>();
+        var story=Production?OpsStory.Begin(seed,inherit==null?null:inherit.Select(i=>OpsCatalog.Projects[i].id)):null;
         for(int y=1;y<=3;y++)
         {
-            var s=NewYear(seed+y*7919,y,c,inherit);PlayYear(s,p);total+=s.AnnualScore;
+            var s=NewYear(seed+y*7919,y,c,inherit);
+            if(story!=null&&!story.finished)
+            {
+                Check(story.state.seed==s.seed&&story.state.budget==s.budget&&story.state.levels.SequenceEqual(s.levels)&&story.state.staffExperience.SequenceEqual(s.staffExperience),"本編進行と年度生成が違う");
+                s=story.state;
+            }
+            PlayYear(s,p);total+=s.AnnualScore;
+            if(story!=null&&!story.finished){Check(story.RecordYear()&&story.Valid(),"年度目標の記録不能");if(story.CanAdvance)Check(story.AdvanceYear()&&story.Valid(),"年度を進められない");}
             if(!s.IsClear){ranks.Add("X");break;}
-            ranks.Add(s.RankCode);c=new Carry{levels=(int[])s.levels.Clone(),staff=(int[])s.staffExperience.Clone(),culture=s.culture,trust=s.trust,budget=s.budget};
+            ranks.Add(s.RankCode);c=new Carry{levels=(int[])s.levels.Clone(),staff=(int[])s.staffExperience.Clone(),culture=s.culture,trust=s.trust,budget=s.budget,state=s};
         }
+        if(story!=null){Check(story.finished&&story.cleared==Pass(ranks.ToArray(),OpsCatalog.StoryGoals),"本編の打ち切り・クリアと試算が違う");ComparedChallenges++;}
         return ranks.ToArray();
     }
     static readonly string[] Order={"C","B","A","S","SS"};
@@ -153,6 +168,8 @@ public static class CompanyOpsThreeYears
     {
         if(args.Length>=3){P2=int.Parse(args[0]);P3=int.Parse(args[1]);Decay=int.Parse(args[2]);}
         if(args.Length>=5){BudgetCarryDiv=int.Parse(args[3]);BudgetCarryMax=int.Parse(args[4]);}
+        Production=args.Length>=6&&args[5]=="production";
+        if(Production)Check(P2==OpsCatalog.StoryPressures[1]&&P3==OpsCatalog.StoryPressures[2]&&Decay==1&&BudgetCarryDiv==1,"本実装との比較は採用値のみ");
         Console.WriteLine("脅威 2年目+"+P2+" / 3年目+"+P3+" / 設備の経年="+Decay+" / 予算の繰越 ÷"+BudgetCarryDiv+" 最大"+BudgetCarryMax);
         var first=new int[Goals.Length];var byFour=new int[Goals.Length];var yr=new int[3,6];int n=0;
         var casual=new int[Goals.Length];var casualFour=new int[Goals.Length];
@@ -174,5 +191,11 @@ public static class CompanyOpsThreeYears
         string[] lab={"届かず","C","B","A","S","SS"};
         for(int y=0;y<3;y++)Console.WriteLine((y+1)+"年目のランク（初回）："+string.Join(" / ",Enumerable.Range(0,6).Select(k=>lab[k]+" "+(100.0*yr[y,k]/n).ToString("F0")+"%")));
         for(int g=0;g<Goals.Length;g++)Console.WriteLine("目標 "+string.Join("→",Goals[g])+"：初回 "+(100.0*first[g]/n).ToString("F0")+"% / 4回目まで "+(100.0*byFour[g]/n).ToString("F0")+"%（気軽な方針だけ 初回 "+(100.0*casual[g]/(n/3)).ToString("F0")+"% / 4回目まで "+(100.0*casualFour[g]/(n/3)).ToString("F0")+"%）");
+        if(Production)
+        {
+            Check((100.0*first[3]/n).ToString("F0")=="51"&&(100.0*byFour[3]/n).ToString("F0")=="73","承認済み試算51%/73%からずれた。数値を変更せず報告すること");
+            Console.WriteLine("本実装の年度生成・目標・引き継ぎ一致："+ComparedChallenges+"挑戦 / "+ComparedYears+"年度 / 最大繰越 "+LargestCarry+"万円（試算の999上限には到達しない）");
+            Console.WriteLine("実数：初回 "+first[3]+"/"+n+"、4回目まで "+byFour[3]+"/"+n);
+        }
     }
 }

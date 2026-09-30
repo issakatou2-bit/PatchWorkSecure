@@ -17,6 +17,13 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+// 3年の本編。1年だけの年度の初期値・得点・事件抽選は変更しない。
+public const int StoryYears=3, StoryFactorSlots=3, StoryEquipmentLevel=1, StoryInitialBudget=76, StoryTrustBaseline=45, StoryTrustDivisor=2;
+public const int StorySeedStride=7919, StoryRetrySeedStride=104729, LegacySaveBudgetLimit=5000;
+public const int StorySaveBudgetLimit=LegacySaveBudgetLimit+StoryInitialBudget*(StoryYears-1);
+public const int ProgressSaveVersion=2, StorySaveVersion=1, ProgressSaveBytes=300000;
+public static readonly string[] StoryGoals={"B","A","A"};
+public static readonly int[] StoryPressures={0,12,24};
 // 山場と年間評価。進行中の旧年度には適用しない。
 public const int PeakRulesVersion=1, JunePeak=2, SeptemberPeak=5, DecemberPeak=8, MarchPeak=11;
 public const int JuneLossGoal=8, JuneStopGoal=8, SeptemberLossGoal=5, SeptemberStopGoal=6;

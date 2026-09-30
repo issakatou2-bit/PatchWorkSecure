@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PatchWorkSecure.CompanyOps
+{
+    public partial class OpsState
+    {
+        // 年の種は呼び出し元が決める。事件を引き直さず、1年目の通常年度との比較にも使う。
+        public static OpsState NewStoryYear(int yearSeed,int year,OpsState previous,IEnumerable<string> factors)
+        {
+            if(year<1||year>OpsCatalog.StoryYears||year==1&&previous!=null||year>1&&(previous==null||!previous.Valid()||!previous.IsClear))throw new ArgumentException("引き継げる年度ではありません");
+            var ids=(factors??Enumerable.Empty<string>()).ToArray();
+            if(!OpsCareer.ValidFactors(ids))throw new ArgumentException("因子が不正です");
+            var s=new OpsState(yearSeed,true){yearPressure=OpsCatalog.StoryPressures[year-1]};
+            if(previous!=null)
+            {
+                for(int i=0;i<s.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
+                s.staffExperience=(int[])previous.staffExperience.Clone();s.culture=previous.culture;
+                s.trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
+                // 全額繰越。試算用のMax=999を本番の上限にしない。
+                s.budget=checked(OpsCatalog.StoryInitialBudget+Math.Max(0,previous.budget));
+            }
+            else foreach(string id in ids)s.levels[OpsCatalog.Index(id)]=OpsCatalog.StoryEquipmentLevel;
+            s.monthStartMetrics=s.ReportMetrics;
+            return s;
+        }
+    }
+    [Serializable] public sealed class OpsStoryYear
+    {
+        public int year,score,loss,stop;
+        public string rank;
+        public bool operated,goalMet;
+        public bool Valid()=>year>=1&&year<=OpsCatalog.StoryYears&&score>=0&&loss>=0&&stop>=0&&OpsStory.RankValue(rank)>=0&&goalMet==(operated&&OpsStory.RankValue(rank)>=OpsStory.RankValue(OpsCatalog.StoryGoals[year-1]));
+    }
+    [Serializable] public sealed class OpsStory
+    {
+        public int version=OpsCatalog.StorySaveVersion,seed,year=1;
+        public OpsState state;
+        public List<string> factors=new List<string>();
+        public List<OpsStoryYear> records=new List<OpsStoryYear>();
+        public bool finished,cleared,rewardClaimed;
+        public string earnedFactor="";
+        public string Goal=>OpsCatalog.StoryGoals[year-1];
+        public bool CanAdvance=>!finished&&records.Count==year&&records[year-1].goalMet;
+        public static int RankValue(string rank)
+        {switch(rank){case "C":return 0;case "B":return 1;case "A":return 2;case "S":return 3;case "SS":return 4;default:return -1;}}
+        public static OpsStory Begin(int seed,IEnumerable<string> factors)
+        {
+            var story=new OpsStory{seed=seed,factors=(factors??Enumerable.Empty<string>()).ToList()};
+            story.state=OpsState.NewStoryYear(story.YearSeed,1,null,story.factors);return story;
+        }
+        public int YearSeed=>unchecked(seed+year*OpsCatalog.StorySeedStride);
+        public bool RecordYear()
+        {
+            if(state==null||state.phase!=OpsPhase.Ended||records.Count!=year-1)return false;
+            bool met=state.IsClear&&RankValue(state.RankCode)>=RankValue(Goal);
+            records.Add(new OpsStoryYear{year=year,rank=state.RankCode,score=state.AnnualScore,loss=state.totalLoss,stop=state.totalDowntime,operated=state.IsClear,goalMet=met});
+            finished=!met||year==OpsCatalog.StoryYears;cleared=met&&year==OpsCatalog.StoryYears;return true;
+        }
+        public bool AdvanceYear()
+        {
+            RecordYear();if(!CanAdvance)return false;
+            var previous=state;year++;state=OpsState.NewStoryYear(YearSeed,year,previous,factors);return true;
+        }
+        public bool Valid()
+        {
+            if(version!=OpsCatalog.StorySaveVersion||year<1||year>OpsCatalog.StoryYears||state==null||!state.Valid()||state.seed!=YearSeed||state.yearPressure!=OpsCatalog.StoryPressures[year-1]||!OpsCareer.ValidFactors(factors))return false;
+            if(records==null||records.Count<year-1||records.Count>year||records.Any(r=>r==null||!r.Valid()))return false;
+            for(int i=0;i<records.Count;i++)if(records[i].year!=i+1||i<year-1&&!records[i].goalMet)return false;
+            bool recorded=records.Count==year;
+            if(recorded&&(state.phase!=OpsPhase.Ended||records[year-1].rank!=state.RankCode||records[year-1].score!=state.AnnualScore||records[year-1].loss!=state.totalLoss||records[year-1].stop!=state.totalDowntime||records[year-1].operated!=state.IsClear))return false;
+            bool end=recorded&&(!records[year-1].goalMet||year==OpsCatalog.StoryYears);
+            if(finished!=end||cleared!=(end&&year==OpsCatalog.StoryYears&&records[year-1].goalMet)||rewardClaimed&&!finished)return false;
+            return rewardClaimed?OpsCatalog.Index(earnedFactor)>=0:string.IsNullOrEmpty(earnedFactor);
+        }
+    }
+    [Serializable] public sealed class OpsCareer
+    {
+        public int version=OpsCatalog.StorySaveVersion,finishedAttempts;
+        public bool endlessUnlocked;
+        public List<string> factors=new List<string>();
+        public static bool ValidFactors(IEnumerable<string> factors)
+        {if(factors==null)return false;var ids=factors.ToArray();return ids.Length<=OpsCatalog.StoryFactorSlots&&ids.Distinct().Count()==ids.Length&&ids.All(id=>OpsCatalog.Index(id)>=0);}
+        public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors);
+        // 選択画面はNext-9。満杯のときは指定枠を置換できる。二重受取はしない。
+        public bool Claim(OpsStory story,string id,int replaceSlot=-1)
+        {
+            if(story==null||!story.Valid()||!story.finished||story.rewardClaimed||!Valid()||OpsCatalog.Index(id)<0)return false;
+            if(!factors.Contains(id))
+            {
+                if(factors.Count<OpsCatalog.StoryFactorSlots)factors.Add(id);
+                else if(replaceSlot>=0&&replaceSlot<factors.Count)factors[replaceSlot]=id;
+                else return false;
+            }
+            story.earnedFactor=id;story.rewardClaimed=true;finishedAttempts++;endlessUnlocked|=story.cleared;return true;
+        }
+    }
+    [Serializable] public sealed class OpsProgress
+    {
+        public int format=OpsCatalog.ProgressSaveVersion;
+        public bool storyMode;
+        public OpsState single;
+        public OpsStory story;
+        public OpsCareer career=new OpsCareer();
+        public OpsState Current=>story==null?single:story.state;
+        public bool Valid()=>format==OpsCatalog.ProgressSaveVersion&&career!=null&&career.Valid()&&(story==null?single!=null&&single.Valid()&&single.yearPressure==0:single==null&&story.Valid())&&(!((story?.cleared??false)&&(story?.rewardClaimed??false))||career.endlessUnlocked);
+    }
+}

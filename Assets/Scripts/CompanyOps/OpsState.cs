@@ -470,7 +470,7 @@ namespace PatchWorkSecure.CompanyOps
             if(missionBudgetRules<0||missionBudgetRules>1||missionBudgetPaid<0||missionBudgetPaid>MissionBudgetReward||acceptedMissionMonth < -1||acceptedMissionMonth>month)return false;
             if(rankBenefitRules<0||rankBenefitRules>1||rankQuarterBonusPaid<0||rankQuarterBonusPaid>1||rankQuarterBonusPaid>0&&(!quarterRewardClaimed||!QuarterPeak))return false;
             if (version != SaveVersion || situationRules < 0 || situationRules > 1 || month < 0 || month > 11 || !Enum.IsDefined(typeof(OpsPhase), phase) ||
-                budget < -500 || budget > 5000 || capacity < 0 || capacity > 8 ||
+                budget < -500 || budget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || capacity < 0 || capacity > 8 ||
                 proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0) || (proposalGrant != 0 && !proposed) ||
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
@@ -486,7 +486,7 @@ namespace PatchWorkSecure.CompanyOps
                 r.missionBonus<0||r.missionBonus>MissionBudgetReward||
                 (r.minigameRecorded && (r.minigameScore<0 || r.minigameScore>OpsCatalog.MinigameMaxScore || r.delegated&&r.minigameScore!=OpsCatalog.MinigameDelegateScore)) ||
                 !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
-                (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > 5000 || r.closingStability < 0 || r.closingStability > 100)) ||
+                (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || r.closingStability < 0 || r.closingStability > 100)) ||
                 (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > 200 || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > 200 || r.forecast.cost < 0 || r.forecast.cost > 200)) ||
                 r.businessLoss < 0 || r.businessLoss > 6 || r.businessLoss > r.loss || r.extraFatigue < 0 || r.extraFatigue > 8 ||
                 r.chainLossReduction < 0 || r.chainLossReduction > 6 || r.chainDowntimeReduction < 0 || r.chainDowntimeReduction > 6 ||

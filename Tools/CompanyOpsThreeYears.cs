@@ -103,7 +103,7 @@ public static class CompanyOpsThreeYears
     // 3年の本編の試算。1年目は現行と同じ。2年目以降は脅威を上乗せし、設備・社員・組織の一部を引き継ぐ。
     // 人間の技能・面白さの測定ではない。数値の置き場所を決めるための仮説。
     sealed class Carry { public int[] levels; public int[] staff; public int culture, trust, budget; }
-    static int P2=6, P3=12, Decay=1, BudgetCarryDiv=2, BudgetCarryMax=30;
+    static int P2=12, P3=24, Decay=1, BudgetCarryDiv=1, BudgetCarryMax=999;
     static OpsState NewYear(int seed,int year,Carry c,int[] inherit)
     {
         var s=new OpsState(seed,true);
@@ -152,7 +152,8 @@ public static class CompanyOpsThreeYears
     public static void Main(string[] args)
     {
         if(args.Length>=3){P2=int.Parse(args[0]);P3=int.Parse(args[1]);Decay=int.Parse(args[2]);}
-        Console.WriteLine("脅威 2年目+"+P2+" / 3年目+"+P3+" / 設備の経年="+Decay);
+        if(args.Length>=5){BudgetCarryDiv=int.Parse(args[3]);BudgetCarryMax=int.Parse(args[4]);}
+        Console.WriteLine("脅威 2年目+"+P2+" / 3年目+"+P3+" / 設備の経年="+Decay+" / 予算の繰越 ÷"+BudgetCarryDiv+" 最大"+BudgetCarryMax);
         var first=new int[Goals.Length];var byFour=new int[Goals.Length];var yr=new int[3,6];int n=0;
         var casual=new int[Goals.Length];var casualFour=new int[Goals.Length];
         foreach(int role in Enumerable.Range(0,3))foreach(int depth in Enumerable.Range(0,3))

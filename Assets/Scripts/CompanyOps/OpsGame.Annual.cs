@@ -19,6 +19,11 @@ namespace PatchWorkSecure.CompanyOps
             }
             PText(screen,"AnnualCategory","ANNUAL REPORT",60,32,900,26,12,PlanPink);
             PText(screen,"EndingTitle",State.IsClear?"一年の記録　年度クリア":"一年の記録　運営終了",60,59,1300,66,44);
+            if(Story!=null)
+            {
+                string result=Story.records.Last().goalMet?"届いた":"届かない";
+                PText(screen,"StoryGoalResult",Story.year+"年目の目標 "+Story.Goal+"以上："+result+(Story.finished?(Story.cleared?"  本編クリア・エンドレス解放":"  挑戦の終わり"):"  次の年度へ進めます"),60,119,1180,27,17,Story.cleared?PlanMint:PlanInk);
+            }
             var logo=PImage(screen,"AnnualLogoWordmark",PlanningArt.logoWordmark,1250,18,300,115);logo.localEulerAngles=new Vector3(0,0,-2);
             PButton(screen,"Menu","設定",1460,836,90,40,Menu,Color.white,PlanInk);
             var rank=PCard(screen,"RankBadge",150,150,360,360,PlanPink,28);rank.localEulerAngles=new Vector3(0,0,-6);KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
@@ -63,7 +68,15 @@ namespace PatchWorkSecure.CompanyOps
             ReportSpeech(State.IsClear?"一年、おつかれさま！\n会社の成長を振り返ってみよう。":"ここまでの対応、おつかれさま。\n次は何を備えるか、記録を見よう。",950,650,300,State.IsClear?"face_crying":"face_sad");
             PButton(screen,"EndingHistory","一年を振り返る",110,780,232.73f,62,History,Color.white,PlanInk,20);
             PButton(screen,"BackHome","タイトルへ",358.73f,780,232.73f,62,()=>{SkipTutorialVisual();tutorialStep=-1;RenderHome();},Color.white,PlanInk,20);
-            PButton(screen,"ReplayYear","もう一年挑戦",607.46f,780,302.54f,62,()=>StartYear(Environment.TickCount),PlanPink,Color.white,20);
+            if(Story==null)PButton(screen,"ReplayYear","もう一年挑戦",607.46f,780,302.54f,62,()=>StartYear(Environment.TickCount),PlanPink,Color.white,20);
+            else PButton(screen,Story.CanAdvance?"NextStoryYear":"StoryRecord",Story.CanAdvance?"次の年度へ":"挑戦の記録へ",607.46f,780,302.54f,62,()=>{if(Story.CanAdvance)NextStoryYear();else StoryRecord();},PlanPink,Color.white,20);
+        }
+        private void StoryRecord()
+        {
+            StopVoice();string rows=string.Join("\n",Story.records.Select(r=>r.year+"年目  "+r.rank+" / "+r.score+"点 / 被害 "+r.loss+"万円・停止 "+r.stop+"時間 / "+(r.goalMet?"目標達成":"目標未達")));
+            string factor=string.IsNullOrEmpty(Story.earnedFactor)?"":OpsCatalog.Projects[OpsCatalog.Index(Story.earnedFactor)].name;
+            var d=Dialog(Story.cleared?"3年の本編クリア":"挑戦の記録",rows+"\n\n因子："+factor+"（自動選択）\n次の挑戦の1年目からLv1。最大3枠。"+(Story.cleared?"\nエンドレスの解放を記録しました。本体は今後追加します。":""),560);
+            PButton(d,"StoryTitle","タイトルへ",32,490,420,48,()=>{SkipTutorialVisual();tutorialStep=-1;RenderHome();},PlanPink,Color.white);
         }
     }
 }

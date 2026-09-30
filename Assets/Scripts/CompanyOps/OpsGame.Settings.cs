@@ -85,13 +85,13 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ConfirmDeleteRecords()
         {
-            var d=Dialog("この試作の記録を消しますか？","「情シスの一年」の進行と、その一年の遭遇・運用記録を消します。\n旧版のセーブと音量・表示設定は残ります。削除前の進行ファイルは退避します。",430);
+            var d=Dialog("この試作の記録を消しますか？","現在の年度・3年の挑戦・因子・解放状況を消します。\n旧版のセーブと音量・表示設定は残ります。削除前の進行ファイルは退避します。",430);
             PButton(d,"ConfirmDeleteRecords","記録を消してタイトルへ",32,360,420,48,()=>
             {
                 try
                 {
                     if(!TestMode && File.Exists(SavePath))File.Move(SavePath,SavePath+".deleted-"+DateTime.UtcNow.ToString("yyyyMMddHHmmssfff"));
-                    saved=null;State=null;SaveWarning="";SkipTutorialVisual();tutorialStep=-1;RenderHome();
+                    saved=null;savedProgress=null;State=null;Story=null;Career=new OpsCareer();SaveWarning="";SkipTutorialVisual();tutorialStep=-1;RenderHome();
                 }
                 catch(Exception ex){Dialog("記録を消せませんでした","元の記録は残っています。\n"+ex.Message,430);}
             },PlanPink,Color.white);

@@ -6,12 +6,33 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using PatchWorkSecure.CompanyOps;
 
 namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next8StoryUI_モードと三年の進行と復帰と終わりを撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            CheckPointer("NewYear");CheckPointer("SingleYear");StringAssert.Contains("3年",Find<Button>("NewYear").GetComponentInChildren<TextMeshProUGUI>().text);
+            yield return new WaitForSecondsRealtime(3);Capture("next8-title-modes");Click("SingleYear");yield return null;Assert.IsNull(game.Story);Assert.AreEqual(0,game.State.yearPressure);
+            game.StartStory(14);yield return new WaitForSecondsRealtime(3);Assert.IsNotNull(game.Story);StringAssert.Contains("目標 B",Find<TextMeshProUGUI>("YearLabel").text);Capture("next8-story-year1");
+            game.ChooseAction("audit");Assert.IsTrue(game.MinigameActive);game.StartStory(14);Assert.IsFalse(game.MinigameActive);
+            FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Assert.IsNotNull(Find<Button>("NextStoryYear"));StringAssert.Contains("届いた",Find<TextMeshProUGUI>("StoryGoalResult").text);Capture("next8-story-pass");
+            int budget=game.State.budget;Click("NextStoryYear");yield return new WaitForSecondsRealtime(3);Assert.AreEqual(2,game.Story.year);Assert.AreEqual(budget+76,game.State.budget);StringAssert.Contains("2年目",Find<TextMeshProUGUI>("YearLabel").text);Capture("next8-story-year2");
+            game.State.Act("audit");game.State.BeginIncident();var progress=game.ExportProgress();string path=Path.Combine(Application.temporaryCachePath,"next8-save-tests","ui-progress.json");
+            Assert.IsTrue(OpsSaveStore.WriteProgress(path,progress,out string warning),warning);var restored=OpsSaveStore.ReadProgress(path,out warning);Assert.IsNotNull(restored,warning);
+            game.StartYear(9);Assert.IsNull(game.Story);Assert.IsTrue(game.RestoreProgress(restored));yield return null;Assert.AreEqual(2,game.Story.year);Assert.AreEqual(OpsPhase.Incident,game.State.phase);
+            game.State.Resolve("scope");game.State.NextMonth();FinishStoryTestYear(game.State);game.OpenTab(0);yield return null;Click("NextStoryYear");yield return null;Assert.AreEqual(3,game.Story.year);
+            FinishStoryTestYear(game.State);game.OpenTab(0);yield return null;Assert.IsTrue(game.Story.cleared);Assert.IsTrue(game.Career.endlessUnlocked);Assert.AreEqual(1,game.Career.finishedAttempts);Assert.AreEqual(1,game.Career.factors.Count);
+            game.OpenTab(0);Assert.AreEqual(1,game.Career.finishedAttempts);Assert.IsFalse(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);Capture("next8-story-clear");Click("StoryRecord");yield return new WaitForSecondsRealtime(2);CheckPointer("StoryTitle");Capture("next8-story-record");Click("StoryTitle");yield return null;
+            Click("SingleYear");yield return null;Assert.IsNull(game.Story);Assert.IsTrue(game.State.levels.All(v=>v==0));Assert.IsTrue(game.Career.endlessUnlocked);
+            game.StartStory(9);Assert.AreEqual(1,game.State.Level(game.Career.factors[0]));game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return null;
+            Assert.IsTrue(game.Story.finished&&!game.Story.cleared);Assert.AreEqual(2,game.Career.finishedAttempts);StringAssert.Contains("届かない",Find<TextMeshProUGUI>("StoryGoalResult").text);yield return new WaitForSecondsRealtime(3);Capture("next8-story-fail");CheckPointer("StoryRecord");CheckPointer("BackHome");
+            Assert.IsTrue(game.ExportProgress().Valid());CheckText();Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         private static void FinishStoryTestYear(OpsState s)
         {
             // 引き継ぎテスト用の強い年度。事件計算と12か月の履歴は実際のルールで作る。

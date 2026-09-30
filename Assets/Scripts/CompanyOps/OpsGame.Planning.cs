@@ -230,7 +230,7 @@ namespace PatchWorkSecure.CompanyOps
             KitGradient(medal.GetComponent<Image>(),Hex("ff9ab3"),Hex("f2557c"));
             IncidentShape(medal,"MonthStitch","dashed",5,5,110,70,new Color(1,1,1,.65f));
             var shadow=medal.gameObject.AddComponent<Shadow>();shadow.effectDistance=new Vector2(0,-5);shadow.effectColor=Hex("d94a70");
-            PText(medal,"YearLabel","1年目",0,9,120,22,13,Color.white,true,true);
+            PText(medal,"YearLabel",Story==null?"1年だけ":Story.year+"年目・目標 "+Story.Goal,0,9,120,22,13,Color.white,true,true);
             PText(medal,"Month",State.Current.name,0,30,120,45,38,Color.white,true,true);
             int slots=Math.Max(State.MaxCapacity,State.capacity);
             float workWidth=Math.Max(192,72+slots*30), workX=1496-workWidth, budgetWidth=Math.Max(170,126+State.budget.ToString().Length*24), budgetX=workX-16-budgetWidth;

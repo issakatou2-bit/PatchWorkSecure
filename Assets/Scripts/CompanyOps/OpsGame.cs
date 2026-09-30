@@ -18,6 +18,9 @@ namespace PatchWorkSecure.CompanyOps
         public OpsState State { get; private set; }
         public string SaveWarning { get; private set; } = "";
         private OpsState saved;
+        private OpsProgress savedProgress;
+        public OpsStory Story {get;private set;}
+        public OpsCareer Career {get;private set;}=new OpsCareer();
         private int tab;
         private string filter = "all";
         private string SavePath => Path.Combine(Application.persistentDataPath, "company-ops-year-v1.json");
@@ -31,15 +34,39 @@ namespace PatchWorkSecure.CompanyOps
         private void ReadSave()
         {
             if (TestMode) return;
-            saved = OpsSaveStore.Read(SavePath, out string warning); SaveWarning = warning;
+            savedProgress=OpsSaveStore.ReadProgress(SavePath,out string warning);saved=savedProgress?.Current;
+            if(savedProgress!=null)Career=savedProgress.career;SaveWarning=warning;
         }
         private void Save()
         {
             if (TestMode || State == null) return;
-            if (OpsSaveStore.Write(SavePath, State, out string warning)) saved = State;
+            var progress=ExportProgress();
+            if(OpsSaveStore.WriteProgress(SavePath,progress,out string warning)){savedProgress=progress;saved=State;}
             SaveWarning = warning;
         }
-        public void StartYear(int seed) { CancelMinigame();StopVoice();voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false; resolutionActive = false;pendingRankBenefit="";statEffectPending=false;roomFilter=""; budgetGainPending=false; rankBefore=rankAfter=null; rankedReports.Clear(); workCompletePending=false;workCompleteMonth=-1; State = new OpsState(seed, true); statChanges = new int[6]; tab = 0; Save(); Render(); TutorialNewYear(); }
+        public void StartYear(int seed){Story=null;EnterYear(new OpsState(seed,true),true);}
+        public void StartStory(int seed){Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
+        private void EnterYear(OpsState next,bool tutorial)
+        {CancelMinigame();StopVoice();SkipTutorialVisual();tutorialStep=-1;voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false;resolutionActive=false;pendingRankBenefit="";statEffectPending=false;roomFilter="";budgetGainPending=false;rankBefore=rankAfter=null;rankedReports.Clear();workCompletePending=false;workCompleteMonth=-1;State=next;statChanges=new int[6];tab=0;Save();Render();if(tutorial)TutorialNewYear();}
+        public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null?State:null,story=Story,storyMode=Story!=null,career=Career};
+        public bool RestoreProgress(OpsProgress progress)
+        {if(progress==null||!progress.Valid())return false;Story=progress.story;Career=progress.career;EnterYear(progress.Current,false);return true;}
+        private void ContinueSaved()=>RestoreProgress(savedProgress??new OpsProgress{single=saved,career=Career});
+        private void RecordStoryOutcome()
+        {
+            if(Story==null||State.phase!=OpsPhase.Ended)return;
+            bool changed=Story.RecordYear();
+            if(Story.finished&&!Story.rewardClaimed)
+            {
+                // 選択画面はNext-9。仮操作では前提不要・未所持の備えからおすすめを1つ自動受取。
+                string id=Career.factors.Count==OpsCatalog.StoryFactorSlots?Career.factors[0]:OpsCatalog.Projects
+                    .Where(p=>string.IsNullOrEmpty(p.requires)&&!Career.factors.Contains(p.id)).OrderByDescending(p=>State.Level(p.id)).First().id;
+                changed|=Career.Claim(Story,id);
+            }
+            if(changed)Save();
+        }
+        public bool NextStoryYear()
+        {if(Story==null||MinigameActive)return false;RecordStoryOutcome();if(!Story.AdvanceYear())return false;EnterYear(Story.state,false);return true;}
         public void OpenTab(int next) { if(MinigameActive)return;roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
@@ -150,7 +177,7 @@ namespace PatchWorkSecure.CompanyOps
                 }
             }, Accent);
             Button(intro, "ContinueYear", saved == null ? "続きの記録はありません" : saved.Current.name + " の記録から続ける", 38, 632, 504, 58,
-                () => { State = saved; statChanges = new int[6]; tab = 0; Render(); }, Edge, saved != null);
+                ContinueSaved, Edge, saved != null);
             Text(intro, "Disclaimer", "1年12か月 / 40種の出来事・18種の日常チケット\n公表事例を参考にした架空の会社と数値です。", 38, 712, 504, 58, 16, Muted);
             if (Navigator != null && Navigator.FaceNormal != null)
             {
@@ -166,6 +193,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Render()
         {
+            RecordStoryOutcome();
             homeVisible = false;
             SetMusic(Sounds == null ? null : State.phase == OpsPhase.Planning ? Sounds.planningMusic :
                 State.phase == OpsPhase.Incident || ResolutionActive ? Sounds.incidentMusic : Sounds.reviewMusic);

@@ -48,6 +48,13 @@ public const double BlockThreeRowsChance=.3, BlockLockMinimum=.2, BlockLockVaria
 public static readonly int[] BlockColumnChoices={4,5,5,5,6};
 public const int BlockBaseValue=10, BlockCellValue=3, BlockUrgentValue=8, BlockDayBonus=3, BlockS=95, BlockA=75, BlockB=45;
 public const int MapHighScore=85, MapLowScore=40, MapHighTrust=6, MapNormalTrust=4, MapLowTrust=2;
+public const int RestoreSeedSalt=0x6707, RestoreWorkers=2, RestoreStorageExtra=1, RestoreMonthEndMultiplier=2, RestoreBenignMinimum=1, RestoreBenignVariation=2;
+public const int RestoreSimulationLimit=200, RestoreSearchLimit=6000, RestoreS=85, RestoreA=65, RestoreB=40;
+public const float RestoreTickSeconds=1;
+public const double RestoreStepHours=.5, RestoreLateHours=1, RestoreMonthEndChance=.35, RestoreLateChance=.3, RestoreRtoShortChance=.5, RestoreRtoSlackMin=.5, RestoreRtoSlackMax=1;
+public const int RestoreMinimumBest=4, RestoreLossPenalty=60, RestoreFailurePenalty=6, RestoreOverduePenalty=8, RestoreBenignClickPenalty=2;
+public static readonly int[] RestoreWorkMin={1,1,1,1,1,2,1,1,1}, RestoreWorkMax={2,1,1,2,3,3,2,2,2};
+public static readonly int[] RestoreCostMin={0,0,0,0,0,0,1,4,2}, RestoreCostMax={0,0,0,0,0,0,3,7,4};
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
 public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};

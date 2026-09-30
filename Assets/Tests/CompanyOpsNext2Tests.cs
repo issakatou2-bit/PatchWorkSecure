@@ -203,8 +203,9 @@ namespace PatchWorkSecure.Tests
             foreach(bool reduced in new[]{false,true})
             {
                 game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");game.State.culture=49;game.OpenTab(0);
-                Assert.IsFalse(game.State.CultureEarlySignal);game.ChooseAction("listen");yield return new WaitForSecondsRealtime(.15f);
-                Assert.IsTrue(game.State.CultureEarlySignal);Assert.IsNotEmpty(UnityEngine.Object.FindObjectsByType<OpsStatSpark>());StringAssert.Contains("次月の兆候",Find<TextMeshProUGUI>("RankBenefitBandText").text);Capture(reduced?"125-next-rank-reduced":"125-next-rank-up");
+                Assert.IsFalse(game.State.CultureEarlySignal);game.ChooseAction("listen");
+                // 粒の寿命は実時間0.6秒。重い描画フレームでも消滅後を検査しないよう、生成直後に確認する。
+                Assert.IsTrue(game.State.CultureEarlySignal);Assert.IsNotEmpty(UnityEngine.Object.FindObjectsByType<OpsStatSpark>());StringAssert.Contains("次月の兆候",Find<TextMeshProUGUI>("RankBenefitBandText").text);yield return new WaitForSecondsRealtime(.15f);Capture(reduced?"125-next-rank-reduced":"125-next-rank-up");
                 yield return new WaitForSecondsRealtime(.9f);CheckPointer("CultureEarlySignal");Click("CultureEarlySignal");yield return new WaitForSecondsRealtime(.4f);StringAssert.Contains("確定",Find<TextMeshProUGUI>("DialogBody").text);Click("CloseDialog");
                 game.State.culture=65;game.State.audited=false;Assert.AreEqual(8,game.State.EstimateMargin);game.OpenTab(0);Click("Stat_3");yield return new WaitForSecondsRealtime(.5f);StringAssert.Contains("1狭める",Find<TextMeshProUGUI>("CurrentRankBenefit").text);Capture("125-next-rank-details");Click("CloseDialog");
                 game.State.trust=50;game.State.capacity=4;game.State.audited=true;game.State.proposed=false;int money=game.State.budget;int grant=12+game.State.Evidence*3+1;game.ChooseAction("proposal");Assert.AreEqual(money+grant,game.State.budget);

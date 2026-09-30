@@ -115,7 +115,13 @@ namespace PatchWorkSecure.Tests
             else if(c.kind=="act")
             {
                 if(c.id=="prepare") { yield return PersonaClick("OpenSituation"); yield return null; yield return PersonaClick("PrepareSituation"); yield return null; }
-                else { yield return PersonaClick("Tab0"); yield return null; yield return PersonaClick("Action_"+c.id); yield return null; }
+                else
+                {
+                    yield return PersonaClick("Tab0"); yield return null; yield return PersonaClick("Action_"+c.id); yield return null;
+                    // 年間の方針比較は従来と同じ50点。新しい日常も表示された委任・確定ボタンで進める。
+                    if(c.id=="audit"||c.id=="map")
+                    {yield return PersonaClick("MinigameDelegate");yield return null;yield return PersonaClick("MinigameContinue");yield return null;}
+                }
             }
             else if(c.kind=="proposal")
             { yield return PersonaClick("Tab1"); yield return null; yield return PersonaClick("Proposal"); yield return null; yield return PersonaClick("Propose_"+c.id); yield return null; }

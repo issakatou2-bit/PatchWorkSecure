@@ -371,7 +371,7 @@ namespace PatchWorkSecure.CompanyOps
             if(score==OpsCatalog.MinigameDelegateScore)return result;
             var range=publicRange??Estimate(response);
             double factor=1-OpsCatalog.MinigameResultInfluence*(score-OpsCatalog.MinigameDelegateScore)/OpsCatalog.MinigameDelegateScore;
-            result.loss=BoundMinigameResult(result.loss,range.lossMin,range.lossMax,factor);
+            if(!SupportsRestore)result.loss=BoundMinigameResult(result.loss,range.lossMin,range.lossMax,factor);
             result.downtime=BoundMinigameResult(result.downtime,range.stopMin,range.stopMax,factor);
             result.businessLoss=Math.Min(result.businessLoss,result.loss);
             return result;
@@ -379,14 +379,14 @@ namespace PatchWorkSecure.CompanyOps
         private static int BoundMinigameResult(int original,int low,int high,double factor)=>
             Math.Max(Math.Min(original,low),Math.Min(Math.Max(original,high),(int)Math.Round(original*factor,MidpointRounding.AwayFromZero)));
         public bool SupportsContainment=>EventSpread==OpsCatalog.SpreadHigh;
-        public bool SupportsMinigame=>SupportsContainment||SupportsMail||SupportsMfa;
+        public bool SupportsMinigame=>SupportsContainment||SupportsMail||SupportsMfa||SupportsRestore;
         public bool Resolve(string response)=>Resolve(response,OpsCatalog.MinigameDelegateScore,true);
         public bool Resolve(string response,int score,bool delegated)
         {
             if (phase != OpsPhase.Incident || !new[] { "contain", "scope", "recover" }.Contains(response) ||
                 score<0 || score>OpsCatalog.MinigameMaxScore || delegated&&score!=OpsCatalog.MinigameDelegateScore || !SupportsMinigame&&score!=OpsCatalog.MinigameDelegateScore) return false;
             var result = ScoredPreview(response,score);
-            if(SupportsContainment||(SupportsMail||SupportsMfa)&&!delegated){result.minigameRecorded=true;result.minigameScore=score;result.delegated=delegated;}
+            if(SupportsContainment||(SupportsMail||SupportsMfa||SupportsRestore)&&!delegated){result.minigameRecorded=true;result.minigameScore=score;result.delegated=delegated;}
             result.forecast = Estimate(response);
             result.metricsBefore = monthStartMetrics == null ? null : (int[])monthStartMetrics.Clone();
             // 同じ事件・対応・社員・点数・公開幅で、設備と運用整備の有無だけを比較する。

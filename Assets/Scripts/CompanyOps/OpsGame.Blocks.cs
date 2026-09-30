@@ -9,7 +9,7 @@ namespace PatchWorkSecure.CompanyOps
     public partial class OpsGame
     {
         private RectTransform blockBoard,blockTray,blockCheck,blockGhost,blockDanger;
-        private int blockRevision=-1,draggedBlock=-1;private float blockCell;private Vector2 blockPointer;
+        private int blockRevision=-1,draggedBlock=-1,blockRightFrame=-1;private float blockCell;private Vector2 blockPointer;
         private readonly string[] blockDays={"月","火","水","木","金","土"};
         private void DrawBlockPresentation()
         {
@@ -79,7 +79,7 @@ namespace PatchWorkSecure.CompanyOps
                     PText(tile,"BlockTaskName",task.Name+(task.Auto?" / 自動":""),10,8,119,46,13,null,false);
                     PText(tile,"BlockTaskRule",BlockRule(task),10,54,119,28,11,PlanGray,false);
                     DrawBlockShape(tile,"BlockMini",task.Cells,10,2,task.Color,88,84,false);
-                    if(task.Placed==null){var rotate=PButton(tile,"BlockRotate_"+id,"向きを変える",8,90,78,26,()=>RotateBlock(id),Color.white,PlanInk,12);rotate.GetComponentInChildren<TMPro.TextMeshProUGUI>().fontSize=11;}
+                    if(task.Placed==null){var rotate=PButton(tile,"BlockRotate_"+id,"向きを変える",8,90,78,26,()=>RotateBlock(id),Color.white,PlanInk,12);var label=rotate.GetComponentInChildren<TMPro.TextMeshProUGUI>();label.enableAutoSizing=false;label.fontSize=11;}
                     if(task.Placed!=null)
                     {
                         int r=task.Placed.Min(c=>c.Row),c=task.Placed.Min(x=>x.Column);
@@ -108,6 +108,12 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsBlockMinigame;if(game==null||!game.Rotate(id))return;MinigameTone(760,"triangle");RefreshBlockPresentation();if(draggedBlock>=0)MoveBlockDrag(blockPointer);
         }
+        public void RightClickBlock(int task)
+        {
+            var game=Minigame as OpsBlockMinigame;if(game==null||game.Phase!=OpsMinigamePhase.Playing||blockRightFrame==Time.frameCount)return;
+            int id=draggedBlock>=0?draggedBlock:task>=0?task:game.Selected;if(id<0)return;
+            blockRightFrame=Time.frameCount;if(draggedBlock<0&&task>=0)game.Select(task);RotateBlock(id);
+        }
         public void PlaceSelectedBlock(int row,int column)
         {
             var game=Minigame as OpsBlockMinigame;if(game==null||game.Selected<0)return;
@@ -116,6 +122,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 MinigameTone(640);MinigamePop(new Vector2(240,350),"ぴったり！",Hex("6c63ff"));
                 foreach(int day in game.NewlyFull){MinigameCutBurst(new Vector2(92+day*(blockCell+6)+blockCell/2,350));MinigamePop(new Vector2(92+day*(blockCell+6),210),blockDays[day]+"曜、すき間なし！",Hex("ffc02e"));StartCoroutine(MinigameChord());}
+                if(game.NewlyFull.Count>0)SpeakSceneLine("mg_combo_0"+(1+minigameComboVoice++%2),0);
             }
             else{MinigameTone(200,"square");MinigameVisual(blockBoard,"shake",.35f);SpeakSceneLine("mg_miss_01",0);}
             RefreshBlockPresentation();
@@ -165,7 +172,8 @@ namespace PatchWorkSecure.CompanyOps
                 else if(touch!=null&&touch.press.wasReleasedThisFrame)EndBlockDrag(touch.position.ReadValue());
                 else if(mouse!=null){if(mouse.leftButton.wasReleasedThisFrame)EndBlockDrag(mouse.position.ReadValue());else if(mouse.leftButton.isPressed)MoveBlockDrag(mouse.position.ReadValue());}
             }
-            if(key!=null&&key.rKey.wasPressedThisFrame||mouse!=null&&(mouse.rightButton.wasPressedThisFrame||Mathf.Abs(mouse.scroll.ReadValue().y)>0))
+            if(mouse!=null&&mouse.rightButton.wasPressedThisFrame&&draggedBlock>=0)RightClickBlock(-1);
+            if(key!=null&&key.rKey.wasPressedThisFrame||mouse!=null&&Mathf.Abs(mouse.scroll.ReadValue().y)>0)
             {int id=draggedBlock>=0?draggedBlock:game.Selected;if(id>=0)RotateBlock(id);}
         }
         public void FinishBlocks()
@@ -175,10 +183,11 @@ namespace PatchWorkSecure.CompanyOps
             minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();
         }
     }
-    public sealed class OpsBlockPointer:MonoBehaviour,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler
+    public sealed class OpsBlockPointer:MonoBehaviour,IPointerDownHandler,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler
     {
         public OpsGame Owner;public int Task=-1,Row=-1,Column=-1;public bool Placed;
-        public void OnPointerClick(PointerEventData e){if(Task<0)return;if(e.button==PointerEventData.InputButton.Right)Owner.RotateBlock(Task);else Owner.SelectBlock(Task);}
+        public void OnPointerDown(PointerEventData e){if(e.button==PointerEventData.InputButton.Right)Owner.RightClickBlock(Task);}
+        public void OnPointerClick(PointerEventData e){if(Task>=0&&e.button==PointerEventData.InputButton.Left)Owner.SelectBlock(Task);}
         public void OnBeginDrag(PointerEventData e){if(Task>=0)Owner.BeginBlockDrag(Task,Placed,e.position);}
         public void OnDrag(PointerEventData e){if(Task>=0)Owner.MoveBlockDrag(e.position);}
         public void OnEndDrag(PointerEventData e){if(Task>=0)Owner.EndBlockDrag(e.position);}

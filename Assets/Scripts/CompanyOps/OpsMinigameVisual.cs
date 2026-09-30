@@ -84,6 +84,11 @@ namespace PatchWorkSecure.CompanyOps
                 EdgeBand(vh,r,0,20,1,.65f);EdgeBand(vh,r,20,90,.65f,0);
             }
             else if(Kind=="line")Line(vh,From,Vector2.Lerp(From,To,Progress),4);
+            else if(Kind=="dashed-line")
+            {
+                float length=Vector2.Distance(From,To);var direction=length>0?(To-From)/length:Vector2.zero;
+                for(float d=0;d<length;d+=12)Line(vh,From+direction*d,From+direction*Mathf.Min(length,d+6),3);
+            }
             else if(Kind=="slash")Line(vh,new Vector2(r.xMin,r.center.y-6),new Vector2(r.xMax,r.center.y+6),4);
             else if(Kind=="ring")
             {

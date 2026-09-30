@@ -76,7 +76,8 @@ namespace PatchWorkSecure.Tests
             Assert.IsFalse(state.Resolve("scope",-1,false));Assert.IsFalse(state.Resolve("scope",101,false));Assert.IsFalse(state.Resolve("scope",80,true));Assert.AreEqual(before,JsonUtility.ToJson(state));
             Assert.IsTrue(state.Resolve("scope",100,false));Assert.IsTrue(state.Valid());var copy=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(state));Assert.IsTrue(copy.Valid());Assert.AreEqual(100,copy.Latest.EffectiveMinigameScore);
             before=JsonUtility.ToJson(state);Assert.IsFalse(state.Resolve("scope",0,false));Assert.AreEqual(before,JsonUtility.ToJson(state));
-            state=new OpsState(14){month=3};Assert.IsFalse(state.SupportsContainment);state.BeginIncident();before=JsonUtility.ToJson(state);
+            // outageはNext-7で対象になったため、未対応の情報共有事件で拒否を確認する。
+            state=new OpsState(14,true);SetEvent(state,OpsEventCatalog.Events.First(e=>e.profile=="sharing").id);Assert.IsFalse(state.SupportsMinigame);state.BeginIncident();before=JsonUtility.ToJson(state);
             Assert.IsFalse(state.Resolve("scope",100,false));Assert.AreEqual(before,JsonUtility.ToJson(state));Assert.IsTrue(state.Resolve("scope"));Assert.IsFalse(state.Latest.minigameRecorded);
         }
         private static OpsState ContainmentFixture(bool benign,int seed=0,bool monitor=false,bool segment=false)

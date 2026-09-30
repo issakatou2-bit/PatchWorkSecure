@@ -134,7 +134,9 @@ namespace PatchWorkSecure.Tests
             {
                 game.StartYear(14);if(auto)game.State.levels[OpsCatalog.Index("automation")]=1;game.ChooseAction("map");Click("MinigameStart");yield return new WaitForSecondsRealtime(.5f);
                 var blocks=(OpsBlockMinigame)game.Minigame;Capture(auto?"next7-f2-play-auto":"next7-f2-play");
-                var task=blocks.Tasks.First(t=>t.Placed==null);game.SelectBlock(task.Id);yield return null;Canvas.ForceUpdateCanvases();CheckPointer("BlockRotate_"+task.Id);for(int i=0;i<4;i++)game.RotateBlock(task.Id);
+                var task=blocks.Tasks.First(t=>t.Placed==null);game.SelectBlock(task.Id);yield return null;Canvas.ForceUpdateCanvases();CheckPointer("BlockRotate_"+task.Id);
+                var orientation=task.Cells.ToArray();game.RightClickBlock(task.Id);var once=task.Cells.ToArray();game.RightClickBlock(task.Id);CollectionAssert.AreEqual(once,task.Cells,"右クリックの二重回転を防ぐ");
+                for(int i=0;i<3;i++)game.RotateBlock(task.Id);CollectionAssert.AreEqual(orientation,task.Cells);for(int i=0;i<4;i++)game.RotateBlock(task.Id);
                 int r=task.Solution.Min(c=>c.Row),c=task.Solution.Min(x=>x.Column);Canvas.ForceUpdateCanvases();CheckPointer("BlockCell_"+r+"_"+c);Click("BlockCell_"+r+"_"+c);yield return null;Assert.IsNotNull(task.Placed);
                 var cell=Find<RectTransform>("BlockCell_"+r+"_"+c);var corners=new Vector3[4];cell.GetWorldCorners(corners);Vector2 target=RectTransformUtility.WorldToScreenPoint(null,corners[1]+new Vector3(2,-2));
                 game.BeginBlockDrag(task.Id,true,target);yield return null;game.MoveBlockDrag(target);game.EndBlockDrag(target);Assert.IsNotNull(task.Placed);

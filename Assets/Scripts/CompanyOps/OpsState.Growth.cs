@@ -30,7 +30,9 @@ namespace PatchWorkSecure.CompanyOps
         public int PlayerLevel => growthRules == 0 ? 1 : OpsGrowthCatalog.Level(playerExperience, OpsGrowthCatalog.PlayerThresholds);
         public int StaffLevel(int index) => growthRules == 0 || staffExperience == null ? 1 : OpsGrowthCatalog.Level(staffExperience[index], OpsGrowthCatalog.StaffThresholds);
         public int EquipmentLevel => 1 + levels.Sum() / 4;
-        public int SeasonPressure => growthRules > 0 ? OpsGrowthCatalog.SeasonPressure[month] : 0;
+        // 複数年の本編で、2年目以降の脅威の上乗せ。1年目・旧保存は0で、従来と同じ計算。
+        public int yearPressure;
+        public int SeasonPressure => (growthRules > 0 ? OpsGrowthCatalog.SeasonPressure[month] : 0) + yearPressure;
         public bool QuarterPeak => growthRules > 0 && new[] { 2, 5, 8, 11 }.Contains(month);
         public string SeasonLabel => growthRules == 0 ? "標準の運用" : QuarterPeak ? month == 11 ? "年度末の総力対応" : "四半期の山場" :
             month == 3 || month == 6 || month == 9 ? "山場後の整備期間" : month == 10 ? "年度末への備え" : "通常の運用";

@@ -134,7 +134,7 @@ namespace PatchWorkSecure.Tests
             action = Find<Button>("Action_audit");
             ExecuteEvents.Execute(action.gameObject, pointer, ExecuteEvents.pointerDownHandler);
             yield return new WaitForSeconds(.1f); Assert.AreEqual(Vector3.one, action.transform.localScale);
-            game.ChooseAction("audit"); game.BeginIncident(); yield return null;
+            ChooseDelegatedWork(game,"audit"); game.BeginIncident(); yield return null;
             CheckPointer("Respond_scope"); game.Resolve("scope"); game.Next(); yield return null;
             Click("OpenSituation"); yield return null; Capture("16-month-situation"); CheckText();
             Click("CloseDialog"); yield return null;

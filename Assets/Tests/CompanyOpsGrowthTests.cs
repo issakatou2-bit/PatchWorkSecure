@@ -144,9 +144,9 @@ namespace PatchWorkSecure.Tests
             game.Buy(OpsCatalog.Index("runbook")); yield return null; Click("OpenTeam"); yield return null;
             CheckPointer("Support_routine"); Click("Support_routine"); yield return new WaitForSeconds(2.9f);
             Assert.AreEqual(1, game.State.capacity); Capture("25-routine-unlocked", 1280, 720); CheckTeamText();
-            Click("CloseDialog"); game.ChooseAction("audit"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); game.Next(); yield return null;
+            Click("CloseDialog"); ChooseDelegatedWork(game,"audit"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); game.Next(); yield return null;
             Click("OpenTeam"); yield return null; Click("Practice_1"); yield return null; Click("Support_investigate"); yield return null;
-            Click("CloseDialog"); game.Buy(OpsCatalog.Index("mfa")); game.ChooseAction("map"); game.BeginIncident(); yield return null;
+            Click("CloseDialog"); game.Buy(OpsCatalog.Index("mfa")); ChooseDelegatedWork(game,"map"); game.BeginIncident(); yield return null;
             Capture("26-staff-assistance"); CheckText(); CheckPointer("Power_scope"); Click("Power_scope"); yield return WaitForPowerCount(game.State.ResponsePower("scope").Total);
             Assert.AreEqual(game.State.ResponsePower("scope").Total.ToString(), Find<TextMeshProUGUI>("PowerTotalValue").text);
             Capture("27-additive-power", 1280, 720); CheckTeamText(); Click("CloseDialog"); yield return null;
@@ -154,7 +154,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(predicted.loss, game.State.Latest.loss);
             Capture("28-growth-review"); CheckText(); Click("ReviewPower"); yield return new WaitForSeconds(.7f); CheckTeamText();
             Click("CloseDialog"); game.Next(); yield return null;
-            game.ChooseAction("listen"); game.ChooseAction("map"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); yield return WaitForResolution(game);
+            ChooseDelegatedWork(game,"listen"); ChooseDelegatedWork(game,"map"); game.BeginIncident(); game.Resolve(PublicTestResponse(game.State)); yield return WaitForResolution(game);
             Assert.IsTrue(game.State.QuarterRewardPending); CheckPointer("NextMonth"); Click("NextMonth"); yield return null;
             Capture("29-quarter-reward"); CheckTeamText(); CheckPointer("Reward_capacity"); Click("Reward_capacity"); yield return null;
             Assert.AreEqual(3, game.State.month); Assert.AreEqual(1, game.State.monthExtraCapacity);

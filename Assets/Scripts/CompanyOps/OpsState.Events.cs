@@ -44,7 +44,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool clueCollected;
         public int IncidentTime=>decisionDepthRules>0&&incidentTimes!=null?incidentTimes[month]:0;
         public string IncidentTimeLabel=>IncidentTime==0?"業務時間":IncidentTime==1?"金曜の夜":"連休中";
-        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?0:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0));
+        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?auditKnowledgeAdjustment:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0));
         public int SituationKnowledge=>OpsCatalog.KnowledgeMax-Blindness;
         public int EventSpread=>CurrentProfile!=null?CurrentProfile.spread:Current.kind=="outage"?OpsCatalog.SpreadNone:new[]{"ransom","supply","vulnerability","identity"}.Contains(Current.kind)?OpsCatalog.SpreadHigh:OpsCatalog.SpreadNormal;
         public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/OpsCatalog.ContainmentOversightDivisor);

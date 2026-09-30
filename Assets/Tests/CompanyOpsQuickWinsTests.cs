@@ -120,14 +120,14 @@ namespace PatchWorkSecure.Tests
             foreach(bool reduced in new[]{false,true})
             {
                 game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
-                foreach(string action in new[]{"audit","listen","map"})game.ChooseAction(action);
+                foreach(string action in new[]{"audit","listen","map"})ChooseDelegatedWork(game,action);
                 Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());game.ChooseAction("rest");yield return null;
                 Assert.AreEqual(0,game.State.capacity);var effect=Find<OpsWorkComplete>("Stat_1");Assert.AreEqual(4,effect.Tokens.Length);
                 string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.16f);Capture(reduced?"113-quickwins3-reduced":"113-quickwins3-work");
                 if(reduced){Assert.AreEqual(effect.Portrait.LayoutPosition,effect.Portrait.GetComponent<RectTransform>().anchoredPosition);Assert.AreEqual(Vector3.one,effect.Portrait.transform.localScale);}
                 yield return new WaitForSecondsRealtime(.6f);Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());Assert.AreEqual(state,JsonUtility.ToJson(game.State));
                 game.OpenTab(0);yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any());
-                game.State.capacity=1;game.State.audited=false;game.ChooseAction("audit");yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any(),"同月で回復して使い切っても再生しない");
+                game.State.capacity=1;game.State.audited=false;ChooseDelegatedWork(game,"audit");yield return null;Assert.IsFalse(Object.FindObjectsByType<OpsWorkComplete>().Any(),"同月で回復して使い切っても再生しない");
             }
             LogAssert.NoUnexpectedReceived();
         }
@@ -155,7 +155,7 @@ namespace PatchWorkSecure.Tests
             foreach(bool reduced in new[]{false,true})
             {
                 game.StartYear(14);Click("Menu");if(game.ReducedMotion!=reduced)Click("ReduceMotion");Click("CloseDialog");
-                game.ChooseAction("audit");game.ChooseAction("proposal");yield return null;var effect=Find<OpsBudgetGain>("BudgetGainEffect");Assert.IsNotNull(effect);
+                ChooseDelegatedWork(game,"audit");ChooseDelegatedWork(game,"proposal");yield return null;var effect=Find<OpsBudgetGain>("BudgetGainEffect");Assert.IsNotNull(effect);
                 var first=effect.Coins[0].anchoredPosition;var state=JsonUtility.ToJson(game.State);
                 yield return new WaitForSecondsRealtime(.18f);Capture(reduced?"111-quickwins1-reduced":"111-quickwins1-coins");
                 if(reduced){Assert.AreEqual(first,effect.Coins[0].anchoredPosition);Assert.AreEqual(Vector3.one,effect.Target.localScale);}

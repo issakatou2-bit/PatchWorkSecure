@@ -60,6 +60,7 @@ namespace PatchWorkSecure.CompanyOps
         public int[] levels = new int[11];
         public OpsPhase phase;
         public bool audited, listened, mapped, rested, proposed;
+        public int auditKnowledgeAdjustment;
         // 0は旧セーブ。新規年度だけ1にし、進行途中のルール変更を避ける。
         public int situationRules;
         // 旧年度は0。受諾は目印のみで、達成判定を後付けで制限しない。
@@ -244,14 +245,17 @@ namespace PatchWorkSecure.CompanyOps
             if (action == "proposal") return proposed ? "今月は提案済み" : Evidence == 0 ? "調査・対話・業務確認のいずれかが必要" : "";
             return "不明な行動です";
         }
-        public bool Act(string action, string group = "recover")
+        public bool Act(string action, string group = "recover", int workScore = OpsCatalog.MinigameDelegateScore)
         {
-            if (ActionBlock(action) != "") return false;
+            if (ActionBlock(action) != "" || workScore<0 || workScore>OpsCatalog.MinigameMaxScore) return false;
             if (action == "proposal" && !new[] { "recover", "protect", "people", "operations" }.Contains(group)) return false;
             capacity--;
             switch (action)
             {
-                case "audit": audited = true; Note("現状調査：" + Current.finding + " 今月の見積もり幅が狭まった。"); break;
+                case "audit": audited = true;
+                    auditKnowledgeAdjustment=workScore>=OpsCatalog.AuditHighScore?-OpsCatalog.AuditExtraKnowledge:
+                        workScore<OpsCatalog.AuditLowScore?OpsCatalog.UnauditedBlindness-OpsCatalog.AuditLowRecovery:0;
+                    Note("現状調査：" + Current.finding + " 今月の見積もり幅が狭まった。"); break;
                 case "listen": listened = true; culture = Clamp(culture + 7); fatigue = Clamp(fatigue - 3);
                     Note("社員と対話。責めずに受け止め、相談文化 +7。早い報告が限定対応を支える。"); break;
                 case "map": mapped = true; trust = Clamp(trust + 4); Learn("asset");
@@ -451,7 +455,7 @@ namespace PatchWorkSecure.CompanyOps
             supportOrder = ""; practiced = false;
             monthExtraCapacity = nextMonthExtraCapacity; nextMonthExtraCapacity = 0; quarterRewardClaimed = false;
             capacity = MaxCapacity;
-            audited = listened = mapped = rested = proposed = false; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
+            audited = listened = mapped = rested = proposed = false; auditKnowledgeAdjustment=0; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
             situationPrepared = false;
             ticketResolution = "";
             clueCollected=false;
@@ -472,6 +476,7 @@ namespace PatchWorkSecure.CompanyOps
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
+            if (auditKnowledgeAdjustment < -OpsCatalog.AuditExtraKnowledge || auditKnowledgeAdjustment > OpsCatalog.UnauditedBlindness-OpsCatalog.AuditLowRecovery || !audited&&auditKnowledgeAdjustment!=0) return false;
             if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || !ValidPeaks() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;

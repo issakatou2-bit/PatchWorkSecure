@@ -94,10 +94,10 @@ namespace PatchWorkSecure.Tests
             game.State.budget=59;game.OpenTab(0);game.SpeakSceneLine("rankup",0);yield return new WaitForSecondsRealtime(.2f);CheckText();Capture("130-polish-planning-rankup");
             foreach(var room in Find<RectTransform>("OfficeStage").GetComponentsInChildren<RectTransform>().Where(r=>r.name.StartsWith("Room_")))Assert.LessOrEqual(room.GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.name=="UninstalledFrame"),3);
             Assert.Greater(Find<RectTransform>("Pin_change").anchoredPosition.x,283);Assert.AreEqual(TextWrappingModes.NoWrap,Find<TextMeshProUGUI>("NavigatorSpeech").textWrappingMode);
-            game.ChooseAction("audit");game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);game.StopVoice();yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-empty");
+            ChooseDelegatedWork(game,"audit");game.BeginIncident();game.Resolve("scope");yield return WaitForResolution(game);game.StopVoice();yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-empty");
             Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="ImpactSummary"));Assert.IsNotNull(Find<RectTransform>("PotentialEquipmentFrame"));Assert.IsFalse(Object.FindObjectsByType<OpsPortraitIdentity>().Any(i=>i.FaceIcon));Assert.AreEqual(3,Find<RectTransform>("MonthlyTeam").GetComponentsInChildren<RectTransform>().Count(t=>t.name.StartsWith("NextSupportFace")));CheckText();
             Assert.AreEqual(3,Find<RectTransform>("MonthlyTeam").GetComponentsInChildren<OpsIncidentGraphic>().Count(g=>g.Kind=="staff-face"));
-            game.StartYear(14);game.ChooseAction(game.State.CurrentMission.actionA);game.ChooseAction(game.State.CurrentMission.actionB);game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectA));game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectB));game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-mission");Assert.IsTrue(game.State.CurrentMissionCompleted);CheckPointer("MissionConversation");Assert.GreaterOrEqual(Find<Button>("MissionConversation").GetComponent<RectTransform>().rect.height,32);CheckText();LogAssert.NoUnexpectedReceived();
+            game.StartYear(14);ChooseDelegatedWork(game,game.State.CurrentMission.actionA);ChooseDelegatedWork(game,game.State.CurrentMission.actionB);game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectA));game.Buy(OpsCatalog.Index(game.State.CurrentMission.projectB));game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Capture("130-polish-monthly-mission");Assert.IsTrue(game.State.CurrentMissionCompleted);CheckPointer("MissionConversation");Assert.GreaterOrEqual(Find<Button>("MissionConversation").GetComponent<RectTransform>().rect.height,32);CheckText();LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
         {
@@ -156,7 +156,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator VoiceV2_依頼と事件と発動と月報は実際の場面に連動し音声なしで完走する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
-            game.Buy(OpsCatalog.Index("backup"));game.ChooseAction("audit");game.ChooseAction("map");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.4f);Click("AcceptMission");Assert.AreEqual(OpsGame.MissionVoiceId(game.State),game.LastReactionId);
+            game.Buy(OpsCatalog.Index("backup"));ChooseDelegatedWork(game,"audit");ChooseDelegatedWork(game,"map");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.4f);Click("AcceptMission");Assert.AreEqual(OpsGame.MissionVoiceId(game.State),game.LastReactionId);
             game.BeginIncident();Assert.AreEqual("incident_start",game.LastReactionId);yield return new WaitForSecondsRealtime(3.7f);Assert.AreEqual("incident_unconfirmed",game.LastReactionId);yield return new WaitForSecondsRealtime(1.4f);Capture("128-voice-unconfirmed");
             game.Resolve("recover");float limit=Time.realtimeSinceStartup+4;while(game.LastReactionId!="incident_activate"&&Time.realtimeSinceStartup<limit)yield return null;
             Assert.AreEqual("incident_activate",game.LastReactionId);Assert.IsTrue(game.State.Latest.investmentEffects.Any(e=>e.avoidedLoss>0||e.avoidedDowntime>0));
@@ -233,10 +233,10 @@ namespace PatchWorkSecure.Tests
         }
         [UnityTest] public IEnumerator NextScreens2_依頼書の二経路と臨時予算は実数で一度だけ働く()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);game.ChooseAction(game.State.CurrentMission.actionA);Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);ChooseDelegatedWork(game,game.State.CurrentMission.actionA);Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);
             Assert.AreEqual(new Vector2(330,-60),Find<RectTransform>("MissionBrief").anchoredPosition);Assert.AreEqual(new Vector2(940,780),Find<RectTransform>("MissionBrief").sizeDelta);
             game.State.MissionProgress(false,out int b,out int bt);Assert.AreEqual(b+" / "+bt,Find<TextMeshProUGUI>("MissionProgressB").text);CheckPointer("AcceptMission");Capture("123-next-mission-brief");Click("AcceptMission");Assert.AreEqual(game.State.month,game.State.acceptedMissionMonth);
-            game.ChooseAction(game.State.CurrentMission.actionB);int money=game.State.budget;game.BeginIncident();Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);game.BeginIncident();Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);
+            ChooseDelegatedWork(game,game.State.CurrentMission.actionB);int money=game.State.budget;game.BeginIncident();Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);game.BeginIncident();Assert.AreEqual(money+OpsState.MissionBudgetReward,game.State.budget);
             game.Resolve("scope");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(.8f);Assert.AreEqual(1,game.State.Latest.missionBonus);Capture("123-next-mission-reward");Click("MissionConversation");yield return new WaitForSecondsRealtime(.5f);CheckPointer("CloseDialog");
             var old=new OpsState(14);old.missionBudgetRules=0;old.Act(old.CurrentMission.actionA);old.Act(old.CurrentMission.actionB);money=old.budget;old.BeginIncident();Assert.AreEqual(money,old.budget);Assert.IsTrue(old.Valid());LogAssert.NoUnexpectedReceived();
         }
@@ -282,7 +282,7 @@ namespace PatchWorkSecure.Tests
             var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);Assert.IsTrue(game.StartTutorial());yield return new WaitForSecondsRealtime(.5f);
             Assert.AreEqual(0,game.TutorialStep);CheckPointer("Stat_0");Click("Stat_0");yield return new WaitForSecondsRealtime(.5f);Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);
             Assert.AreEqual(1,game.TutorialStep);Assert.IsFalse(game.Surface.GetComponentsInChildren<Transform>(true).First(t=>t.name=="PlanningCharacter").gameObject.activeSelf);
-            yield return new WaitForSecondsRealtime(3);CheckPointer("Action_audit");Capture("73-tutorial-audit");Click("Action_audit");yield return new WaitForSecondsRealtime(.5f);
+            yield return new WaitForSecondsRealtime(3);CheckPointer("Action_audit");Capture("73-tutorial-audit");Click("Action_audit");DelegateWork(game);yield return new WaitForSecondsRealtime(.5f);
             Assert.AreEqual(2,game.TutorialStep);CheckPointer("ConsultationDetails");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.5f);CheckPointer("CloseDialog");Click("CloseDialog");yield return new WaitForSecondsRealtime(.3f);
             Assert.AreEqual(3,game.TutorialStep);CheckPointer("OpenProjects");Click("OpenProjects");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Details_inventory");Click("Details_inventory");yield return new WaitForSecondsRealtime(.5f);CheckPointer("Buy_inventory");Click("Buy_inventory");yield return new WaitForSecondsRealtime(.6f);
             Assert.AreEqual(4,game.TutorialStep);CheckPointer("AdvanceMonth");Click("AdvanceMonth");yield return new WaitForSecondsRealtime(.5f);CheckPointer("ConfirmAdvance");Click("ConfirmAdvance");yield return new WaitForSecondsRealtime(.5f);
@@ -298,7 +298,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator 月報は三つの数値と実際の支援をモック配置で表示する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
-            game.Buy(OpsCatalog.Index("backup"));game.ChooseAction("audit");game.ChooseAction("map");game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(1);
+            game.Buy(OpsCatalog.Index("backup"));ChooseDelegatedWork(game,"audit");ChooseDelegatedWork(game,"map");game.BeginIncident();game.Resolve("recover");yield return WaitForResolution(game);yield return new WaitForSecondsRealtime(1);
             var r=game.State.Latest;Assert.AreEqual(r.loss+"<size=17>万円</size>",Find<TextMeshProUGUI>("MonthlyLossValue").text);
             Assert.AreEqual(r.downtime+"<size=17>時間</size>",Find<TextMeshProUGUI>("MonthlyStopValue").text);
             Assert.AreEqual(new Vector2(40,-140),Find<RectTransform>("MonthlyIncident").anchoredPosition);

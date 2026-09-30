@@ -43,11 +43,21 @@ namespace PatchWorkSecure.CompanyOps
         public void OpenTab(int next) { if(MinigameActive)return;roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {
+            if(MinigameActive || State==null)return;
+            if(action=="audit")
+            {
+                if(State.ActionBlock(action)!="")return;
+                OpenMinigame(new OpsLogMinigame(State),"",s=>ApplyWorkAction(action,group,s.Score));return;
+            }
+            ApplyWorkAction(action,group,OpsCatalog.MinigameDelegateScore);
+        }
+        private void ApplyWorkAction(string action,string group,int score)
+        {
             var origin=ActionOrigin("Action_"+action);
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
             int before = State.milestones.Count;
-            if (!State.Act(action, group)) return;
+            if (!State.Act(action, group,score)) return;
             RecordStatChanges(previous);
             string feedback = action == "audit" ? "現状調査 完了 / 見積もりの幅が狭まりました" :
                 action == "listen" ? "社員との対話 / 相談文化が育ちました" :
@@ -59,11 +69,14 @@ namespace PatchWorkSecure.CompanyOps
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" : feedback, true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Action);
             ActionStatParticles(origin);
             SpeakRankUp();
+            // 調査は結果確定まで非同期。開始時でなく、反映後にガイドを進める。
+            TutorialAction("Action_"+action);
             if(action=="rest"&&pendingVoice==null)foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
             {identity.GetComponent<OpsPortraitAnimator>().ChangePose("pose_coffee");}
         }
         public void Buy(int index)
         {
+            if(MinigameActive)return;
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
             int before = State.milestones.Count;
@@ -78,6 +91,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public void BeginIncident()
         {
+            if(MinigameActive)return;
             var previous = ReadStats();
             int before = State.MissionCount;
             if (!State.BeginIncident()) return;

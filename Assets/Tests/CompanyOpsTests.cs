@@ -212,11 +212,11 @@ namespace PatchWorkSecure.Tests
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);
             var game = Object.FindAnyObjectByType<OpsGame>(); game.StartYear(14); yield return null;
             Capture("10-mission-start");
-            Click("Action_audit"); yield return null;
+            Click("Action_audit"); DelegateWork(game); yield return null;
             Click("ConsultationDetails"); yield return null;
             StringAssert.Contains("現場 1/2", Find<TextMeshProUGUI>("MissionProgress").text);
             Click("CloseDialog"); yield return null;
-            Click("Action_map"); yield return null;
+            Click("Action_map"); DelegateWork(game); yield return null;
             Assert.IsTrue(game.State.MissionReady);
             Capture("11-mission-ready"); CheckText();
             game.BeginIncident(); yield return null;

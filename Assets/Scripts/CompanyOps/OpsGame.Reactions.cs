@@ -187,6 +187,7 @@ namespace PatchWorkSecure.CompanyOps
             string pose=Minigame?.Phase==OpsMinigamePhase.Playing?
                 Minigame is OpsMailMinigame?"pose_magnifier":Minigame is OpsMfaMinigame?"pose_laptop":line.poseId:line.poseId;
             if(Minigame is OpsLogMinigame&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose="pose_magnifier";
+            if(Minigame is OpsBlockMinigame blocks&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose=blocks.Automation?"pose_fists":"pose_think";
             foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
                 if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
                 else if(!string.IsNullOrEmpty(pose))identity.GetComponent<OpsPortraitAnimator>()?.ChangePose(pose);

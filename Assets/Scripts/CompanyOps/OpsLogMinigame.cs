@@ -19,6 +19,7 @@ namespace PatchWorkSecure.CompanyOps
         public int Wrong {get;private set;}
         public int Total {get;private set;}
         public int Revision {get;private set;}
+        public float HitStopRemaining {get;private set;}
         public int Knowledge=>Math.Min(OpsCatalog.KnowledgeMax,Found*OpsCatalog.KnowledgeMax/OpsCatalog.LogBadCount);
         public IReadOnlyList<OpsLogRow> Visible=>visible;
         public IReadOnlyList<OpsLogRow> Queue=>queue;
@@ -56,6 +57,7 @@ namespace PatchWorkSecure.CompanyOps
         public override void Tick(float delta)
         {
             if(Phase!=OpsMinigamePhase.Playing||float.IsNaN(delta)||float.IsInfinity(delta)||delta<=0)return;
+            float paused=Math.Min(delta,HitStopRemaining);HitStopRemaining-=paused;delta-=paused;
             float target=Math.Min(Duration,Elapsed+delta);
             while(feedAt<=target){Push();feedAt+=OpsCatalog.LogFeedSeconds;}
             base.Tick(delta);
@@ -64,7 +66,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var row=visible.FirstOrDefault(r=>r.Id==id);
             if(Phase!=OpsMinigamePhase.Playing||row==null||row.Hit)return false;
-            row.Hit=true;if(row.Suspicious){Found++;clues.Insert(0,row.Reason);}else Wrong++;
+            row.Hit=true;if(row.Suspicious){Found++;clues.Insert(0,row.Reason);HitStopRemaining=OpsCatalog.ContainmentHitStop;}else Wrong++;
             Revision++;return true;
         }
         protected override void OnTimeUp()=>Complete((int)Math.Round(Found*100.0/Math.Max(1,Total),MidpointRounding.AwayFromZero)-Wrong*OpsCatalog.LogWrongPenalty);

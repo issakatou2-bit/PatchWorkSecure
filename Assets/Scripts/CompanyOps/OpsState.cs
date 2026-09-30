@@ -258,7 +258,7 @@ namespace PatchWorkSecure.CompanyOps
                     Note("現状調査：" + Current.finding + " 今月の見積もり幅が狭まった。"); break;
                 case "listen": listened = true; culture = Clamp(culture + 7); fatigue = Clamp(fatigue - 3);
                     Note("社員と対話。責めずに受け止め、相談文化 +7。早い報告が限定対応を支える。"); break;
-                case "map": mapped = true; trust = Clamp(trust + 4); Learn("asset");
+                case "map": mapped = true; trust = Clamp(trust + (workScore>=OpsCatalog.MapHighScore?OpsCatalog.MapHighTrust:workScore<OpsCatalog.MapLowScore?OpsCatalog.MapLowTrust:OpsCatalog.MapNormalTrust)); Learn("asset");
                     Note("止められない仕事と代替手順を確認。対応時の業務停止を2時間短縮できる。"); break;
                 case "rest": rested = true; fatigue = Clamp(fatigue - 18);
                     if (Situation.extraFatigue > 0) situationPrepared = true;

@@ -42,6 +42,12 @@ public const double MfaLegitimateChance=.5, MfaSpamChance=.5, MfaForeignChance=.
 public const int WorkSeedStride=7919, LogSeedSalt=0xe107, LogBadCount=6, LogNormalCount=34, LogInitialRows=3, LogVisibleRows=15;
 public const float LogSeconds=35, LogFeedSeconds=.85f;
 public const int LogWrongPenalty=6, LogS=90, LogA=70, LogB=45, AuditHighScore=80, AuditLowScore=35, AuditExtraKnowledge=1, AuditLowRecovery=1;
+public const float BlockSeconds=90;
+public const int BlockSeedSalt=0xf207, BlockGenerationAttempts=200, BlockSearchNodes=20000, BlockMinTasks=5, BlockMaxTasks=8, BlockMaxSingles=2;
+public const double BlockThreeRowsChance=.3, BlockLockMinimum=.2, BlockLockVariation=.1, BlockLongLockChance=.35, BlockBrokenFraction=.3;
+public static readonly int[] BlockColumnChoices={4,5,5,5,6};
+public const int BlockBaseValue=10, BlockCellValue=3, BlockUrgentValue=8, BlockDayBonus=3, BlockS=95, BlockA=75, BlockB=45;
+public const int MapHighScore=85, MapLowScore=40, MapHighTrust=6, MapNormalTrust=4, MapLowTrust=2;
 public static readonly int[] PeakMonths={JunePeak,SeptemberPeak,DecemberPeak,MarchPeak};
 public static readonly int[] PeakLossGoals={JuneLossGoal,SeptemberLossGoal,DecemberLossGoal,MarchLossGoal};
 public static readonly int[] PeakStopGoals={JuneStopGoal,SeptemberStopGoal,DecemberStopGoal,MarchStopGoal};

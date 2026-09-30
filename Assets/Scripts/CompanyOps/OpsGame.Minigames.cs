@@ -31,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public bool OpenMinigame(OpsMinigame session,string response,Action<OpsMinigame> complete)
         {
-            bool practice=session is OpsMailMinigame mail&&mail.Practice || session is OpsLogMinigame;
+            bool practice=session is OpsMailMinigame mail&&mail.Practice || session is OpsLogMinigame||session is OpsBlockMinigame;
             if(session==null||session.Phase!=OpsMinigamePhase.Brief||State==null||(practice?State.phase!=OpsPhase.Planning:State.phase!=OpsPhase.Incident)||MinigameActive||ResolutionActive)return false;
             Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
             StopVoice();homeVisible=false;NewScreen();
@@ -40,13 +40,13 @@ namespace PatchWorkSecure.CompanyOps
             minigameCanvas=Box(screen,"MinigameCanvas",42.105f,0,1280,760,Hex("1d2a44"));minigameCanvas.localScale=Vector3.one*(900f/760f);
             KitGradient(minigameCanvas.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));
             DrawMinigameBackground(minigameCanvas);
-            if(session is OpsMailMinigame||session is OpsMfaMinigame||session is OpsLogMinigame)
+            if(session is OpsMailMinigame||session is OpsMfaMinigame||session is OpsLogMinigame||session is OpsBlockMinigame)
             {
                 minigameCanvas.anchoredPosition=new Vector2(61.5385f,-11.5385f);minigameCanvas.localScale=Vector3.one*(900f/780f);
                 bool isMail=session is OpsMailMinigame;
                 KitGradient(screen.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
                 KitGradient(minigameCanvas.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
-                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else DrawMfaPresentation();MinigameBrief();return true;
+                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else if(session is OpsBlockMinigame)DrawBlockPresentation();else DrawMfaPresentation();MinigameBrief();return true;
             }
             IncidentShape(minigameCanvas,"MinigameHazard","tape",0,0,1280,14,Hex("ffc02e"));
             var top=PCard(minigameCanvas,"MinigameTop",0,24,1280,70,Color.white,20);
@@ -83,13 +83,23 @@ namespace PatchWorkSecure.CompanyOps
         private void MinigameBrief()
         {
             var card=MinigameModal(Minigame.Title);
+            if(Minigame is OpsBlockMinigame blocks)
+            {
+                card.anchoredPosition=new Vector2(280,-197);card.sizeDelta=new Vector2(720,366);DecisionPanel(card);
+                PText(card,"MinigameInstructions","今週の予定表。縦が時間、横が曜日。盤面の大きさ・予定・作業は毎回かわる。\n作業にはそれぞれ形がある（2日がかり＝横に長い、準備→本番＝L字）。\nドラッグ、または選んでからマスを押して配置。\nRキー・右クリック・ホイール・ボタンで向きを変える。\n空きマスと作業のマスは同じ数。条件を守ってすき間を埋めよう。90秒。",26,100,668,130,15,null,false);
+                PText(card,"MinigameEquipment",(blocks.Automation?"導入済み":"未導入")+"：定型業務の自動化（小さい無条件の作業を1つ配置）",26,248,668,32,15,null,false);
+                PButton(card,"MinigameStart","組みはじめる",26,288,430,58,StartMinigame,Hex("6c63ff"),Color.white,22);
+                PButton(card,"MinigameDelegate","社員に任せる / 50点",472,288,222,58,DelegateMinigame,Color.white,PlanInk,16);return;
+            }
             if(Minigame is OpsLogMinigame)
             {
+                card.anchoredPosition=new Vector2(300,-206);card.sizeDelta=new Vector2(680,348);
                 DecisionPanel(card);
-                PText(card,"MinigameInstructions","35秒、流れてくるログから普段と違う行を押そう。\n深夜のログイン、失敗の連続、大量のダウンロード、記録の停止。\n普通の行を押すと空振り。画面外に流れた行は押せない。",26,100,628,128,17,null,false);
-                PText(card,"MinigameEquipment",(Minigame.Monitor?"導入済み":"未導入")+"：監視と通知（怪しい行に黄色の印）",26,250,628,42,15,null,false);
-                PButton(card,"MinigameStart","はじめる",26,330,390,64,StartMinigame,PlanBlue,Color.white,22);
-                PButton(card,"MinigameDelegate","社員に任せる / 50点",432,330,222,64,DelegateMinigame,Color.white,PlanInk,16);return;
+                FindMinigameText("MinigameModalTitle").rectTransform.anchoredPosition=new Vector2(26,-50);
+                PText(card,"MinigameInstructions","認証サーバーの記録が流れてくる。おかしな行を見つけたら押す。\n見つけるほど状況がわかり、今月の事件の範囲を絞りやすくなる。\n普段どおりの行を押すと空振り。画面外の行は押せない。",26,104,628,80,15,null,false);
+                PText(card,"MinigameEquipment",(Minigame.Monitor?"導入済み":"未導入")+"：監視と通知（怪しい行に黄色の印）",26,196,628,32,15,null,false);
+                PButton(card,"MinigameStart","調べはじめる",26,240,628,64,StartMinigame,PlanBlue,Color.white,22);
+                PButton(minigameModal,"MinigameDelegate","社員に任せる / 50点",854,568,222,38,DelegateMinigame,Color.white,PlanInk,16);return;
             }
             if(Minigame is OpsMailMinigame mail)
             {
@@ -139,7 +149,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 FindMinigameText("MinigameTime").text=Minigame is OpsContainmentMinigame?Minigame.Remaining.ToString("F1"):Mathf.CeilToInt(Minigame.Remaining).ToString();
                 var fill=minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill") as RectTransform;
-                if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:Minigame is OpsMfaMinigame?670:Minigame is OpsLogMinigame?722:310)*Minigame.Remaining/Minigame.Duration);
+                if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:Minigame is OpsMfaMinigame?670:Minigame is OpsBlockMinigame?550:Minigame is OpsLogMinigame?722:310)*Minigame.Remaining/Minigame.Duration);
                 RefreshCurrentMinigame();
                 if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();}
             }
@@ -152,15 +162,16 @@ namespace PatchWorkSecure.CompanyOps
         private void RefreshCurrentMinigame()
         {
             if(Minigame is OpsMailMinigame)RefreshMailPresentation();else if(Minigame is OpsMfaMinigame)RefreshMfaPresentation();
-            else if(Minigame is OpsLogMinigame)RefreshLogPresentation();else RefreshMinigameBoard();
+            else if(Minigame is OpsLogMinigame)RefreshLogPresentation();else if(Minigame is OpsBlockMinigame)RefreshBlockPresentation();else RefreshMinigameBoard();
         }
-        public void TickMinigameInput()=>TickDecisionKeys();
+        public void TickMinigameInput(){TickDecisionKeys();TickBlockKeys();}
         private void ShowMinigameFinish()
         {
             var containment=Minigame as OpsContainmentMinigame;
             string title=containment!=null&&containment.TotalInfected==0?"確認完了":containment!=null&&containment.Uncontained>0?"広がってしまった…":"封じ込め成功！";
             if(Minigame is OpsMailMinigame)title="仕分け完了！";
             if(Minigame is OpsLogMinigame)title="調査完了！";
+            if(Minigame is OpsBlockMinigame)title="予定が組めた！";
             if(Minigame is OpsMfaMinigame mfa)title=mfa.Breaches==0?"侵入ゼロ！":"関所の対応完了";
             bool good=Minigame.Score>=OpsCatalog.MinigameGood;
             MinigameBanner(title,good?PlanMint:Hex("e0405f"));
@@ -170,7 +181,7 @@ namespace PatchWorkSecure.CompanyOps
         private void MinigameResult()
         {
             minigameResultDrawn=true;var card=MinigameModal(Minigame.Delegated?"社員が対応しました":Minigame.Title+" / 結果");
-            bool decision=Minigame is OpsMailMinigame||Minigame is OpsMfaMinigame||Minigame is OpsLogMinigame;
+            bool decision=Minigame is OpsMailMinigame||Minigame is OpsMfaMinigame||Minigame is OpsLogMinigame||Minigame is OpsBlockMinigame;
             if(decision){card.anchoredPosition=new Vector2(300,-135);card.sizeDelta=new Vector2(680,490);}
             var stamp=PCard(card,"MinigameRankStamp",26,88,170,116,Minigame.Grade=="S"?Hex("e0a100"):PlanPink,22,false);
             KitGradient(stamp.GetComponent<Image>(),Minigame.Grade=="S"?Hex("ffe38a"):Hex("ffb3c6"),Minigame.Grade=="S"?Hex("e0a100"):PlanPink);
@@ -179,11 +190,11 @@ namespace PatchWorkSecure.CompanyOps
             PText(card,"MinigameScore",Minigame.Score+"点",222,94,432,76,48,PlanInk,true,true);
             if(decision)
             {
-                minigameMaxim=Minigame is OpsMailMinigame mail?mail.ResultMaxim:Minigame is OpsLogMinigame?"maxim_logs":"maxim_mfa";
+                minigameMaxim=Minigame is OpsMailMinigame mail?mail.ResultMaxim:Minigame is OpsLogMinigame?"maxim_logs":Minigame is OpsBlockMinigame?"maxim_priority":"maxim_mfa";
                 PText(card,"MinigameMaxim",CaptionsEnabled?SpeechLines(ReactionBank?.Find(minigameMaxim)?.caption??""):"",222,170,432,70,16,PlanInk,false);
             }
             PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,decision?250:224,628,112,16,null,false);
-            bool practice=Minigame is OpsMailMinigame training&&training.Practice || Minigame is OpsLogMinigame;
+            bool practice=Minigame is OpsMailMinigame training&&training.Practice || Minigame is OpsLogMinigame||Minigame is OpsBlockMinigame;
             PButton(card,"MinigameContinue",practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):"結果を反映する",26,decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
             if(!Minigame.Delegated)StartCoroutine(CountMinigameResult(stamp,Minigame.Score));
         }
@@ -199,6 +210,8 @@ namespace PatchWorkSecure.CompanyOps
         }
         private string MinigameResultDetail()
         {
+            if(Minigame is OpsBlockMinigame blocks)return "配置 "+blocks.PlacedCount+" / "+blocks.Tasks.Count+"／1日の完成ボーナス +"+blocks.Bonus+"\n"+
+                (blocks.Tasks.All(t=>t.Placed!=null&&!t.Violates)?"すべての作業を期限と条件を守って、すき間なく入れられた。":string.Join("、",blocks.Tasks.Where(t=>t.Placed==null||t.Violates).Select(t=>t.Name+"："+(t.Placed==null?"未配置":"条件違反"))))+"\n85点以上は信頼 +6、40点未満は +2。それ以外・委任は今までと同じ +4。";
             if(Minigame is OpsLogMinigame logs)return "怪しい行 "+logs.Found+" / "+logs.Total+" を発見／空振り "+logs.Wrong+"\n状況の把握 "+logs.Knowledge+" / "+OpsCatalog.KnowledgeMax+"\n普段との違いを見つけよう。80点以上は把握 +1、35点未満は回復1。見積もり幅は今までと同じ。";
             if(Minigame is OpsMfaMinigame mfa)return "正解 "+mfa.Correct+"／侵入 "+mfa.Breaches+"（被害）／足止め "+mfa.Blocks+"（業務が止まる）\n攻撃者は承認依頼を何度も送り、うっかり許可を待つ（疲労攻撃）。番号の一致で偽の依頼を見分けやすく。\n"+DecisionResultFactor();
             if(Minigame is OpsMailMinigame mail)return "正解 "+mail.Correct+"／見逃し "+mail.Misses+"（被害につながる）／止めすぎ "+mail.FalseAlarms+"（業務が遅れる）／残り時間 "+Mathf.CeilToInt(mail.Remaining)+"秒\n"+

@@ -44,10 +44,11 @@ namespace PatchWorkSecure.CompanyOps
         public void ChooseAction(string action, string group = "recover")
         {
             if(MinigameActive || State==null)return;
-            if(action=="audit")
+            if(action=="audit"||action=="map")
             {
                 if(State.ActionBlock(action)!="")return;
-                OpenMinigame(new OpsLogMinigame(State),"",s=>ApplyWorkAction(action,group,s.Score));return;
+                OpsMinigame session=action=="audit"?(OpsMinigame)new OpsLogMinigame(State):new OpsBlockMinigame(State);
+                OpenMinigame(session,"",s=>ApplyWorkAction(action,group,s.Score));return;
             }
             ApplyWorkAction(action,group,OpsCatalog.MinigameDelegateScore);
         }

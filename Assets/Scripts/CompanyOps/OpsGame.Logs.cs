@@ -14,7 +14,7 @@ namespace PatchWorkSecure.CompanyOps
             KitGradient(screen.GetComponent<Image>(),Hex("cfe9ff"),Hex("e8e3ff"));KitGradient(minigameCanvas.GetComponent<Image>(),Hex("cfe9ff"),Hex("e8e3ff"));
             DrawDecisionMinigameTop("ログを調べる",182,722,"発見","空振り",PlanBlue);
             KitGradient(minigameCanvas.Find("MinigameTop/MinigameAlert").GetComponent<Image>(),Hex("7fd0ff"),PlanBlue);
-            KitGradient(minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill").GetComponent<Image>(),PlanBlue,Hex("8f86ff"),true);
+            KitGradient(minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill").GetComponent<Image>(),Hex("8f86ff"),PlanBlue,true);
             var terminal=PCard(minigameCanvas,"LogTerminal",0,92,860,650,Hex("0e1628"),24);
             var header=PCard(terminal,"LogHeader",0,0,860,44,Hex("16213a"),24,false);
             string[] colors={"ff6f91","ffc02e","2bb673"};
@@ -49,6 +49,7 @@ namespace PatchWorkSecure.CompanyOps
                     var data=game.Visible[i];int id=data.Id;
                     var button=PButton(logRows,"LogRow_"+id,"",0,i*37,836,35,()=>HitLog(id),data.Hit&&data.Suspicious?new Color(.88f,.25f,.37f,.28f):Color.clear,Color.white,12,null,!data.Hit&&game.Phase==OpsMinigamePhase.Playing);
                     foreach(var shadow in button.GetComponents<Shadow>())shadow.enabled=false;
+                    if(data.Hit&&data.Suspicious){var outline=button.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ff7a93");outline.effectDistance=new Vector2(2,-2);}
                     foreach(var text in button.GetComponentsInChildren<TMPro.TextMeshProUGUI>())text.gameObject.SetActive(false);
                     var row=(RectTransform)button.transform;
                     PText(row,"LogTime",data.Time,10,0,70,35,15,Hex("7f93b8"),false);

@@ -183,9 +183,12 @@ namespace PatchWorkSecure.CompanyOps
         private void ApplyReactionFace(OpsReaction reaction,OpsReactionLine line)
         {
             if (Navigator == null || screen == null) return;
+            // 本編では道具を持った姿を維持。結果では台本のポーズへ戻す。
+            string pose=Minigame?.Phase==OpsMinigamePhase.Playing?
+                Minigame is OpsMailMinigame?"pose_magnifier":Minigame is OpsMfaMinigame?"pose_laptop":line.poseId:line.poseId;
             foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
                 if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
-                else if(!string.IsNullOrEmpty(line.poseId))identity.GetComponent<OpsPortraitAnimator>()?.ChangePose(line.poseId);
+                else if(!string.IsNullOrEmpty(pose))identity.GetComponent<OpsPortraitAnimator>()?.ChangePose(pose);
             string expression=string.IsNullOrEmpty(line.faceId)?"normal":line.faceId.Substring("face_".Length);
             foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.SetExpression(expression);
             if(line.faceId=="face_pout")foreach(var motion in screen.GetComponentsInChildren<OpsPortraitMotion>())motion.ShowEmotion(3);

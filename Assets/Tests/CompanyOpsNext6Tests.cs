@@ -198,7 +198,7 @@ namespace PatchWorkSecure.Tests
             var original=game.State.Preview("scope");Click("MinigameDelegate");yield return null;Capture("next6-c-delegate");Click("MinigameContinue");Assert.AreEqual(original.loss,game.State.Latest.loss);Assert.AreEqual(original.downtime,game.State.Latest.downtime);yield return WaitForResolution(game);
             game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.State.levels[PatchWorkSecure.CompanyOps.OpsCatalog.Index("education")]=1;game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
             game.ChooseResponse("scope");Click("MinigameStart");yield return new WaitForSecondsRealtime(.6f);
-            var session=(PatchWorkSecure.CompanyOps.OpsMailMinigame)game.Minigame;string snapshot=JsonUtility.ToJson(game.State);CheckPointer("MailSafe");CheckPointer("MailReport");if(session.Current.Body.Contains("<mark="))StringAssert.Contains("<b><mark=#FFE066CC>",Find<TextMeshProUGUI>("MailBodyText").text);Capture("next6-c-play-hint");
+            var session=(PatchWorkSecure.CompanyOps.OpsMailMinigame)game.Minigame;string snapshot=JsonUtility.ToJson(game.State);CheckPointer("MailSafe");CheckPointer("MailReport");if(session.Current.Body.Contains("<mark="))StringAssert.Contains("<b><link=\"mail-hint\">",Find<TextMeshProUGUI>("MailBodyText").text);Capture("next6-c-play-hint");
             if(session.Current.Link!=""){game.ShowMailLink(session.Current.Link);StringAssert.Contains(session.Current.Link,Find<TextMeshProUGUI>("MailStatus").text);Capture("next6-c-link");game.ShowMailLink("");}
             while(session.Phase==PatchWorkSecure.CompanyOps.OpsMinigamePhase.Playing)
             {

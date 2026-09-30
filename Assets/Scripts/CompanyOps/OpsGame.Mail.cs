@@ -88,15 +88,16 @@ namespace PatchWorkSecure.CompanyOps
                 mailCard=PCard(mailStack,"MailCard",0,0,760,520,Color.white,22);DecisionPanel(mailCard);MinigameGloss(mailCard,760,520);mailCard.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
                 var swipe=mailCard.gameObject.AddComponent<OpsMailPointer>();swipe.Owner=this;swipe.Swipe=true;
                 PText(mailCard,"MailSenderLabel","差出人",30,26,70,28,15,PlanGray);
-                string addr=game.Education&&q.MarkAddress?"<b><mark=#FFE066CC>"+q.Address+"</mark></b>":q.Address;
-                PText(mailCard,"MailSender",q.Sender+"  <"+addr+">",110,26,620,28,15,null,false);
+                string addr=game.Education&&q.MarkAddress?"<b><link=\"mail-hint\">"+q.Address+"</link></b>":q.Address;
+                OpsPhraseMarker.Attach(PText(mailCard,"MailSender",q.Sender+"  <"+addr+">",110,26,620,28,15,null,false));
                 PText(mailCard,"MailToLabel","宛先",30,56,70,28,15,PlanGray);
                 PText(mailCard,"MailTo","あなた <you@nw-shoji.co.jp>",110,56,620,28,15,null,false);
                 PText(mailCard,"MailSubject",q.Subject,30,94,700,48,26);
                 var body=PCard(mailCard,"MailBody",30,142,700,170,Hex("f6f8fc"),14,false);
                 foreach(var edge in body.GetComponents<UnityEngine.UI.Outline>())DestroyImmediate(edge);KitGradient(body.GetComponent<UnityEngine.UI.Image>(),Hex("f6f8fc"),Hex("f6f8fc"));
-                string text=game.Education?q.Body.Replace("<mark=#ffe06666>","<b><mark=#FFE066CC>").Replace("</mark>","</mark></b>"):q.Body.Replace("<mark=#ffe06666>","").Replace("</mark>","");
+                string text=game.Education?q.Body.Replace("<mark=#ffe06666>","<b><link=\"mail-hint\">").Replace("</mark>","</link></b>"):q.Body.Replace("<mark=#ffe06666>","").Replace("</mark>","");
                 var bodyText=PText(body,"MailBodyText",text,18,14,664,100,17,PlanInk,false);bodyText.alignment=TextAlignmentOptions.TopLeft;bodyText.lineSpacing=14;
+                OpsPhraseMarker.Attach(bodyText);
                 if(q.Link!="")
                 {
                     var link=PButton(body,"MailLink","<u>"+q.LinkLabel+"</u>",18,112,664,32,()=>{},Color.clear,Hex("1a6fd6"),17);
@@ -104,7 +105,7 @@ namespace PatchWorkSecure.CompanyOps
                     var label=link.GetComponentInChildren<TextMeshProUGUI>();label.alignment=TextAlignmentOptions.Left;label.margin=Vector4.zero;
                     var pointer=link.gameObject.AddComponent<OpsMailPointer>();pointer.Owner=this;pointer.Url=q.Link;
                 }
-                if(q.Attachment!="")PText(body,"MailAttachment","添付  "+(game.Education&&q.Suspicious?"<b><mark=#FFE066CC>"+q.Attachment+"</mark></b>":q.Attachment),18,124,664,30,14,PlanInk);
+                if(q.Attachment!="")OpsPhraseMarker.Attach(PText(body,"MailAttachment","添付  "+(game.Education&&q.Suspicious?"<b><link=\"mail-hint\">"+q.Attachment+"</link></b>":q.Attachment),18,124,664,30,14,PlanInk));
                 PText(mailCard,"MailStatus",game.Number+" / "+OpsCatalog.MailCount+" 通目",30,484,700,22,13,PlanGray);
                 MinigameVisual(mailCard,"enter",.4f);
             }

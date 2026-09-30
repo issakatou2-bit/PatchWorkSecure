@@ -13,6 +13,8 @@ namespace PatchWorkSecure.CompanyOps
             logRevision=-1;minigameHeartbeatAt=-1;
             KitGradient(screen.GetComponent<Image>(),Hex("cfe9ff"),Hex("e8e3ff"));KitGradient(minigameCanvas.GetComponent<Image>(),Hex("cfe9ff"),Hex("e8e3ff"));
             DrawDecisionMinigameTop("ログを調べる",182,722,"発見","空振り",PlanBlue);
+            var count=FindMinigameText("DecisionGood");count.rectTransform.sizeDelta=new Vector2(172,46);count.enableAutoSizing=false;
+            FindMinigameText("DecisionMiss").gameObject.SetActive(false);
             KitGradient(minigameCanvas.Find("MinigameTop/MinigameAlert").GetComponent<Image>(),Hex("7fd0ff"),PlanBlue);
             KitGradient(minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill").GetComponent<Image>(),Hex("8f86ff"),PlanBlue,true);
             var terminal=PCard(minigameCanvas,"LogTerminal",0,92,860,650,Hex("0e1628"),24);
@@ -37,8 +39,7 @@ namespace PatchWorkSecure.CompanyOps
         private void RefreshLogPresentation()
         {
             var game=Minigame as OpsLogMinigame;if(game==null)return;
-            FindMinigameText("DecisionGood").text="発見 <color=#2bb673>"+game.Found+"</color>";
-            FindMinigameText("DecisionMiss").text="/ "+game.Total;
+            FindMinigameText("DecisionGood").text="発見 <color=#2bb673>"+game.Found+"</color> / "+game.Total;
             FindMinigameText("DecisionFalse").text="空振り <color=#ff8a3d>"+game.Wrong+"</color>";
             if(logRevision!=game.Revision)
             {
@@ -52,10 +53,11 @@ namespace PatchWorkSecure.CompanyOps
                     if(data.Hit&&data.Suspicious){var outline=button.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ff7a93");outline.effectDistance=new Vector2(2,-2);}
                     foreach(var text in button.GetComponentsInChildren<TMPro.TextMeshProUGUI>())text.gameObject.SetActive(false);
                     var row=(RectTransform)button.transform;
-                    PText(row,"LogTime",data.Time,10,0,70,35,15,Hex("7f93b8"),false);
-                    PText(row,"LogUser",data.User,94,0,92,35,15,Hex("ffd48a"),false);
-                    PText(row,"LogIp",data.Ip,200,0,190,35,15,Hex("9fd9ff"),false);
-                    PText(row,"LogEvent",data.Event,404,0,402,35,15,Hex("cfe0ff"),false);
+                    // 手本の等幅15px相当。自動縮小で読みづらくしない。
+                    LogText(row,"LogTime",data.Time,10,70,Hex("7f93b8"));
+                    LogText(row,"LogUser",data.User,94,92,Hex("ffd48a"));
+                    LogText(row,"LogIp",data.Ip,200,190,Hex("9fd9ff"));
+                    LogText(row,"LogEvent",data.Event,404,402,Hex("cfe0ff"));
                     if(data.Suspicious&&game.Monitor)PCard(row,"LogHint",816,13,8,8,Hex("ffc02e"),12,false);
                 }
                 foreach(Transform child in logClues){child.gameObject.SetActive(false);Destroy(child.gameObject);}
@@ -77,6 +79,13 @@ namespace PatchWorkSecure.CompanyOps
             if(row.Suspicious){MinigameTone(600*Mathf.Pow(1.1f,game.Found));MinigamePop(new Vector2(540,180),"発見！",Hex("e0405f"));if(game.Found==3)SpeakSceneLine("mg_combo_01",0);}
             else{MinigameTone(220,"square");MinigameVisual(logRows,"shake",.35f);SpeakSceneLine("mg_miss_01",0);}
             RefreshLogPresentation();
+        }
+        private void LogText(Transform row,string name,string value,float x,float width,Color color)
+        {
+            var label=PText(row,name,value,x,0,width,35,15,color,false);label.enableAutoSizing=false;
+            label.fontStyle=TMPro.FontStyles.Normal;label.textWrappingMode=TMPro.TextWrappingModes.NoWrap;
+            // 日本語は既存のCJK書体、ASCIIは等幅でログの列を揃える。
+            if(name!="LogEvent")label.text="<mspace=8.8>"+value+"</mspace>";
         }
     }
 }

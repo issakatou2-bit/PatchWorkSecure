@@ -19,6 +19,8 @@ namespace PatchWorkSecure.CompanyOps
             var mode=FindMinigameText("DecisionGood");mode.rectTransform.anchoredPosition=new Vector2(274,-12);mode.rectTransform.sizeDelta=new Vector2(112,46);mode.fontSize=14;
             var timer=(RectTransform)minigameCanvas.Find("MinigameTop/MinigameTimer");timer.anchoredPosition=new Vector2(390,-28);timer.sizeDelta=new Vector2(550,16);
             ((RectTransform)timer.Find("MinigameTimerFill")).sizeDelta=new Vector2(550,16);
+            var count=FindMinigameText("DecisionMiss");count.rectTransform.anchoredPosition=new Vector2(1010,-12);count.rectTransform.sizeDelta=new Vector2(244,46);count.enableAutoSizing=false;
+            FindMinigameText("MinigameTime").rectTransform.anchoredPosition=new Vector2(952,-12);
             blockBoard=PCard(minigameCanvas,"BlockBoard",0,92,640,560,Hex("fffdf8"),22);DecisionPanel(blockBoard);
             KitGradient(blockBoard.GetComponent<Image>(),Hex("fffdf8"),Hex("fffdf8"));
             IncidentShape(blockBoard,"BlockStitch","dashed",9,9,622,542,new Color(.85f,.29f,.44f,.25f));

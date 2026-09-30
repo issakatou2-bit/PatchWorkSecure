@@ -150,8 +150,9 @@ namespace PatchWorkSecure.CompanyOps
             StopVoice();MinigameVisual(mailCard,"mail-out",.35f,new Vector2(report?1:-1,0));
             if(result==OpsMailAnswer.Correct)
             {
-                MinigameTone(560*Mathf.Pow(1.1f,Mathf.Min(game.Streak,8)));MinigamePop(new Vector2(440,260),(report?"見破った！":"OK！")+(game.Streak>=2?" ×"+game.Streak:""),report?Hex("e0405f"):PlanMint);
-                if(report){MinigameCutBurst(new Vector2(440,260));SpeakSceneLine("mg_mail_catch",0);}
+                MinigameTone(560*Mathf.Pow(1.1f,Mathf.Min(game.Streak,8)));MinigamePop(new Vector2(440,430),(report?"見破った！":"OK！")+(game.Streak>=2?" ×"+game.Streak:""),report?Hex("e0405f"):PlanMint);
+                // 次のメールが入る間も粒の上端が題名へ届かない、本文下側の空間で光らせる。
+                if(report){MinigameCutBurst(new Vector2(440,430));SpeakSceneLine("mg_mail_catch",0);}
                 else if(game.Streak==4)SpeakSceneLine("mg_combo_01",0);
             }
             else

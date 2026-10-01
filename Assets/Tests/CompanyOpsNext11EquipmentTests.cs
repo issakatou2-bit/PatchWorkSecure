@@ -33,7 +33,8 @@ namespace PatchWorkSecure.Tests
             StringAssert.Contains("先に",s.UpgradeBlock(11));StringAssert.Contains("先に",s.UpgradeBlock(12));
             s.levels[3]=s.levels[4]=1;s.budget=200;s.capacity=4;Assert.IsTrue(s.Upgrade(11));Assert.IsTrue(s.Upgrade(12));Assert.IsTrue(s.Valid());
             var copy=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(s));Assert.IsTrue(copy.Valid());Assert.AreEqual(1,copy.Level("zeroTrust"));
-            copy.yearGrowthRules=0;copy.levels=copy.levels.Take(11).ToArray();Assert.IsTrue(copy.Valid());Assert.AreEqual(0,copy.Level("zeroTrust"));
+            copy.yearGrowthRules=0;copy.yearThreatRules=0;copy.yearPressure=OpsCatalog.StoryPressures[1];copy.levels=copy.levels.Take(11).ToArray();
+            copy.eventSchedule=OpsEventCatalog.StorySchedule(copy.seed,2,copy.previousStoryEvents);Assert.IsTrue(copy.Valid());Assert.AreEqual(0,copy.Level("zeroTrust"));
             Assert.IsFalse(OpsCareer.ValidFactors(new[]{"edr"}));
         }
         [Test] public void Next11Equipment_効く題材と公開見積もりと五十点互換と正常事件を守る()

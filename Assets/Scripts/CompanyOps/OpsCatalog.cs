@@ -45,6 +45,11 @@ public const int StorySaveBudgetLimit=LegacySaveBudgetLimit+StoryInitialBudget*(
 public const int ProgressSaveVersion=2, StorySaveVersion=1, ProgressSaveBytes=300000;
 public static readonly string[] StoryGoals={"B","A","A"};
 public static readonly int[] StoryPressures={0,12,24};
+// 旧途中保存の脅威は保持。新しい年度だけ、追加設備・仲間・強敵を含む試算で調整する。
+public const int StoryThreatVersion=1;
+public static readonly int[] GrowthStoryPressures={0,13,26};
+public static int StoryPressure(int year,int threatRules)=>
+    year>=1&&year<=StoryYears?(threatRules>0?GrowthStoryPressures:StoryPressures)[year-1]:0;
 public const int StoryThemeWeight=2;
 public static readonly string[][] StorySeasons={
     new[]{"はじまり","新しい仲間","繁忙期の入口","繁忙期","夏季休暇","上期の振り返り","下期の投資","納品準備","年末の山場","仕組みの見直し","年度末への備え","一年の集大成"},

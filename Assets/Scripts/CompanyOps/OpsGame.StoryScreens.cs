@@ -78,7 +78,7 @@ namespace PatchWorkSecure.CompanyOps
             StoryText(achieved,"StoryGoalResult","目標 "+Story.Goal+"以上（"+threshold.ToString("N0")+"点）を "+(State.AnnualScore-threshold).ToString("N0")+"点 上回った",8,0,374,30,13,Hex("1a7c63"),true);
             var panel=PCard(screen,"StoryCarry",520,170,1020,470,Color.white,24);
             StoryCategory(panel,"CarryCategory","NEXT YEAR",24,20,114,PlanBlue);StoryText(panel,"CarryHeading",next+"年目へ持っていくもの",138,17,450,34,21);
-            StoryText(panel,"CarryThreat",next+"年目は攻撃が手強くなる（脅威 +"+OpsCatalog.StoryPressures[next-1]+"）",652,22,344,24,14,PlanGray,false,true);
+            StoryText(panel,"CarryThreat",next+"年目は攻撃が手強くなる（脅威 +"+OpsCatalog.StoryPressure(next,OpsCatalog.StoryThreatVersion)+"）",652,22,344,24,14,PlanGray,false,true);
             StoryCarryMetrics(panel);
             StoryText(panel,"CarryEquipmentHeading","設備",24,220,42,27,16);var note=PCard(panel,"CarryEquipmentNote",66,220,690,27,Hex("e6f3ff"),12,false);
             StoryText(note,"CarryEquipmentNoteText","新しい手口が出たので、Lv2の設備は見直してLv1から。更新すればLv2へ戻せる",10,0,670,27,13,Hex("1f5f99"),false,true);

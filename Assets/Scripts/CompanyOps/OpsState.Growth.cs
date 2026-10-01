@@ -32,6 +32,7 @@ namespace PatchWorkSecure.CompanyOps
         public int EquipmentLevel => 1 + levels.Sum() / 4;
         // 複数年の本編で、2年目以降の脅威の上乗せ。1年目・旧保存は0で、従来と同じ計算。
         public int yearPressure;
+        public int yearThreatRules;
         public int SeasonPressure => (growthRules > 0 ? OpsGrowthCatalog.SeasonPressure[month] : 0) + yearPressure;
         public bool QuarterPeak => growthRules > 0 && new[] { 2, 5, 8, 11 }.Contains(month);
         public string SeasonLabel => growthRules == 0 ? "標準の運用" : QuarterPeak ? month == 11 ? "年度末の総力対応" : "四半期の山場" :
@@ -168,7 +169,8 @@ namespace PatchWorkSecure.CompanyOps
         }
         private bool ValidGrowth()
         {
-            if(yearPressure<0||yearPressure>OpsCatalog.StoryPressures[OpsCatalog.StoryYears-1])return false;
+            if(yearThreatRules<0||yearThreatRules>OpsCatalog.StoryThreatVersion||yearThreatRules>0&&(yearGrowthRules==0||storyCalendarYear<2)||
+                yearPressure<0||yearPressure>OpsCatalog.StoryPressure(OpsCatalog.StoryYears,yearThreatRules))return false;
             if (growthRules < 0 || growthRules > 1 || monthExtraCapacity < 0 || monthExtraCapacity > 1 || nextMonthExtraCapacity < 0 || nextMonthExtraCapacity > 1 ||
                 (nextMonthExtraCapacity > 0 && !quarterRewardClaimed) || (quarterRewardClaimed && (!QuarterPeak || month == 11))) return false;
             if (history != null && !history.All(r => r != null && ValidGrowthResult(r))) return false;

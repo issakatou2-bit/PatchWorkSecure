@@ -30,7 +30,8 @@ public static class CompanyOpsThreeYears
         string[] baseOrder=p.role==0 ? new[]{"automation","runbook","education","inventory","backup","drill","patch","mfa","monitor","segment","redundancy"} :
             p.role==1 ? new[]{"backup","education","runbook","inventory","mfa","patch","drill","automation","monitor","segment","redundancy"} :
             new[]{"inventory","runbook","patch","backup","drill","monitor","mfa","automation","education","redundancy","segment"};
-        return (p.depth==0 ? baseOrder : new[]{s.CurrentMission.projectA,s.CurrentMission.projectB}.Concat(baseOrder))
+        var unlocked=Production&&s.yearGrowthRules>0?OpsCatalog.AdvancedProjects.Where(project=>s.EquipmentAvailable(OpsCatalog.Index(project.id))).Select(project=>project.id):Enumerable.Empty<string>();
+        return (p.depth==0 ? baseOrder.Concat(unlocked) : new[]{s.CurrentMission.projectA,s.CurrentMission.projectB}.Concat(unlocked).Concat(baseOrder))
             .Where(id=>!string.IsNullOrEmpty(id)).Distinct().ToArray();
     }
     static double UpgradeValue(Profile p,OpsState s,int index)
@@ -43,15 +44,16 @@ public static class CompanyOpsThreeYears
             var a=s.Estimate(response);var b=preview.Estimate(response);
             improvement=Math.Max(improvement,p.LossWeight*(a.lossMax-b.lossMax)+p.StopWeight*(a.stopMax-b.stopMax));
         }
-        string id=OpsCatalog.Projects[index].id;
+        string id=OpsCatalog.AllProjects[index].id;
         int mission=(id==s.CurrentMission.projectA||id==s.CurrentMission.projectB)&&s.Level(id)==0?10:0;
         int coverage=s.Level(id)==0?8:0;
         int chain=(id=="drill"&&s.Level("backup")>0||id=="runbook"&&s.Level("automation")>0)?8:0;
-        return improvement+mission+coverage+chain-s.Cost(index)*.15-OpsCatalog.Projects[index].upkeep*(12-s.month)*.4;
+        return improvement+mission+coverage+chain-s.Cost(index)*.15-OpsCatalog.AllProjects[index].upkeep*(12-s.month)*.4;
     }
     static PersonaCommand Next(OpsState s,Profile p,PersonaTurn turn)
     {
         if(s.phase!=OpsPhase.Planning||turn.steps>=24)return null;
+        if(Production&&s.EngineerResearchBlock=="")return Command("engineer","");
         if(p.depth>0||s.month%2==0)for(int i=0;i<4;i++)if(s.BubbleAvailable(i)&&s.BubbleKind(i)==6)return Command("bubble",i.ToString());
         if(string.IsNullOrEmpty(s.supportOrder)&&p.depth>0)
         {
@@ -69,17 +71,17 @@ public static class CompanyOpsThreeYears
                 if(!string.IsNullOrEmpty(action)&&s.ActionBlock(action)=="")return Command("act",action);
         if(p.depth==2&&s.Situation.stopLossCap>0&&s.ActionBlock("prepare")=="")return Command("act","prepare");
         var priorities=Priorities(p,s);
-        var eligible=priorities.Select(OpsCatalog.Index).Where(i=>s.Level(OpsCatalog.Projects[i].id)<(p.depth==2?2:1)).ToArray();
+        var eligible=priorities.Select(OpsCatalog.Index).Where(i=>s.Level(OpsCatalog.AllProjects[i].id)<(p.depth==2?2:1)).ToArray();
         var buyable=eligible.Where(i=>s.UpgradeBlock(i)==""&&s.budget>=s.Cost(i)+p.Reserve);
         if(p.depth==2)buyable=buyable.OrderByDescending(i=>UpgradeValue(p,s,i));
         if(turn.purchases<(p.depth==0?1:2))
         {
-            int buy=buyable.DefaultIfEmpty(-1).First();if(buy>=0)return Command("buy",OpsCatalog.Projects[buy].id);
+            int buy=buyable.DefaultIfEmpty(-1).First();if(buy>=0)return Command("buy",OpsCatalog.AllProjects[buy].id);
             if(p.depth>0&&s.ActionBlock("proposal")=="")
                 foreach(int i in eligible)
                 {
-                    var project=OpsCatalog.Projects[i];
-                    if(s.capacity>=s.WorkCost(i)+1&&s.budget+12+s.Evidence*3>=s.Cost(i)+p.Reserve&&
+                    var project=OpsCatalog.AllProjects[i];
+                    if(s.capacity>=s.WorkCost(i)+1&&s.budget+(Production?s.ProposalOffer:12+s.Evidence*3)>=s.Cost(i)+p.Reserve&&
                         (string.IsNullOrEmpty(project.requires)||s.Level(project.requires)>0))return Command("proposal",project.group);
                 }
         }
@@ -110,9 +112,11 @@ public static class CompanyOpsThreeYears
         s.yearPressure=year==1?0:year==2?P2:P3;
         if(c!=null)
         {
+            if(Production){s.storyCalendarYear=year;s.yearGrowthRules=OpsCatalog.YearGrowthVersion;s.yearThreatRules=OpsCatalog.StoryThreatVersion;s.levels=new int[OpsCatalog.YearEquipmentCount];}
             // 設備は古くなる：Lv2はLv1へ、Lv1は残す（Decay=1）。Decay=2なら全部1段下げる。
-            for(int i=0;i<s.levels.Length;i++)s.levels[i]=Decay==0?c.levels[i]:Decay==1?Math.Min(1,c.levels[i]):Math.Max(0,c.levels[i]-1);
-            s.staffExperience=(int[])c.staff.Clone();
+            for(int i=0;i<Math.Min(s.levels.Length,c.levels.Length);i++)s.levels[i]=Decay==0?c.levels[i]:Decay==1?Math.Min(1,c.levels[i]):Math.Max(0,c.levels[i]-1);
+            if(Production){s.staffExperience=new int[s.StaffCount];Array.Copy(c.staff,s.staffExperience,c.staff.Length);}
+            else s.staffExperience=(int[])c.staff.Clone();
             s.culture=c.culture;s.trust=(c.trust+45)/2;
             s.budget+=Math.Min(BudgetCarryMax,Math.Max(0,c.budget)/BudgetCarryDiv);
         }
@@ -125,7 +129,7 @@ public static class CompanyOpsThreeYears
         while(s.phase!=OpsPhase.Ended)
         {
             var turn=new PersonaTurn();PersonaCommand command;
-            while((command=Next(s,p,turn))!=null){Check(CompanyOpsPersonaPolicy.ApplyRule(s,command),p.name+"実行不能");CompanyOpsPersonaPolicy.Applied(turn,command);}
+            while((command=Next(s,p,turn))!=null){Check(command.kind=="engineer"?s.RequestEngineerResearch():CompanyOpsPersonaPolicy.ApplyRule(s,command),p.name+"実行不能");CompanyOpsPersonaPolicy.Applied(turn,command);}
             Check(s.BeginIncident(),"事件開始不能");Check(s.Resolve(Response(s,p,seen)),"対応不能");
             if(p.role!=0||p.depth>0||s.Latest.loss>6)seen.Add(s.Current.lesson);
             if(s.QuarterRewardPending)s.ClaimQuarterReward(p.role==0&&s.budget>30?"capacity":"budget");
@@ -155,7 +159,7 @@ public static class CompanyOpsThreeYears
             if(Production)
             {
                 var actual=OpsState.NewStoryYear(seed+y*OpsCatalog.StorySeedStride,y,previous,inherit==null?null:inherit.Select(i=>OpsCatalog.Projects[i].id));
-                Check(actual.Valid()&&actual.seed==s.seed&&actual.yearPressure==s.yearPressure&&actual.budget==s.budget&&actual.culture==s.culture&&actual.trust==s.trust&&actual.fatigue==s.fatigue&&actual.capacity==s.capacity&&actual.levels.SequenceEqual(s.levels)&&actual.staffExperience.SequenceEqual(s.staffExperience),"試算と本実装の引き継ぎが違う");
+                Check(actual.Valid()&&actual.seed==s.seed&&actual.yearThreatRules==s.yearThreatRules&&actual.yearPressure==s.yearPressure&&actual.budget==s.budget&&actual.culture==s.culture&&actual.trust==s.trust&&actual.fatigue==s.fatigue&&actual.capacity==s.capacity&&actual.levels.SequenceEqual(s.levels)&&actual.staffExperience.SequenceEqual(s.staffExperience),"試算と本実装の引き継ぎが違う");
                 if(previous!=null)LargestCarry=Math.Max(LargestCarry,previous.budget);ComparedYears++;
                 if(!story.finished){Check(story.state.seed==actual.seed&&story.state.budget==actual.budget&&story.state.levels.SequenceEqual(actual.levels)&&story.state.staffExperience.SequenceEqual(actual.staffExperience),"本編進行と年度生成が違う");actual=story.state;}
                 s=actual;
@@ -175,11 +179,16 @@ public static class CompanyOpsThreeYears
     static readonly string[][] Goals={new[]{"C","C","C"},new[]{"B","B","B"},new[]{"B","B","A"},new[]{"B","A","A"},new[]{"A","A","A"},new[]{"B","A","S"}};
     public static void Main(string[] args)
     {
+        bool catalogRun=args.Length==1&&args[0]=="production";
+        if(catalogRun){P2=OpsCatalog.GrowthStoryPressures[1];P3=OpsCatalog.GrowthStoryPressures[2];Decay=1;BudgetCarryDiv=1;BudgetCarryMax=999;}
         if(args.Length>=3){P2=int.Parse(args[0]);P3=int.Parse(args[1]);Decay=int.Parse(args[2]);}
         if(args.Length>=5){BudgetCarryDiv=int.Parse(args[3]);BudgetCarryMax=int.Parse(args[4]);}
-        Production=args.Length>=6&&args[5]=="production";
+        bool probe=args.Length>=6&&args[5]=="production-probe";
+        Production=catalogRun||args.Length>=6&&(args[5]=="production"||probe);
+        // 候補はこの試算プロセスだけ。ファイルの数値や保存は書き換えない。
+        if(probe){OpsCatalog.GrowthStoryPressures[1]=P2;OpsCatalog.GrowthStoryPressures[2]=P3;Console.WriteLine("調整候補（ゲームへ未採用）");}
         if(args.Length>=6&&!Production)Milestones=int.Parse(args[5]);
-        if(Production)Check(P2==OpsCatalog.StoryPressures[1]&&P3==OpsCatalog.StoryPressures[2]&&Decay==1&&BudgetCarryDiv==1&&Milestones==0,"本実装との比較は採用値のみ");
+        if(Production)Check(P2==OpsCatalog.GrowthStoryPressures[1]&&P3==OpsCatalog.GrowthStoryPressures[2]&&Decay==1&&BudgetCarryDiv==1&&Milestones==0,"本実装との比較は採用値のみ");
         Console.WriteLine("脅威 2年目+"+P2+" / 3年目+"+P3+" / 設備の経年="+Decay+" / 予算の繰越 ÷"+BudgetCarryDiv+" 最大"+BudgetCarryMax+" / 成長目標の入れ替え="+Milestones);
         var first=new int[Goals.Length];var byFour=new int[Goals.Length];var yr=new int[3,6];int n=0;
         var casual=new int[Goals.Length];var casualFour=new int[Goals.Length];
@@ -206,6 +215,7 @@ public static class CompanyOpsThreeYears
             Check(n==540&&ComparedChallenges==2160,"本実装の検証数が不足しています");
             Console.WriteLine("本実装の年度生成・目標・引き継ぎ一致："+ComparedChallenges+"挑戦 / "+ComparedYears+"年度 / 最大繰越 "+LargestCarry+"万円（試算の999上限には到達しない）");
             Console.WriteLine("実数：初回 "+first[3]+"/"+n+"、4回目まで "+byFour[3]+"/"+n);
+            if(!probe)Check(100.0*first[3]/n>=35&&100.0*first[3]/n<=45&&100.0*byFour[3]/n>=60&&100.0*byFour[3]/n<=70,"Next-11の目安（初回35〜45%、4回目まで60〜70%）の外です");
         }
     }
 }

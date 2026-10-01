@@ -56,9 +56,9 @@ namespace PatchWorkSecure.Tests
             story.state.staffExperience[0]=8;var old=story.state;Assert.IsTrue(story.RecordYear());Assert.IsFalse(story.RecordYear());Assert.IsTrue(story.AdvanceYear());
             Assert.AreEqual(5076,story.state.budget);Assert.AreEqual(64,story.state.trust);Assert.AreEqual(84,story.state.culture);
             CollectionAssert.AreEqual(old.staffExperience,story.state.staffExperience);Assert.AreNotSame(old.staffExperience,story.state.staffExperience);
-            Assert.IsTrue(story.state.levels.Take(OpsCatalog.BaseEquipmentCount).All(v=>v==1));Assert.IsTrue(story.state.levels.Skip(OpsCatalog.BaseEquipmentCount).All(v=>v==0));Assert.AreEqual(12,story.state.yearPressure);Assert.AreEqual(24,story.state.fatigue);Assert.AreEqual(0,story.state.totalLoss);
+            Assert.IsTrue(story.state.levels.Take(OpsCatalog.BaseEquipmentCount).All(v=>v==1));Assert.IsTrue(story.state.levels.Skip(OpsCatalog.BaseEquipmentCount).All(v=>v==0));Assert.AreEqual(OpsCatalog.StoryPressure(2,OpsCatalog.StoryThreatVersion),story.state.yearPressure);Assert.AreEqual(24,story.state.fatigue);Assert.AreEqual(0,story.state.totalLoss);
             CollectionAssert.AreEqual(story.state.ReportMetrics,story.state.monthStartMetrics);Assert.IsTrue(story.Valid());
-            FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());Assert.AreEqual(24,story.state.yearPressure);Assert.AreEqual(0,story.state.month);Assert.IsTrue(story.Valid());
+            FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());Assert.AreEqual(OpsCatalog.StoryPressure(3,OpsCatalog.StoryThreatVersion),story.state.yearPressure);Assert.AreEqual(0,story.state.month);Assert.IsTrue(story.Valid());
         }
         [Test] public void Next8Story_目標未達と運営終了と三年クリアを区別する()
         {

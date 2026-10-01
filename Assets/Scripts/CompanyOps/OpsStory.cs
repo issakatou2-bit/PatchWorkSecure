@@ -12,7 +12,8 @@ namespace PatchWorkSecure.CompanyOps
             if(year<1||year>OpsCatalog.StoryYears||year==1&&previous!=null||year>1&&(previous==null||!previous.Valid()||!previous.IsClear))throw new ArgumentException("引き継げる年度ではありません");
             var ids=(factors??Enumerable.Empty<string>()).ToArray();
             if(!OpsCareer.ValidFactors(ids))throw new ArgumentException("因子が不正です");
-            var s=new OpsState(yearSeed,true){yearPressure=OpsCatalog.StoryPressures[year-1]};
+            int threatRules=year>1?OpsCatalog.StoryThreatVersion:0;
+            var s=new OpsState(yearSeed,true){yearPressure=OpsCatalog.StoryPressure(year,threatRules),yearThreatRules=threatRules};
             if(previous!=null)
             {
                 s.storyCalendarYear=year;
@@ -94,7 +95,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public bool Valid()
         {
-            if(version!=OpsCatalog.StorySaveVersion||year<1||year>OpsCatalog.StoryYears||state==null||!state.Valid()||state.seed!=YearSeed||state.yearPressure!=OpsCatalog.StoryPressures[year-1]||!OpsCareer.ValidFactors(factors))return false;
+            if(version!=OpsCatalog.StorySaveVersion||year<1||year>OpsCatalog.StoryYears||state==null||!state.Valid()||state.seed!=YearSeed||state.yearPressure!=OpsCatalog.StoryPressure(year,state.yearThreatRules)||!OpsCareer.ValidFactors(factors))return false;
             if(records==null||records.Count<year-1||records.Count>year||records.Any(r=>r==null||!r.Valid()))return false;
             for(int i=0;i<records.Count;i++)if(records[i].year!=i+1||i<year-1&&!records[i].goalMet)return false;
             bool recorded=records.Count==year;

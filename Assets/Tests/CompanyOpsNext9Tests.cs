@@ -79,7 +79,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(3,Object.FindObjectsByType<TextMeshProUGUI>().Count(t=>t.name.StartsWith("EquipmentReviewLabel")&&t.text=="見直し"));
             var prior=JsonUtility.ToJson(game.State);CheckPointer("StoryAnnualReview");Click("StoryAnnualReview");yield return new WaitForSecondsRealtime(3);CheckPointer("BackHome");Click("BackHome");yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(prior,JsonUtility.ToJson(game.State));CheckPointer("NextStoryYear");Click("NextStoryYear");yield return new WaitForSecondsRealtime(2);
-            Assert.AreEqual(2,game.Story.year);Assert.AreEqual(114,game.State.budget);Assert.AreEqual(12,game.State.yearPressure);Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+            Assert.AreEqual(2,game.Story.year);Assert.AreEqual(114,game.State.budget);Assert.AreEqual(OpsCatalog.StoryPressure(2,OpsCatalog.StoryThreatVersion),game.State.yearPressure);Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator Next9Title_承認済み三つのモードと因子札を撮影する()
         {

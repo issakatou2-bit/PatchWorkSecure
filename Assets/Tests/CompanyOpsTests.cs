@@ -249,6 +249,9 @@ namespace PatchWorkSecure.Tests
             NavigatePlanningControl(name);
             var b = Find<Button>(name); Assert.IsTrue(b.interactable, "押せないボタン: " + name);
             b.onClick.Invoke();
+            // 通年テストは因子演出をスキップ。演出専用テストは実ボタンを直接操作する。
+            var revealGame=Object.FindAnyObjectByType<OpsGame>();
+            if(revealGame!=null&&revealGame.FactorRevealActive)revealGame.SkipFactorReveal();
             // 既存の通年テストは日記を閉じて進む。日記専用テストは実ボタンを直接操作する。
             if(name=="NextMonth")
             {
@@ -336,6 +339,7 @@ namespace PatchWorkSecure.Tests
             var target = new RenderTexture(width, height, 24); var old = RenderTexture.active;
             camera.targetTexture = target; canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = camera; canvas.planeDistance = 1;
             Canvas.ForceUpdateCanvases(); foreach (var t in canvas.GetComponentsInChildren<TextMeshProUGUI>()) t.ForceMeshUpdate();
+            foreach(var p in canvas.GetComponentsInChildren<OpsFactorPerspective>())p.Refresh();Canvas.ForceUpdateCanvases();
             camera.Render(); RenderTexture.active = target;
             var texture = new Texture2D(width, height, TextureFormat.RGB24, false); texture.ReadPixels(new Rect(0, 0, width, height), 0, 0); texture.Apply();
             string dir = Path.Combine(Application.dataPath, "../Artifacts/CompanyOps"); Directory.CreateDirectory(dir);

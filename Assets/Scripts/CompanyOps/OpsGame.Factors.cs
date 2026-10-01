@@ -16,7 +16,7 @@ namespace PatchWorkSecure.CompanyOps
             if(Story.rewardClaimed){continuation();return;}
             factorCandidates=Story.FactorCandidates(Career);selectedFactor=Math.Min(1,factorCandidates.Length-1);
             replaceFactorSlot=Career.factors.Count<OpsCatalog.StoryFactorSlots?Career.factors.Count:-1;factorContinuation=continuation;
-            FactorScreen();
+            FactorRevealScreen();
         }
         private void FactorScreen()
         {

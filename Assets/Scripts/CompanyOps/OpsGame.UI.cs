@@ -97,6 +97,7 @@ namespace PatchWorkSecure.CompanyOps
         private void NewScreen()
         {
             DiaryActive=false;
+            FactorRevealActive=false;
             PhasePresentationRunning=false;
             if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
@@ -190,10 +191,12 @@ namespace PatchWorkSecure.CompanyOps
         {
             TickVoice();
             TickMusic();
+            if(FactorRevealActive&&!FactorRevealPaused)TickFactorReveal(Time.unscaledDeltaTime);
             AlignDialogFooter(); RefreshTutorial();
             if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 StopVoice();
+                if(FactorRevealActive){SkipFactorReveal();return;}
                 if (modal != null) CloseDialog(); else Menu();
             }
             if (toast != null)

@@ -10,6 +10,7 @@ namespace PatchWorkSecure.CompanyOps
         public string Kind;
         public float Offset;
         public float StrokeWidth=2;
+        public float CornerRadius=-1;
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
@@ -28,7 +29,7 @@ namespace PatchWorkSecure.CompanyOps
             }
             else if(Kind=="rounded-dashed")
             {
-                float radius=Mathf.Min(w,h)*.16f;
+                float radius=CornerRadius>=0?CornerRadius:Mathf.Min(w,h)*.16f;
                 for(int corner=0;corner<4;corner++)
                 {
                     Vector2 center=new Vector2(corner==0||corner==3?r.xMax-radius:r.xMin+radius,corner<2?r.yMax-radius:r.yMin+radius);

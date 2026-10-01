@@ -8,6 +8,25 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Test] public void Next10Events_新しい八件は既存プロファイルと用語を使う()
+        {
+            Assert.AreEqual(40,OpsEventCatalog.Events.Length);Assert.AreEqual(8,OpsEventCatalog.StoryEvents.Length);
+            var appeared=new System.Collections.Generic.HashSet<string>();
+            foreach(var e in OpsEventCatalog.StoryEvents)
+            {
+                var p=OpsEventCatalog.Profile(e.profile);Assert.IsNotNull(p,e.id);Assert.IsNotNull(OpsCatalog.Term(p.lesson),e.id);
+                Assert.IsNotEmpty(OpsEventCatalog.SourceUrl(e.source??p.source));
+                foreach(string text in new[]{e.title,e.news,e.boss,e.staff,e.symptom,e.finding,e.hint})Assert.IsNotEmpty(text,e.id);
+                Assert.AreEqual(e.id=="y3-passkey",e.operational);
+            }
+            for(int seed=0;seed<250;seed++)
+            {
+                var first=OpsEventCatalog.StorySchedule(seed,1,null);Assert.IsFalse(first.Any(id=>id.StartsWith("y")));
+                var second=OpsEventCatalog.StorySchedule(seed+7919,2,first);var third=OpsEventCatalog.StorySchedule(seed+15838,3,first.Concat(second).ToArray());
+                foreach(string id in second.Concat(third))if(id.StartsWith("y"))appeared.Add(id);
+            }
+            CollectionAssert.AreEquivalent(OpsEventCatalog.StoryEvents.Select(e=>e.id),appeared);
+        }
         [Test] public void Next10Calendar_三年の抽選は重複せず固定月と運用月を守る()
         {
             for(int seed=0;seed<500;seed++)

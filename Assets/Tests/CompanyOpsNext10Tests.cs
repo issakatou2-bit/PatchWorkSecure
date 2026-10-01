@@ -38,7 +38,7 @@ namespace PatchWorkSecure.Tests
                 {
                     s.levels[OpsCatalog.Index(goal.projectA)]=goal.levelA;
                     if(goal.projectB!=null)s.levels[OpsCatalog.Index(goal.projectB)]=goal.levelB;
-                    if(goal.staffLevel>0)for(int i=0;i<(goal.allStaff?3:1);i++)while(s.StaffLevel(i)<goal.staffLevel)s.staffExperience[i]++;
+                    if(goal.staffLevel>0)for(int i=0;i<(goal.allStaff?s.StaffCount:1);i++)while(s.StaffLevel(i)<goal.staffLevel)s.staffExperience[i]++;
                 }
                 s.trust=40;s.Act("rest");Assert.AreEqual(3,s.milestones.Count);Assert.AreEqual(40+3*OpsCatalog.GrowthTrustReward,s.trust);
                 CollectionAssert.AreEquivalent(s.GrowthGoals.Select(g=>g.name),s.milestones);

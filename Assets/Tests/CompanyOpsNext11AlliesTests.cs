@@ -61,7 +61,10 @@ namespace PatchWorkSecure.Tests
         }
         [Test] public void Next11Allies_旧年度の社員三人を維持し壊れた担当番号は拒否する()
         {
-            var s=AlliesStory(2).state;s.yearGrowthRules=0;s.levels=s.levels.Take(11).ToArray();Assert.IsTrue(s.Valid());
+            var s=AlliesStory(2).state;s.yearGrowthRules=0;s.yearThreatRules=0;s.yearPressure=OpsCatalog.StoryPressures[1];
+            s.levels=s.levels.Take(OpsCatalog.BaseEquipmentCount).ToArray();
+            s.eventSchedule=OpsEventCatalog.StorySchedule(s.seed,2,s.previousStoryEvents);
+            s.monthStartMetrics=s.ReportMetrics;Assert.IsTrue(s.Valid());
             Assert.AreEqual(3,s.StaffCount);Assert.IsFalse(s.HasYearAllies);Assert.IsFalse(s.RequestEngineerResearch());Assert.IsFalse(s.Practice(3));
             s.staffExperience=new int[4];Assert.IsFalse(s.Valid());s.staffExperience=new int[3];s.engineerRequested=true;Assert.IsFalse(s.Valid());
             var junior=AlliesStory(3).state;Assert.IsFalse(junior.SelectSupportMember(4));Assert.IsFalse(junior.SelectSupportMember(-2));

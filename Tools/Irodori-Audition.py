@@ -1,6 +1,7 @@
 # Irodori-TTS（ローカル・無料）で、秘書さんとエンジニアさんの声の候補を作り、キャラの1枚絵つきの試聴ページを書き出す。
 # 使い方（Irodori-TTSの仮想環境のPythonで実行）:
-#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--only-page]
+#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--only-page]
+#   （小さいモデルと大きいモデルは別々に実行する）
 # 出力：Artifacts/VoiceAudition/（gitでは追跡しない）。index.html をブラウザで開くと聞き比べられる。
 # 声の性格は文字（キャプション）だけで作る。実在の人の声を手本にしない（Irodoriの利用条件）。
 import html, json, sys
@@ -68,7 +69,11 @@ def generate():
             return get_cached_runtime(key)[0]
     infer.InferenceRuntime = Cached  # 同じモデルを1回だけ読み込む
     done = 0
-    for model, c, ci, li, cap, line in sorted(jobs(), key=lambda j: j[0] != 'small'):
+    # 同じ処理の中でモデルを切り替えると落ちる（Windows、v4-Large int8）。--model でモデルごとに分けて実行する
+    want = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'small'
+    for model, c, ci, li, cap, line in jobs():
+        if model != want:
+            continue
         out = OUT / 'audio' / wav_name(model, c, ci, li)
         if out.exists():
             continue
@@ -80,6 +85,10 @@ def generate():
 
 
 def page():
+    import shutil
+    (OUT / 'art').mkdir(exist_ok=True)
+    for c in CHARS:
+        shutil.copy(ROOT / 'Assets' / 'Art' / 'KeyVisual' / c['art'], OUT / 'art' / c['art'])
     def player(model, c, ci, li):
         f = wav_name(model, c, ci, li)
         if not (OUT / 'audio' / f).exists():
@@ -93,7 +102,7 @@ def page():
             rows.append(f'<tr><th>候補{ci + 1}</th><td class="cap">{html.escape(cap)}</td>{cells}<td class="lg">{player("large", c, ci, 0)}</td>'
                         f'<td><label><input type="radio" name="{c["id"]}" value="{ci + 1}"> これ</label></td></tr>')
         heads = ''.join(f'<th class="ln">{html.escape(l)}</th>' for l in c['lines'])
-        cards.append(f'''<section class="char"><img src="../../Assets/Art/KeyVisual/{c['art']}" alt="">
+        cards.append(f'''<section class="char"><img src="art/{c['art']}" alt="">
 <div class="body"><h2>{c['name']}</h2><p class="about">{html.escape(c['about'])}</p>
 <table><tr><th></th><th>声の性格（キャプション）</th>{heads}<th class="lg">話題の大型モデルで1行目</th><th></th></tr>{''.join(rows)}</table></div></section>''')
     doc = f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>声の試聴</title>
@@ -101,7 +110,7 @@ def page():
 <style>
 body{{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44;background:linear-gradient(160deg,#fff4ec,#ffe3ec 50%,#dcefff);min-height:100vh}}
 header{{padding:28px 40px 6px}} h1{{font-family:'M PLUS Rounded 1c';margin:0;font-size:34px}} header p{{margin:6px 0 0;color:#52607a;font-weight:700}}
-.char{{display:flex;gap:24px;margin:22px 40px;background:#fff;border-radius:24px;box-shadow:0 0 0 3px #fff,0 14px 34px rgba(27,35,64,.14);overflow:hidden}}
+.char{{display:flex;min-width:1180px;gap:24px;margin:22px 40px;background:#fff;border-radius:24px;box-shadow:0 0 0 3px #fff,0 14px 34px rgba(27,35,64,.14);overflow:hidden}}
 .char img{{width:300px;object-fit:cover;object-position:50% 15%}}
 .body{{padding:20px 24px 22px 0;flex:1}} h2{{font-family:'M PLUS Rounded 1c';margin:0;font-size:28px}} .about{{margin:4px 0 12px;color:#6b7894;font-weight:700}}
 table{{border-collapse:collapse;width:100%;font-size:14px}} th,td{{padding:8px 6px;border-bottom:1px solid #eef1f6;text-align:center;vertical-align:middle}}

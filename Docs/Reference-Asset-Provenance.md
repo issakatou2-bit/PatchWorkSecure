@@ -64,3 +64,10 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - 生成サービスの規約上の商用利用の可否は、販売前に確認すること。
 - `Assets/Art/UI/Bubbles/`の4PNG（困りごとの泡の青・ピンク・金と、金の点線の輪）は、`ArtSource/UI/bubbles.html`のCSS（放射グラデーション・縁・影）をClaude CodeがEdgeで背景透明のまま書き出したもの。AI画像生成・第三者素材は使っていない。
 - `Assets/Art/UI/Craft/`の8PNG（縫い目の枠・上からの光沢・箔押しの光・斜めの帯・紙の地紋・網点・走査線・集中線）は、`Tools/Make-CraftTextures.py`でClaude CodeがPillowで描いたもの。白で描き、Unity側で色を付けて使う。AI画像生成・第三者素材は使っていない。使い方は`Docs/Visual-Craft-2026-09-29.md`。
+
+## 2026-10-01 秘書さん・エンジニアさんの声の試し（Irodori-TTS）
+
+- 道具：Irodori-TTS（Aratako氏、GitHub `Aratako/Irodori-TTS`、コードはMIT License）。このPCの中だけで動かす（`C:\Users\issak\Tools\Irodori-TTS`、Python 3.11、PyTorch 2.10 CUDA 12.8、RTX 4060 Ti）。アカウント登録なし。
+- モデル：`Aratako/Irodori-TTS-v4.1-Small`（重みもMIT。商用可、ライセンス表記を同梱）と、話題の大型`Aratako/Irodori-TTS-v4-Large-Quantized`の`int8-weight-only`（**Googleの「Gemmaの利用規約」と禁止用途の決まりが適用**。商用は可だが、配布物に規約の写しと注意書きが要る）。採用する前に、その時点のモデルカードの条件を確認する。
+- 声の作り方：文字の説明（キャプション）だけで作り、参照の音声は使わない。実在の人（声優・著名人）の声を手本にしない（モデルの利用条件。偶然似る可能性はモデルカードにも注意書きあり）。
+- 試聴の生成：`Tools/Irodori-Audition.py`（候補4つ×台詞3行＋大型モデルで1行目）。出力`Artifacts/VoiceAudition/`（gitで追跡しない）。採用が決まったら、台本・キャプション・種・モデル名をここに記録してから本番の音声を作る。

@@ -119,7 +119,7 @@ namespace PatchWorkSecure.Tests
         }
         [Test] public void VoiceV2_台本は九場面六本と追加十一と全文五十二で重複しない()
         {
-            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(52,lines.Count(l=>l.fullSpeech));Assert.AreEqual(11,lines.Count(l=>l.extra));
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());Assert.AreEqual(52,lines.Count(l=>l.fullSpeech&&!l.id.StartsWith("diary_")));Assert.AreEqual(38,lines.Count(l=>l.fullSpeech&&l.id.StartsWith("diary_")));Assert.AreEqual(11,lines.Count(l=>l.extra));
             foreach(var l in lines){Assert.IsNotEmpty(l.caption);Assert.IsNotEmpty(l.faceId);Assert.IsNotEmpty(l.poseId);Assert.IsNull(l.clip);}
             foreach(OpsReaction r in System.Enum.GetValues(typeof(OpsReaction)))Assert.AreEqual(6,lines.Count(l=>OpsReactionBank.IsGeneralReaction(l)&&l.reaction==r));
             for(int m=0;m<12;m++){var s=new OpsState(1){month=m};Assert.AreEqual("mission_accept_"+(m+1).ToString("00"),OpsGame.MissionVoiceId(s));}

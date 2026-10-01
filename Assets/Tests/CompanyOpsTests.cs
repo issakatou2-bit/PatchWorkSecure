@@ -249,6 +249,12 @@ namespace PatchWorkSecure.Tests
             NavigatePlanningControl(name);
             var b = Find<Button>(name); Assert.IsTrue(b.interactable, "押せないボタン: " + name);
             b.onClick.Invoke();
+            // 既存の通年テストは日記を閉じて進む。日記専用テストは実ボタンを直接操作する。
+            if(name=="NextMonth")
+            {
+                var game=Object.FindAnyObjectByType<OpsGame>();
+                if(game!=null&&game.DiaryActive)Find<Button>("DiaryClose").onClick.Invoke();
+            }
             // 既存の年間・画面テストは社員に任せる50点方針で継続。
             // ミニゲーム自体の試遊は専用テストでこの補助を使わず操作する。
             if(name.StartsWith("Respond_"))

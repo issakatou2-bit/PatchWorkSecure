@@ -182,7 +182,7 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="maxim_password", caption="パスワードの使い回しは、ぜったいダメだよ〜！", scene="基本", faceId="face_pout", poseId="pose_armscross" },
             new OpsReactionLine { id="maxim_usb", caption="知らないUSBは、挿さない！", scene="基本", faceId="face_akire", poseId="pose_point" },
             new OpsReactionLine { id="maxim_estimate", caption="見積もりは目安。確率じゃなくて、幅で考えるんだよ！", scene="見積もりの読み方", faceId="face_normal", poseId="pose_think" },
-        };
+        }.Concat(OpsDiaryCatalog.Entries.Where(e=>!string.IsNullOrEmpty(e.voiceId)).Select(e=>new OpsReactionLine{id=e.voiceId,caption=e.intro,scene="日記 "+e.year+"年目"+OpsCatalog.Months[e.month].name,faceId=e.face,poseId=e.pose,fullSpeech=true})).ToArray();
     }
 
     // ゲームの乱数と分離。音声の有無や再抽選で出来事・結果を変えない。

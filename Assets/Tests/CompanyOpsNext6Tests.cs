@@ -14,7 +14,7 @@ namespace PatchWorkSecure.Tests
     {
         [Test] public void Next6Common_格言二十行を一般反応と混ぜず台本通り保持する()
         {
-            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(153,lines.Length);Assert.AreEqual(20,lines.Count(l=>l.id.StartsWith("maxim_")));Assert.AreEqual(54,OpsReactionBank.Defaults().Length);
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(20,lines.Count(l=>l.id.StartsWith("maxim_")));Assert.AreEqual(54,OpsReactionBank.Defaults().Length);
             var csv=System.IO.File.ReadAllLines("Docs/Voice/hinata-script-v2.csv").Where(l=>l.StartsWith("maxim_"));
             foreach(var row in csv)
             {

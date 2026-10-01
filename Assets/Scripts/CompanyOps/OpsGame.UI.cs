@@ -96,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            DiaryActive=false;
             PhasePresentationRunning=false;
             if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];

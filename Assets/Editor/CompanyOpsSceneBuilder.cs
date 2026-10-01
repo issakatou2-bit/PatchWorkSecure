@@ -95,7 +95,7 @@ namespace PatchWorkSecure.EditorTools
                 var local=AssetDatabase.LoadAssetAtPath<OpsReactionBank>(localPath);
                 if(local==null){local=ScriptableObject.CreateInstance<OpsReactionBank>();AssetDatabase.CreateAsset(local,localPath);}
                 local.lines=ReadHinataScript();
-                foreach(var line in local.lines)line.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(source+"/"+line.id+".mp3");
+                foreach(var line in local.lines)line.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(source+"/"+line.id+".mp3")??AssetDatabase.LoadAssetAtPath<AudioClip>(source+"/"+line.id+".wav");
                 EditorUtility.SetDirty(local);
             }
             var persona=AssetDatabase.LoadAssetAtPath<NavigatorPersona>("Assets/Personas/Persona_Hinata.asset");
@@ -118,7 +118,8 @@ namespace PatchWorkSecure.EditorTools
                 }
                 cells.Add(cell.ToString());if(quoted||cells.Count!=8)throw new System.FormatException("ひなた台本のCSV形式が不正です。");
                 System.Enum.TryParse(cells[0].Split('_')[0],true,out OpsReaction reaction);
-                result.Add(new OpsReactionLine{id=cells[0],caption=cells[3],scene=cells[2],reaction=reaction,faceId=cells[4],poseId=cells[5],fullSpeech=cells[1]=="全文",extra=cells[0].StartsWith("extra_")});
+                var diary=OpsDiaryCatalog.Entries.FirstOrDefault(e=>e.voiceId==cells[0]);
+                result.Add(new OpsReactionLine{id=cells[0],caption=diary?.intro??cells[3],scene=cells[2],reaction=reaction,faceId=cells[4],poseId=cells[5],fullSpeech=cells[1]=="全文"||cells[1]=="日記",extra=cells[0].StartsWith("extra_")});
             }
             if(result.Count!=OpsCatalog.VoiceScriptLineCount||result.Select(l=>l.id).Distinct().Count()!=OpsCatalog.VoiceScriptLineCount)throw new System.FormatException("台本v2は重複のない"+OpsCatalog.VoiceScriptLineCount+"行が必要です。");
             return result.ToArray();

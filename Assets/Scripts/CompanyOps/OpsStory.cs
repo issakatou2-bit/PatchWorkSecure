@@ -111,7 +111,9 @@ namespace PatchWorkSecure.CompanyOps
         public List<string> factors=new List<string>();
         public static bool ValidFactors(IEnumerable<string> factors)
         {if(factors==null)return false;var ids=factors.ToArray();return ids.Length<=OpsCatalog.StoryFactorSlots&&ids.Distinct().Count()==ids.Length&&ids.All(id=>OpsCatalog.Index(id)>=0);}
-        public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors);
+        public List<OpsDiaryRecord> diary=new List<OpsDiaryRecord>();
+        public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors)&&
+            (diary==null||diary.Count<=OpsDiaryCatalog.Entries.Length&&diary.All(p=>p!=null&&p.Valid())&&diary.Select(p=>p.key).Distinct().Count()==diary.Count);
         // 選択画面はNext-9。満杯のときは指定枠を置換できる。二重受取はしない。
         public bool Claim(OpsStory story,string id,int replaceSlot=-1)
         {

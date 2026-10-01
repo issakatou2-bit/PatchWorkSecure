@@ -89,7 +89,7 @@ namespace PatchWorkSecure.CompanyOps
             if(screen==null||LastReactionId=="")return;
             foreach(var label in screen.GetComponentsInChildren<TextMeshProUGUI>())if(label.name==voiceCaptionTarget)
             {
-                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
+                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"||label.name=="DiaryVoiceCaption"?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
                 if(label.name=="ResolutionReaction")label.fontSizeMin=12;
                 // 字幕に数値通知を重ねない。成果の数値はHUD・月報・発動内訳に残る。
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);
@@ -190,7 +190,8 @@ namespace PatchWorkSecure.CompanyOps
             if(Minigame is OpsBlockMinigame blocks&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose=blocks.Automation?"pose_fists":"pose_think";
             if(Minigame is OpsRestoreMinigame&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose="pose_typing";
             foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
-                if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
+                if(DiaryActive&&identity.name=="DiaryPortrait")continue;
+                else if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);
                 else if(!string.IsNullOrEmpty(pose))identity.GetComponent<OpsPortraitAnimator>()?.ChangePose(pose);
             string expression=string.IsNullOrEmpty(line.faceId)?"normal":line.faceId.Substring("face_".Length);
             foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.SetExpression(expression);

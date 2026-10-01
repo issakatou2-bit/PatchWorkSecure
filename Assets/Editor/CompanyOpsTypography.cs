@@ -28,6 +28,14 @@ namespace PatchWorkSecure.EditorTools
             game.Font = body; game.HeadingFont = heading;
             AssetDatabase.SaveAssets();
         }
+        public static void ConfigureDiaryFont()
+        {
+            if(!AssetDatabase.IsValidFolder(Root+"Resources"))AssetDatabase.CreateFolder(Root.TrimEnd('/'),"Resources");
+            var font=Create("KleeOne-SemiBold","Resources/KleeOneDiary",null);
+            font.name="KleeOneDiary";
+            font.fallbackFontAssetTable=new System.Collections.Generic.List<TMP_FontAsset>{AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Root+"BodyDynamic.asset"),AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Root+"HeadingDynamic.asset")};
+            EditorUtility.SetDirty(font);AssetDatabase.SaveAssets();
+        }
         private static TMP_FontAsset Create(string sourceName, string assetName, string corpus)
         {
             var source = AssetDatabase.LoadAssetAtPath<Font>(Root + sourceName + ".ttf");

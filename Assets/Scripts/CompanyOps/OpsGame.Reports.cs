@@ -66,7 +66,7 @@ namespace PatchWorkSecure.CompanyOps
             var r=State.Latest;var previous=PreviousReport(r);ReportBackground(false);
             PImage(screen,"MonthlyLogoIcon",PlanningArt.logoIcon,40,30,80,80);
             var medal=PCard(screen,"MonthMedal",136,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
-            PText(medal,"YearNumber","1年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
+            PText(medal,"YearNumber",(Story?.year??1)+"年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
             PText(screen,"MonthlyCategory","MONTHLY REPORT",272,26,800,28,12,PlanPink);
             PText(screen,"ReviewTitle","今月のふりかえり",272,52,800,62,40);
             RankProgressStrip(screen,272,109,468);
@@ -74,6 +74,7 @@ namespace PatchWorkSecure.CompanyOps
             var damageStamp=PCard(screen,"MonthlyDamageStamp",1050,53,240,54,r.loss==0?Hex("e3faf3"):Hex("ffe9ee"),16,false);
             PText(damageStamp,"MonthlyDamageStampText",r.loss==0?"金銭被害なし":"金銭被害 "+r.loss+"万円",0,0,240,54,20,r.loss==0?Hex("1a7c63"):Coral,true,true);Reveal(damageStamp,.25f,true);
             PButton(screen,"Menu","設定",1370,38,180,52,Menu,Color.white,PlanInk);
+            PButton(screen,"DiaryWritten","日記が書かれた",1290,108,260,38,OpenMonthlyDiary,Hex("fff6d6"),Hex("7a5a00"),16);
             var incident=ReportPanel("MonthlyIncident",40,140,700,330);
             PText(incident,"ReviewEvent","事件："+(r.eventTitle??State.Current.title),26,20,648,36,18,PlanGray);
             string[] names={"被害","業務停止","対応費"},ids={"MonthlyLossValue","MonthlyStopValue","MonthlyCostValue"};int[] values={r.loss,r.downtime,r.cost};
@@ -142,7 +143,7 @@ namespace PatchWorkSecure.CompanyOps
             Portrait(screen,"NavigatorPortrait",1250,300,363,450,r.loss==0?"pose_peace":"pose_think");
             ReportSpeech(best!=null?"備えが効いたね！\n次の計画でも、今回の結果を活かそう。":r.loss==0?"金銭被害はゼロ！\n停止と対応費も確認しよう。":"対応おつかれさま。\n被害と停止を減らす方法を考えよう。",1250,180,320,r.loss==0?"face_sparkle":"face_worried");
             PButton(screen,"ReviewDetails","記録を見る",40,772,384.67f,62,()=>MonthlyRecordDialog(r),Color.white,PlanInk,20);
-            PButton(screen,"NextMonth",State.QuarterRewardPending?(State.peakGoalRules>0?"四半期の報酬を選ぶ":"山場クリア / 報酬を選ぶ"):State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,()=>{if(State.QuarterRewardPending)QuarterRewardDialog();else Next();},PlanInk,Color.white,20);
+            PButton(screen,"NextMonth",State.QuarterRewardPending?(State.peakGoalRules>0?"四半期の報酬を選ぶ":"山場クリア / 報酬を選ぶ"):State.month==11||State.budget<0||State.stability==0?"年間評価へ ▶":OpsCatalog.Months[State.month+1].name+"へ ▶",440.67f,772,769.33f,62,OpenMonthlyDiary,PlanInk,Color.white,20);
         }
         public static string ReportMissionTitle(string title)
         {

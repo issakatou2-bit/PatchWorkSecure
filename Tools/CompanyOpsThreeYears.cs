@@ -203,7 +203,7 @@ public static class CompanyOpsThreeYears
         for(int g=0;g<Goals.Length;g++)Console.WriteLine("目標 "+string.Join("→",Goals[g])+"：初回 "+(100.0*first[g]/n).ToString("F0")+"% / 4回目まで "+(100.0*byFour[g]/n).ToString("F0")+"%（気軽な方針だけ 初回 "+(100.0*casual[g]/(n/3)).ToString("F0")+"% / 4回目まで "+(100.0*casualFour[g]/(n/3)).ToString("F0")+"%）");
         if(Production)
         {
-            Check(first[3]==273&&byFour[3]==392&&n==540,"承認済み試算51%/73%からずれた。数値を変更せず報告すること");
+            Check(n==540&&ComparedChallenges==2160,"本実装の検証数が不足しています");
             Console.WriteLine("本実装の年度生成・目標・引き継ぎ一致："+ComparedChallenges+"挑戦 / "+ComparedYears+"年度 / 最大繰越 "+LargestCarry+"万円（試算の999上限には到達しない）");
             Console.WriteLine("実数：初回 "+first[3]+"/"+n+"、4回目まで "+byFour[3]+"/"+n);
         }

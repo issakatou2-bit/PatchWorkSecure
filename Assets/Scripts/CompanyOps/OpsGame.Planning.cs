@@ -343,13 +343,19 @@ namespace PatchWorkSecure.CompanyOps
             PText(goals,"GoalsTitle","今年の目標",18,10,260,24,15,PlanGray);
             string[] names={"戻せることを確かめる","相談が集まる職場"}; int[] ids={0,2};
             string[] progress={(State.Level("backup")>0?1:0)+(State.Level("drill")>0?1:0)+"/2",State.culture+"/65"};
+            if(State.storyCalendarYear>=2)
+            {
+                names=ids.Select(i=>State.GrowthGoals[i].name).ToArray();
+                progress=ids.Select(i=>State.GrowthSteps(State.GrowthGoals[i]).Count(done=>done)+"/2").ToArray();
+            }
             for(int j=0;j<2;j++)
             {
                 int goal=ids[j];var b=PButton(goals,"Goal"+goal,"",14,40+j*36,280,30,()=>GrowthPlan(goal),new Color(1,1,1,0),PlanInk,16);
-                PImage(b.transform,"GoalStar",j==0||State.milestones.Contains("相談が集まる職場")?PlanningArt.star:PlanningArt.starMuted,4,2,26,26);
+                PImage(b.transform,"GoalStar",j==0||State.milestones.Contains(State.GrowthGoals[goal].name)?PlanningArt.star:PlanningArt.starMuted,4,2,26,26);
                 PText(b.transform,"GoalLabel",names[j],40,0,200,30,16,j==0?PlanInk:PlanGray);
                 PText(b.transform,"GoalProgress",progress[j],231,0,49,30,15,Hex("7c879c"),true,true);
                 bool last=j==0?(State.Level("backup")>0?1:0)+(State.Level("drill")>0?1:0)==1:State.Level("education")>0&&State.culture<65&&State.culture+7>=65&&State.ActionBlock("listen")=="";
+                if(State.storyCalendarYear>=2)last=false;
                 if(last){b.transform.Find("GoalProgress").GetComponent<RectTransform>().sizeDelta=new Vector2(49,20);PText(b.transform,"GoalNear","あと1手",216,20,64,14,11,Hex("1a7c63"),true,true);}
             }
             PButton(screen,"AdvanceMonth","月を進める ▶",1268,660,308,60,AdvancePlanning,PlanInk,Color.white,20,Hex("0c1226"));

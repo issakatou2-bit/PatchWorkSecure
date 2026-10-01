@@ -17,6 +17,27 @@ namespace PatchWorkSecure.CompanyOps
 
 public static class OpsCatalog
 {
+public sealed class GrowthGoal
+{
+    public string name,description,projectA,projectB;
+    public int levelA,levelB,staffLevel,culture;
+    public bool allStaff;
+}
+public const int GrowthScoreReward=30,GrowthTrustReward=4,LegacyGoalCulture=65,StoryGoalCulture=85;
+public static readonly GrowthGoal[][] GrowthGoals={
+    new[]{
+        new GrowthGoal{name="戻せることを確かめた",description="バックアップLv1＋復元訓練Lv1",projectA="backup",levelA=1,projectB="drill",levelB=1},
+        new GrowthGoal{name="ひとりで抱えない運用",description="自動化Lv1＋引継ぎ手順Lv1",projectA="automation",levelA=1,projectB="runbook",levelB=1},
+        new GrowthGoal{name="相談が集まる職場",description="教育Lv1＋相談文化65以上",projectA="education",levelA=1,culture=LegacyGoalCulture}},
+    new[]{
+        new GrowthGoal{name="拠点まで見える",description="台帳Lv2＋ネットワーク分離Lv1",projectA="inventory",levelA=2,projectB="segment",levelB=1},
+        new GrowthGoal{name="入口を重ねて守る",description="多要素認証Lv2＋監視Lv1",projectA="mfa",levelA=2,projectB="monitor",levelB=1},
+        new GrowthGoal{name="誰が休んでも回る",description="手順Lv2＋社員の誰か1人がLv3",projectA="runbook",levelA=2,staffLevel=3}},
+    new[]{
+        new GrowthGoal{name="戻せることを証明した",description="バックアップLv2＋訓練Lv2",projectA="backup",levelA=2,projectB="drill",levelB=2},
+        new GrowthGoal{name="気づいて止める",description="監視Lv2＋社員3人ともLv2以上",projectA="monitor",levelA=2,staffLevel=2,allStaff=true},
+        new GrowthGoal{name="相談が文化になった",description="教育Lv2＋相談文化85以上",projectA="education",levelA=2,culture=StoryGoalCulture}}
+};
 // 3年の本編。1年だけの年度の初期値・得点・事件抽選は変更しない。
 public const int StoryYears=3, StoryFactorSlots=3, StoryEquipmentLevel=1, StoryInitialBudget=76, StoryTrustBaseline=45, StoryTrustDivisor=2;
 public const int StorySeedStride=7919, StoryRetrySeedStride=104729, LegacySaveBudgetLimit=5000;

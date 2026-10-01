@@ -233,8 +233,9 @@ namespace PatchWorkSecure.CompanyOps
             Bar(left, "立て直す力", State.Resilience, 20, 348, 211, Accent);
             Bar(left, "チームの力", State.Organization, 20, 403, 211, Rose);
             Text(left, "MilestoneHeading", "成長目標", 20, 472, 218, 33, 20);
-            string[] goals = { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" };
+            string[] goals = State.GrowthGoals.Select(g=>g.name).ToArray();
             string[] labels = { "復元の確認", "仕事を分担", "相談しやすい職場" };
+            if(State.storyCalendarYear>=2)labels=goals;
             for (int i = 0; i < 3; i++)
             {
                 bool done = State.milestones.Contains(goals[i]);

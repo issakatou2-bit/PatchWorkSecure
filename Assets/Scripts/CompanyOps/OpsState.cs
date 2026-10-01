@@ -124,7 +124,7 @@ namespace PatchWorkSecure.CompanyOps
         public string StaffVoice => Level("education") > 0 && culture >= 65 && (CurrentProfile == null ? Current.kind == "social" : CurrentProfile.id == "bec") ?
             "経理の森さん：「急ぎの依頼も、いつもの連絡先で確認してから相談しています」" : Current.staff;
         public int AnnualScore => Math.Max(0, 1000 - totalLoss * 7 - totalDowntime * 4 +
-            MissionCount * 45 + milestones.Count * 30 + (Preparedness + Resilience + Organization) * 2 + Math.Max(0, Math.Min(200, budget)) + PeakScore);
+            MissionCount * 45 + milestones.Count * OpsCatalog.GrowthScoreReward + (Preparedness + Resilience + Organization) * 2 + Math.Max(0, Math.Min(200, budget)) + PeakScore);
         public string Rank => "運用ランク " + RankCode;
 
         private bool ActionDone(string action)
@@ -174,14 +174,21 @@ namespace PatchWorkSecure.CompanyOps
         private void Note(string message) { lastMessage = message; journal.Add(Current.name + " / " + message); }
         private void CheckMilestones()
         {
-            Award("戻せることを確かめた", Level("backup") > 0 && Level("drill") > 0);
-            Award("ひとりで抱えない運用", Level("automation") > 0 && Level("runbook") > 0);
-            Award("相談が集まる職場", Level("education") > 0 && culture >= 65);
+            foreach(var goal in GrowthGoals)Award(goal.name,GrowthSteps(goal).All(done=>done));
+        }
+        public OpsCatalog.GrowthGoal[] GrowthGoals=>OpsCatalog.GrowthGoals[Math.Max(1,Math.Min(OpsCatalog.StoryYears,storyCalendarYear))-1];
+        public bool[] GrowthSteps(OpsCatalog.GrowthGoal goal)
+        {
+            var steps=new List<bool>{Level(goal.projectA)>=goal.levelA};
+            if(!string.IsNullOrEmpty(goal.projectB))steps.Add(Level(goal.projectB)>=goal.levelB);
+            if(goal.culture>0)steps.Add(culture>=goal.culture);
+            if(goal.staffLevel>0)steps.Add(goal.allStaff?Enumerable.Range(0,3).All(i=>StaffLevel(i)>=goal.staffLevel):Enumerable.Range(0,3).Any(i=>StaffLevel(i)>=goal.staffLevel));
+            return steps.ToArray();
         }
         private void Award(string title, bool achieved)
         {
             if (!achieved || milestones.Contains(title)) return;
-            milestones.Add(title); trust = Clamp(trust + 4);
+            milestones.Add(title); trust = Clamp(trust + OpsCatalog.GrowthTrustReward);
             Note("会社の成長「" + title + "」を達成。経営の信頼 +4。");
         }
         public int BaseCost(int index) => OpsCatalog.Projects[index].cost + levels[index] * (OpsCatalog.Projects[index].cost / 2);
@@ -475,7 +482,7 @@ namespace PatchWorkSecure.CompanyOps
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
                 levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
-                milestones == null || milestones.Count > 3 || milestones.Any(t => !new[] { "戻せることを確かめた", "ひとりで抱えない運用", "相談が集まる職場" }.Contains(t))) return false;
+                milestones == null || milestones.Count > 3 || milestones.Distinct().Count()!=milestones.Count || milestones.Any(t => !GrowthGoals.Any(g=>g.name==t))) return false;
             if (auditKnowledgeAdjustment < -OpsCatalog.AuditExtraKnowledge || auditKnowledgeAdjustment > OpsCatalog.UnauditedBlindness-OpsCatalog.AuditLowRecovery || !audited&&auditKnowledgeAdjustment!=0) return false;
             if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || !ValidPeaks() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||

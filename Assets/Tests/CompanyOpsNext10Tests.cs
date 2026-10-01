@@ -1,13 +1,52 @@
 using System;
 using System.Linq;
+using System.Collections;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 using PatchWorkSecure.CompanyOps;
 
 namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next10GrowthUI_年度の目標と年別の季節名を撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
+            var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);
+            FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);
+            Assert.AreEqual("拠点まで見える",Find<UnityEngine.UI.Button>("Goal0").transform.Find("GoalLabel").GetComponent<TextMeshProUGUI>().text);Capture("next10-year2-goals");
+            Click("Goal0");yield return new WaitForSecondsRealtime(1);StringAssert.Contains("台帳Lv2",Find<TextMeshProUGUI>("DialogBody").text);Capture("next10-year2-goal-detail");
+            game.OpenTab(0);FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
+            Click("StoryAnnualReview");yield return new WaitForSecondsRealtime(3);Capture("next10-year2-annual-goals");
+            Assert.IsTrue(game.State.GrowthGoals.All(g=>game.State.milestones.Contains(g.name)||!game.State.GrowthSteps(g).All(done=>done)));
+            Assert.IsTrue(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);Capture("next10-year3-goals");
+            Assert.AreEqual("戻せることを証明した",Find<UnityEngine.UI.Button>("Goal0").transform.Find("GoalLabel").GetComponent<TextMeshProUGUI>().text);
+            CheckText();Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
+        [Test] public void Next10Growth_年別の条件と信頼加算は一度だけ()
+        {
+            for(int year=2;year<=3;year++)
+            {
+                var story=OpsStory.Begin(14,null);FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());
+                if(year==3){FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());}
+                var s=story.state;s.culture=100;
+                Assert.AreEqual(0,s.milestones.Count);Assert.IsFalse(s.GrowthGoals.Any(g=>s.GrowthSteps(g).All(done=>done)));
+                foreach(var goal in s.GrowthGoals)
+                {
+                    s.levels[OpsCatalog.Index(goal.projectA)]=goal.levelA;
+                    if(goal.projectB!=null)s.levels[OpsCatalog.Index(goal.projectB)]=goal.levelB;
+                    if(goal.staffLevel>0)for(int i=0;i<(goal.allStaff?3:1);i++)while(s.StaffLevel(i)<goal.staffLevel)s.staffExperience[i]++;
+                }
+                s.trust=40;s.Act("rest");Assert.AreEqual(3,s.milestones.Count);Assert.AreEqual(40+3*OpsCatalog.GrowthTrustReward,s.trust);
+                CollectionAssert.AreEquivalent(s.GrowthGoals.Select(g=>g.name),s.milestones);
+                int trust=s.trust;s.Act("listen");Assert.AreEqual(trust,s.trust);Assert.IsTrue(s.Valid());
+                s.milestones.Add("戻せることを確かめた");Assert.IsFalse(s.Valid());
+            }
+            var legacy=new OpsState(14,true){yearPressure=12};Assert.AreEqual("戻せることを確かめた",legacy.GrowthGoals[0].name);
+        }
         [Test] public void Next10Events_新しい八件は既存プロファイルと用語を使う()
         {
             Assert.AreEqual(40,OpsEventCatalog.Events.Length);Assert.AreEqual(8,OpsEventCatalog.StoryEvents.Length);

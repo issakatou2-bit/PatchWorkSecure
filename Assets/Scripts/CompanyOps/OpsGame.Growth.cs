@@ -9,6 +9,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         private void GrowthPlan(int goal)
         {
+            if(State.storyCalendarYear>=2){StoryGrowthPlan(goal);return;}
             string[] titles = { "復元を確かめる", "担当者が休める運用", "相談が集まる職場" };
             string[] descriptions = {
                 "保存したデータを、実際に戻せる状態へ。バックアップと復元訓練を組み合わせます。",
@@ -45,6 +46,21 @@ namespace PatchWorkSecure.CompanyOps
                 "\n初めての成長達成で信頼 +4・年間 +30点。導入費・維持費は別です。", 32, 581, 748, 52, 17, Ink);
         }
 
+        private void StoryGrowthPlan(int index)
+        {
+            var goal=State.GrowthGoals[index];var steps=State.GrowthSteps(goal);
+            var d=Dialog(goal.name,goal.description,560);
+            PText(d,"StoryGrowthProgress","達成した条件 "+steps.Count(done=>done)+" / "+steps.Length,32,190,748,36,22,PlanPink);
+            var projects=new[]{goal.projectA,goal.projectB}.Where(id=>!string.IsNullOrEmpty(id)).ToArray();
+            for(int i=0;i<projects.Length;i++)
+            {
+                string id=projects[i];int project=OpsCatalog.Index(id),required=i==0?goal.levelA:goal.levelB;
+                PButton(d,"StoryGrowthProject"+i,OpsCatalog.Projects[project].name+"　Lv."+State.Level(id)+" / 必要 Lv."+required,32+i*384,244,364,86,()=>ProjectDialog(project),Color.white,PlanInk);
+            }
+            if(goal.culture>0)PButton(d,"StoryGrowthTalk","相談文化 "+State.culture+" / "+goal.culture+"　社員との対話",416,244,364,86,()=>ChooseAction("listen"),Color.white,PlanInk);
+            if(goal.staffLevel>0)PText(d,"StoryGrowthStaff",(goal.allStaff?"社員3人とも":"社員の誰か1人")+" Lv."+goal.staffLevel+"以上\n"+string.Join("　",Enumerable.Range(0,3).Select(i=>OpsGrowthCatalog.StaffNames[i]+" Lv."+State.StaffLevel(i))),32,348,748,76,18,PlanInk);
+            PText(d,"StoryGrowthReward","初めての達成で 信頼 +"+OpsCatalog.GrowthTrustReward+"・年間 +"+OpsCatalog.GrowthScoreReward+"点\n設備の導入費・維持費は別です。",32,442,748,65,17,PlanGray);
+        }
         private void InvestmentReport(OpsOutcome r)
         {
             var d = Dialog("今月、役立った備え", "同じ出来事・対応・社員状態で比較。効果0は、この場面で金銭被害と停止に差がなかったという意味です。", 770);

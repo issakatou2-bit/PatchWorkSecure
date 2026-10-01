@@ -15,7 +15,7 @@ namespace PatchWorkSecure.CompanyOps
         internal bool PortraitEntering {get;private set;}
         private bool BeginPortraitScreen()
         {
-            string key=homeVisible?"title":ResolutionActive?"resolution_"+State.month:State.phase+"_"+State.month;
+            string key=homeVisible||State==null?"title":ResolutionActive?"resolution_"+State.month:State.phase+"_"+State.month;
             PortraitEntering=key!=portraitScreenKey;portraitScreenKey=key;return PortraitEntering;
         }
         public float PresentationDeltaTime => !ReducedMotion&&Time.unscaledTime<holdUntil?0:Time.unscaledDeltaTime;

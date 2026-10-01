@@ -38,7 +38,8 @@ namespace PatchWorkSecure.CompanyOps
             Hover(resume,saved==null?"つづきの記録はありません":(savedProgress?.story==null?"":savedProgress.story.year+"年目 / ")+saved.Current.name);
             TitleButtonStyle(PButton(screen,"HomeGuide","遊び方",250.67f,642,148.67f,52,Guide,Color.white,PlanInk),false);
             TitleButtonStyle(PButton(screen,"HomeSettings","設定",411.33f,642,148.67f,52,Menu,Color.white,PlanInk),false);
-            TitleButtonStyle(PButton(screen,"HomeDiary","ひなたの日記帳",90,716,470,52,OpenDiaryBook,Color.white,PlanInk),false);
+            TitleButtonStyle(PButton(screen,"HomeDiary","ひなたの日記帳",90,716,228,52,OpenDiaryBook,Color.white,PlanInk),false);
+            TitleButtonStyle(PButton(screen,"HomeRecords","記録",332,716,228,52,OpenRecords,Color.white,PlanInk),false);
             var caption=PText(screen,"TitleCaption","",620,836,890,30,16,PlanInk,false,true);caption.textWrappingMode=TMPro.TextWrappingModes.NoWrap;
             if(SaveWarning!="")PText(screen,"SaveWarning",SaveWarning,90,864,1420,28,15,Coral,false);
         }

@@ -58,6 +58,8 @@ namespace PatchWorkSecure.CompanyOps
         public List<string> factors=new List<string>();
         public List<OpsEndlessYear> records=new List<OpsEndlessYear>();
         public bool finished,retired;
+        public bool recordedCareer,bestUpdated;
+        public List<string> earnedTitles=new List<string>();
         public int YearSeed=>unchecked(seed+year*OpsCatalog.StorySeedStride);
         public long TotalScore=>records.Sum(r=>(long)r.score/(r.operated?1:OpsCatalog.EndlessFailureScoreDivisor));
         public int CompletedYears=>records.Count(r=>r.operated);
@@ -81,7 +83,8 @@ namespace PatchWorkSecure.CompanyOps
         public bool Retire(){RecordYear();if(!CanAdvance)return false;retired=finished=true;return true;}
         public bool Valid()
         {
-            if(version!=OpsCatalog.StorySaveVersion||year<1||state==null||state.endlessYear!=year||!state.Valid()||state.seed!=YearSeed||!OpsCareer.ValidFactors(factors)||records==null||records.Count<year-1||records.Count>year||records.Any(r=>r==null||!r.Valid()))return false;
+            if(version!=OpsCatalog.StorySaveVersion||year<1||state==null||state.endlessYear!=year||!state.Valid()||state.seed!=YearSeed||!OpsCareer.ValidFactors(factors)||records==null||records.Count<year-1||records.Count>year||records.Any(r=>r==null||!r.Valid())||
+                !OpsCareer.ValidTitles(earnedTitles)||recordedCareer&&!finished||bestUpdated&&!recordedCareer)return false;
             for(int i=0;i<records.Count;i++)if(records[i].year!=i+1||i<year-1&&!records[i].operated)return false;
             bool recorded=records.Count==year;
             if(recorded)

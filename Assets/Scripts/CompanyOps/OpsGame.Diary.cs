@@ -75,7 +75,7 @@ namespace PatchWorkSecure.CompanyOps
                 var final=new OpsDiaryRecord{key=ending,content=ending,mood=record.mood,recap=record.recap,thought=record.thought,rank=record.rank,minigame="",season="結末",yearEnd=true,monthNotes=record.monthNotes,bestEquipment=record.bestEquipment,bestSupport=record.bestSupport};
                 DiaryPages.RemoveAll(p=>p.key==ending);DiaryPages.Add(final);
             }
-            Save();DiarySpread(record,()=>{DiaryActive=false;if(State.QuarterRewardPending)QuarterRewardDialogAfterDiary();else Next();},prior!=null);
+            Career.RecordDiaryTitle();Save();DiarySpread(record,()=>{DiaryActive=false;if(State.QuarterRewardPending)QuarterRewardDialogAfterDiary();else Next();},prior!=null);
         }
         private void QuarterRewardDialogAfterDiary(){Render();QuarterRewardDialog();}
         public void OpenDiaryBook()

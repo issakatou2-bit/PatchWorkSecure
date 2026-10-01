@@ -59,10 +59,11 @@ namespace PatchWorkSecure.CompanyOps
         private void RecordStoryOutcome()
         {
             if(State!=null&&Career.RecordBoss(State,State.Latest))Save();
-            if(Endless!=null){if(Endless.RecordYear())Save();return;}
+            if(Endless!=null){bool changedEndless=Endless.RecordYear();changedEndless|=Career.RecordEndless(Endless);if(changedEndless)Save();return;}
             if(Story==null||State.phase!=OpsPhase.Ended)return;
             bool changed=Story.RecordYear();
             if(Story.cleared&&!Career.endlessUnlocked){Career.endlessUnlocked=true;changed=true;}
+            changed|=Career.RecordStoryTitles(Story);
             if(changed)Save();
         }
         public bool NextStoryYear()

@@ -119,7 +119,7 @@ namespace PatchWorkSecure.CompanyOps
         {if(factors==null)return false;var ids=factors.ToArray();return ids.Length<=OpsCatalog.StoryFactorSlots&&ids.Distinct().Count()==ids.Length&&ids.All(id=>OpsCatalog.Index(id)>=0&&OpsCatalog.Index(id)<OpsCatalog.BaseEquipmentCount);}
         public List<OpsDiaryRecord> diary=new List<OpsDiaryRecord>();
         public List<int> seenOpeningYears=new List<int>();
-        public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors)&&ValidBosses()&&
+        public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors)&&ValidBosses()&&ValidRecords()&&
             (diary==null||diary.Count<=OpsDiaryCatalog.Entries.Length&&diary.All(p=>p!=null&&p.Valid())&&diary.Select(p=>p.key).Distinct().Count()==diary.Count)&&
             (seenOpeningYears==null||seenOpeningYears.Count<=2&&seenOpeningYears.Distinct().Count()==seenOpeningYears.Count&&seenOpeningYears.TrueForAll(y=>y==2||y==3));
         // 選択画面はNext-9。満杯のときは指定枠を置換できる。二重受取はしない。

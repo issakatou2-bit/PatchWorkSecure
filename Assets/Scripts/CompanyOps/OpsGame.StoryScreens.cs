@@ -62,9 +62,9 @@ namespace PatchWorkSecure.CompanyOps
         private void ReturnStoryOutcome(){storyAnnualDetails=false;Render();}
         private void StoryRenewScreen()
         {
-            StoryBackground();int year=Story.year,next=year+1;
+            StoryBackground();int year=RunYear,next=year+1;bool endless=Endless!=null;
             StoryCategory(screen,"StoryCategory","YEAR "+year+" CLEAR",60,32,450,PlanPink);
-            StoryText(screen,"EndingTitle",year+"年目　目標達成！",60,52,560,66,42);StoryRoad(640,36);
+            StoryText(screen,"EndingTitle",year+(endless?"年目　運営完了！":"年目　目標達成！"),60,52,560,66,42);if(endless)EndlessRoad(640,36);else StoryRoad(640,36);
             var rank=PCard(screen,"RankBadge",120,170,300,300,PlanPink,28);rank.localEulerAngles=new Vector3(0,0,6);
             rank.pivot=new Vector2(.5f,.5f);rank.anchoredPosition+=new Vector2(150,-150);
             KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));rank.GetComponent<Image>().pixelsPerUnitMultiplier=PlanningArt.round28.border.x/56;
@@ -74,18 +74,19 @@ namespace PatchWorkSecure.CompanyOps
             StoryText(rank,"CompanyRank",State.RankCode,0,83,300,205,State.RankCode=="SS"?130:170,Color.white,true);
             StoryText(screen,"ScoreHeading","年間得点",80,500,380,26,15,PlanGray,true);
             var number=PText(screen,"AnnualScoreValue",State.AnnualScore.ToString("N0")+"<size=22>点</size>",80,528,380,70,60,PlanInk,true,true);number.enableAutoSizing=false;number.overflowMode=TextOverflowModes.Overflow;
-            int threshold=StoryGoalPoints(Story.Goal);var achieved=PCard(screen,"StoryGoalBand",80,602,390,30,Hex("e3faf3"),16,false);
-            StoryText(achieved,"StoryGoalResult","目標 "+Story.Goal+"以上（"+threshold.ToString("N0")+"点）を "+(State.AnnualScore-threshold).ToString("N0")+"点 上回った",8,0,374,30,13,Hex("1a7c63"),true);
+            int threshold=endless?0:StoryGoalPoints(Story.Goal);var achieved=PCard(screen,"StoryGoalBand",80,602,390,30,Hex("e3faf3"),16,false);
+            StoryText(achieved,"StoryGoalResult",endless?"累計 "+Endless.TotalScore.ToString("N0")+"点 / 目標ランクでの打ち切りなし":"目標 "+Story.Goal+"以上（"+threshold.ToString("N0")+"点）を "+(State.AnnualScore-threshold).ToString("N0")+"点 上回った",8,0,374,30,13,Hex("1a7c63"),true);
             var panel=PCard(screen,"StoryCarry",520,170,1020,470,Color.white,24);
             StoryCategory(panel,"CarryCategory","NEXT YEAR",24,20,114,PlanBlue);StoryText(panel,"CarryHeading",next+"年目へ持っていくもの",138,17,450,34,21);
-            StoryText(panel,"CarryThreat",next+"年目は攻撃が手強くなる（脅威 +"+OpsCatalog.StoryPressure(next,OpsCatalog.StoryThreatVersion)+"）",652,22,344,24,14,PlanGray,false,true);
+            StoryText(panel,"CarryThreat",next+"年目は攻撃が手強くなる（脅威 +"+(endless?OpsCatalog.EndlessPressure(next):OpsCatalog.StoryPressure(next,OpsCatalog.StoryThreatVersion))+"）",652,22,344,24,14,PlanGray,false,true);
             StoryCarryMetrics(panel);
             StoryText(panel,"CarryEquipmentHeading","設備",24,220,42,27,16);var note=PCard(panel,"CarryEquipmentNote",66,220,690,27,Hex("e6f3ff"),12,false);
             StoryText(note,"CarryEquipmentNoteText","新しい手口が出たので、Lv2の設備は見直してLv1から。更新すればLv2へ戻せる",10,0,670,27,13,Hex("1f5f99"),false,true);
             StoryEquipmentGrid(panel);
             Portrait(screen,"StoryPortrait",1300,600,260,300,"pose_peace");StorySpeech(year+"年目、おつかれさま！\n守り方も、毎年見直すものだよ。",930,668,360,88);
             StoryButton("StoryAnnualReview",year+"年目を振り返る",120,780,310,ReviewStoryAnnual);
-            StoryButton("NextStoryYear",next+"年目をはじめる",446,780,434,()=>NextStoryYear(),true);
+            if(endless){StoryButton("NextEndlessYear","次の年度へ続ける",446,780,330,()=>NextEndlessYear(),true);StoryButton("RetireEndless","ここで引退する",792,780,310,ConfirmRetireEndless);}
+            else StoryButton("NextStoryYear",next+"年目をはじめる",446,780,434,()=>NextStoryYear(),true);
         }
         private void StoryCarryMetrics(RectTransform panel)
         {

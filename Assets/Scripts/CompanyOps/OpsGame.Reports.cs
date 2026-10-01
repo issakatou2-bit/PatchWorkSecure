@@ -66,7 +66,7 @@ namespace PatchWorkSecure.CompanyOps
             var r=State.Latest;var previous=PreviousReport(r);ReportBackground(false);
             PImage(screen,"MonthlyLogoIcon",PlanningArt.logoIcon,40,30,80,80);
             var medal=PCard(screen,"MonthMedal",136,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));
-            PText(medal,"YearNumber",(Story?.year??1)+"年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
+            PText(medal,"YearNumber",RunYear+"年目",0,6,120,24,13,Color.white,true,true);PText(medal,"Month",State.Current.name,0,30,120,44,36,Color.white,true,true);
             PText(screen,"MonthlyCategory","MONTHLY REPORT",272,26,800,28,12,PlanPink);
             PText(screen,"ReviewTitle","今月のふりかえり",272,52,800,62,40);
             RankProgressStrip(screen,272,109,468);

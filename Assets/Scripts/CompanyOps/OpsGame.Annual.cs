@@ -67,8 +67,9 @@ namespace PatchWorkSecure.CompanyOps
             Portrait(screen,"NavigatorPortrait",1275,630,266,260,State.IsClear?"pose_jump":"pose_exhausted");
             ReportSpeech(State.IsClear?"一年、おつかれさま！\n会社の成長を振り返ってみよう。":"ここまでの対応、おつかれさま。\n次は何を備えるか、記録を見よう。",950,650,300,State.IsClear?"face_crying":"face_sad");
             PButton(screen,"EndingHistory","一年を振り返る",110,780,232.73f,62,History,Color.white,PlanInk,20);
-            PButton(screen,"BackHome",Story!=null&&Story.CanAdvance?"年度替わりへ":"タイトルへ",358.73f,780,232.73f,62,()=>{if(Story!=null&&Story.CanAdvance){ReturnStoryOutcome();return;}SkipTutorialVisual();tutorialStep=-1;RenderHome();},Color.white,PlanInk,20);
-            if(Story==null)PButton(screen,"ReplayYear","もう一年挑戦",607.46f,780,302.54f,62,()=>StartYear(Environment.TickCount),PlanPink,Color.white,20);
+            PButton(screen,"BackHome",Endless!=null?"挑戦の記録へ":Story!=null&&Story.CanAdvance?"年度替わりへ":"タイトルへ",358.73f,780,232.73f,62,()=>{if(Endless!=null||Story!=null&&Story.CanAdvance){ReturnStoryOutcome();return;}SkipTutorialVisual();tutorialStep=-1;RenderHome();},Color.white,PlanInk,20);
+            if(Endless!=null)PButton(screen,"EndlessAnnualReturn",Endless.CanAdvance?"続けるか選ぶ":"挑戦の記録へ",607.46f,780,302.54f,62,ReturnStoryOutcome,PlanPink,Color.white,20);
+            else if(Story==null)PButton(screen,"ReplayYear","もう一年挑戦",607.46f,780,302.54f,62,()=>StartYear(Environment.TickCount),PlanPink,Color.white,20);
             else PButton(screen,Story.CanAdvance?"NextStoryYear":"StoryRecord",Story.CanAdvance?"次の年度へ":"挑戦の記録へ",607.46f,780,302.54f,62,()=>{if(Story.CanAdvance)NextStoryYear();else StoryRecord();},PlanPink,Color.white,20);
         }
         private void StoryRecord()

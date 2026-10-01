@@ -60,7 +60,7 @@ namespace PatchWorkSecure.CompanyOps
             bool ends=r.month==11||State.budget<0||State.stability==0;
             bool met=r.month==11&&State.budget>=0&&State.stability>0&&(Story==null||OpsStory.RankValue(State.RankCode)>=OpsStory.RankValue(Story.Goal));
             int ending=!met?OpsDiaryCatalog.FailEnding:State.RankCode=="SS"?OpsDiaryCatalog.SSEnding:OpsDiaryCatalog.ClearEnding;
-            if(year==3&&r.month==11)content=ending;
+            if(Story!=null&&year==3&&r.month==11)content=ending;
             var prior=DiaryPages.FirstOrDefault(p=>p.key==key);
             var record=new OpsDiaryRecord{key=key,content=content,mood=OpsDiaryCatalog.Mood(r),recap=OpsDiaryCatalog.Recap(State,r),thought=OpsDiaryCatalog.Thought(r),rank=State.RankCode,season=State.Current.season,yearEnd=r.month==11,continues=Story!=null&&met&&year<3,
                 minigame=r.minigameRecorded&&!r.delegated?"対応 "+(r.minigameScore>=OpsCatalog.MinigameS?"S":r.minigameScore>=OpsCatalog.MinigameA?"A":r.minigameScore>=OpsCatalog.MinigameB?"B":"C"):"",

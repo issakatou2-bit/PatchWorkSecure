@@ -1,6 +1,6 @@
 # Irodori-TTS（ローカル・無料）で、秘書さんとエンジニアさんの声の候補を作り、キャラの1枚絵つきの試聴ページを書き出す。
 # 使い方（Irodori-TTSの仮想環境のPythonで実行）:
-#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--only-page]
+#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--lock] [--only-page]
 #   （小さいモデルと大きいモデルは別々に実行する）
 # 出力：Artifacts/VoiceAudition/（gitでは追跡しない）。index.html をブラウザで開くと聞き比べられる。
 # 声の性格は文字（キャプション）だけで作る。実在の人の声を手本にしない（Irodoriの利用条件）。
@@ -84,6 +84,73 @@ def generate():
     print('生成', done, '本')
 
 
+# 声を固定する：気に入った1本を「声の見本」（参照音声）にして、同じ声で別の台詞を言わせる。
+# 見本はこの道具で作った音声だけを使う（実在の人の声は使わない）。
+EXTRA = {
+    'secretary': ['また無理してるでしょ。顔に書いてあるわよ。', '予算、通ったわ。……ちゃんと結果で返してね？'],
+    'engineer': ['……この時間の通信、いつもと違う。', 'おつかれ。……今日は、平和だったね。'],
+}
+LOCKS = [
+    # (名前, キャラid, 見本のファイル, 使うキャプションの番号, 見本を選んだ理由)
+    ('秘書さん3「数字は」', 'secretary', 'secretary-small-c3-l1.wav', 2, '加藤さん：3の「数字は」がかわいい'),
+    ('秘書さん3「ふふっ」', 'secretary', 'secretary-small-c3-l3.wav', 2, '加藤さん：3の「ふふっ」もかわいい'),
+    ('エンジニアさん1 大型', 'engineer', 'engineer-large-c1-l1.wav', 0, '加藤さん：1の大型がすごく良い'),
+    ('エンジニアさん3 大型', 'engineer', 'engineer-large-c3-l1.wav', 2, '加藤さん：3は大型なら良いかも'),
+]
+
+
+def lock_lines(cid):
+    c = next(x for x in CHARS if x['id'] == cid)
+    return c, c['lines'] + EXTRA[cid]
+
+
+def lock_name(li, k):
+    return f"lock{k + 1}-l{li + 1}.wav"
+
+
+def generate_locks(model):
+    sys.path.insert(0, str(IRODORI))
+    import infer
+    from irodori_tts.inference_runtime import get_cached_runtime
+
+    class Cached:
+        @staticmethod
+        def from_key(key):
+            return get_cached_runtime(key)[0]
+    infer.InferenceRuntime = Cached
+    done = 0
+    for k, (name, cid, ref, ci, why) in enumerate(LOCKS):
+        c, lines = lock_lines(cid)
+        for li, line in enumerate(lines):
+            out = OUT / 'audio' / model / lock_name(li, k)
+            if out.exists():
+                continue
+            sys.argv = ['infer.py', '--hf-checkpoint', MODELS[model][1], '--model-precision', 'bf16', '--text', line,
+                        '--caption', c['captions'][ci], '--ref-wav', str(OUT / 'audio' / ref), '--seed', str(SEED), '--output-wav', str(out)]
+            infer.main()
+            done += 1
+    print('固定した声', done, '本')
+
+
+def lock_section():
+    rows = []
+    for k, (name, cid, ref, ci, why) in enumerate(LOCKS):
+        c, lines = lock_lines(cid)
+        def cell(model, li):
+            f = f'audio/{model}/{lock_name(li, k)}'
+            return f'<button onclick="play(this,&quot;{f}&quot;)">▶</button>' if (OUT / f).exists() else '<span class="miss">未生成</span>'
+        for model in ('large', 'small'):
+            cells = ''.join(f'<td>{cell(model, li)}</td>' for li in range(len(lines)))
+            label = MODELS[model][0].split('（')[0]
+            rows.append(f'<tr><th>{html.escape(name) if model == "large" else ""}</th><td class="cap">{html.escape(why) if model == "large" else ""}</td>'
+                        f'<td><button onclick="play(this,&quot;audio/{ref}&quot;)">見本</button></td><td class="md">{label}</td>{cells}</tr>')
+    heads = lambda cid: ''.join(f'<th class="ln">{html.escape(l)}</th>' for l in lock_lines(cid)[1])
+    return f'''<section class="char" style="display:block;padding:20px 24px"><h2>声を固定した版（見本の声のまま、5行を言わせる）</h2>
+<p class="about">気に入った1本を「声の見本」にして作り直した。上の段が話題の大型モデル、下の段が小さいモデル。台詞の列：秘書さんは上2つ、エンジニアさんは下2つの見本。</p>
+<table><tr><th></th><th>見本を選んだ理由</th><th>見本</th><th>モデル</th>{heads('secretary')}</tr>{''.join(rows[:4])}
+<tr><th></th><th></th><th></th><th></th>{heads('engineer')}</tr>{''.join(rows[4:])}</table></section>'''
+
+
 def page():
     import shutil
     (OUT / 'art').mkdir(exist_ok=True)
@@ -114,11 +181,12 @@ header{{padding:28px 40px 6px}} h1{{font-family:'M PLUS Rounded 1c';margin:0;fon
 .char img{{width:300px;object-fit:cover;object-position:50% 15%}}
 .body{{padding:20px 24px 22px 0;flex:1}} h2{{font-family:'M PLUS Rounded 1c';margin:0;font-size:28px}} .about{{margin:4px 0 12px;color:#6b7894;font-weight:700}}
 table{{border-collapse:collapse;width:100%;font-size:14px}} th,td{{padding:8px 6px;border-bottom:1px solid #eef1f6;text-align:center;vertical-align:middle}}
-th{{color:#6b7894;font-weight:700}} .cap{{text-align:left;max-width:330px;line-height:1.5}} .ln{{font-size:12px;max-width:170px;line-height:1.4}} .lg{{background:#fff8e6}}
+th{{color:#6b7894;font-weight:700}} .cap{{text-align:left;max-width:330px;line-height:1.5}} .ln{{font-size:12px;max-width:170px;line-height:1.4}} .lg{{background:#fff8e6}} .md{{font-size:12px;color:#6b7894}}
 button{{width:46px;height:46px;border:0;border-radius:14px;cursor:pointer;font-size:18px;color:#fff;background:linear-gradient(180deg,#ff94ae,#ff6f91);box-shadow:0 4px 0 #c9486c}}
 button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0 #1f75b8}} .miss{{color:#b5bccb;font-size:12px}}
 </style></head><body><header><h1>秘書さん・エンジニアさんの声の試聴</h1>
 <p>Irodori-TTS（ローカル・無料）。声は文字の説明だけで作った候補です。気に入った候補に「これ」を付けてください（この画面の中だけの印です）。</p></header>
+{lock_section() if any((OUT / 'audio' / m).exists() for m in ('large', 'small')) else ''}
 {''.join(cards)}
 <script>let a=null,b=null;function play(btn,src){{if(a){{a.pause();b&&b.classList.remove('on')}}a=new Audio(src);b=btn;btn.classList.add('on');a.onended=()=>btn.classList.remove('on');a.play()}}</script>
 </body></html>'''
@@ -128,6 +196,10 @@ button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0
 
 if __name__ == '__main__':
     (OUT / 'audio').mkdir(parents=True, exist_ok=True)
-    if '--only-page' not in sys.argv:
+    if '--lock' in sys.argv:
+        m = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large'
+        (OUT / 'audio' / m).mkdir(parents=True, exist_ok=True)
+        generate_locks(m)
+    elif '--only-page' not in sys.argv:
         generate()
     page()

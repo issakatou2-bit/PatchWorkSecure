@@ -263,7 +263,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);var game=Object.FindAnyObjectByType<OpsGame>();
-            Assert.AreEqual("title-kv-veil",Find<OpsIncidentGraphic>("TitleVeil").Kind);Assert.AreEqual(.9f,Find<OpsUIReveal>("TitleLogoWordmark").Duration);Capture("122-next-title");
+            Assert.AreEqual("story-title-veil",Find<OpsIncidentGraphic>("TitleVeil").Kind);Assert.AreEqual(.9f,Find<OpsUIReveal>("TitleLogoWordmark").Duration);Capture("122-next-title");
             game.StartYear(14);string state=JsonUtility.ToJson(game.State);yield return new WaitForSecondsRealtime(.8f);
             Assert.AreEqual(game.State.Current.name,Find<TextMeshProUGUI>("CalendarMonth").text);Assert.IsFalse(game.PhasePresentationCanSkip);Capture("122-next-calendar");
             // スキップに使った入力を、背後の行動ボタンへ通さない。初回は短縮しない。

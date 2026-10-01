@@ -28,7 +28,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
             var game=Object.FindAnyObjectByType<OpsGame>();Assert.AreSame(game.PlanningArt.titleKeyVisual,Find<Image>("TitleKeyVisual").sprite);
-            CheckRect("TitleLogoWordmark",50,0,640,246);Assert.AreEqual(.84f,Find<RectTransform>("TitleBrand").localScale.x);CheckPointer("NewYear");CheckPointer("HomeSettings");Capture("90-v2-title");
+            CheckRect("TitleLogoWordmark",50,0,640,246);Assert.AreEqual(1,Find<RectTransform>("TitleBrand").localScale.x);Capture("90-v2-title");yield return null;CheckPointer("NewYear");CheckPointer("HomeSettings");
             game.StartYear(14);yield return new WaitForSecondsRealtime(1.5f);
             Assert.AreSame(game.Navigator.Pose(game.ActiveVoiceBank.Find("season_04").poseId),Find<Image>("NavigatorPortrait").sprite);Assert.IsNotNull(Find<Image>("PlanningLogoIcon").sprite);
             Assert.AreEqual("OfficeStage",Find<Transform>("PlanningCharacter").parent.name);CheckNewPortraits();CheckText();Capture("91-v2-planning");

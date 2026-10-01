@@ -13,6 +13,17 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next9Isolation_動的な作業フォントはアセットに書き戻さない()
+        {
+            string root=System.IO.Path.Combine(Application.dataPath,"Fonts/CompanyYear");var before=System.IO.File.ReadAllBytes(root+"/BodyDynamic.asset");var beforeHeading=System.IO.File.ReadAllBytes(root+"/HeadingDynamic.asset");
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();
+            Assert.AreNotEqual(HideFlags.None,game.Font.hideFlags);Assert.AreNotEqual(HideFlags.None,game.Font.fallbackFontAssetTable[0].hideFlags);
+            game.Font.fallbackFontAssetTable[0].TryAddCharacters("穏絆萌暫",out _);game.StartStory(9);yield return null;
+            CollectionAssert.AreEqual(before,System.IO.File.ReadAllBytes(root+"/BodyDynamic.asset"));CollectionAssert.AreEqual(beforeHeading,System.IO.File.ReadAllBytes(root+"/HeadingDynamic.asset"));
+            var prefs=new TestPreferenceScope();bool had=PlayerPrefs.HasKey("pws_ops_music");float volume=PlayerPrefs.GetFloat("pws_ops_music");prefs.Snapshot();
+            try{PlayerPrefs.SetFloat("pws_ops_music",.123f);}finally{prefs.Restore();}
+            Assert.AreEqual(had,PlayerPrefs.HasKey("pws_ops_music"));Assert.AreEqual(volume,PlayerPrefs.GetFloat("pws_ops_music"));LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Next9Endings_二つの結末と三年の実記録と因子への導線を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

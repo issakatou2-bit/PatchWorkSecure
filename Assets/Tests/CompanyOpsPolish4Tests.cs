@@ -77,26 +77,23 @@ namespace PatchWorkSecure.Tests
             }
             CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");PolishCapture(16);LogAssert.NoUnexpectedReceived();
         }
-        [UnityTest] public IEnumerator Polish4_15_タイトル文字は白三ピクセルと薄ピンク六ピクセルの輪郭になる()
+        [UnityTest] public IEnumerator Polish4_15_承認済みタイトルは文字の代用をせずロゴ画像を使う()
         {
-            yield return PolishTitle();var title=Find<RectTransform>("Title");
-            foreach(string layer in new[]{"TitleWhiteShadow","TitlePinkShadow"})
-            {
-                int offset=layer=="TitleWhiteShadow"?3:6;var edge=Find<TextMeshProUGUI>(layer);
-                Assert.AreEqual(new Vector2(offset,-offset),edge.rectTransform.anchoredPosition-title.anchoredPosition);Assert.AreEqual("情シスの一年",edge.text);Assert.IsFalse(edge.raycastTarget);
-            }
-            ColorUtility.TryParseHtmlString("#ffc4d3",out var pink);Assert.AreEqual(pink,Find<TextMeshProUGUI>("TitlePinkShadow").color);PolishCapture(15);LogAssert.NoUnexpectedReceived();
+            yield return PolishTitle();var game=Object.FindAnyObjectByType<OpsGame>();var logo=Find<Image>("TitleLogoWordmark");
+            Assert.AreSame(game.PlanningArt.logoWordmark,logo.sprite);Assert.AreEqual(new Vector2(640,246),logo.rectTransform.sizeDelta);Assert.IsFalse(logo.raycastTarget);
+            Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="TitleWhiteShadow"||t.name=="TitlePinkShadow"));PolishCapture(15);LogAssert.NoUnexpectedReceived();
         }
-        [UnityTest] public IEnumerator Polish4_14_副題帯は単色ピンクの斜め切り素材になる()
+        [UnityTest] public IEnumerator Polish4_14_承認済み三年タイトルは旧副題帯を出さず三つのモードを並べる()
         {
-            yield return PolishTitle();var game=Object.FindAnyObjectByType<OpsGame>();var ribbon=Find<Image>("TitleRibbon");Assert.AreSame(game.PlanningArt.ribbonSlant,ribbon.sprite);Assert.IsNotNull(ribbon.sprite);
-            Assert.IsNull(ribbon.GetComponent<OpsIncidentGraphic>());ColorUtility.TryParseHtmlString("#ff6f91",out var pink);Assert.AreEqual(pink,ribbon.color);Assert.AreEqual(new Vector2(570,44),ribbon.rectTransform.sizeDelta);
-            Assert.IsFalse(Find<TextMeshProUGUI>("TitleSubtitle").isTextOverflowing);PolishCapture(14);LogAssert.NoUnexpectedReceived();
+            yield return PolishTitle();Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="TitleRibbon"||t.name=="TitleSubtitle"));
+            string[] names={"NewYear","SingleYear","EndlessYear"};float[] y={292,398,486};
+            for(int i=0;i<3;i++){var button=Find<Button>(names[i]);Assert.AreEqual(new Vector2(90,-y[i]),button.GetComponent<RectTransform>().anchoredPosition);Assert.AreEqual(470,button.GetComponent<RectTransform>().rect.width);Assert.IsNotNull(Find<TextMeshProUGUI>(names[i]+"Description"));}
+            PolishCapture(14);LogAssert.NoUnexpectedReceived();
         }
-        [UnityTest] public IEnumerator Polish4_13_ロゴの最終角度はCSSのマイナス二度と一致する()
+        [UnityTest] public IEnumerator Polish4_13_承認済み三年タイトルのロゴは水平でアイコンだけ傾く()
         {
-            yield return PolishTitle();var brand=Find<RectTransform>("TitleBrand");Assert.AreEqual(2,Mathf.DeltaAngle(0,brand.localEulerAngles.z),.01f);
-            Assert.AreEqual(new Vector2(0,.5f),brand.pivot);Assert.AreEqual(.84f,brand.localScale.x);Assert.IsFalse(Find<OpsUIReveal>("TitleLogoWordmark").enabled);
+            yield return PolishTitle();var brand=Find<RectTransform>("TitleBrand");Assert.AreEqual(0,Mathf.DeltaAngle(0,brand.localEulerAngles.z),.01f);
+            Assert.AreEqual(new Vector2(0,1),brand.pivot);Assert.AreEqual(1,brand.localScale.x);Assert.AreEqual(new Vector2(700,250),brand.sizeDelta);Assert.AreEqual(8,Mathf.DeltaAngle(0,Find<RectTransform>("TitleLogoIcon").localEulerAngles.z),.01f);Assert.IsFalse(Find<OpsUIReveal>("TitleLogoWordmark").enabled);
             PolishCapture(13);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator Polish4_12_把握と時間帯は左上の赤枠外にまとまる()

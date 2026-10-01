@@ -46,7 +46,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             StoryBackground();var rays=screen.Find("StoryRays") as RectTransform;rays.sizeDelta=new Vector2(1800,1800);rays.anchoredPosition=new Vector2(800,-330);
             StoryCategory(screen,"StoryCategory","3 YEARS CLEAR",500,40,600,PlanPink);screen.Find("StoryCategory").GetComponent<TextMeshProUGUI>().alignment=TextAlignmentOptions.Midline;
-            StoryText(screen,"EndingTitle","3年間、守り抜いた",0,68,1600,74,46,null,true);StoryRoad(529,170);
+            StoryText(screen,"EndingTitle","3年間守り抜いた",0,68,1600,74,46,null,true);StoryRoad(529,170);
             Portrait(screen,"StoryPortrait",640,320,320,380,"pose_jump");Motion(screen.Find("StoryPortrait") as RectTransform,"hop",1.4f);
             StorySpeech("3年間、本当にありがとう！\n次は「特別な結末」も見てみたいね。\n3年目で運用ランクSSが目印だよ。",1000,380,420,130);
             var panel=PCard(screen,"EndingUnlock",180,420,400,160,Color.white,24);

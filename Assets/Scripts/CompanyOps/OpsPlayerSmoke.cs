@@ -44,6 +44,13 @@ namespace PatchWorkSecure.CompanyOps
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.planningMusic);
                 game.BeginIncident(); yield return new WaitForSecondsRealtime(1);
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.incidentMusic);
+                if (Environment.GetCommandLineArgs().Contains("-ops-voice-smoke-test"))
+                {
+                    yield return new WaitForSecondsRealtime(.5f);
+                    var line=game.ActiveVoiceBank?.Find("incident_start");
+                    if(line?.clip==null||!game.PortraitVoicePlaying)failed=true;
+                    Debug.Log("[CompanyOps Player] ひなたの事件音声の再生確認 "+(failed?"FAILED":"PASSED"));
+                }
                 game.Resolve("scope");
                 float deadline=Time.realtimeSinceStartup+8;
                 while(game.ResolutionActive&&Time.realtimeSinceStartup<deadline)yield return null;
@@ -78,7 +85,13 @@ namespace PatchWorkSecure.CompanyOps
                     if (s.budget >= s.Cost(index) + 12) s.Upgrade(index);
                 }
                 s.Act("audit"); s.Act("rest"); s.Act("map");
-                game.BeginIncident(); game.Resolve(s.Current.kind == "outage" ? "recover" : "scope"); game.Next();
+                game.BeginIncident();
+                // 機械的に限定対応を続けない。利用者に見える見積もりだけで方針を選ぶ。
+                string response = new[] { "contain", "scope", "recover" }.OrderBy(id => {
+                    var estimate = s.Estimate(id);
+                    return estimate.cost + estimate.lossMax + estimate.stopMax * 2;
+                }).First();
+                game.Resolve(response); game.Next();
                 return s.Valid();
             }
             catch (Exception e) { Debug.LogException(e); return false; }

@@ -119,7 +119,8 @@ namespace PatchWorkSecure.CompanyOps
                 if(missing){eq.gameObject.AddComponent<CanvasGroup>().alpha=.45f;StoryText(eq,"MissingEquipment","未導入 "+(OpsCatalog.Projects.Length-installed.Length)+"つ",64,10,150,46,14);StoryText(eq,"MissingIcon","＋",12,14,38,38,20,PlanGray,true);continue;}
                 string[] glyph={"戻","練","台","認","手","自","教","監","分","更","代"};string[] colors={"2ec4a0","ffb020","8b7cf6","3fa9f5","ff6f91","f0803c","2f93dc","3fa9f5","3fa9f5","3fa9f5","2ec4a0"};int oi=Array.IndexOf(order,project.id);
                 var icon=PCard(eq,"EquipmentIcon"+i,12,14,38,38,Hex(colors[oi]),12,false);StoryText(icon,"EquipmentGlyph"+i,glyph[oi],0,0,38,38,15,Color.white,true);
-                StoryText(eq,"EquipmentName"+i,project.name,60,8,113,50,14,null,false,true);StoryText(eq,"EquipmentLevel"+i,renew?"Lv2→1":"Lv1",172,14,60,38,15,renew?Hex("1f75b8"):PlanInk,true);
+                // Lv1は短い札なので、設備名へ幅を返す。モックのflexと同じ並び。
+                StoryText(eq,"EquipmentName"+i,project.name,60,8,renew?113:128,50,14,null,false,true);StoryText(eq,"EquipmentLevel"+i,renew?"Lv2→1":"Lv1",renew?172:190,14,renew?60:34,38,15,renew?Hex("1f75b8"):PlanInk,true);
                 if(renew){var badge=PCard(eq,"EquipmentReview"+i,177,-10,51,20,PlanBlue,12,false);StoryText(badge,"EquipmentReviewLabel"+i,"見直し",0,0,51,20,11,Color.white,true);}Reveal(eq,i*.05f);
             }
         }
@@ -128,7 +129,7 @@ namespace PatchWorkSecure.CompanyOps
             StoryBackground(true);StoryCategory(screen,"StoryCategory","CHALLENGE RECORD",60,32,450,PlanGray);
             StoryText(screen,"EndingTitle","挑戦の記録　"+Story.year+"年目で終了",60,52,590,66,42);StoryRoad(640,36,true);
             var panel=PCard(screen,"StoryFailure",80,170,700,470,Color.white,24);foreach(var outline in panel.GetComponents<Outline>())DestroyImmediate(outline);var whiteEdge=panel.gameObject.AddComponent<Outline>();whiteEdge.effectColor=Color.white;whiteEdge.effectDistance=new Vector2(3,-3);StoryCategory(panel,"FailureCategory","WHAT HAPPENED",26,22,300,PlanPink);
-            StoryText(panel,"FailureHeading",Story.year+"年目、"+(State.IsClear?"あと少しだった":"運営を続けられなかった"),26,46,648,40,21);
+            StoryText(panel,"FailureHeading",Story.year+"年目"+(State.IsClear?"あと少しだった":"運営を続けられなかった"),26,46,648,40,21);
             var score=StoryText(panel,"FailureScore",State.AnnualScore.ToString("N0"),26,93,180,64,56,Hex("c23a60"));score.textWrappingMode=TextWrappingModes.NoWrap;
             int threshold=StoryGoalPoints(Story.Goal);float marker=432*.897f,fill=marker*Mathf.Clamp01(State.AnnualScore/(float)threshold);
             PCard(panel,"StoryGoalTrack",210,103,432,16,Hex("eef2f8"),12,false);if(fill>0){var f=PCard(panel,"StoryGoalFill",210,103,fill,16,PlanPink,12,false);KitGradient(f.GetComponent<Image>(),Hex("ffb3c4"),PlanPink,true);}

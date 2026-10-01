@@ -10,7 +10,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         private readonly Button[] containmentPCs=new Button[OpsCatalog.ContainmentRooms*OpsCatalog.ContainmentPCsPerRoom];
         private readonly Button[] containmentRooms=new Button[OpsCatalog.ContainmentRooms];
-        private Button containmentScan,containmentWide;
+        private Button containmentScan,containmentWide,containmentEdr;
         private RectTransform containmentDanger;
         private float minigameHeartbeatAt;
         private readonly Dictionary<string,AudioClip> minigameTones=new Dictionary<string,AudioClip>();
@@ -62,7 +62,14 @@ namespace PatchWorkSecure.CompanyOps
             containmentWide=PButton(parent,"MinigameWide","",18,142,328,76,StopMinigameRoom,Color.white,PlanInk,16,Hex("c7d0e0"));
             PText(containmentWide.transform,"MinigameWideLabel","部屋ごと止める",12,4,304,32,17);
             PText(containmentWide.transform,"MinigameWideHint","選んだ部屋を全部切り離す。業務も止まる",12,36,304,32,12,PlanGray,false);
-            PText(parent,"MinigameToolHint","端末を押すと1台ずつ切り離す。\n赤は確認できた感染、?は様子がおかしい端末。",18,228,328,36,12,PlanGray,false);
+            containmentEdr=null;
+            if(Minigame is OpsContainmentMinigame c&&c.Edr)
+            {
+                containmentEdr=PButton(parent,"MinigameEdr","EDR 即時隔離 / あと1回\n<size=11>最初の感染端末 / 時間消費なし</size>",18,220,328,44,EdrIsolateMinigamePC,Hex("dff1ff"),PlanInk,14,Hex("8ac9ef"));
+                var label=containmentEdr.GetComponentInChildren<TextMeshProUGUI>();label.fontSize=14;label.enableAutoSizing=false;
+                label.overflowMode=TextOverflowModes.Overflow;label.alignment=TextAlignmentOptions.Center;
+            }
+            else PText(parent,"MinigameToolHint","端末を押すと1台ずつ切り離す。\n赤は確認できた感染、?は様子がおかしい端末。",18,228,328,36,12,PlanGray,false);
         }
         partial void RefreshMinigameBoard()
         {
@@ -89,6 +96,11 @@ namespace PatchWorkSecure.CompanyOps
             FindMinigameText("MinigameStopped").text="停止 "+game.StoppedCount;
             FindMinigameText("MinigameScanLabel").text="部屋を調べる（あと"+game.ScansLeft+"回）";
             containmentScan.interactable=playing&&game.ScansLeft>0;containmentWide.interactable=playing;
+            if(containmentEdr!=null)
+            {
+                containmentEdr.interactable=game.CanEdrIsolate;
+                containmentEdr.GetComponentInChildren<TextMeshProUGUI>().text=(game.EdrIsolationsLeft==0?"EDR 即時隔離 / 使用済み":game.CanEdrIsolate?"EDR 即時隔離 / あと1回":"EDR 即時隔離 / 検知対象なし")+"\n<size=11>最初の感染端末 / 時間消費なし</size>";
+            }
             bool low=playing&&game.Remaining<OpsCatalog.MinigameDangerSeconds;containmentDanger.gameObject.SetActive(low);
             if(low&&game.Elapsed-minigameHeartbeatAt>(game.Remaining<OpsCatalog.MinigameUrgentSeconds?.45f:.75f))
             {minigameHeartbeatAt=game.Elapsed;MinigameTone(90);StartCoroutine(DelayedMinigameTone(70,.09f));}
@@ -111,6 +123,17 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsContainmentMinigame;if(game==null)return;
             var result=game.Cut(index);if(result==OpsTerminalCut.None)return;
+            PresentMinigameCut(index,result);
+        }
+        private void EdrIsolateMinigamePC()
+        {
+            var game=Minigame as OpsContainmentMinigame;if(game==null)return;
+            int index=game.EdrIsolate();if(index<0)return;
+            PresentMinigameCut(index,OpsTerminalCut.Infected);
+        }
+        private void PresentMinigameCut(int index,OpsTerminalCut result)
+        {
+            var game=Minigame as OpsContainmentMinigame;if(game==null)return;
             var center=MinigamePCCenter(index);
             if(result==OpsTerminalCut.Infected)
             {

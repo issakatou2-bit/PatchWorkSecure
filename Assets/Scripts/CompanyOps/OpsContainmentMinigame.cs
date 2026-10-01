@@ -14,6 +14,10 @@ namespace PatchWorkSecure.CompanyOps
         public bool Edr {get;private set;}
         private float accumulated,scanUntil;
         private int scanRoom=-1;
+        private int initialInfected=-1,edrIsolations;
+        public int EdrIsolationsLeft=>Edr?OpsCatalog.EdrInstantIsolations-edrIsolations:0;
+        // 真相ではなく、画面でも検知済みの初期端末だけを対象にする。
+        public bool CanEdrIsolate=>Phase==OpsMinigamePhase.Playing&&EdrIsolationsLeft>0&&initialInfected>=0&&Visible(initialInfected);
         public int SelectedRoom {get;private set;}
         public int ScansLeft {get;private set;}=OpsCatalog.ContainmentScans;
         public int Streak {get;private set;}
@@ -39,7 +43,7 @@ namespace PatchWorkSecure.CompanyOps
             if(!base.Start())return false;
             int first=random.Next(PCCount),second=(first+7+random.Next(6))%PCCount;
             if(benign){pcs[first].suspicious=pcs[second].suspicious=true;}
-            else{Infect(first,0);Infect(second,-1.5f);}
+            else{initialInfected=first;Infect(first,0);Infect(second,-1.5f);}
             return true;
         }
         public bool IsStopped(int index)=>pcs[index].cut;
@@ -67,6 +71,14 @@ namespace PatchWorkSecure.CompanyOps
             var p=pcs[index];p.cut=true;
             if(p.infected){Streak++;HitStopRemaining=OpsCatalog.ContainmentHitStop;return OpsTerminalCut.Infected;}
             Streak=0;return OpsTerminalCut.Normal;
+        }
+        public int EdrIsolate()
+        {
+            if(!CanEdrIsolate)return -1;
+            // Tickや経過時間には触れず、通常の遮断と同じ判定・演出を使う。
+            int index=initialInfected;
+            if(Cut(index)!=OpsTerminalCut.Infected)return -1;
+            edrIsolations++;return index;
         }
         public int StopRoom()
         {

@@ -137,7 +137,7 @@ namespace PatchWorkSecure.CompanyOps
             (Minigame.Monitor?"導入済み":"未導入")+"：監視と通知 / 感染がすぐ見える\n"+
             (Minigame.Segment?"導入済み":"未導入")+"：ネットワーク分離 / 部屋をまたがない\n"+
             (Minigame.Backup?"導入済み：分離バックアップ / 結果の復旧に反映済み":"未導入：分離バックアップ / 導入すると結果の復旧に働く")+
-            (Minigame is OpsContainmentMinigame c&&c.Edr?"\n導入済み：EDR / 感染した部屋に検知の通知":"");
+            (Minigame is OpsContainmentMinigame c&&c.Edr?"\n導入済み：EDR / 部屋を通知・強調 / 最初の感染端末を時間消費なしで1回隔離":"");
         public void StartMinigame()
         {
             if(Minigame==null||!Minigame.Start())return;

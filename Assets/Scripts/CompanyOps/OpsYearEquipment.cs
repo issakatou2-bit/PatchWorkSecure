@@ -13,9 +13,10 @@ namespace PatchWorkSecure.CompanyOps
         public const int ZeroTrustPrevention=5, ZeroTrustContainment=3, EdrContainment=5;
         public const int ThreatSharingKnowledge=1, ThreatSharingMarginCut=2, CsirtPeakStopCut=2;
         public const float EdrRevealSeconds=1;
+        public const int EdrInstantIsolations=1;
         public static readonly OpsProject[] AdvancedProjects={
             new OpsProject{id="zeroTrust",name="ゼロトラスト接続",tag="入口",group="protect",requires="mfa",cost=ZeroTrustCost,time=ZeroTrustWork,upkeep=ZeroTrustUpkeep,max=2,term="defense",desc="拠点や在宅の接続を、場所だけで信じず確かめる。",effect="委託先・在宅・セッションの侵入被害と広がりを減らす。"},
-            new OpsProject{id="edr",name="端末の検知と対応（EDR）",tag="端末",group="protect",requires="monitor",cost=EdrCost,time=EdrWork,upkeep=EdrUpkeep,max=2,term="detect",desc="端末の動きを検知し、対応につなぐ。",effect="ランサム・標的型の封じ込めに加算。封じ込めゲームでは感染した部屋に検知の通知。監視が無い場合も早く見える。"},
+            new OpsProject{id="edr",name="端末の検知と対応（EDR）",tag="端末",group="protect",requires="monitor",cost=EdrCost,time=EdrWork,upkeep=EdrUpkeep,max=2,term="detect",desc="端末の動きを検知し、対応につなぐ。",effect="ランサム・標的型の封じ込めに加算。感染した部屋を通知・強調。最初の感染端末を時間消費なしで1回切り離せる。監視の即時表示は維持。"},
             new OpsProject{id="threatSharing",name="脅威情報の共有",tag="情報",group="protect",requires="monitor",cost=ThreatSharingCost,time=ThreatSharingWork,upkeep=ThreatSharingUpkeep,max=2,term="detect",desc="業界の仲間と手口や兆候を共有する。",effect="標的型・侵害の主張・BECの把握+1。見積もりの幅も狭まる。真相の確定とは別。"},
             new OpsProject{id="csirt",name="事件対応の体制（CSIRT）",tag="体制",group="operations",requires="runbook",cost=CsirtCost,time=CsirtWork,upkeep=CsirtUpkeep,max=2,term="incident",desc="事件の連絡と判断の役割を決めておく。",effect="山場の月の停止を短縮。総決算にも同じ仕組みで効く。"}
         };

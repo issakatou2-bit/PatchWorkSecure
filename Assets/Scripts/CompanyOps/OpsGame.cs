@@ -47,7 +47,7 @@ namespace PatchWorkSecure.CompanyOps
         public void StartYear(int seed){Story=null;EnterYear(new OpsState(seed,true),true);}
         public void StartStory(int seed){Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
         private void EnterYear(OpsState next,bool tutorial)
-        {CancelMinigame();StopVoice();SkipTutorialVisual();tutorialStep=-1;voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false;resolutionActive=false;pendingRankBenefit="";statEffectPending=false;roomFilter="";budgetGainPending=false;rankBefore=rankAfter=null;rankedReports.Clear();workCompletePending=false;workCompleteMonth=-1;State=next;statChanges=new int[6];tab=0;Save();Render();if(tutorial)TutorialNewYear();}
+        {storyAnnualDetails=false;CancelMinigame();StopVoice();SkipTutorialVisual();tutorialStep=-1;voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false;resolutionActive=false;pendingRankBenefit="";statEffectPending=false;roomFilter="";budgetGainPending=false;rankBefore=rankAfter=null;rankedReports.Clear();workCompletePending=false;workCompleteMonth=-1;State=next;statChanges=new int[6];tab=0;Save();Render();if(tutorial)TutorialNewYear();}
         public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null?State:null,story=Story,storyMode=Story!=null,career=Career};
         public bool RestoreProgress(OpsProgress progress)
         {if(progress==null||!progress.Valid())return false;Story=progress.story;Career=progress.career;EnterYear(progress.Current,false);return true;}
@@ -203,7 +203,7 @@ namespace PatchWorkSecure.CompanyOps
             if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }
             resolutionActive = false;
             if (State.phase == OpsPhase.Review) { MonthlyScreen();ScreenVoice();return; }
-            if (State.phase == OpsPhase.Ended) { AnnualScreen();ScreenVoice();return; }
+            if (State.phase == OpsPhase.Ended) { if(Story!=null&&Story.CanAdvance&&!storyAnnualDetails){StoryRenewScreen();return;}AnnualScreen();ScreenVoice();return; }
             Header();
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }

@@ -13,6 +13,20 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next9Renew_全額繰越と設備見直しと年度の道のりを撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);
+            FinishStoryTestYear(game.State);game.State.budget=38;game.State.culture=68;game.State.trust=71;
+            foreach(var p in OpsCatalog.Projects)game.State.levels[OpsCatalog.Index(p.id)]=0;
+            foreach(string id in new[]{"backup","drill","runbook"})game.State.levels[OpsCatalog.Index(id)]=2;
+            foreach(string id in new[]{"inventory","mfa","automation","education"})game.State.levels[OpsCatalog.Index(id)]=1;
+            game.State.capacity=0;Assert.IsTrue(game.State.Valid(),"撮影状態も有効な年度である");game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next9-year-renew");
+            Assert.AreEqual("114<size=15>万円</size>",Find<TextMeshProUGUI>("CarryValue0").text);Assert.AreEqual("58",Find<TextMeshProUGUI>("CarryValue3").text);
+            Assert.AreEqual(3,Object.FindObjectsByType<TextMeshProUGUI>().Count(t=>t.name.StartsWith("EquipmentReviewLabel")&&t.text=="見直し"));
+            var prior=JsonUtility.ToJson(game.State);CheckPointer("StoryAnnualReview");Click("StoryAnnualReview");yield return new WaitForSecondsRealtime(3);CheckPointer("BackHome");Click("BackHome");yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual(prior,JsonUtility.ToJson(game.State));CheckPointer("NextStoryYear");Click("NextStoryYear");yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual(2,game.Story.year);Assert.AreEqual(114,game.State.budget);Assert.AreEqual(12,game.State.yearPressure);Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Next9Title_承認済み三つのモードと因子札を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);

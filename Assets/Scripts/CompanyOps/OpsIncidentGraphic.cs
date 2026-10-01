@@ -13,7 +13,31 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="staff-face")
+            if(Kind.StartsWith("story-")&&Kind.EndsWith("background"))
+            {
+                bool fail=Kind=="story-fail-background",dark=Kind=="story-factor-background";
+                Color a=dark?new Color(.231f,.310f,.490f):fail?new Color(.933f,.949f,.973f):new Color(1,.957f,.839f);
+                Color b=fail?new Color(.902f,.925f,.973f):new Color(1,.890f,.925f),c=fail?new Color(.953f,.910f,.965f):new Color(.863f,.937f,1);
+                for(int j=0;j<24;j++)for(int i=0;i<40;i++)
+                {
+                    int s=vh.currentVertCount;
+                    Vector2[] points={new Vector2(i/40f,j/24f),new Vector2((i+1)/40f,j/24f),new Vector2((i+1)/40f,(j+1)/24f),new Vector2(i/40f,(j+1)/24f)};
+                    foreach(var p in points){float t=Mathf.Clamp01(p.x*.393f+(1-p.y)*.607f);Color v=dark?Color.Lerp(a,new Color(.114f,.165f,.267f),Mathf.Clamp01(Vector2.Distance(new Vector2((p.x-.5f)*1.6f,p.y-.6f),Vector2.zero)/.7f)):t<.55f?Color.Lerp(a,b,t/.55f):Color.Lerp(b,c,(t-.55f)/.45f);Add(vh,new Vector2(r.xMin+p.x*w,r.yMin+p.y*h),v);}
+                    vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);
+                }
+            }
+            else if(Kind=="rounded-dashed")
+            {
+                float radius=Mathf.Min(w,h)*.16f;
+                for(int corner=0;corner<4;corner++)
+                {
+                    Vector2 center=new Vector2(corner==0||corner==3?r.xMax-radius:r.xMin+radius,corner<2?r.yMax-radius:r.yMin+radius);
+                    for(int j=0;j<12;j+=2){float a=(corner*90+j*7.5f)*Mathf.Deg2Rad,b=(corner*90+(j+1)*7.5f)*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*radius,5);}
+                }
+                for(float x=radius;x<w-radius;x+=15){Line(vh,new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMin),5);Line(vh,new Vector2(r.xMin+x,r.yMax),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMax),5);}
+                for(float y=radius;y<h-radius;y+=15){Line(vh,new Vector2(r.xMin,r.yMin+y),new Vector2(r.xMin,r.yMin+Mathf.Min(y+9,h-radius)),5);Line(vh,new Vector2(r.xMax,r.yMin+y),new Vector2(r.xMax,r.yMin+Mathf.Min(y+9,h-radius)),5);}
+            }
+            else if(Kind=="staff-face")
             {
                 var center=r.center+Vector2.up*h*.03f;
                 for(int i=0;i<40;i++){float a=i*Mathf.PI/20,b=(i+1)*Mathf.PI/20;Line(vh,center+new Vector2(Mathf.Cos(a)*w*.34f,Mathf.Sin(a)*h*.4f),center+new Vector2(Mathf.Cos(b)*w*.34f,Mathf.Sin(b)*h*.4f),2);}

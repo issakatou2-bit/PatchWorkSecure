@@ -20,7 +20,7 @@ namespace PatchWorkSecure.Tests
             yield return new WaitForSecondsRealtime(3);Capture("next8-title-modes");Click("SingleYear");yield return null;Assert.IsNull(game.Story);Assert.AreEqual(0,game.State.yearPressure);
             game.StartStory(14);yield return new WaitForSecondsRealtime(3);Assert.IsNotNull(game.Story);StringAssert.Contains("目標 B",Find<TextMeshProUGUI>("YearLabel").text);Capture("next8-story-year1");
             game.ChooseAction("audit");Assert.IsTrue(game.MinigameActive);game.StartStory(14);Assert.IsFalse(game.MinigameActive);
-            FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Assert.IsNotNull(Find<Button>("NextStoryYear"));StringAssert.Contains("届いた",Find<TextMeshProUGUI>("StoryGoalResult").text);Capture("next8-story-pass");
+            FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Assert.IsNotNull(Find<Button>("NextStoryYear"));StringAssert.Contains("目標 B以上",Find<TextMeshProUGUI>("StoryGoalResult").text);Capture("next8-story-pass");
             int budget=game.State.budget;Click("NextStoryYear");yield return new WaitForSecondsRealtime(3);Assert.AreEqual(2,game.Story.year);Assert.AreEqual(budget+76,game.State.budget);StringAssert.Contains("2年目",Find<TextMeshProUGUI>("YearLabel").text);Capture("next8-story-year2");
             game.State.Act("audit");game.State.BeginIncident();var progress=game.ExportProgress();string path=Path.Combine(Application.temporaryCachePath,"next8-save-tests","ui-progress.json");
             Assert.IsTrue(OpsSaveStore.WriteProgress(path,progress,out string warning),warning);var restored=OpsSaveStore.ReadProgress(path,out warning);Assert.IsNotNull(restored,warning);

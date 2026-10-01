@@ -1,6 +1,6 @@
 # Irodori-TTS（ローカル・無料）で、秘書さんとエンジニアさんの声の候補を作り、キャラの1枚絵つきの試聴ページを書き出す。
 # 使い方（Irodori-TTSの仮想環境のPythonで実行）:
-#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--lock|--round2|--round3] [--only-page]
+#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--lock|--round2|--round3|--round4] [--only-page]
 #   （小さいモデルと大きいモデルは別々に実行する）
 # 出力：Artifacts/VoiceAudition/（gitでは追跡しない）。index.html をブラウザで開くと聞き比べられる。
 # 声の性格は文字（キャプション）だけで作る。実在の人の声を手本にしない（Irodoriの利用条件）。
@@ -38,7 +38,7 @@ CHARS = [
      ],
      'lines': [
          '……ん、見つけた。同じところから、ログイン失敗が四十回。',
-         '私も、一回落ちた。……だから、大丈夫。',
+         '試験は一回で受かった。……会議の時間は、三回忘れた。',
          'いつもを知らないと、いつもと違うは分からない。……ポテト、食べる？',
      ]},
 ]
@@ -291,6 +291,70 @@ def round3_section():
     return f'''<section class="char" style="display:block;padding:20px 24px;box-shadow:0 0 0 3px #fff,0 0 0 7px #ff94ae,0 14px 34px rgba(27,35,64,.14)"><h2>3回目：決めた声で、キャラらしい台詞と短い反応</h2>{''.join(blocks)}</section>'''
 
 
+# 4回目（10/1）：①どのキャラでもない新しい声（特徴だけを文字で指定。特定の声優・キャラは手本にしない）
+# ②エンジニアさんの設定「その道のプロ。試験に落ちない、理解度も高い。パソコン以外は抜けている」に沿った台詞
+NEW_LINES = ['おはようございます。今日も、よろしくお願いしますね。', 'その考え方は、とても良いと思います。……少しだけ、補足しますね。',
+             'ふぁ……すみません。昨日は遅くまで、本を読んでいて。', 'ふふ、大丈夫ですよ。分からないことは、分からないって言っていいんです。']
+ROUND4 = [
+    ('new1', '新しい声1', None, '小柄な若い女性。落ち着いていて丁寧、少し眠たげ。知的で、声の高さは中くらい。' + CLEAR, 'large', NEW_LINES),
+    ('new2', '新しい声2', None, '物静かで丁寧な、知的な少女。ゆっくり、少し眠たげに話す。声の高さは中くらい。' + CLEAR, 'large', NEW_LINES),
+    ('new3', '新しい声3', None, '小柄で落ち着いた女性。淡々として丁寧だが、ときどき柔らかく笑う。' + CLEAR, 'large', NEW_LINES),
+    ('new4', '新しい声4', None, '穏やかで理知的な若い女性。丁寧な言葉で、少し眠たげに、やさしく諭すように話す。' + CLEAR, 'large', NEW_LINES),
+    ('eng', 'エンジニアさん（プロだけど、パソコン以外は抜けている）', 'engineer-large-c1-l1.wav', ENG_CAP + CLEAR, 'small', [
+        'その脆弱性、悪用の条件が限られてる。うちは外に出してないから、優先度は中。',
+        'ログの突き合わせ、取れた。侵入は二時十二分。入口は、委託先の保守ID。',
+        'この設計なら、拠点が一つ止まっても、仕事は止まらない。',
+        '……あ、今日って会議だった？　何時から？　……もう始まってる？',
+        '試験？　うん、受かった。……それより、お昼ごはん食べたっけ。',
+        '家の鍵、どこに置いたっけ。……サーバー室の鍵は、ちゃんと持ってる。',
+    ]),
+]
+
+
+def r4_path(sid, i):
+    return OUT / 'audio' / 'r4' / f'{sid}-{i + 1:02d}.wav'
+
+
+def generate_round4(model):
+    sys.path.insert(0, str(IRODORI))
+    import infer
+    from irodori_tts.inference_runtime import get_cached_runtime
+
+    class Cached:
+        @staticmethod
+        def from_key(key):
+            return get_cached_runtime(key)[0]
+    infer.InferenceRuntime = Cached
+    done = 0
+    for k, (sid, name, ref, cap, m, lines) in enumerate(ROUND4):
+        if m != model:
+            continue
+        for i, text in enumerate(lines):
+            out = r4_path(sid, i)
+            if out.exists():
+                continue
+            out.parent.mkdir(parents=True, exist_ok=True)
+            ref_args = ['--ref-wav', str(OUT / 'audio' / ref)] if ref else ['--no-ref']
+            sys.argv = ['infer.py', '--hf-checkpoint', MODELS[m][1], '--model-precision', 'bf16', '--text', text,
+                        '--caption', cap, *ref_args, '--seed', str(SEED + k), '--output-wav', str(out)]
+            infer.main()
+            done += 1
+    print('4回目', done, '本')
+
+
+def round4_section():
+    blocks = []
+    for sid, name, ref, cap, m, lines in ROUND4:
+        files = [f'audio/r4/{r4_path(sid, i).name}' for i in range(len(lines)) if r4_path(sid, i).exists()]
+        chips = ''.join(f'<span class="chip"><button class="sm" onclick="play(this,&quot;audio/r4/{r4_path(sid, i).name}&quot;)">▶</button>{html.escape(t)}</span>'
+                        for i, t in enumerate(lines) if r4_path(sid, i).exists())
+        how = '見本 ' + ref if ref else '見本なし（文字の説明だけ）'
+        blocks.append(f'<div class="row"><b>{html.escape(name)}</b><button class="all" onclick="playAll(this,{html.escape(json.dumps(files))})">全部再生</button>'
+                      f'<span class="md">{html.escape(cap)}（{MODELS[m][0].split("（")[0]}、{how}）</span></div><div class="chips">{chips}</div>')
+    return f'''<section class="char" style="display:block;padding:20px 24px;box-shadow:0 0 0 3px #fff,0 0 0 7px #7fc4ff,0 14px 34px rgba(27,35,64,.14)"><h2>4回目：どのキャラでもない新しい声／エンジニアさんの設定に沿った台詞</h2>
+<p class="about">新しい声は、好みの特徴だけを文字で指定して作った（特定の声優さん・キャラクターは手本にしていない）。気に入ったものは、声の見本にして固定できる。</p>{''.join(blocks)}</section>'''
+
+
 def page():
     import shutil
     (OUT / 'art').mkdir(exist_ok=True)
@@ -326,6 +390,7 @@ button{{width:46px;height:46px;border:0;border-radius:14px;cursor:pointer;font-s
 button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0 #1f75b8}} .miss{{color:#b5bccb;font-size:12px}}
 </style></head><body><header><h1>秘書さん・エンジニアさんの声の試聴</h1>
 <p>Irodori-TTS（ローカル・無料）。声は文字の説明だけで作った候補です。気に入った候補に「これ」を付けてください（この画面の中だけの印です）。</p></header>
+{round4_section() if (OUT / 'audio' / 'r4').exists() else ''}
 {round3_section() if (OUT / 'audio' / 'r3').exists() else ''}
 {round2_section() if (OUT / 'audio' / 'r2').exists() else ''}
 {lock_section() if any((OUT / 'audio' / m).exists() for m in ('large', 'small')) else ''}
@@ -339,7 +404,9 @@ let _=0;function play(btn,src){{if(a){{a.pause();b&&b.classList.remove('on')}}a=
 
 if __name__ == '__main__':
     (OUT / 'audio').mkdir(parents=True, exist_ok=True)
-    if '--round3' in sys.argv:
+    if '--round4' in sys.argv:
+        generate_round4(sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large')
+    elif '--round3' in sys.argv:
         generate_round3(sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large')
     elif '--round2' in sys.argv:
         generate_round2(sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large')

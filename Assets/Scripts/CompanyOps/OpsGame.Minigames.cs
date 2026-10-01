@@ -129,14 +129,15 @@ namespace PatchWorkSecure.CompanyOps
                 PButton(minigameModal,"MinigameDelegate","社員に任せる / 50点",854,602,222,38,DelegateMinigame,Color.white,PlanInk,16);return;
             }
             PText(card,"MinigameInstructions","20秒で広がりを止めよう。\n端末を押す：1台ずつ切り離す\n部屋を選んで調べる：隠れた感染が3秒見える\n部屋ごと止める：速いが、正常な端末も止まる",26,78,628,108,17,null,false);
-            PText(card,"MinigameEquipment",MinigameEquipment(),26,204,628,112,16,null,false);
+            PText(card,"MinigameEquipment",MinigameEquipment(),26,204,628,112,Minigame is OpsContainmentMinigame c&&c.Edr?14:16,null,false);
             PButton(card,"MinigameStart","対応を始める",26,332,390,58,StartMinigame,PlanPink,Color.white,20);
             PButton(card,"MinigameDelegate","社員に任せる / 50点",432,332,222,58,DelegateMinigame,Color.white,PlanInk,17);
         }
         private string MinigameEquipment()=>"事件の前にそろえた備え\n"+
             (Minigame.Monitor?"導入済み":"未導入")+"：監視と通知 / 感染がすぐ見える\n"+
             (Minigame.Segment?"導入済み":"未導入")+"：ネットワーク分離 / 部屋をまたがない\n"+
-            (Minigame.Backup?"導入済み：分離バックアップ / 結果の復旧に反映済み":"未導入：分離バックアップ / 導入すると結果の復旧に働く");
+            (Minigame.Backup?"導入済み：分離バックアップ / 結果の復旧に反映済み":"未導入：分離バックアップ / 導入すると結果の復旧に働く")+
+            (Minigame is OpsContainmentMinigame c&&c.Edr?"\n導入済み：EDR / 感染した部屋に検知の通知":"");
         public void StartMinigame()
         {
             if(Minigame==null||!Minigame.Start())return;

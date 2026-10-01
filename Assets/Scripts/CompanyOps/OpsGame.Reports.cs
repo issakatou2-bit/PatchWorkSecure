@@ -99,8 +99,8 @@ namespace PatchWorkSecure.CompanyOps
             bool peakMiss=r.peakGoalRecorded&&!r.peakGoalMet;
             PText(effect.transform,"EffectTag",peakMiss?"山場未達 / 次に効きそうな備え":best==null?"次に効きそうな備え":"効いた備え",16,6,peakMiss?616:240,28,14,Hex("1a7c63"));
             var potential=r.potentialInvestmentEffects?.FirstOrDefault();
-            string equipment=peakMiss?PeakMissHint(r):best!=null?OpsCatalog.Projects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level:
-                potential!=null?OpsCatalog.Projects[OpsCatalog.Index(potential.projectId)].name+" / 未導入":"次の計画で備えを確認しよう";
+            string equipment=peakMiss?PeakMissHint(r):best!=null?OpsCatalog.AllProjects[OpsCatalog.Index(best.projectId)].name+" Lv."+best.level:
+                potential!=null?OpsCatalog.AllProjects[OpsCatalog.Index(potential.projectId)].name+" / 未導入":"次の計画で備えを確認しよう";
             PText(effect.transform,"ImpactNumbers",equipment,16,34,best==null||peakMiss?616:396,24,peakMiss?13:17);
             if(best==null||peakMiss)IncidentShape(effect.transform,"PotentialEquipmentFrame","dashed",4,4,640,58,Hex("1a7c63"));
             else PText(effect.transform,"ImpactSummary",r.hasInvestmentComparison?"被害 −"+r.avoidedLoss+"万円\n停止 −"+r.avoidedDowntime+"時間":"比較未記録",430,6,200,52,15,Hex("1a7c63"));

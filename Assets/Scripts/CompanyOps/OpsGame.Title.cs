@@ -42,7 +42,7 @@ namespace PatchWorkSecure.CompanyOps
             var caption=PText(screen,"TitleCaption","",620,836,890,30,16,PlanInk,false,true);caption.textWrappingMode=TMPro.TextWrappingModes.NoWrap;
             if(SaveWarning!="")PText(screen,"SaveWarning",SaveWarning,90,864,1420,28,15,Coral,false);
         }
-        private static string TitleFactorName(string id)=>id=="inventory"?"台帳":OpsCatalog.Projects[OpsCatalog.Index(id)].name;
+        private static string TitleFactorName(string id)=>id=="inventory"?"台帳":OpsCatalog.AllProjects[OpsCatalog.Index(id)].name;
         private void EndlessNotice(){Dialog("終わりなき年度","準備中です。解放の記録は保存されています。",340);}
         private Button StoryModeButton(string id,string title,string hint,float y,float h,float size,bool primary,Action action)
         {

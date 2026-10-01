@@ -44,7 +44,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool clueCollected;
         public int IncidentTime=>decisionDepthRules>0&&incidentTimes!=null?incidentTimes[month]:0;
         public string IncidentTimeLabel=>IncidentTime==0?"業務時間":IncidentTime==1?"金曜の夜":"連休中";
-        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?auditKnowledgeAdjustment:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0));
+        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?auditKnowledgeAdjustment:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0)-AdvancedKnowledge);
         public int SituationKnowledge=>OpsCatalog.KnowledgeMax-Blindness;
         public int EventSpread=>CurrentProfile!=null?CurrentProfile.spread:Current.kind=="outage"?OpsCatalog.SpreadNone:new[]{"ransom","supply","vulnerability","identity"}.Contains(Current.kind)?OpsCatalog.SpreadHigh:OpsCatalog.SpreadNormal;
         public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/OpsCatalog.ContainmentOversightDivisor);
@@ -99,7 +99,7 @@ namespace PatchWorkSecure.CompanyOps
         private int CulturalPower => CurrentProfile == null ? Current.kind == "social" ? culture/8 : Current.kind == "leak" ? culture/12 : 0 :
             CurrentProfile.cultureDivisor == 0 ? 0 : culture/CurrentProfile.cultureDivisor;
         private int ContainmentPower => (CurrentProfile == null ? Current.kind == "ransom" || Current.kind == "supply" || Current.kind == "vulnerability" ? 6 : 0 :
-            CurrentProfile.containment) * Level("segment");
+            CurrentProfile.containment) * Level("segment")+AdvancedContainment;
         private int BasicResponsePower(string response) => CurrentProfile == null ? response == "contain" ? Current.kind == "outage" ? 7 : 23 : 5 :
             response == "contain" ? CurrentProfile.stopPower : response == "scope" ? CurrentProfile.scopePower : CurrentProfile.recoverPower;
         public string ResponseName(string response) => CurrentProfile == null ? response == "contain" ? "広範囲の停止・隔離" :

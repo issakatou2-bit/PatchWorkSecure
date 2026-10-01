@@ -21,7 +21,7 @@ namespace PatchWorkSecure.CompanyOps
                 var area=RoomBounds(id);var room=PButton(stage,"Room_"+id,"",area.x,area.y,area.width,area.height,()=>OpenRoomProjects(id),Color.clear,Color.clear,16);
                 Hover(room,RoomName(id)+" / "+(id=="reception"?"社外との連絡・日常業務":"この部屋の設備・運用を整える"));
                 var label=PCard(room.transform,"RoomLabel",8,6,Mathf.Min(area.width-16,132),24,new Color(1,1,1,.92f),12,false);PText(label,"RoomLabelText",RoomName(id),0,0,label.rect.width,24,13,PlanInk,true,true);
-                var ids=OpsCatalog.Projects.Where(p=>ProjectRoom(p.id)==id).Select(p=>p.id).ToArray();
+                var ids=OpsCatalog.AllProjects.Where(p=>State.EquipmentAvailable(OpsCatalog.Index(p.id))&&ProjectRoom(p.id)==id).Select(p=>p.id).ToArray();
                 int placeholders=0,slot=0;
                 for(int i=0;i<ids.Length;i++)
                 {
@@ -46,7 +46,7 @@ namespace PatchWorkSecure.CompanyOps
             if(State.storyCalendarYear>=2)
             {
                 PlanningSatellite(stage,"branch",620,420,210,140,2);
-                if(State.storyCalendarYear>=3)PlanningSatellite(stage,"partners",350,492,194,110,3);
+                if(State.storyCalendarYear>=3)PlanningSatellite(stage,"partners",620,270,210,125,3);
             }
         }
         private void PlanningSatellite(RectTransform stage,string id,float x,float y,float w,float h,int year)
@@ -57,11 +57,18 @@ namespace PatchWorkSecure.CompanyOps
             var shader=Resources.Load<Shader>("OpsOfficeHue");if(shader!=null){var m=new Material(shader){hideFlags=HideFlags.DontSave};m.SetFloat("_Hue",year==3?250:160);m.SetFloat("_Saturation",year==3?.9f:.8f);art.material=m;map.gameObject.AddComponent<OpsTransientMaterial>().Material=m;}
             var button=PButton(stage,"Room_"+id,"",x,y,w,h,()=>OpenRoomProjects(id),Color.clear,Color.clear);
             var label=PCard(button.transform,"RoomLabel",8,7,w-16,26,PlanBlue,12,false);PText(label,"RoomLabelText",RoomName(id),0,0,w-16,26,14,Color.white,true,true);
-            Hover(button,RoomName(id)+" / "+string.Join("・",OpsCatalog.Projects.Where(p=>ProjectRoom(p.id)==id).Select(p=>p.name)));
+            var equipment=OpsCatalog.AllProjects.Where(p=>State.EquipmentAvailable(OpsCatalog.Index(p.id))&&ProjectRoom(p.id)==id).ToArray();
+            for(int i=0;i<equipment.Length;i++)
+            {
+                var p=equipment[i];int level=State.Level(p.id);if(level==0)continue;
+                var device=Box(button.transform,"RoomDevice_"+p.id,16+i*38,h-44,28,30,level==1?Hex("2774a8"):Hex("1a7c63"));
+                for(int n=0;n<2;n++)PCard(device,"DeviceLight"+n,6,8+n*9,16,4,n<level?n==1?Hex("ffd23f"):Hex("5dff9c"):Hex("6b7894"),12,false);
+            }
+            Hover(button,RoomName(id)+" / "+string.Join("・",OpsCatalog.AllProjects.Where(p=>State.EquipmentAvailable(OpsCatalog.Index(p.id))&&ProjectRoom(p.id)==id).Select(p=>p.name)));
         }
         private void OpenRoomProjects(string room)
         {
-            if((room=="branch"||room=="partners")&&!OpsCatalog.Projects.Any(p=>ProjectRoom(p.id)==room))
+            if((room=="branch"||room=="partners")&&!OpsCatalog.AllProjects.Any(p=>ProjectRoom(p.id)==room&&State.EquipmentAvailable(OpsCatalog.Index(p.id))))
             {
                 var company=OpsCatalog.CompanyYear(State.storyCalendarYear);
                 Dialog(RoomName(room),"社員 "+company.employees+"人 / 守る端末 "+company.devices+"台 / 拠点 "+company.branches+"\n"+(room=="branch"?"本社と拠点の接続・端末の備えを整える場所。":"取引先と情報を共有し、事件対応の連絡を整える場所。"),440);return;
@@ -88,7 +95,7 @@ namespace PatchWorkSecure.CompanyOps
         private void ShowInstallation(int index)
         {
             if (!Application.isPlaying) return;
-            var project = OpsCatalog.Projects[index];
+            var project = OpsCatalog.AllProjects[index];
             var map = screen.Find("OfficeStage") as RectTransform;
             if (map == null) return;
             string target = "Room_"+ProjectRoom(project.id);

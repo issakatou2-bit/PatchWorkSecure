@@ -101,8 +101,9 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void StoryEquipmentGrid(RectTransform panel)
         {
-            string[] order={"backup","drill","inventory","mfa","runbook","automation","education","monitor","segment","patch","redundancy"};
-            var installed=order.Select(id=>OpsCatalog.Projects[OpsCatalog.Index(id)]).Where(p=>State.Level(p.id)>0).ToArray();int count=installed.Length+(installed.Length<OpsCatalog.Projects.Length?1:0);Transform grid=panel;
+            string[] order={"backup","drill","inventory","mfa","runbook","automation","education","monitor","segment","patch","redundancy","zeroTrust","edr","threatSharing","csirt"};
+            var available=order.Where(id=>State.EquipmentAvailable(OpsCatalog.Index(id))).ToArray();
+            var installed=available.Select(id=>OpsCatalog.AllProjects[OpsCatalog.Index(id)]).Where(p=>State.Level(p.id)>0).ToArray();int count=installed.Length+(installed.Length<available.Length?1:0);Transform grid=panel;
             if(count>8)
             {
                 var scroll=Rect(panel,"CarryEquipmentScroll",24,244,972,190);var view=PImage(scroll,"Viewport",null,0,0,972,190);view.GetComponent<Image>().raycastTarget=true;view.gameObject.AddComponent<Mask>().showMaskGraphic=false;
@@ -116,8 +117,8 @@ namespace PatchWorkSecure.CompanyOps
                 bool missing=i>=installed.Length;var project=missing?null:installed[i];bool renew=!missing&&State.Level(project.id)>1;
                 Transform parent=count>8?grid.GetChild(i/4):grid;float x=count>8?i%4*246:24+i%4*246,y=count>8?0:254+i/4*76;
                 var eq=PCard(parent,"CarryEquipment"+i,x,y,236,66,renew?Hex("e6f3ff"):Color.white,16,false);var border=eq.gameObject.AddComponent<Outline>();border.effectColor=renew?Hex("7fc4ff"):Hex("e6ebf3");border.effectDistance=new Vector2(2,-2);
-                if(missing){eq.gameObject.AddComponent<CanvasGroup>().alpha=.45f;StoryText(eq,"MissingEquipment","未導入 "+(OpsCatalog.Projects.Length-installed.Length)+"つ",64,10,150,46,14);StoryText(eq,"MissingIcon","＋",12,14,38,38,20,PlanGray,true);continue;}
-                string[] glyph={"戻","練","台","認","手","自","教","監","分","更","代"};string[] colors={"2ec4a0","ffb020","8b7cf6","3fa9f5","ff6f91","f0803c","2f93dc","3fa9f5","3fa9f5","3fa9f5","2ec4a0"};int oi=Array.IndexOf(order,project.id);
+                if(missing){eq.gameObject.AddComponent<CanvasGroup>().alpha=.45f;StoryText(eq,"MissingEquipment","未導入 "+(available.Length-installed.Length)+"つ",64,10,150,46,14);StoryText(eq,"MissingIcon","＋",12,14,38,38,20,PlanGray,true);continue;}
+                string[] glyph={"戻","練","台","認","手","自","教","監","分","更","代","ゼ","E","情","C"};string[] colors={"2ec4a0","ffb020","8b7cf6","3fa9f5","ff6f91","f0803c","2f93dc","3fa9f5","3fa9f5","3fa9f5","2ec4a0","3fa9f5","3fa9f5","3fa9f5","ff6f91"};int oi=Array.IndexOf(order,project.id);
                 var icon=PCard(eq,"EquipmentIcon"+i,12,14,38,38,Hex(colors[oi]),12,false);StoryText(icon,"EquipmentGlyph"+i,glyph[oi],0,0,38,38,15,Color.white,true);
                 // Lv1は短い札なので、設備名へ幅を返す。モックのflexと同じ並び。
                 StoryText(eq,"EquipmentName"+i,project.name,60,8,renew?113:128,50,14,null,false,true);StoryText(eq,"EquipmentLevel"+i,renew?"Lv2→1":"Lv1",renew?172:190,14,renew?60:34,38,15,renew?Hex("1f75b8"):PlanInk,true);
@@ -138,7 +139,7 @@ namespace PatchWorkSecure.CompanyOps
             var worst=State.history.OrderByDescending(r=>r.loss+r.downtime).FirstOrDefault();
             string painful=worst==null?"事件の対応記録なし":OpsCatalog.Months[worst.month].name+" "+(worst.eventTitle??OpsCatalog.Months[worst.month].@event)+"　被害 "+worst.loss+"万円・停止 "+worst.downtime+"時間";
             var potential=State.history.Where(r=>r.potentialInvestmentEffects!=null).SelectMany(r=>r.potentialInvestmentEffects.Select(e=>new{record=r,effect=e})).OrderByDescending(p=>p.effect.avoidedLoss*7+p.effect.avoidedDowntime*4).FirstOrDefault();
-            string next=potential==null?"個別比較の記録なし / 次の計画で備えを確認":OpsCatalog.Projects[OpsCatalog.Index(potential.effect.projectId)].name+"（"+OpsCatalog.Months[potential.record.month].name+"の個別比較：停止 −"+potential.effect.avoidedDowntime+"時間・被害 −"+potential.effect.avoidedLoss+"万円）";
+            string next=potential==null?"個別比較の記録なし / 次の計画で備えを確認":OpsCatalog.AllProjects[OpsCatalog.Index(potential.effect.projectId)].name+"（"+OpsCatalog.Months[potential.record.month].name+"の個別比較：停止 −"+potential.effect.avoidedDowntime+"時間・被害 −"+potential.effect.avoidedLoss+"万円）";
             var best=State.history.Where(r=>r.minigameRecorded&&!r.delegated).GroupBy(r=>StoryMinigameName(r)).OrderByDescending(g=>g.Average(r=>r.minigameScore)).FirstOrDefault();
             string good="山場 "+State.history.Count(r=>r.peakGoalRecorded)+"つ中 "+State.PeakMedals+"つ達成"+(best==null?"・自分で遊んだミニゲームは未記録":"・"+best.Key+" 平均"+Mathf.RoundToInt((float)best.Average(r=>r.minigameScore))+"点");
             StoryFailureRow(panel,"WorstMonth","一番痛かった月",painful,166,Hex("ffe9ee"),Hex("c23a60"));
@@ -154,7 +155,7 @@ namespace PatchWorkSecure.CompanyOps
                 var c=candidates[i];var card=PCard(reward,"FactorPreview"+i,26+i*220,153,206,116,new Color(1,1,1,.1f),20,false);
                 if(i==0)IncidentShape(card,"FactorPreviewBorder","story-outline",0,0,206,116,new Color(1,.824f,.247f,.6f));
                 StoryStars(card,"FactorPreviewStars"+i,c.stars,103-c.stars*12,18);
-                StoryText(card,"FactorPreviewName"+i,OpsCatalog.Projects[OpsCatalog.Index(c.id)].name,12,48,182,32,18,Color.white,true);
+                StoryText(card,"FactorPreviewName"+i,OpsCatalog.AllProjects[OpsCatalog.Index(c.id)].name,12,48,182,32,18,Color.white,true);
                 StoryText(card,"FactorPreviewReason"+i,c.reason,12,84,182,24,12,new Color(1,1,1,.8f),true);
             }
             var ownedHeading=StoryText(reward,"OwnedFactorsHeading","持っている因子",26,292,104,56,13,new Color(1,1,1,.8f));ownedHeading.textWrappingMode=TextWrappingModes.NoWrap;

@@ -11,6 +11,7 @@ namespace PatchWorkSecure.CompanyOps
         private readonly PC[] pcs=new PC[OpsCatalog.ContainmentRooms*OpsCatalog.ContainmentPCsPerRoom];
         private readonly Random random;
         private readonly bool benign;
+        public bool Edr {get;private set;}
         private float accumulated,scanUntil;
         private int scanRoom=-1;
         public int SelectedRoom {get;private set;}
@@ -19,6 +20,8 @@ namespace PatchWorkSecure.CompanyOps
         public float HitStopRemaining {get;private set;}
         public int PCCount=>pcs.Length;
         public int VisibleCount=>Enumerable.Range(0,PCCount).Count(Visible);
+        public int EdrRoomAlerts(int room)=>Edr&&Phase==OpsMinigamePhase.Playing&&room>=0&&room<OpsCatalog.ContainmentRooms?
+            Enumerable.Range(room*OpsCatalog.ContainmentPCsPerRoom,OpsCatalog.ContainmentPCsPerRoom).Count(Visible):0;
         public int StoppedCount=>pcs.Count(p=>p.cut);
         public int NormalStopped=>Phase==OpsMinigamePhase.Result?pcs.Count(p=>p.cut&&!p.infected):0;
         public int TotalInfected=>Phase==OpsMinigamePhase.Result?pcs.Count(p=>p.infected):0;
@@ -28,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
         public event Action<int,int> Spread;
         internal OpsContainmentMinigame(OpsState state,bool isBenign):base("感染の封じ込め",state)
         {
-            benign=isBenign;random=new Random(unchecked(state.seed^((state.month+1)*7919)^0x351ac));
+            benign=isBenign;Edr=state.Level("edr")>0;random=new Random(unchecked(state.seed^((state.month+1)*7919)^0x351ac));
             for(int i=0;i<PCCount;i++)pcs[i]=new PC();
         }
         public override bool Start()
@@ -43,7 +46,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool StoppedInfection(int index)=>pcs[index].cut&&pcs[index].infected;
         public bool Visible(int index)
         {
-            var p=pcs[index];return !p.cut&&p.infected&&(Monitor||Scanning(index/OpsCatalog.ContainmentPCsPerRoom)||Elapsed-p.infectedAt>OpsCatalog.ContainmentRevealSeconds);
+            var p=pcs[index];return !p.cut&&p.infected&&(Monitor||Scanning(index/OpsCatalog.ContainmentPCsPerRoom)||Elapsed-p.infectedAt>(Edr?OpsCatalog.EdrRevealSeconds:OpsCatalog.ContainmentRevealSeconds));
         }
         public bool Suspect(int index)
         {

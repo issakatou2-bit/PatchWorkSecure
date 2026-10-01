@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
                 PImage(card,"FactorIllustration"+i,art[i],(360-w)*.5f,(560-h)*.18f,w,h);
                 IncidentShape(card,"FactorCardShade"+i,"story-card-shade",0,420,360,140,Color.white);
                 StoryStars(card,"FactorStars"+i,c.stars,20,450);
-                var name=StoryText(card,"FactorCardName"+i,OpsCatalog.Projects[OpsCatalog.Index(c.id)].name,20,480,320,40,26,Color.white);name.enableAutoSizing=true;name.fontSizeMin=20;name.textWrappingMode=TextWrappingModes.NoWrap;
+                var name=StoryText(card,"FactorCardName"+i,OpsCatalog.AllProjects[OpsCatalog.Index(c.id)].name,20,480,320,40,26,Color.white);name.enableAutoSizing=true;name.fontSizeMin=20;name.textWrappingMode=TextWrappingModes.NoWrap;
                 StoryText(card,"FactorRecommendation"+i,speakers[i]+"の推薦："+OpsCatalog.FactorRecommendation(c.id),20,520,320,34,14,new Color(1,1,1,.9f),false,true);
                 var foil=PImage(card,"FactorFoil"+i,PlanningArt.shine,-200,0,160,560,new Color(1,1,.85f,.35f));Motion(foil,"shine",3.6f,i*.12f);
                 // 絵の上の透明な操作面。カードはマスクで角丸に切り抜き、別のボタンを重ねる。

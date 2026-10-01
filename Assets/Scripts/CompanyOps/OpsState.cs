@@ -72,7 +72,7 @@ namespace PatchWorkSecure.CompanyOps
         public int QuarterTrustBonus=>rankBenefitRules>0&&trust>=65?1:0;
         public bool CultureEarlySignal=>rankBenefitRules>0&&culture>=50&&month<11;
         public int ForecastRankPrecision=>rankBenefitRules>0&&culture>=65&&!audited?1:0;
-        public int EstimateMargin=>(audited?2:Level("monitor")>0?6:9)-ForecastRankPrecision;
+        public int EstimateMargin=>Math.Max(1,(audited?2:Level("monitor")>0?6:9)-ForecastRankPrecision-AdvancedMarginCut);
         public const int MissionBudgetReward=1;
         public int MissionBudgetOffer=>missionBudgetRules>0?MissionBudgetReward:0;
         public bool situationPrepared;
@@ -102,8 +102,8 @@ namespace PatchWorkSecure.CompanyOps
             }
         }
         public int SituationFatigue => situationPrepared ? 0 : Math.Max(0, Situation.extraFatigue - 4 * Level("runbook"));
-        public int Level(string id) { int i = OpsCatalog.Index(id); return i < 0 ? 0 : levels[i]; }
-        public int Upkeep => OpsCatalog.Projects.Select((p, i) => p.upkeep * levels[i]).Sum();
+        public int Level(string id) { int i = OpsCatalog.Index(id); return i < 0 || i>=levels.Length || !EquipmentAvailable(i) ? 0 : levels[i]; }
+        public int Upkeep => Enumerable.Range(0,levels.Length).Sum(i=>OpsCatalog.AllProjects[i].upkeep*Level(OpsCatalog.AllProjects[i].id));
         public int MonthlyGrant => 20 + trust / 20;
         public int MaxCapacity => 4 + Level("automation") + (growthRules > 0 ? monthExtraCapacity + (supportOrder == "routine" ? 1 : 0) : 0);
         public int Evidence => (audited ? 1 : 0) + (listened ? 1 : 0) + (mapped ? 1 : 0);
@@ -191,9 +191,9 @@ namespace PatchWorkSecure.CompanyOps
             milestones.Add(title); trust = Clamp(trust + OpsCatalog.GrowthTrustReward);
             Note("会社の成長「" + title + "」を達成。経営の信頼 +4。");
         }
-        public int BaseCost(int index) => OpsCatalog.Projects[index].cost + levels[index] * (OpsCatalog.Projects[index].cost / 2);
-        public int Cost(int index) => Math.Max(1, BaseCost(index) - (OpsCatalog.Projects[index].group == Situation.group ? Situation.costDiscount : 0));
-        public int WorkCost(int index) => Math.Max(1, OpsCatalog.Projects[index].time - (OpsCatalog.Projects[index].group == Situation.group ? Situation.timeDiscount : 0));
+        public int BaseCost(int index) => OpsCatalog.AllProjects[index].cost + Level(OpsCatalog.AllProjects[index].id) * (OpsCatalog.AllProjects[index].cost / 2);
+        public int Cost(int index) => Math.Max(1, BaseCost(index) - (OpsCatalog.AllProjects[index].group == Situation.group ? Situation.costDiscount : 0));
+        public int WorkCost(int index) => Math.Max(1, OpsCatalog.AllProjects[index].time - (OpsCatalog.AllProjects[index].group == Situation.group ? Situation.timeDiscount : 0));
         // 購入前の比較専用。予算・履歴・知識・報酬を実際の進行に反映しない。
         public OpsState PreviewUpgrade(int index)
         {
@@ -217,7 +217,8 @@ namespace PatchWorkSecure.CompanyOps
         public string UpgradeBlock(int index)
         {
             if (index < 0 || index >= levels.Length) return "不明な設備です";
-            var p = OpsCatalog.Projects[index];
+            if(!EquipmentAvailable(index))return OpsCatalog.EquipmentFirstYear(index)+"年目から導入できます";
+            var p = OpsCatalog.AllProjects[index];
             if (phase != OpsPhase.Planning) return "整備できるのは計画中です";
             if (levels[index] >= p.max) return "運用定着済み";
             if (!string.IsNullOrEmpty(p.requires) && Level(p.requires) == 0) return "先に「" + OpsCatalog.Projects[OpsCatalog.Index(p.requires)].name + "」が必要";
@@ -228,7 +229,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool Upgrade(int index)
         {
             if (UpgradeBlock(index) != "") return false;
-            var p = OpsCatalog.Projects[index];
+            var p = OpsCatalog.AllProjects[index];
             budget -= Cost(index); capacity -= WorkCost(index); levels[index]++;
             if (p.id == "education") culture = Clamp(culture + 9);
             if (p.id == "mfa") fatigue = Clamp(fatigue + 4);
@@ -281,7 +282,7 @@ namespace PatchWorkSecure.CompanyOps
             GainFromWork(action);
             CheckMilestones(); return true;
         }
-        private int GroupLevels(string group) => OpsCatalog.Projects.Select((p, i) => p.group == group ? levels[i] : 0).Sum();
+        private int GroupLevels(string group) => Enumerable.Range(0,levels.Length).Sum(i=>OpsCatalog.AllProjects[i].group==group?Level(OpsCatalog.AllProjects[i].id):0);
         public bool BeginIncident()
         {
             if (phase != OpsPhase.Planning) return false;
@@ -297,7 +298,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private int Prevention()
         {
-            if (CurrentProfile != null) return CurrentProfile.prevention.Select((weight, i) => weight * levels[i]).Sum() + CulturalPower;
+            if (CurrentProfile != null) return CurrentProfile.prevention.Select((weight, i) => weight * levels[i]).Sum() + CulturalPower + AdvancedPrevention;
             switch (Current.kind)
             {
                 case "identity": return 11 * Level("mfa") + 3 * Level("education");
@@ -356,6 +357,7 @@ namespace PatchWorkSecure.CompanyOps
             int chainLoss = dataLoss ? Math.Min(loss, OpsCatalog.ChainLossPerLevel * chain) : 0;
             int chainStop = Math.Min(downtime, OpsCatalog.ChainStopPerLevel * chain);
             loss -= chainLoss; downtime -= chainStop;
+            downtime=Math.Max(0,downtime-AdvancedStopCut);
             int businessLoss = situationPrepared ? 0 : Math.Min(Situation.stopLossCap, downtime);
             loss += businessLoss;
             int cost = response == "contain" ? OpsCatalog.ContainCost : response == "scope" ? OpsCatalog.ScopeCost+Blindness*OpsCatalog.ScopeCostPerBlind : decisionDepthRules==0?OpsCatalog.LegacyRecoverCost:OpsCatalog.RecoverCost;
@@ -410,13 +412,14 @@ namespace PatchWorkSecure.CompanyOps
                 if (levels[i] == 0) continue;
                 var withoutOne = CopyForComparison(); withoutOne.levels[i] = 0;
                 var comparison = withoutOne.ScoredPreview(response,score,result.forecast);
-                result.investmentEffects.Add(new OpsInvestmentEffect { projectId = OpsCatalog.Projects[i].id, level = levels[i],
+                result.investmentEffects.Add(new OpsInvestmentEffect { projectId = OpsCatalog.AllProjects[i].id, level = levels[i],
                     avoidedLoss = comparison.loss - result.loss, avoidedDowntime = comparison.downtime - result.downtime });
             }
             result.potentialInvestmentEffects = new List<OpsInvestmentEffect>();
             for (int i = 0; i < levels.Length; i++)
             {
-                var project = OpsCatalog.Projects[i];
+                if(!EquipmentAvailable(i))continue;
+                var project = OpsCatalog.AllProjects[i];
                 if (levels[i] > 0 || (!string.IsNullOrEmpty(project.requires) && Level(project.requires) == 0)) continue;
                 var withOne = CopyForComparison(); withOne.levels[i] = 1;
                 var comparison = withOne.ScoredPreview(response,score,result.forecast);
@@ -480,7 +483,7 @@ namespace PatchWorkSecure.CompanyOps
                 budget < -500 || budget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || capacity < 0 || capacity > 8 ||
                 proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0) || (proposalGrant != 0 && !proposed) ||
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
-                levels == null || levels.Length != OpsCatalog.Projects.Length || levels.Any(n => n < 0 || n > 2) ||
+                !ValidYearEquipment() || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Distinct().Count()!=milestones.Count || milestones.Any(t => !GrowthGoals.Any(g=>g.name==t))) return false;
             if (auditKnowledgeAdjustment < -OpsCatalog.AuditExtraKnowledge || auditKnowledgeAdjustment > OpsCatalog.UnauditedBlindness-OpsCatalog.AuditLowRecovery || !audited&&auditKnowledgeAdjustment!=0) return false;

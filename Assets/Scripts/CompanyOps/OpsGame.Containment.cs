@@ -71,9 +71,11 @@ namespace PatchWorkSecure.CompanyOps
             for(int r=0;r<OpsCatalog.ContainmentRooms;r++)
             {
                 bool selected=r==game.SelectedRoom;
+                int detected=game.EdrRoomAlerts(r);
                 containmentRooms[r].GetComponent<Image>().color=selected||game.Scanning(r)?Hex("dff1ff"):Hex("eef3fa");
-                containmentRooms[r].interactable=playing;containmentRooms[r].GetComponent<Outline>().enabled=selected||game.Scanning(r);
-                FindMinigameText("MinigameSelected_"+r).text=selected?"選択中":"部屋を選ぶ";
+                containmentRooms[r].interactable=playing;containmentRooms[r].GetComponent<Outline>().enabled=selected||game.Scanning(r)||detected>0;
+                containmentRooms[r].GetComponent<Outline>().effectColor=detected>0?Hex("e0405f"):Hex("3fa9f5");
+                var roomNote=FindMinigameText("MinigameSelected_"+r);roomNote.text=detected>0?"EDR 検知 "+detected:selected?"選択中":"部屋を選ぶ";roomNote.color=detected>0?Hex("c23a60"):PlanGray;
             }
             for(int i=0;i<game.PCCount;i++)
             {

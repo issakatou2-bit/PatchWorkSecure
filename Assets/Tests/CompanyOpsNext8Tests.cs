@@ -37,7 +37,10 @@ namespace PatchWorkSecure.Tests
         private static void FinishStoryTestYear(OpsState s)
         {
             // 引き継ぎテスト用の強い年度。事件計算と12か月の履歴は実際のルールで作る。
-            for(int i=0;i<s.levels.Length;i++)s.levels[i]=2;s.culture=s.trust=100;s.fatigue=0;s.budget=200;
+            for(int i=0;i<s.levels.Length;i++)s.levels[i]=s.EquipmentAvailable(i)?2:0;s.culture=s.trust=100;s.fatigue=0;
+            // 15設備を全てLv2にする撮影・引き継ぎ用の入力は、追加の維持費も賄う。
+            // 実際の開始予算や難易度は変えない。初年度の入力は従来のまま。
+            s.budget=s.yearGrowthRules>0?400:200;
             while(s.phase!=OpsPhase.Ended)
             {
                 Assert.IsTrue(s.BeginIncident());
@@ -53,7 +56,7 @@ namespace PatchWorkSecure.Tests
             story.state.staffExperience[0]=8;var old=story.state;Assert.IsTrue(story.RecordYear());Assert.IsFalse(story.RecordYear());Assert.IsTrue(story.AdvanceYear());
             Assert.AreEqual(5076,story.state.budget);Assert.AreEqual(64,story.state.trust);Assert.AreEqual(84,story.state.culture);
             CollectionAssert.AreEqual(old.staffExperience,story.state.staffExperience);Assert.AreNotSame(old.staffExperience,story.state.staffExperience);
-            Assert.IsTrue(story.state.levels.All(v=>v==1));Assert.AreEqual(12,story.state.yearPressure);Assert.AreEqual(24,story.state.fatigue);Assert.AreEqual(0,story.state.totalLoss);
+            Assert.IsTrue(story.state.levels.Take(OpsCatalog.BaseEquipmentCount).All(v=>v==1));Assert.IsTrue(story.state.levels.Skip(OpsCatalog.BaseEquipmentCount).All(v=>v==0));Assert.AreEqual(12,story.state.yearPressure);Assert.AreEqual(24,story.state.fatigue);Assert.AreEqual(0,story.state.totalLoss);
             CollectionAssert.AreEqual(story.state.ReportMetrics,story.state.monthStartMetrics);Assert.IsTrue(story.Valid());
             FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());Assert.AreEqual(24,story.state.yearPressure);Assert.AreEqual(0,story.state.month);Assert.IsTrue(story.Valid());
         }

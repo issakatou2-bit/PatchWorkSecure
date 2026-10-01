@@ -152,7 +152,7 @@ namespace PatchWorkSecure.CompanyOps
             Vector2[] rooms={new Vector2(95,110),new Vector2(245,190),new Vector2(280,290),new Vector2(505,300),new Vector2(705,200),new Vector2(760,420),new Vector2(600,235)};
             // 年度で増えた実際の部屋にも泡が届く。抽選・個数・報酬は変えない。
             if(State.storyCalendarYear>=2)rooms[4]=new Vector2(690,465);
-            if(State.storyCalendarYear>=3)rooms[5]=new Vector2(430,520);
+            if(State.storyCalendarYear>=3)rooms[5]=new Vector2(690,310);
             if(kind<7)return rooms[kind];
             var occupied=Enumerable.Range(0,4).Where(i=>State.BubbleKind(i)<7).Select(i=>rooms[State.BubbleKind(i)]).ToList();
             int rareIndex=Enumerable.Range(0,index).Count(i=>State.BubbleKind(i)==7);
@@ -393,7 +393,7 @@ namespace PatchWorkSecure.CompanyOps
                 if(upgrade)Shine(b.transform,w,144);
                 PImage(b.transform,"ActionIcon",upgrade?PlanningArt.upgrade:icons[j],(w-44)/2,22,44,44);
                 PText(b.transform,"ActionTitle",upgrade?"設備を導入":titles[j],8,71,w-16,30,20,upgrade?Hex("4a3200"):PlanInk,true,true);
-                int count=Enumerable.Range(0,OpsCatalog.Projects.Length).Count(i=>State.UpgradeBlock(i)=="");
+                int count=Enumerable.Range(0,State.levels.Length).Count(i=>State.UpgradeBlock(i)=="");
                 PText(b.transform,"ActionEffect",upgrade?"導入できる "+count+"件":block!=""?block:effects[j],6,107,w-12,22,13,upgrade?Hex("5c4000"):colors[j],true,true);
                 // 計画行動に社員の追加効果はないため、経験獲得を「支援」として表示しない。
                 if(!upgrade) Hover(b,titles[j]+" / 1工数");
@@ -463,8 +463,8 @@ namespace PatchWorkSecure.CompanyOps
                 var task=PCard(route,"MissionTask"+(equipment?"A":"B")+row,14,54+row*68,402,58,complete?Hex("e3faf3"):Hex("f3f6fb"),16,false);
                 var check=PCard(task,"TaskCheck",14,16,26,26,complete?tone:Color.white,12,false);var edge=check.gameObject.AddComponent<Outline>();edge.effectColor=complete?tone:Hex("b8c1d3");edge.effectDistance=new Vector2(3,-3);
                 if(complete)IncidentShape(check,"TaskTick","check",5,5,16,16,Color.white);
-                string title=equipment?OpsCatalog.Projects[index].name+"を導入":OpsEventCatalog.ActionName(id);
-                string cost=complete?"済み":equipment?State.Cost(index)+"万円・"+State.WorkCost(index)+"工数"+(string.IsNullOrEmpty(OpsCatalog.Projects[index].requires)?"":" / 前提設備あり"):"1工数";
+                string title=equipment?OpsCatalog.AllProjects[index].name+"を導入":OpsEventCatalog.ActionName(id);
+                string cost=complete?"済み":equipment?State.Cost(index)+"万円・"+State.WorkCost(index)+"工数"+(string.IsNullOrEmpty(OpsCatalog.AllProjects[index].requires)?"":" / 前提設備あり"):"1工数";
                 PText(task,"TaskTitle",title,52,4,336,28,16);PText(task,"TaskCost",cost,52,32,336,22,13,complete?tone:PlanGray,false);row++;
             }
         }

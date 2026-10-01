@@ -64,7 +64,7 @@ namespace PatchWorkSecure.CompanyOps
                 minigame=r.minigameRecorded&&!r.delegated?"対応 "+(r.minigameScore>=OpsCatalog.MinigameS?"S":r.minigameScore>=OpsCatalog.MinigameA?"A":r.minigameScore>=OpsCatalog.MinigameB?"B":"C"):"",
                 monthNotes=State.history.Select(h=>h.peakGoalRecorded?(h.peakGoalMet?"山場突破":"山場未達"):h.eventTitle??"未記録").ToArray()};
             var equipment=State.history.Where(h=>h.investmentEffects!=null).SelectMany(h=>h.investmentEffects).GroupBy(e=>e.projectId).OrderByDescending(g=>g.Sum(e=>e.avoidedLoss*7+e.avoidedDowntime*4)).FirstOrDefault(g=>g.Any(e=>e.avoidedLoss>0||e.avoidedDowntime>0));
-            record.bestEquipment=equipment==null?"比較は未記録":OpsCatalog.Projects[OpsCatalog.Index(equipment.Key)].name;
+            record.bestEquipment=equipment==null?"比較は未記録":OpsCatalog.AllProjects[OpsCatalog.Index(equipment.Key)].name;
             record.bestSupport=State.history.Where(h=>!h.benign&&h.power!=null&&h.power.staff>0).GroupBy(h=>h.power.support.Split('：')[0]).OrderByDescending(g=>g.Sum(h=>h.power.staff)).FirstOrDefault()?.Key??"支援なし";
             if(prior!=null)DiaryPages.Remove(prior);DiaryPages.Add(record);
             // 結末のページは到達したものだけ。未来の月や別の結末は解放しない。

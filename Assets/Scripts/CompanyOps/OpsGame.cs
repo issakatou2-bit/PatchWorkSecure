@@ -107,7 +107,7 @@ namespace PatchWorkSecure.CompanyOps
             bool growth = State.milestones.Count > before;
             string levelUp = LevelUpNotice(oldLevels);
             Save(); Render(); Toast(levelUp != "" ? "LEVEL UP / " + levelUp : growth ? "成長達成 / " + State.milestones.Last() + "・年間 +30点" :
-                OpsCatalog.Projects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました", true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Purchase);
+                OpsCatalog.AllProjects[index].name + " Lv." + State.levels[index] + " / 会社の備えを更新しました", true, growth || levelUp != "" ? OpsCue.Growth : OpsCue.Purchase);
             ShowInstallation(index);
             SpeakRankUp();
         }
@@ -349,9 +349,10 @@ namespace PatchWorkSecure.CompanyOps
             string[] keys = { "all", "protect", "recover", "people", "operations" }, titles = { "すべて", "防御", "復旧", "組織", "運用" };
             for (int i = 0; i < keys.Length; i++) { string key = keys[i]; Button(p, "Filter_" + key, titles[i], 24 + i * 111, 120, 103, 38, () => { roomFilter="";filter = key; Render(); }, filter == key ? Mint : Edge); }
             var list = Scroll(p, 24, 174, 550, 368);
-            for (int i = 0; i < OpsCatalog.Projects.Length; i++)
+            for (int i = 0; i < OpsCatalog.AllProjects.Length; i++)
             {
-                int index = i; var project = OpsCatalog.Projects[i]; if (roomFilter!=""&&ProjectRoom(project.id)!=roomFilter||filter != "all" && project.group != filter) continue;
+                if(!State.EquipmentAvailable(i))continue;
+                int index = i; var project = OpsCatalog.AllProjects[i]; if (roomFilter!=""&&ProjectRoom(project.id)!=roomFilter||filter != "all" && project.group != filter) continue;
                 var card = Box(list, "Project_" + project.id, 0, 0, 532, 147, Panel, true); card.gameObject.AddComponent<LayoutElement>().preferredHeight = 147;
                 Text(card, "ProjectName", project.name + "  <color=#70B4FF>Lv." + State.levels[i] + "</color>", 16, 12, 502, 36, 21);
                 Text(card, "ProjectDescription", project.desc, 16, 51, 502, 34, 16, Muted);
@@ -366,7 +367,8 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ProjectDialog(int index, string response = "scope")
         {
-            var p = OpsCatalog.Projects[index]; string block = State.UpgradeBlock(index);
+            if(!State.EquipmentAvailable(index))return;
+            var p = OpsCatalog.AllProjects[index]; string block = State.UpgradeBlock(index);
             var after = State.PreviewUpgrade(index);
             var d = Dialog(p.name + " / Lv." + State.levels[index] + " → " + Math.Min(2, State.levels[index] + 1),
                 p.effect + (State.Cost(index) < State.BaseCost(index) || State.WorkCost(index) < p.time ?
@@ -400,7 +402,7 @@ namespace PatchWorkSecure.CompanyOps
             for (int i = 0; i < groups.Length; i++)
             {
                 string g = groups[i];
-                bool possible = OpsCatalog.Projects.Select((p, j) => new { p, j }).Any(x => x.p.group == g && State.levels[x.j] < 2 &&
+                bool possible = OpsCatalog.AllProjects.Select((p, j) => new { p, j }).Where(x=>State.EquipmentAvailable(x.j)).Any(x => x.p.group == g && State.levels[x.j] < 2 &&
                     State.capacity - 1 >= State.WorkCost(x.j) && State.budget + 12 + State.Evidence * 3+State.ProposalRankBonus >= State.Cost(x.j) &&
                     (string.IsNullOrEmpty(x.p.requires) || State.Level(x.p.requires) > 0));
                 Button(d, "Propose_" + g, GroupName(g) + "を改善する" + (possible ? "" : " / 今月は工数等が不足"), 32, 260 + i * 51, 552, 44, () => ChooseAction("proposal", g), Edge, possible);

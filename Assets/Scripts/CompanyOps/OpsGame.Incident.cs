@@ -119,13 +119,13 @@ namespace PatchWorkSecure.CompanyOps
             float staffWidth=tagWidth(staffCaption)+(support?22:0),gearRight=928-16-staffWidth-10;
             foreach(int i in relevant)
             {
-                var item=OpsCatalog.Projects[i];string caption=item.name+" Lv."+State.levels[i];float w=tagWidth(caption);if(x+w>gearRight) break;
+                var item=OpsCatalog.AllProjects[i];string caption=item.name+" Lv."+State.levels[i];float w=tagWidth(caption);if(x+w>gearRight) break;
                 var tag=PCard(ready,"Ready_"+item.id,x,15,w,32,PlanMint,12,false);
                 PText(tag,"ReadyLabel_"+item.id,caption,12,0,w-24,32,14,Color.white);x+=w+10;
             }
             foreach(string id in missing.Where(id=>State.Level(id)==0).Take(2))
             {
-                string caption=OpsCatalog.Projects[OpsCatalog.Index(id)].name+" 未導入";float w=tagWidth(caption);if(x+w>gearRight) break;
+                string caption=OpsCatalog.AllProjects[OpsCatalog.Index(id)].name+" 未導入";float w=tagWidth(caption);if(x+w>gearRight) break;
                 var tag=PCard(ready,"Missing_"+id,x,15,w,32,Color.white,12,false);
                 IncidentShape(tag,"MissingFrame_"+id,"round-dashed",0,0,w,32,PlanGray).GetComponent<OpsIncidentGraphic>().StrokeWidth=1;
                 PText(tag,"MissingLabel_"+id,caption,12,0,w-24,32,14,PlanInk);x+=w+10;
@@ -153,7 +153,7 @@ namespace PatchWorkSecure.CompanyOps
                     // 公開見積もりに効く設備だけを表示。未確定の結果は参照しない。
                     int best=working.OrderByDescending(j=>State.EstimateWithoutProject(j,id).lossMax-e.lossMax)
                         .ThenByDescending(j=>State.EstimateWithoutProject(j,id).stopMax-e.stopMax).First();
-                    string label=OpsCatalog.Projects[best].name+"が効く";
+                    string label=OpsCatalog.AllProjects[best].name+"が効く";
                     float badgeWidth=Mathf.Min(w-32,24+label.Length*13);
                     var badge=PCard(card,"PreparedBadge_"+id,w-badgeWidth-16,-14,badgeWidth,27,PlanMint,12,false);
                     PText(badge,"PreparedText_"+id,label,8,0,badgeWidth-16,27,13,Color.white,true,true);
@@ -192,8 +192,8 @@ namespace PatchWorkSecure.CompanyOps
             for(int j=0;j<count;j++)
             {
                 bool more=j==5&&working.Length>6;
-                string text=more?"ほか "+(working.Length-5)+"件":OpsCatalog.Projects[working[j]].name;
-                string key=more?"WorkingMore_"+response:"Working_"+response+"_"+OpsCatalog.Projects[working[j]].id;
+                string text=more?"ほか "+(working.Length-5)+"件":OpsCatalog.AllProjects[working[j]].name;
+                string key=more?"WorkingMore_"+response:"Working_"+response+"_"+OpsCatalog.AllProjects[working[j]].id;
                 var chip=PButton(card,key,text,20+(j%2)*(chipWidth+8),410+(j/2)*27,chipWidth,23,
                     ()=>WorkingEquipmentDetails(response,working),Hex("e3faf3"),Hex("1a7c63"),12);
                 chip.GetComponentInChildren<TextMeshProUGUI>().fontSizeMin=10;
@@ -205,7 +205,7 @@ namespace PatchWorkSecure.CompanyOps
             string body=string.Join("\n\n",working.Select(j=>
             {
                 var absent=State.EstimateWithoutProject(j,response);
-                return OpsCatalog.Projects[j].name+" Lv."+State.levels[j]+"\n外すと見積もり上限：被害 +"+(absent.lossMax-actual.lossMax)+"万円 / 停止 +"+(absent.stopMax-actual.stopMax)+"時間";
+                return OpsCatalog.AllProjects[j].name+" Lv."+State.levels[j]+"\n外すと見積もり上限：被害 +"+(absent.lossMax-actual.lossMax)+"万円 / 停止 +"+(absent.stopMax-actual.stopMax)+"時間";
             }));
             var dialog=Dialog("この方針で働く備え",body+"\n\n設備を一つずつ外した比較です。連携があるため、差は足し合わせません。",Mathf.Min(820,300+working.Length*64));
             var text=dialog.Find("DialogBody").GetComponent<TextMeshProUGUI>();text.fontSize=15;text.fontSizeMin=12;text.fontSizeMax=15;

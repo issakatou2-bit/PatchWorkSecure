@@ -199,7 +199,7 @@ new OpsTerm { id="least", name="最小権限", basic="その仕事に必要な�
 new OpsTerm { id="risk", name="リスクへの対応", basic="すべてに同じ費用をかけず、影響と備える負担を考える。", deep="低減、回避、移転・共有、受容などの選択がある。受容は放置と同義ではなく、残るリスクを把握し、適切な権限で判断する。" },
 new OpsTerm { id="bcp", name="事業継続", basic="システムを直すだけでなく、重要な仕事を続ける・戻すことを考える。", deep="代替業務、役割、連絡、復旧の優先順位などを含む。現場と経営の要求をすり合わせ、訓練で確かめる。" },
 };
-public static int Index(string id) => Array.FindIndex(Projects, p => p.id == id);
+public static int Index(string id) => Array.FindIndex(AllProjects, p => p.id == id);
 public static OpsTerm Term(string id) => Array.Find(Terms, t => t.id == id);
 }
 }

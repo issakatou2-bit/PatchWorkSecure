@@ -22,7 +22,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
             game.StartStory(14);FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());
-            for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;game.State.budget=400;
+            for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=game.State.EquipmentAvailable(i)?2:0;game.State.budget=400;
             for(int m=0;m<3;m++){DiaryTestMonth(game.State);if(game.State.QuarterRewardPending)game.State.ClaimQuarterReward("budget");game.State.NextMonth();}
             DiaryTestMonth(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-good-before");
             string before=JsonUtility.ToJson(game.State);game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-good");

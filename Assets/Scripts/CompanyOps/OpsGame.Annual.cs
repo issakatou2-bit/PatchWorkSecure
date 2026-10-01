@@ -52,7 +52,7 @@ namespace PatchWorkSecure.CompanyOps
             var mvp=ReportPanel("AnnualMvp",610,356,301.33f,174,.12f);
             PText(mvp,"MvpCategory","MVP",20,14,260,26,12,PlanMint);PText(mvp,"MvpHeading","一番効いた備え",20,46,260,26,16,PlanGray);
             var best=summary.Mvp;
-            PText(mvp,"MvpProject",best==null?"有効な備えの記録なし":OpsCatalog.Projects[OpsCatalog.Index(best.id)].name,20,77,260,48,22);
+            PText(mvp,"MvpProject",best==null?"有効な備えの記録なし":OpsCatalog.AllProjects[OpsCatalog.Index(best.id)].name,20,77,260,48,22);
             PText(mvp,"MvpEffects",best==null?"比較は記録がある月のみ":best.activations+"回発動・被害 −"+best.loss+"万円\n停止 −"+best.downtime+"時間（個別比較）",20,126,260,42,14,Hex("1a7c63"));
             var team=ReportPanel("AnnualTeam",929.33f,356,301.33f,174,.16f);PText(team,"TeamCategory","TEAM",20,14,260,26,12,PlanBlue);PText(team,"TeamHeading","活躍した社員",20,46,260,26,16,PlanGray);
             int member=summary.StaffMvp;
@@ -74,7 +74,7 @@ namespace PatchWorkSecure.CompanyOps
         private void StoryRecord()
         {
             StopVoice();string rows=string.Join("\n",Story.records.Select(r=>r.year+"年目  "+r.rank+" / "+r.score+"点 / 被害 "+r.loss+"万円・停止 "+r.stop+"時間 / "+(r.goalMet?"目標達成":"目標未達")));
-            string factor=string.IsNullOrEmpty(Story.earnedFactor)?"":OpsCatalog.Projects[OpsCatalog.Index(Story.earnedFactor)].name;
+            string factor=string.IsNullOrEmpty(Story.earnedFactor)?"":OpsCatalog.AllProjects[OpsCatalog.Index(Story.earnedFactor)].name;
             var d=Dialog(Story.cleared?"3年の本編クリア":"挑戦の記録",rows+"\n\n"+(Story.rewardClaimed?"受け取った因子："+factor:"因子を1つ選んで持ち帰れます。")+"\n次の挑戦の1年目からLv1。最大3枠。"+(Story.cleared?"\nエンドレスの解放を記録しました。本体は今後追加します。":""),560);
             PButton(d,"StoryTitle","タイトルへ",32,490,420,48,StoryTitleOrFactor,PlanPink,Color.white);
         }

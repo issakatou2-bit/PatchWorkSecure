@@ -28,7 +28,7 @@ namespace PatchWorkSecure.CompanyOps
             var steps=new List<ResolutionStep>{new ResolutionStep{name="方針："+ResponseTitles[response],detail=State.CurrentProfile==null?ResponseLines[response]:State.ResponseName(result.response),color=PlanInk}};
             if(result.investmentEffects!=null)
                 foreach(var effect in result.investmentEffects.Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0))
-                    steps.Add(new ResolutionStep{name=OpsCatalog.Projects[OpsCatalog.Index(effect.projectId)].name+" Lv."+effect.level+" 発動",detail=EffectLine(effect),color=PlanMint,equipment=true});
+                    steps.Add(new ResolutionStep{name=OpsCatalog.AllProjects[OpsCatalog.Index(effect.projectId)].name+" Lv."+effect.level+" 発動",detail=EffectLine(effect),color=PlanMint,equipment=true});
             if(!result.benign&&result.power!=null&&result.power.staff>0)
             {
                 string[] parts=result.power.support.Split('：');
@@ -39,7 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             if(result.peakGoalRecorded&&result.peakGoalMet)steps.Add(new ResolutionStep{name="山場の盾",detail="信頼 +"+result.peakTrustChange+" / 予算 +"+result.peakBudgetBonus+"万円 / 年間 +"+result.peakScoreBonus+"点",color=Hex("ba8000"),peak=true});
             var missing=result.potentialInvestmentEffects?.Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0)
                 .OrderByDescending(e=>e.avoidedLoss).ThenByDescending(e=>e.avoidedDowntime).FirstOrDefault();
-            if(missing!=null)steps.Add(new ResolutionStep{name=OpsCatalog.Projects[OpsCatalog.Index(missing.projectId)].name+" 未導入",detail="あれば、"+EffectLine(missing),color=PlanGray,missing=true});
+            if(missing!=null)steps.Add(new ResolutionStep{name=OpsCatalog.AllProjects[OpsCatalog.Index(missing.projectId)].name+" 未導入",detail="あれば、"+EffectLine(missing),color=PlanGray,missing=true});
             return steps;
         }
         private void ResolutionScreen()

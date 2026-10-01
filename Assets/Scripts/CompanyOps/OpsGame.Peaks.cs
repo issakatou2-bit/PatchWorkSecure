@@ -34,7 +34,7 @@ namespace PatchWorkSecure.CompanyOps
             if(effect==null)return "単独の未導入設備では改善なし / 調査・運用・支援も見直そう";
             int i=State.PeakIndex(result.month);
             bool reaches=i>=0&&result.loss-effect.avoidedLoss<=OpsCatalog.PeakLossGoals[i]&&result.downtime-effect.avoidedDowntime<=OpsCatalog.PeakStopGoals[i];
-            return OpsCatalog.Projects[OpsCatalog.Index(effect.projectId)].name+"："+EffectLine(effect)+" / "+(reaches?"あれば目標内":"単独ではまだ未達");
+            return OpsCatalog.AllProjects[OpsCatalog.Index(effect.projectId)].name+"："+EffectLine(effect)+" / "+(reaches?"あれば目標内":"単独ではまだ未達");
         }
         private void PeakMonthlyResult(OpsOutcome result)
         {

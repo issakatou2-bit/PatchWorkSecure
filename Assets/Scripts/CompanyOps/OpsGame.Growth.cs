@@ -30,7 +30,7 @@ namespace PatchWorkSecure.CompanyOps
             Text(badge, "ChainStatusText", level > 0 ? "成立 / " + (goal == 2 ? "相談文化が定着" : "連携 Lv." + level) : "準備中 / 下の項目から計画を確認できます", 16, 7, 720, 30, 20, level > 0 ? Ink : Paper);
             for (int i = 0; i < pairs[goal].Length; i++)
             {
-                int index = OpsCatalog.Index(pairs[goal][i]); var p = OpsCatalog.Projects[index];
+                int index = OpsCatalog.Index(pairs[goal][i]); var p = OpsCatalog.AllProjects[index];
                 string progress = "Lv." + State.levels[index] + " / " + p.max;
                 string cost = State.levels[index] == p.max ? "運用定着済み" : "次段階 " + State.Cost(index) + "万円・" + State.WorkCost(index) + "工数";
                 Button(d, "ChainProject_" + p.id, p.name + "\n<size=17>" + progress + "\n" + cost + "</size>\n<size=14>導入・強化の詳細 ></size>",
@@ -55,7 +55,7 @@ namespace PatchWorkSecure.CompanyOps
             for(int i=0;i<projects.Length;i++)
             {
                 string id=projects[i];int project=OpsCatalog.Index(id),required=i==0?goal.levelA:goal.levelB;
-                PButton(d,"StoryGrowthProject"+i,OpsCatalog.Projects[project].name+"　Lv."+State.Level(id)+" / 必要 Lv."+required,32+i*384,244,364,86,()=>ProjectDialog(project),Color.white,PlanInk);
+                PButton(d,"StoryGrowthProject"+i,OpsCatalog.AllProjects[project].name+"　Lv."+State.Level(id)+" / 必要 Lv."+required,32+i*384,244,364,86,()=>ProjectDialog(project),Color.white,PlanInk);
             }
             if(goal.culture>0)PButton(d,"StoryGrowthTalk","相談文化 "+State.culture+" / "+goal.culture+"　社員との対話",416,244,364,86,()=>ChooseAction("listen"),Color.white,PlanInk);
             if(goal.staffLevel>0)PText(d,"StoryGrowthStaff",(goal.allStaff?"社員3人とも":"社員の誰か1人")+" Lv."+goal.staffLevel+"以上\n"+string.Join("　",Enumerable.Range(0,3).Select(i=>OpsGrowthCatalog.StaffNames[i]+" Lv."+State.StaffLevel(i))),32,348,748,76,18,PlanInk);
@@ -86,7 +86,7 @@ namespace PatchWorkSecure.CompanyOps
                 var card = Box(list, "Effect_" + e.projectId, 0, 0, 720, 79, Panel);
                 card.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 79;
                 card.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(card, "EffectName", OpsCatalog.Projects[OpsCatalog.Index(e.projectId)].name + " Lv." + e.level, 14, 8, 684, 29, 21);
+                Text(card, "EffectName", OpsCatalog.AllProjects[OpsCatalog.Index(e.projectId)].name + " Lv." + e.level, 14, 8, 684, 29, 21);
                 Text(card, "EffectValue", "この整備がなければ  被害 +" + e.avoidedLoss + "万円 / 停止 +" + e.avoidedDowntime + "h", 14, 42, 684, 29, 19,
                     e.avoidedLoss + e.avoidedDowntime > 0 ? Mint : Muted);
             }

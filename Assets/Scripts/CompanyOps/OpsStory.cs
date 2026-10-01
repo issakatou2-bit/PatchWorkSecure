@@ -16,11 +16,12 @@ namespace PatchWorkSecure.CompanyOps
             if(previous!=null)
             {
                 s.storyCalendarYear=year;
+                s.yearGrowthRules=OpsCatalog.YearGrowthVersion;s.levels=new int[OpsCatalog.YearEquipmentCount];
                 // 旧2年目の保存にも対応。初年度の既存抽選を種から復元し、今の年度は引き直さない。
                 var earlier=previous.previousStoryEvents??(year==3?OpsEventCatalog.Schedule(unchecked(yearSeed-(year-1)*OpsCatalog.StorySeedStride),false):new string[0]);
                 s.previousStoryEvents=earlier.Concat(previous.eventSchedule??new string[0]).Distinct().ToArray();
                 s.eventSchedule=OpsEventCatalog.StorySchedule(yearSeed,year,s.previousStoryEvents);
-                for(int i=0;i<s.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
+                for(int i=0;i<previous.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
                 s.staffExperience=(int[])previous.staffExperience.Clone();s.culture=previous.culture;
                 s.trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
                 // 全額繰越。試算用のMax=999を本番の上限にしない。
@@ -39,7 +40,7 @@ namespace PatchWorkSecure.CompanyOps
         // 表示用の個別比較の記録。古い保存のnullは未記録。総効果や報酬には足さない。
         public List<OpsInvestmentEffect> presentationEffects;
         public bool Valid()=>year>=1&&year<=OpsCatalog.StoryYears&&score>=0&&loss>=0&&stop>=0&&OpsStory.RankValue(rank)>=0&&goalMet==(operated&&OpsStory.RankValue(rank)>=OpsStory.RankValue(OpsCatalog.StoryGoals[year-1]))&&
-            (presentationEffects==null||presentationEffects.Count<=OpsCatalog.Projects.Length&&presentationEffects.All(e=>e!=null&&OpsCatalog.Index(e.projectId)>=0&&e.avoidedLoss>=0&&e.avoidedDowntime>=0));
+            (presentationEffects==null||presentationEffects.Count<=OpsCatalog.YearEquipmentCount&&presentationEffects.All(e=>e!=null&&OpsCatalog.Index(e.projectId)>=0&&e.avoidedLoss>=0&&e.avoidedDowntime>=0));
     }
     [Serializable] public sealed class OpsStory
     {
@@ -78,7 +79,7 @@ namespace PatchWorkSecure.CompanyOps
             Action<string,string,int> add=(id,reason,source)=>
             {
                 if(OpsCatalog.Index(id)<0)return;
-                var p=OpsCatalog.Projects[OpsCatalog.Index(id)];
+                var p=OpsCatalog.AllProjects[OpsCatalog.Index(id)];
                 while(!string.IsNullOrEmpty(p.requires))p=OpsCatalog.Projects[OpsCatalog.Index(p.requires)];
                 if(career.factors.Contains(p.id)||result.Any(c=>c.id==p.id)||result.Count>=OpsCatalog.StoryFactorSlots)return;
                 result.Add(new OpsFactorCandidate{id=p.id,reason=reason,sourceYear=source,stars=year});
@@ -110,7 +111,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool endlessUnlocked;
         public List<string> factors=new List<string>();
         public static bool ValidFactors(IEnumerable<string> factors)
-        {if(factors==null)return false;var ids=factors.ToArray();return ids.Length<=OpsCatalog.StoryFactorSlots&&ids.Distinct().Count()==ids.Length&&ids.All(id=>OpsCatalog.Index(id)>=0);}
+        {if(factors==null)return false;var ids=factors.ToArray();return ids.Length<=OpsCatalog.StoryFactorSlots&&ids.Distinct().Count()==ids.Length&&ids.All(id=>OpsCatalog.Index(id)>=0&&OpsCatalog.Index(id)<OpsCatalog.BaseEquipmentCount);}
         public List<OpsDiaryRecord> diary=new List<OpsDiaryRecord>();
         public List<int> seenOpeningYears=new List<int>();
         public bool Valid()=>version==OpsCatalog.StorySaveVersion&&finishedAttempts>=0&&ValidFactors(factors)&&
@@ -119,7 +120,7 @@ namespace PatchWorkSecure.CompanyOps
         // 選択画面はNext-9。満杯のときは指定枠を置換できる。二重受取はしない。
         public bool Claim(OpsStory story,string id,int replaceSlot=-1)
         {
-            if(story==null||!story.Valid()||!story.finished||story.rewardClaimed||!Valid()||OpsCatalog.Index(id)<0)return false;
+            if(story==null||!story.Valid()||!story.finished||story.rewardClaimed||!Valid()||!ValidFactors(new[]{id}))return false;
             if(!factors.Contains(id))
             {
                 if(factors.Count<OpsCatalog.StoryFactorSlots)factors.Add(id);

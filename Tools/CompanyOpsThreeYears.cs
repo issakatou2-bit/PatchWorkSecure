@@ -123,7 +123,7 @@ public static class CompanyOpsThreeYears
         if(inherit!=null)for(int i=0;i<inherit.Length;i++)s.levels[inherit[i]]=Math.Max(s.levels[inherit[i]],1);
         return s;
     }
-    static void PlayYear(OpsState s,Profile p)
+    static void PlayYear(OpsState s,Profile p,Action<OpsState> afterMonth=null)
     {
         var seen=new HashSet<string>();
         while(s.phase!=OpsPhase.Ended)
@@ -133,7 +133,7 @@ public static class CompanyOpsThreeYears
             Check(s.BeginIncident(),"事件開始不能");Check(s.Resolve(Response(s,p,seen)),"対応不能");
             if(p.role!=0||p.depth>0||s.Latest.loss>6)seen.Add(s.Current.lesson);
             if(s.QuarterRewardPending)s.ClaimQuarterReward(p.role==0&&s.budget>30?"capacity":"budget");
-            Check(s.NextMonth(),"次月不能");
+            Check(s.NextMonth(),"次月不能");afterMonth?.Invoke(s);
         }
     }
     // 2年目以降の成長目標を年ごとに替える案（Milestones=1）。1年目の3つを外し、年末の状態で新しい3つを判定した近似。
@@ -179,6 +179,8 @@ public static class CompanyOpsThreeYears
     static readonly string[][] Goals={new[]{"C","C","C"},new[]{"B","B","B"},new[]{"B","B","A"},new[]{"B","A","A"},new[]{"A","A","A"},new[]{"B","A","S"}};
     public static void Main(string[] args)
     {
+        if(args.Length>0&&args[0]=="endless"){RunEndless(args);return;}
+        if(args.Length>0&&args[0]=="diagnose-endless"){DiagnoseEndless(args);return;}
         bool catalogRun=args.Length==1&&args[0]=="production";
         if(catalogRun){P2=OpsCatalog.GrowthStoryPressures[1];P3=OpsCatalog.GrowthStoryPressures[2];Decay=1;BudgetCarryDiv=1;BudgetCarryMax=999;}
         if(args.Length>=3){P2=int.Parse(args[0]);P3=int.Parse(args[1]);Decay=int.Parse(args[2]);}
@@ -217,5 +219,60 @@ public static class CompanyOpsThreeYears
             Console.WriteLine("実数：初回 "+first[3]+"/"+n+"、4回目まで "+byFour[3]+"/"+n);
             if(!probe)Check(100.0*first[3]/n>=35&&100.0*first[3]/n<=45&&100.0*byFour[3]/n>=60&&100.0*byFour[3]/n<=70,"Next-11の目安（初回35〜45%、4回目まで60〜70%）の外です");
         }
+    }
+    static double Quantile(IEnumerable<double> values,double fraction)
+    {var a=values.OrderBy(x=>x).ToArray();return a[(int)Math.Ceiling((a.Length-1)*fraction)];}
+    static void DiagnoseEndless(string[] args)
+    {
+        Production=true;int role=int.Parse(args[1]),depth=int.Parse(args[2]);string dir=args[3];Directory.CreateDirectory(dir);
+        var p=new Profile{role=role,depth=depth,name=Names[role][depth]};var rows=new List<string>{"seed,year,month,phase,budget,upkeep,grant,stability,levels"};int budgetEnds=0,stabilityEnds=0;
+        for(int cohort=0;cohort<100;cohort++)
+        {
+            int seed=14+cohort*997;var factor=Priorities(p,new OpsState(seed,true)).First(id=>string.IsNullOrEmpty(OpsCatalog.AllProjects[OpsCatalog.Index(id)].requires));var run=OpsEndless.Begin(seed,new[]{factor});
+            while(!run.finished)
+            {
+                Check(run.year<=40,"診断で40年を超えた");PlayYear(run.state,p,s=>rows.Add(string.Join(",",new object[]{seed,run.year,s.Latest?.month??s.month,s.phase,s.budget,s.Upkeep,s.MonthlyGrant,s.stability,Cell(string.Join(";",s.levels))})));
+                Check(run.RecordYear()&&run.Valid(),"診断の年度記録不能");if(run.CanAdvance)run.AdvanceYear();
+            }
+            if(run.state.budget<0)budgetEnds++;if(run.state.stability==0)stabilityEnds++;
+        }
+        File.WriteAllLines(Path.Combine(dir,"months.csv"),rows,new UTF8Encoding(true));Console.WriteLine(p.name+" 100挑戦の運営終了：予算不足 "+budgetEnds+" / 安定0 "+stabilityEnds+"（重複あり）");
+    }
+    static void RunEndless(string[] args)
+    {
+        Production=true;int factorCount=args.Length>2?int.Parse(args[2]):1;
+        Check(factorCount>=0&&factorCount<=OpsCatalog.StoryFactorSlots,"因子数が不正");
+        string dir=args.Length>1?args[1]:"Artifacts/Next12/Endless";Directory.CreateDirectory(dir);
+        var rows=new List<string>{"role,depth,policy,cohort,seed,duration_months,completed_years,total_score,overall_rank,end_year"};
+        var summaries=new List<string>{"role,depth,policy,p25_years,median_years,p90_years,max_years,median_score,ss_percent,target_met"};
+        var deepScores=new List<double>();bool targets=true;double maximum=0;
+        Console.WriteLine("終わりなき年度：9方針×100挑戦 / 本編の引き継ぎと同じ / 社員に任せる50点");
+        Console.WriteLine("脅威：1〜3年は確定した本編の値 / 4年以降 "+OpsCatalog.EndlessPressureBase+" + "+OpsCatalog.EndlessPressureLinear+"n + "+OpsCatalog.EndlessPressureQuadratic+"n²");
+        Console.WriteLine("入力仮説：本編クリアで解放済み、因子 "+factorCount+"枠を方針の優先設備から選択。人間の試遊・学習効果ではない。");
+        foreach(int role in Enumerable.Range(0,3))foreach(int depth in Enumerable.Range(0,3))
+        {
+            var p=new Profile{role=role,depth=depth,name=Names[role][depth]};var years=new List<double>();var scores=new List<double>();int ss=0;
+            for(int cohort=0;cohort<100;cohort++)
+            {
+                int seed=14+cohort*997;var factors=Priorities(p,new OpsState(seed,true)).Where(id=>string.IsNullOrEmpty(OpsCatalog.AllProjects[OpsCatalog.Index(id)].requires)).Take(factorCount).ToArray();
+                var run=OpsEndless.Begin(seed,factors);
+                while(!run.finished)
+                {
+                    Check(run.year<=40,"40年を超えた生存例。自動の引退や強制終了で目安に合わせないこと");
+                    PlayYear(run.state,p);Check(run.state.Valid(),p.name+" / "+run.year+"年目の状態が不正");Check(run.RecordYear()&&run.Valid(),"エンドレスの年度記録不能");
+                    if(run.CanAdvance)Check(run.AdvanceYear()&&run.Valid(),"エンドレスの年度引き継ぎ不能");
+                }
+                double duration=run.DurationMonths/(double)OpsCatalog.EndlessMonthsPerYear;years.Add(duration);scores.Add(run.TotalScore);if(depth>0)deepScores.Add(run.TotalScore);
+                string rank=OpsCatalog.EndlessRank(run.TotalScore);if(rank=="SS")ss++;
+                rows.Add(string.Join(",",new object[]{role,depth,Cell(p.name),cohort,seed,run.DurationMonths,run.CompletedYears,run.TotalScore,rank,run.year}));
+            }
+            double q25=Quantile(years,.25),median=Quantile(years,.5),q90=Quantile(years,.9),max=years.Max(),score=Quantile(scores,.5);bool met=median>=(depth==0?2:6)&&median<=(depth==0?4:9);targets&=met;maximum=Math.Max(maximum,max);
+            summaries.Add(string.Join(",",new object[]{role,depth,Cell(p.name),q25.ToString("F2"),median.ToString("F2"),q90.ToString("F2"),max.ToString("F2"),score,ss,met}));
+            Console.WriteLine(p.name+"：25% "+q25.ToString("F2")+"年 / 中央 "+median.ToString("F2")+"年 / 90% "+q90.ToString("F2")+"年 / 最長 "+max.ToString("F2")+"年 / 合計点中央 "+score+" / SS "+ss+"% / 中央の目安 "+(met?"内":"外"));
+        }
+        File.WriteAllLines(Path.Combine(dir,"runs.csv"),rows,new UTF8Encoding(true));File.WriteAllLines(Path.Combine(dir,"summary.csv"),summaries,new UTF8Encoding(true));
+        Console.WriteLine("深度1・2の得点分位：10% "+Quantile(deepScores,.1)+" / 40% "+Quantile(deepScores,.4)+" / 70% "+Quantile(deepScores,.7)+" / 90% "+Quantile(deepScores,.9));
+        Console.WriteLine("中央・最長の目安（15年程度まで、判定上限17年）："+(targets&&maximum<=17?"内":"外"));
+        if(args.Length>3&&args[3]=="check")Check(targets&&maximum<=17,"Next-12の継続年数の目安の外。成功扱いにしないこと");
     }
 }

@@ -13,6 +13,21 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next9Endings_二つの結末と三年の実記録と因子への導線を撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            foreach(bool special in new[]{true,false})
+            {
+                game.StartStory(14);for(int y=1;y<=3;y++){FinishStoryTestYear(game.State);if(y==3&&special){game.State.totalLoss=0;game.State.totalDowntime=0;}if(y==3&&!special)while(game.State.AnnualScore>=OpsCatalog.AnnualS)game.State.totalLoss++;if(y<3)Assert.IsTrue(game.NextStoryYear());}
+                game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture(special?"next9-ending-ss":"next9-ending-a");yield return null;
+                Assert.IsTrue(game.Story.cleared&&game.Career.endlessUnlocked);CheckPointer("StoryRecord");CheckPointer("BackHome");
+                if(special){Assert.IsNotNull(Find<Image>("EndingKeyVisual"));Assert.AreEqual(game.Story.records.Sum(r=>r.score).ToString("N0")+"点",Find<TextMeshProUGUI>("EndingTotalScore").text);}
+                else {CheckPointer("StoryEndless");Click("StoryEndless");StringAssert.Contains("準備中",Find<TextMeshProUGUI>("DialogBody").text);Click("CloseDialog");}
+                var prior=JsonUtility.ToJson(game.State);Click("StoryRecord");yield return null;StringAssert.Contains("3年目",Find<TextMeshProUGUI>("DialogBody").text);Click("StoryTitle");yield return new WaitForSecondsRealtime(1);
+                Assert.IsNotNull(Find<Button>("ConfirmFactor"));Assert.AreEqual(prior,JsonUtility.ToJson(game.State));Click("ConfirmFactor");yield return null;Assert.IsTrue(game.Story.rewardClaimed);CheckText();
+            }
+            Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Next9FactorSelection_明示選択と入替と保存復帰を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.Career.factors.Add("backup");game.StartStory(14);

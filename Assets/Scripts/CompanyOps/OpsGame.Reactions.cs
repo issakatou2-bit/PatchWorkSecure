@@ -89,7 +89,7 @@ namespace PatchWorkSecure.CompanyOps
             if(screen==null||LastReactionId=="")return;
             foreach(var label in screen.GetComponentsInChildren<TextMeshProUGUI>())if(label.name==voiceCaptionTarget)
             {
-                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
+                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
                 if(label.name=="ResolutionReaction")label.fontSizeMin=12;
                 // 字幕に数値通知を重ねない。成果の数値はHUD・月報・発動内訳に残る。
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);

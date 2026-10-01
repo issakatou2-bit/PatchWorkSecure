@@ -65,6 +65,11 @@ namespace PatchWorkSecure.CompanyOps
                 return;
             }
             float t = Mathf.Repeat((Time.unscaledTime - started + Delay) / Period, 1);
+            if(Kind=="ending-kv")
+            {
+                float p=Mathf.Clamp01((Time.unscaledTime-started)/Period);
+                rect.localScale=Vector3.one*Mathf.Lerp(1.12f,1,1-Mathf.Pow(1-p,3));
+            }
             if (Kind == "bob") rect.anchoredPosition = origin + Vector2.up * (5 - 5 * Mathf.Cos(t * Mathf.PI * 2));
             if (Kind == "drift")
             {

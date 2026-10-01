@@ -76,6 +76,11 @@ namespace PatchWorkSecure.CompanyOps
             }
             else if(Kind=="play")Polygon(vh,new[]{new Vector2(r.xMin+w*.2f,r.yMin),new Vector2(r.xMax,r.center.y),new Vector2(r.xMin+w*.2f,r.yMax)},color);
             else if(Kind=="arrow"){Line(vh,new Vector2(r.xMin,r.center.y),new Vector2(r.xMax,r.center.y),2.6f);Line(vh,new Vector2(r.center.x,r.yMax),new Vector2(r.xMax,r.center.y),2.6f);Line(vh,new Vector2(r.center.x,r.yMin),new Vector2(r.xMax,r.center.y),2.6f);}
+            else if(Kind=="story-ending-veil")
+            {
+                float[] y={0,.22f,.55f,1},alpha={.985f,.96f,0,0};
+                for(int i=0;i<3;i++){int s=vh.currentVertCount;Add(vh,new Vector2(r.xMin,r.yMin+y[i]*h),new Color(.114f,.165f,.267f,alpha[i]));Add(vh,new Vector2(r.xMax,r.yMin+y[i]*h),new Color(.114f,.165f,.267f,alpha[i]));Add(vh,new Vector2(r.xMax,r.yMin+y[i+1]*h),new Color(.114f,.165f,.267f,alpha[i+1]));Add(vh,new Vector2(r.xMin,r.yMin+y[i+1]*h),new Color(.114f,.165f,.267f,alpha[i+1]));vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);}
+            }
             else if(Kind=="story-card-shade")
             {
                 int s=vh.currentVertCount;var navy=new Color(.114f,.165f,.267f,.985f);Add(vh,new Vector2(r.xMin,r.yMin),navy);Add(vh,new Vector2(r.xMax,r.yMin),navy);Add(vh,new Vector2(r.xMax,r.yMin+h*.7f),navy);Add(vh,new Vector2(r.xMin,r.yMin+h*.7f),navy);vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);

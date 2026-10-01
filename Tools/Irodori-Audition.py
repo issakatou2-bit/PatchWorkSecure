@@ -325,6 +325,7 @@ ROUND4 += [
 # ①気に入った1本を見本にする ②あいさつを人の会話らしく崩す、の2通りで確かめる。
 CASUAL = ['あ、おはようございます。……きょうも、よろしくお願いしますね。', 'おはようございます。ふふ、きょうは早いんですね。']
 ROUND4 += [
+    ('engf25', 'エンジニアさん　25%速く（1割では声の部分が6〜10%しか縮まず、差が分からなかった）', 'engineer-large-c1-l1.wav', ENG_CAP + CLEAR, 'small', ROUND4[4][5], ['--seed', str(SEED + 4), '--duration-scale', '0.75']),
     ('g-ref22', 'あいさつ：新しい声2の2個目を見本に', 'r4/new2-02.wav', ROUND4[1][3], 'large', GREET + CASUAL, ['--seed', str(SEED + 1)]),
     ('g-ref32', 'あいさつ：新しい声3の2個目を見本に', 'r4/new3-02.wav', ROUND4[2][3], 'large', GREET + CASUAL, ['--seed', str(SEED + 2)]),
     ('g-ref42', 'あいさつ：新しい声4の2個目を見本に', 'r4/new4-02.wav', ROUND4[3][3], 'large', GREET + CASUAL, ['--seed', str(SEED + 3)]),

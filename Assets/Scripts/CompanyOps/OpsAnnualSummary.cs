@@ -13,13 +13,13 @@ namespace PatchWorkSecure.CompanyOps
             public int activations, loss, downtime;
         }
         public readonly List<Project> projects = new List<Project>();
-        public readonly int[] staffSupport = new int[3];
+        public int[] staffSupport = new int[OpsCatalog.OriginalStaffCount];
         public readonly List<string> encountered = new List<string>();
         public Project Mvp => projects.OrderByDescending(p=>p.loss).ThenByDescending(p=>p.downtime).ThenByDescending(p=>p.activations).FirstOrDefault();
         public int StaffMvp => staffSupport.Max()==0 ? -1 : Array.IndexOf(staffSupport,staffSupport.Max());
         public static OpsAnnualSummary From(OpsState state)
         {
-            var summary = new OpsAnnualSummary();
+            var summary = new OpsAnnualSummary{staffSupport=new int[state.StaffCount]};
             foreach (var record in state.history)
             {
                 if (OpsEventCatalog.Event(record.eventId) != null && !summary.encountered.Contains(record.eventId)) summary.encountered.Add(record.eventId);
@@ -31,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
                     project.activations++; project.loss+=effect.avoidedLoss; project.downtime+=effect.avoidedDowntime;
                 }
                 if (record.benign || record.power==null || record.power.staff<=0 || string.IsNullOrEmpty(record.power.support)) continue;
-                for(int i=0;i<3;i++)if(record.power.support.StartsWith(OpsGrowthCatalog.StaffNames[i]+"：",StringComparison.Ordinal)) summary.staffSupport[i]++;
+                for(int i=0;i<summary.staffSupport.Length;i++)if(record.power.support.StartsWith(OpsGrowthCatalog.StaffNames[i]+"：",StringComparison.Ordinal)) summary.staffSupport[i]++;
             }
             return summary;
         }

@@ -28,7 +28,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool quarterRewardClaimed;
         public int monthExtraCapacity, nextMonthExtraCapacity;
         public int PlayerLevel => growthRules == 0 ? 1 : OpsGrowthCatalog.Level(playerExperience, OpsGrowthCatalog.PlayerThresholds);
-        public int StaffLevel(int index) => growthRules == 0 || staffExperience == null ? 1 : OpsGrowthCatalog.Level(staffExperience[index], OpsGrowthCatalog.StaffThresholds);
+        public int StaffLevel(int index) => growthRules == 0 || staffExperience == null || index<0 || index>=staffExperience.Length ? 1 : OpsGrowthCatalog.Level(staffExperience[index], OpsGrowthCatalog.StaffThresholds);
         public int EquipmentLevel => 1 + levels.Sum() / 4;
         // 複数年の本編で、2年目以降の脅威の上乗せ。1年目・旧保存は0で、従来と同じ計算。
         public int yearPressure;
@@ -49,12 +49,13 @@ namespace PatchWorkSecure.CompanyOps
             Note("四半期の山場を完了。報酬 / " + (reward == "budget" ? "改善予算 +" + OpsGrowthCatalog.QuarterBudget + "万円" : "翌月の支援枠 +1工数") + "。");
             return true;
         }
-        public int[] GrowthLevels => new[] { PlayerLevel, StaffLevel(0), StaffLevel(1), StaffLevel(2) };
+        public int[] GrowthLevels => new[]{PlayerLevel}.Concat(Enumerable.Range(0,StaffCount).Select(StaffLevel)).ToArray();
         public string EffectiveSupport => growthRules == 0 ? "none" : supportOrder == "routine" ? "routine" :
             supportOrder == "investigate" || supportOrder == "recover" ? supportOrder :
             (DataRecoveryApplies || RestartApplies) && StaffLevel(2) >= 2 ? "recover" : "investigate";
-        private int SupportMember => EffectiveSupport == "routine" ? 0 : EffectiveSupport == "recover" || Current.kind == "social" ? 2 : 1;
-        public string SupportSummary => growthRules == 0 ? "旧年度 / 育成はニューゲームから" : EffectiveSupport == "routine" ?
+        private int SupportMember => supportMemberChoice>0?supportMemberChoice-1:EffectiveSupport == "routine" ? 0 : EffectiveSupport == "recover" || Current.kind == "social" ? 2 : 1;
+        public string SupportSummary => growthRules == 0 ? "旧年度 / 育成はニューゲームから" : supportMemberChoice>0?
+            OpsGrowthCatalog.StaffNames[SupportMember]+"："+(EffectiveSupport=="routine"?"社員の手順案内を担当 / 今月の工数 +1":EffectiveSupport=="recover"?"業務データ・再開確認 / 復旧対応を支援":"記録の整理・調査補助 / 調査対応を支援") : EffectiveSupport == "routine" ?
             "小川：社員の手順案内を担当 / 今月の工数 +1" : EffectiveSupport == "recover" ?
             "森：業務データ・再開確認 / 復旧対応を支援" : Current.kind == "social" ?
             "森：依頼・承認記録の照合 / 調査対応を支援" : "佐伯：記録の整理・調査補助 / 調査対応を支援";
@@ -65,7 +66,8 @@ namespace PatchWorkSecure.CompanyOps
             if (!string.IsNullOrEmpty(supportOrder)) return "今月の方針は確定済み / 来月変更できます";
             if (!OpsGrowthCatalog.Orders.Contains(order)) return "不明な支援方針です";
             if (order != "auto" && PlayerLevel < 2) return "担当者Lv.2で方針指定を解放";
-            if (order == "routine" && (StaffLevel(0) < 2 || Level("runbook") == 0)) return "小川Lv.2＋引継ぎ手順が必要";
+            int member=supportMemberChoice>0?supportMemberChoice-1:0;
+            if (order == "routine" && (StaffLevel(member) < 2 || Level("runbook") == 0)) return OpsGrowthCatalog.StaffNames[member]+"Lv.2＋引継ぎ手順が必要";
             return "";
         }
         public bool AssignSupport(string order)
@@ -79,7 +81,7 @@ namespace PatchWorkSecure.CompanyOps
         public string PracticeBlock(int member)
         {
             if (growthRules == 0) return "育成ルールは新しい年度で有効です";
-            if (member < 0 || member >= 3) return "不明な社員です";
+            if (member < 0 || member >= StaffCount) return "不明な社員です";
             if (phase != OpsPhase.Planning) return "計画中に練習できます";
             if (practiced) return "共同練習は月1回です";
             if (staffExperience[member] >= OpsGrowthCatalog.StaffThresholds.Last()) return "この試作での習熟上限です";
@@ -105,7 +107,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if (growthRules == 0) return 0;
             int old = staffExperience[index];
-            staffExperience[index] = Math.Min(OpsGrowthCatalog.StaffThresholds.Last(), old + amount);
+            staffExperience[index] = Math.Min(OpsGrowthCatalog.StaffThresholds.Last(), old + amount+(HasJunior&&index==OpsCatalog.OriginalStaffCount&&amount>0?OpsCatalog.JuniorExtraExperience:0));
             return staffExperience[index] - old;
         }
         private void GainFromWork(string action, string project = "")
@@ -115,7 +117,7 @@ namespace PatchWorkSecure.CompanyOps
             if (action == "listen" || project == "runbook") GainStaff(0, 1);
             if (action == "audit" || project == "monitor") GainStaff(1, 1);
             if (action == "map" || project == "drill") GainStaff(2, 1);
-            if (project == "education") for (int i = 0; i < 3; i++) GainStaff(i, 1);
+            if (project == "education") for (int i = 0; i < StaffCount; i++) GainStaff(i, 1);
         }
         public OpsResponsePower ResponsePower(string response)
         {
@@ -148,8 +150,8 @@ namespace PatchWorkSecure.CompanyOps
         private void CompleteGrowth(OpsOutcome result)
         {
             if (growthRules == 0) return;
-            var g = new OpsGrowthResult { playerBefore = PlayerLevel, staffBefore = new[] { StaffLevel(0), StaffLevel(1), StaffLevel(2) },
-                staffXp = new int[3], support = SupportSummary, mentoring = "" };
+            var g = new OpsGrowthResult { playerBefore = PlayerLevel, staffBefore = Enumerable.Range(0,StaffCount).Select(StaffLevel).ToArray(),
+                staffXp = new int[StaffCount], support = SupportSummary, mentoring = "" };
             // 対応を振り返って成長。今回の結果には解決前のレベルを使う。
             g.playerXp = GainPlayer(OpsGrowthCatalog.ReviewXp);
             bool participated = EffectiveSupport == "routine" || result.power.staff > 0;
@@ -157,11 +159,11 @@ namespace PatchWorkSecure.CompanyOps
             int mentor = Array.FindIndex(g.staffBefore, level => level == 3);
             if (mentor >= 0 && Level("runbook") > 0)
             {
-                int junior = Enumerable.Range(0, 3).Where(i => i != mentor).OrderBy(i => staffExperience[i]).First();
+                int junior = Enumerable.Range(0, StaffCount).Where(i => i != mentor).OrderBy(i => staffExperience[i]).First();
                 int xp = GainStaff(junior, 1); g.staffXp[junior] += xp;
-                if (xp > 0) g.mentoring = OpsGrowthCatalog.StaffNames[mentor] + "が" + OpsGrowthCatalog.StaffNames[junior] + "に手順を共有 / 経験 +1";
+                if (xp > 0) g.mentoring = OpsGrowthCatalog.StaffNames[mentor] + "が" + OpsGrowthCatalog.StaffNames[junior] + "に手順を共有 / 経験 +"+xp;
             }
-            g.playerAfter = PlayerLevel; g.staffAfter = new[] { StaffLevel(0), StaffLevel(1), StaffLevel(2) };
+            g.playerAfter = PlayerLevel; g.staffAfter = Enumerable.Range(0,StaffCount).Select(StaffLevel).ToArray();
             result.growth = g;
         }
         private bool ValidGrowth()
@@ -171,20 +173,20 @@ namespace PatchWorkSecure.CompanyOps
                 (nextMonthExtraCapacity > 0 && !quarterRewardClaimed) || (quarterRewardClaimed && (!QuarterPeak || month == 11))) return false;
             if (history != null && !history.All(r => r != null && ValidGrowthResult(r))) return false;
             if (growthRules == 0) return monthExtraCapacity == 0 && nextMonthExtraCapacity == 0;
-            if (playerExperience < 0 || playerExperience > OpsGrowthCatalog.PlayerThresholds.Last() || staffExperience == null || staffExperience.Length != 3 ||
+            if (playerExperience < 0 || playerExperience > OpsGrowthCatalog.PlayerThresholds.Last() || staffExperience == null || staffExperience.Length != StaffCount ||
                 staffExperience.Any(n => n < 0 || n > OpsGrowthCatalog.StaffThresholds.Last()) ||
                 (!string.IsNullOrEmpty(supportOrder) && !OpsGrowthCatalog.Orders.Contains(supportOrder))) return false;
-            if (supportOrder == "routine" && (PlayerLevel < 2 || StaffLevel(0) < 2 || Level("runbook") == 0)) return false;
+            if (supportOrder == "routine" && (PlayerLevel < 2 || StaffLevel(SupportMember) < 2 || Level("runbook") == 0)) return false;
             return true;
         }
-        private static bool ValidGrowthResult(OpsOutcome r)
+        private bool ValidGrowthResult(OpsOutcome r)
         {
             if (r.power != null && (new[] { r.power.basic, r.power.equipment, r.power.field, r.power.player, r.power.staff }.Any(n => n < 0 || n > 200) ||
                 r.power.player > 8 || r.power.staff > 6 || r.power.support == null || r.power.support.Length > 200)) return false;
             var g = r.growth; if (g == null) return true;
             return g.playerBefore >= 1 && g.playerAfter >= g.playerBefore && g.playerAfter <= 5 && g.playerXp >= 0 && g.playerXp <= OpsGrowthCatalog.ReviewXp &&
-                g.staffBefore != null && g.staffAfter != null && g.staffXp != null && g.staffBefore.Length == 3 && g.staffAfter.Length == 3 && g.staffXp.Length == 3 &&
-                Enumerable.Range(0, 3).All(i => g.staffBefore[i] >= 1 && g.staffAfter[i] >= g.staffBefore[i] && g.staffAfter[i] <= 3 && g.staffXp[i] >= 0 && g.staffXp[i] <= 2) &&
+                g.staffBefore != null && g.staffAfter != null && g.staffXp != null && g.staffBefore.Length == StaffCount && g.staffAfter.Length == StaffCount && g.staffXp.Length == StaffCount &&
+                Enumerable.Range(0, StaffCount).All(i => g.staffBefore[i] >= 1 && g.staffAfter[i] >= g.staffBefore[i] && g.staffAfter[i] <= 3 && g.staffXp[i] >= 0 && g.staffXp[i] <= (HasJunior&&i==OpsCatalog.OriginalStaffCount?2*(1+OpsCatalog.JuniorExtraExperience):2)) &&
                 g.support != null && g.support.Length <= 200 && g.mentoring != null && g.mentoring.Length <= 200;
         }
     }
@@ -199,8 +201,8 @@ namespace PatchWorkSecure.CompanyOps
         public const int QuarterBudget = 10;
         // 成長に合わせた追従補正ではなく、全プレイヤー共通の年間負荷。
         public static readonly int[] SeasonPressure = { 0, 0, 4, 0, 0, 6, 4, 6, 12, 4, 14, 20 };
-        public static readonly string[] StaffNames = { "小川", "佐伯", "森" };
-        public static readonly string[] StaffRoles = { "総務 / 社員の窓口", "情シス / 調査補助", "経理 / 業務確認" };
+        public static readonly string[] StaffNames = { "小川", "佐伯", "森", "後輩" };
+        public static readonly string[] StaffRoles = { "総務 / 社員の窓口", "情シス / 調査補助", "経理 / 業務確認", "情シス / ひなたの後輩" };
         public static readonly string[] Orders = { "auto", "routine", "investigate", "recover" };
         public static int Level(int xp, int[] thresholds) => thresholds.Count(n => xp >= n);
         public static string OrderName(string order) => order == "routine" ? "日常対応" : order == "investigate" ? "調査補助" : order == "recover" ? "復旧支援" : "おまかせ";

@@ -90,7 +90,8 @@ namespace PatchWorkSecure.CompanyOps
         private void StoryCarryMetrics(RectTransform panel)
         {
             string[] names={"予算","社員の経験","相談文化","経営の信頼"};int budget=OpsCatalog.StoryInitialBudget+Math.Max(0,State.budget),trust=(State.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
-            string[] values={budget+"<size=15>万円</size>",OpsGrowthCatalog.StaffNames[0]+" Lv"+State.StaffLevel(0)+"　"+OpsGrowthCatalog.StaffNames[1]+" Lv"+State.StaffLevel(1)+"\n"+OpsGrowthCatalog.StaffNames[2]+" Lv"+State.StaffLevel(2),State.culture.ToString(),trust.ToString()};
+            string members=OpsGrowthCatalog.StaffNames[0]+" Lv"+State.StaffLevel(0)+"　"+OpsGrowthCatalog.StaffNames[1]+" Lv"+State.StaffLevel(1)+"\n"+OpsGrowthCatalog.StaffNames[2]+" Lv"+State.StaffLevel(2)+(State.HasJunior?"　"+OpsGrowthCatalog.StaffNames[3]+" Lv"+State.StaffLevel(3):"");
+            string[] values={budget+"<size=15>万円</size>",members,State.culture.ToString(),trust.ToString()};
             string[] hints={"毎年の"+OpsCatalog.StoryInitialBudget+"万円＋残りの"+Math.Max(0,State.budget)+"万円を全額持ち越し","そのまま","そのまま","新しい経営計画で、改めて築く"};
             for(int i=0;i<4;i++)
             {

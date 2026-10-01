@@ -22,7 +22,7 @@ namespace PatchWorkSecure.CompanyOps
                 s.previousStoryEvents=earlier.Concat(previous.eventSchedule??new string[0]).Distinct().ToArray();
                 s.eventSchedule=OpsEventCatalog.StorySchedule(yearSeed,year,s.previousStoryEvents);
                 for(int i=0;i<previous.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
-                s.staffExperience=(int[])previous.staffExperience.Clone();s.culture=previous.culture;
+                s.staffExperience=new int[s.StaffCount];Array.Copy(previous.staffExperience,s.staffExperience,previous.staffExperience.Length);s.culture=previous.culture;
                 s.trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
                 // 全額繰越。試算用のMax=999を本番の上限にしない。
                 s.budget=checked(OpsCatalog.StoryInitialBudget+Math.Max(0,previous.budget));

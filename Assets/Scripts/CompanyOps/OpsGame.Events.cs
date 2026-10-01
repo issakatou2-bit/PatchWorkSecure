@@ -21,7 +21,8 @@ namespace PatchWorkSecure.CompanyOps
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 80);
             var info = Box(d, "TicketBenefit", 32, 204, 752, 112, Ink);
             info.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            Text(info, "TicketBenefitText", "対応の効果 / "+State.TicketEffect+"\n担当："+OpsGrowthCatalog.StaffNames[t.member]+" / 社員経験 +1\n共同対応：1工数・担当者経験 +1 / 委任：0工数", 18, 12, 716, 90, 21, Mint);
+            int member=State.TicketMember,xp=1+(State.HasJunior&&member==OpsCatalog.OriginalStaffCount?OpsCatalog.JuniorExtraExperience:0);
+            Text(info, "TicketBenefitText", "対応の効果 / "+State.TicketEffect+"\n担当："+OpsGrowthCatalog.StaffNames[member]+" / 社員経験 +"+xp+"\n共同対応：1工数・担当者経験 +1 / 委任：0工数", 18, 12, 716, 90, 21, Mint);
             Text(d, "TicketContext", "月1件の任意の仕事です。今月の改善投資と工数を比べて選べます。\n"+
                 "委任には担当社員Lv.2と引継ぎ手順が必要です。\n後回しでも罰則はありません。対応済みの仕事は月報へ残ります。", 32, 341, 748, 105, 20, Ink);
             for (int i=0;i<2;i++)

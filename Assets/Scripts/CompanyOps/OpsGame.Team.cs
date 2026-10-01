@@ -12,7 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         private string LevelUpNotice(int[] before)
         {
             var after = State.GrowthLevels;
-            return string.Join("・", Enumerable.Range(0, 4).Where(i => after[i] > before[i]).Select(i =>
+            return string.Join("・", Enumerable.Range(0, after.Length).Where(i => after[i] > before[i]).Select(i =>
                 (i == 0 ? "担当者" : OpsGrowthCatalog.StaffNames[i - 1]) + " Lv." + before[i] + " → " + after[i]));
         }
 
@@ -23,7 +23,7 @@ namespace PatchWorkSecure.CompanyOps
                 Dialog("旧年度の記録", "この年度のルールは保存時のままです。設備・担当者・社員の育成はニューゲームで有効になります。過去の経験値は後付けしません。", 400);
                 return;
             }
-            var d = Dialog("運用チーム / 育成と支援方針", "調査・対話・業務確認で、担当者と関わった社員が成長。\n共同練習は1工数・月1回。重要な判断はあなたが担当します。", 820);
+            var d = Dialog("運用チーム / 育成と支援方針", "調査・対話・業務確認で、担当者と関わった社員が成長。\n共同練習は1工数・月1回。重要な判断はあなたが担当します。", State.HasJunior?880:820);
             d.Find("DialogBody").GetComponent<RectTransform>().sizeDelta = new Vector2(748, 60);
             var lead = Box(d, "PlayerGrowth", 32, 177, 752, 86, Ink);
             lead.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
@@ -34,35 +34,44 @@ namespace PatchWorkSecure.CompanyOps
             string[] jobs = {
                 "Lv.2＋手順：日常対応 / 工数+1\n対話・手順導入で経験+1",
                 "Lv.2：調査補助 / 抑制力+2\n調査・監視導入で経験+1",
-                "Lv.2：復旧+3 / 依頼照合+2\n業務確認・復元訓練で経験+1"
+                "Lv.2：復旧+3 / 依頼照合+2\n業務確認・復元訓練で経験+1",
+                "Lv.2：調査+2 / 復旧+3\nひなたの支えで経験+1"
             };
-            for (int i = 0; i < 3; i++)
+            if(State.HasJunior){jobs[0]="Lv.2＋手順：工数+1\n対話・手順で経験+1";jobs[1]="Lv.2：調査の抑制力+2\n調査・監視で経験+1";jobs[2]="Lv.2：復旧+3／照合+2\n業務確認・訓練で経験+1";}
+            float width=State.HasJunior?180:244,stride=State.HasJunior?190:254;
+            for (int i = 0; i < State.StaffCount; i++)
             {
                 int member = i;
-                var card = Box(d, "TeamMember" + i, 32 + 254 * i, 281, 244, 201, Panel, true);
+                var card = Box(d, "TeamMember" + i, 32 + stride * i, 281, width, State.HasJunior?218:201, Panel, true);
                 card.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(card, "TeamRole" + i, OpsGrowthCatalog.StaffRoles[i], 14, 10, 216, 24, 15, Muted);
-                Text(card, "TeamLevel" + i, OpsGrowthCatalog.StaffNames[i] + "  Lv." + State.StaffLevel(i), 14, 40, 216, 36, 27, StaffColor);
-                Text(card, "TeamExperience" + i, OpsGrowthCatalog.ExperienceText(State.staffExperience[i], OpsGrowthCatalog.StaffThresholds), 14, 81, 216, 23, 17);
-                var track = Box(card, "ExperienceTrack", 14, 110, 216, 5, Edge); track.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
+                Text(card, "TeamRole" + i, OpsGrowthCatalog.StaffRoles[i], 14, 10, width-28, 24, State.HasJunior?12:15, Muted);
+                Text(card, "TeamLevel" + i, OpsGrowthCatalog.StaffNames[i] + "  Lv." + State.StaffLevel(i), 14, 40, width-28, 36, State.HasJunior?22:27, StaffColor);
+                Text(card, "TeamExperience" + i, OpsGrowthCatalog.ExperienceText(State.staffExperience[i], OpsGrowthCatalog.StaffThresholds), 14, 81, width-28, 23, State.HasJunior?14:17);
+                var track = Box(card, "ExperienceTrack", 14, 110, width-28, 5, Edge); track.GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
                 float fill = State.StaffLevel(i) == 3 ? 1 : (State.staffExperience[i] - OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i) - 1]) /
                     (float)(OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i)] - OpsGrowthCatalog.StaffThresholds[State.StaffLevel(i) - 1]);
-                if (fill > 0) Box(card, "ExperienceFill", 14, 110, 216 * fill, 5, StaffColor).GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
-                Text(card, "TeamJob" + i, jobs[i], 14, 119, 216, 40, 14, Muted);
+                if (fill > 0) Box(card, "ExperienceFill", 14, 110, (width-28) * fill, 5, StaffColor).GetComponent<UnityEngine.UI.Image>().raycastTarget = false;
+                Text(card, "TeamJob" + i, jobs[i], 14, 119, width-28, State.HasJunior?51:40, State.HasJunior?12:14, Muted);
                 string block = State.PracticeBlock(i);
-                Button(card, "Practice_" + i, block == "" ? "共同練習 / 経験+2" : block, 10, 163, 224, 34, () => PracticeWith(member), Edge, block == "");
+                var practice=Button(card, "Practice_" + i, block == "" ? "共同練習 / 経験+"+(OpsGrowthCatalog.PracticeXp+(i==OpsCatalog.OriginalStaffCount?OpsCatalog.JuniorExtraExperience:0)) : block, 10, State.HasJunior?180:163, width-20, 34, () => PracticeWith(member), Edge, block == "");
+                if(State.HasJunior){var label=practice.GetComponentInChildren<TextMeshProUGUI>();label.fontSizeMax=13;label.fontSizeMin=11;}
             }
             Text(d, "TeamOrderHeading", string.IsNullOrEmpty(State.supportOrder) ? "今月の支援方針 / 確定は1回・工数不要" :
-                "今月は「" + OpsGrowthCatalog.OrderName(State.supportOrder) + "」 / 来月変更できます", 32, 493, 750, 29, 19, Ink);
+                "今月は「" + OpsGrowthCatalog.OrderName(State.supportOrder) + "」 / 来月変更できます", 32, State.HasJunior?509:493, 750, 29, 19, Ink);
+            if(State.HasJunior)for(int i=-1;i<State.StaffCount;i++)
+            {
+                int member=i;var pick=Button(d,"SupportMember_"+(i<0?"auto":i.ToString()),i<0?"担当はおまかせ":OpsGrowthCatalog.StaffNames[i],32+(i+1)*152,548,144,34,()=>SelectTeamMember(member),State.supportMemberChoice==i+1?Mint:Edge,State.phase==OpsPhase.Planning&&string.IsNullOrEmpty(State.supportOrder));
+                var label=pick.GetComponentInChildren<TextMeshProUGUI>();label.fontSizeMax=16;label.fontSizeMin=14;
+            }
             string[] descriptions = { "相談内容に応じて調査／復旧を選ぶ", "社員の手順案内 / 今月の工数+1", "記録整理・照合 / 停止か限定対応に加算", "業務データ・再開確認 / 復旧対応に加算" };
             for (int i = 0; i < 4; i++)
             {
                 string order = OpsGrowthCatalog.Orders[i], block = State.SupportBlock(order);
                 string detail = block == "" || !string.IsNullOrEmpty(State.supportOrder) ? descriptions[i] : block;
                 Button(d, "Support_" + order, OpsGrowthCatalog.OrderName(order) + "\n<size=14>" + detail + "</size>",
-                    32 + i % 2 * 384, 532 + i / 2 * 61, 368, 54, () => SetSupport(order), State.supportOrder == order ? Mint : Edge, block == "");
+                    32 + i % 2 * 384, (State.HasJunior?602:532) + i / 2 * 61, 368, 54, () => SetSupport(order), State.supportOrder == order ? Mint : Edge, block == "");
             }
-            Text(d, "TeamOrderHelp", "未指定ならおまかせ。日常対応を選んだ月は事件対応への加算なし。\n社員Lv.3＋手順で他の社員へ経験+1。佐伯Lv.3＋台帳＋手順で記録整理+2。\n教育の導入・強化は全員の経験+1。レベルはゲーム内の習熟度です。", 32, 665, 752, 72, 16, Ink);
+            Text(d, "TeamOrderHelp", State.HasJunior?"後輩も支援・日常チケットの委任を担当。担当を選んで方針を確定。\nひなたの支えで後輩の成長に経験+1。日常対応の月は事件加算なし。\n社員Lv.3＋手順で手順を共有。レベルはゲーム内の習熟度です。":"未指定ならおまかせ。日常対応を選んだ月は事件対応への加算なし。\n社員Lv.3＋手順で他の社員へ経験+1。佐伯Lv.3＋台帳＋手順で記録整理+2。\n教育の導入・強化は全員の経験+1。レベルはゲーム内の習熟度です。", 32, State.HasJunior?735:665, 752, 72, 16, Ink);
         }
         private void PracticeWith(int member)
         {
@@ -155,7 +164,7 @@ namespace PatchWorkSecure.CompanyOps
             if (g == null) return "この記録には社員・担当者の経験値の内訳がありません。";
             string result = g.playerXp == 0 && g.playerAfter == 5 ? "あなた Lv.5 / 習熟MAX" :
                 "あなた 経験 +" + g.playerXp + " / Lv." + g.playerBefore + (g.playerAfter > g.playerBefore ? " → " + g.playerAfter + "  LEVEL UP" : "");
-            for (int i = 0; i < 3; i++) if (g.staffXp[i] > 0)
+            for (int i = 0; i < g.staffXp.Length; i++) if (g.staffXp[i] > 0)
                 result += "\n" + OpsGrowthCatalog.StaffNames[i] + " 経験 +" + g.staffXp[i] + " / Lv." + g.staffBefore[i] + (g.staffAfter[i] > g.staffBefore[i] ? " → " + g.staffAfter[i] + "  LEVEL UP" : "");
             return result;
         }

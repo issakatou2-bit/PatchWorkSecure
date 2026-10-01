@@ -44,7 +44,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool clueCollected;
         public int IncidentTime=>decisionDepthRules>0&&incidentTimes!=null?incidentTimes[month]:0;
         public string IncidentTimeLabel=>IncidentTime==0?"業務時間":IncidentTime==1?"金曜の夜":"連休中";
-        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?auditKnowledgeAdjustment:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0)-AdvancedKnowledge);
+        public int Blindness=>decisionDepthRules==0?0:Math.Max(0,(audited?auditKnowledgeAdjustment:OpsCatalog.UnauditedBlindness)+(Level("monitor")==0?OpsCatalog.MissingEvidenceBlindness:0)+(Level("inventory")==0?OpsCatalog.MissingEvidenceBlindness:0)-(clueCollected?OpsCatalog.ClueBlindnessCut:0)-AdvancedKnowledge-EngineerKnowledgeGain);
         public int SituationKnowledge=>OpsCatalog.KnowledgeMax-Blindness;
         public int EventSpread=>CurrentProfile!=null?CurrentProfile.spread:Current.kind=="outage"?OpsCatalog.SpreadNone:new[]{"ransom","supply","vulnerability","identity"}.Contains(Current.kind)?OpsCatalog.SpreadHigh:OpsCatalog.SpreadNormal;
         public int ScopeOversight=>decisionDepthRules==0?0:Math.Max(0,Blindness*EventSpread*OpsCatalog.BlindLossPerPoint-ContainmentPower/OpsCatalog.ContainmentOversightDivisor);
@@ -114,7 +114,7 @@ namespace PatchWorkSecure.CompanyOps
             if (phase != OpsPhase.Planning) return "計画中に対応できます";
             if (!string.IsNullOrEmpty(ticketResolution)) return "今月のチケットは対応済み";
             if (!delegateToStaff) return capacity < 1 ? "今月の工数が足りません" : "";
-            return StaffLevel(Ticket.member) < 2 || Level("runbook") == 0 ? OpsGrowthCatalog.StaffNames[Ticket.member]+"Lv.2＋引継ぎ手順が必要" : "";
+            return StaffLevel(TicketMember) < 2 || Level("runbook") == 0 ? OpsGrowthCatalog.StaffNames[TicketMember]+"Lv.2＋引継ぎ手順が必要" : "";
         }
         public bool ResolveTicket(bool delegateToStaff)
         {
@@ -123,8 +123,8 @@ namespace PatchWorkSecure.CompanyOps
             if (!delegateToStaff) { capacity--; GainPlayer(1); }
             ticketResolution = delegateToStaff ? "delegate" : "self";
             budget += t.cash; culture=Clamp(culture+t.culture); trust=Clamp(trust+t.trust); fatigue=Clamp(fatigue-t.relief);
-            int xp = GainStaff(t.member, 1); Learn(t.lesson);
-            Note("日常チケット「"+t.title+"」完了 / "+(delegateToStaff ? OpsGrowthCatalog.StaffNames[t.member]+"に任せた / 担当者の工数0" : "共同対応 / 1工数")+
+            int xp = GainStaff(TicketMember, 1); Learn(t.lesson);
+            Note("日常チケット「"+t.title+"」完了 / "+(delegateToStaff ? OpsGrowthCatalog.StaffNames[TicketMember]+"に任せた / 担当者の工数0" : "共同対応 / 1工数")+
                 " / "+TicketEffect+" / 社員経験 +"+xp+"。");
             CheckMilestones(); return true;
         }

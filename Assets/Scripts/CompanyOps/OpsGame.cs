@@ -397,13 +397,13 @@ namespace PatchWorkSecure.CompanyOps
         private static string GroupName(string group) => group == "protect" ? "防御" : group == "recover" ? "復旧" : group == "people" ? "組織" : "運用";
         private void Proposal()
         {
-            var d = Dialog("追加予算の申請", "追加予算 +" + (12 + State.Evidence * 3+State.ProposalRankBonus) + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5。未達は信頼 -7・交付額を全額返却。", 560);
+            var d = Dialog("追加予算の申請", "追加予算 +" + State.ProposalOffer + "万円 / 1工数\n今月、提案後に選んだ分野の整備が必要。\n達成で信頼 +5。未達は信頼 -7・交付額を全額返却。"+(State.SecretaryProposalBonus>0?"\nかのんの後押し / 山場の予算 +"+State.SecretaryProposalBonus+"万円を含む":""), 560);
             string[] groups = { "recover", "protect", "people", "operations" };
             for (int i = 0; i < groups.Length; i++)
             {
                 string g = groups[i];
                 bool possible = OpsCatalog.AllProjects.Select((p, j) => new { p, j }).Where(x=>State.EquipmentAvailable(x.j)).Any(x => x.p.group == g && State.levels[x.j] < 2 &&
-                    State.capacity - 1 >= State.WorkCost(x.j) && State.budget + 12 + State.Evidence * 3+State.ProposalRankBonus >= State.Cost(x.j) &&
+                    State.capacity - 1 >= State.WorkCost(x.j) && State.budget + State.ProposalOffer >= State.Cost(x.j) &&
                     (string.IsNullOrEmpty(x.p.requires) || State.Level(x.p.requires) > 0));
                 Button(d, "Propose_" + g, GroupName(g) + "を改善する" + (possible ? "" : " / 今月は工数等が不足"), 32, 260 + i * 51, 552, 44, () => ChooseAction("proposal", g), Edge, possible);
             }

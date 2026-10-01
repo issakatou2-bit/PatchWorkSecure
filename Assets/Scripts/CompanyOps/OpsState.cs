@@ -182,7 +182,7 @@ namespace PatchWorkSecure.CompanyOps
             var steps=new List<bool>{Level(goal.projectA)>=goal.levelA};
             if(!string.IsNullOrEmpty(goal.projectB))steps.Add(Level(goal.projectB)>=goal.levelB);
             if(goal.culture>0)steps.Add(culture>=goal.culture);
-            if(goal.staffLevel>0)steps.Add(goal.allStaff?Enumerable.Range(0,3).All(i=>StaffLevel(i)>=goal.staffLevel):Enumerable.Range(0,3).Any(i=>StaffLevel(i)>=goal.staffLevel));
+            if(goal.staffLevel>0)steps.Add(goal.allStaff?Enumerable.Range(0,StaffCount).All(i=>StaffLevel(i)>=goal.staffLevel):Enumerable.Range(0,StaffCount).Any(i=>StaffLevel(i)>=goal.staffLevel));
             return steps.ToArray();
         }
         private void Award(string title, bool achieved)
@@ -276,7 +276,7 @@ namespace PatchWorkSecure.CompanyOps
                     Note(Situation.action + " / 今月の" + (Situation.stopLossCap > 0 ? "停止に伴う追加損失" : "少人数対応による追加疲労") + "を防ぐ準備ができた。" +
                         (Situation.extraFatigue > 0 ? "休息も確保し、疲労 -18。" : "")); break;
                 case "proposal": proposed = true; promiseGroup = group; promiseBaseline = GroupLevels(group);
-                    int grant = 12 + Evidence * 3+ProposalRankBonus; proposalGrant = grant; budget += grant;
+                    int grant = ProposalOffer; proposalGrant = grant; budget += grant;
                     Note("根拠を示した提案で追加予算 +" + grant + "万円。今月中に約束した分野の整備を1段階進めよう。"); break;
             }
             GainFromWork(action);
@@ -463,6 +463,7 @@ namespace PatchWorkSecure.CompanyOps
             culture = Clamp(culture + 2 * Level("education") - 1);
             stability = Clamp(stability + 3);
             supportOrder = ""; practiced = false;
+            engineerRequested=false;supportMemberChoice=0;
             monthExtraCapacity = nextMonthExtraCapacity; nextMonthExtraCapacity = 0; quarterRewardClaimed = false;
             capacity = MaxCapacity;
             audited = listened = mapped = rested = proposed = false; auditKnowledgeAdjustment=0; promiseGroup = ""; promiseBaseline = 0; proposalGrant = 0;
@@ -481,13 +482,13 @@ namespace PatchWorkSecure.CompanyOps
             if(rankBenefitRules<0||rankBenefitRules>1||rankQuarterBonusPaid<0||rankQuarterBonusPaid>1||rankQuarterBonusPaid>0&&(!quarterRewardClaimed||!QuarterPeak))return false;
             if (version != SaveVersion || situationRules < 0 || situationRules > 1 || month < 0 || month > 11 || !Enum.IsDefined(typeof(OpsPhase), phase) ||
                 budget < -500 || budget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || capacity < 0 || capacity > 8 ||
-                proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0) || (proposalGrant != 0 && !proposed) ||
+                proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0)+SecretaryProposalBonus || (proposalGrant != 0 && !proposed) ||
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
                 !ValidYearEquipment() || levels.Any(n => n < 0 || n > 2) ||
                 history == null || history.Count > 12 || journal == null || journal.Count > 250 || learned == null || learned.Count > OpsCatalog.Terms.Length ||
                 milestones == null || milestones.Count > 3 || milestones.Distinct().Count()!=milestones.Count || milestones.Any(t => !GrowthGoals.Any(g=>g.name==t))) return false;
             if (auditKnowledgeAdjustment < -OpsCatalog.AuditExtraKnowledge || auditKnowledgeAdjustment > OpsCatalog.UnauditedBlindness-OpsCatalog.AuditLowRecovery || !audited&&auditKnowledgeAdjustment!=0) return false;
-            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || !ValidPeaks() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
+            if (!ValidGrowth() || !ValidEvents() || !ValidDecisionDepth() || !ValidBubbles() || !ValidPeaks() || !ValidYearAllies() || capacity > MaxCapacity || !ValidReportMetrics(monthStartMetrics)) return false;
             if (completedMissions != null && (completedMissions.Count > 12 || completedMissions.Distinct().Count() != completedMissions.Count ||
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;

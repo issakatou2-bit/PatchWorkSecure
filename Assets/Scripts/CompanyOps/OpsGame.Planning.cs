@@ -91,6 +91,13 @@ namespace PatchWorkSecure.CompanyOps
                 var time=PCard(stage,"PlanningTimeBadge",250,16,146,34,State.IncidentTime>0?Hex("5a4a9a"):PlanBlue,12,false);
                 PText(time,"PlanningTimeLabel",State.IncidentTimeLabel,0,0,146,34,14,Color.white,true,true);
             }
+            if(State.HasYearAllies)
+            {
+                string block=State.EngineerResearchBlock;
+                var research=PButton(stage,"EngineerResearch",State.engineerRequested?"エンジニアさん / 調査済み":"調査を頼む / 0工数",414,16,240,34,RequestEngineer,Color.white,PlanInk,16,null,block=="");
+                research.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
+                Hover(research,block==""?"エンジニアさん / 月1回・状況の把握 +"+OpsCatalog.EngineerKnowledge+"。侵害の確定ではありません。":block);
+            }
             if(State.CultureEarlySignal)
             {
                 var upcoming=State.EventAt(State.month+1);string category=upcoming==null?"システムの運用":OpsEventCatalog.Profile(upcoming.profile).category;

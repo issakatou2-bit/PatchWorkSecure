@@ -54,6 +54,7 @@ namespace PatchWorkSecure.CompanyOps
         private void ContinueSaved()=>RestoreProgress(savedProgress??new OpsProgress{single=saved,career=Career});
         private void RecordStoryOutcome()
         {
+            if(State!=null&&Career.RecordBoss(State,State.Latest))Save();
             if(Story==null||State.phase!=OpsPhase.Ended)return;
             bool changed=Story.RecordYear();
             if(Story.cleared&&!Career.endlessUnlocked){Career.endlessUnlocked=true;changed=true;}
@@ -412,6 +413,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             Text(p, "NotebookTitle", "運用・セキュリティの知識", 24, 84, 550, 40, 27);
             Text(p, "NotebookIntro", "読むための工数は不要。数値はゲーム用の簡略モデル。", 24, 136, 550, 56, 18, Muted);
+            if(State.yearGrowthRules>0||(Career.defeatedBosses?.Count??0)>0)
+                Button(p,"BossArchive","強敵の記録 / "+(Career.defeatedBosses?.Count??0)+"体",24,640,550,48,BossArchive,Edge);
             var list = Scroll(p, 24, 199, 550, 419);
             foreach (var term in OpsCatalog.Terms)
             {

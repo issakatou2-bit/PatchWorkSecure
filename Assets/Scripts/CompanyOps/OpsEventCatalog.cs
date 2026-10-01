@@ -23,7 +23,7 @@ namespace PatchWorkSecure.CompanyOps
         public string id, title, request, lesson, source;
         public int member, cash, culture, trust, relief;
     }
-    public static class OpsEventCatalog
+    public static partial class OpsEventCatalog
     {
         // 順位は発生確率・危険度ではない。公式の脅威区分との対応だけを持つ。
         public static readonly string[] ThreatNames = { "ランサム攻撃", "サプライチェーン・委託先", "AI利用のリスク", "脆弱性悪用", "標的型攻撃",
@@ -116,7 +116,7 @@ namespace PatchWorkSecure.CompanyOps
             E("y3-passkey","change","パスキーに切り替えたら","認証方式の切替で、社員がログインできなくなった事例。","パスワードをやめられるなら、やってほしい。","佐伯：古い端末の社員が、新しい方式に対応していません。","切替の翌朝、ログインできない問い合わせが集中。","対象端末・移行手順・代替の手段を確認。","良い仕組みも、移行の段取りが要る。戻し方と代替の道を先に用意する。",new int[0],operational:true),
             E("y3-final","ransom","3年目の総決算","取引先として狙われ、暗号化と情報の持ち出しを同時に受けた事例。","3年でここまで来た。この会社、守り切れるか？","ひなた：先輩、全部の拠点で同時に異常が出てます！","複数の拠点で同時にファイルの異常と大量の外向き通信。","記録の保全、範囲の特定、復元元の健全性を確認。","3年かけて積んだ備えは、この日のためにある。",new[]{1,5})
         };
-        public static OpsEvent Event(string id) => Array.Find(Events, e => e.id == id)??Array.Find(StoryEvents,e=>e.id==id);
+        public static OpsEvent Event(string id) => Array.Find(Events, e => e.id == id)??Array.Find(StoryEvents,e=>e.id==id)??Array.Find(BossEvents,e=>e.id==id);
         public static OpsEventProfile Profile(string id) => Array.Find(Profiles, p => p.id == id);
         public static string ProjectNames(OpsEventProfile p) => OpsCatalog.Projects[OpsCatalog.Index(p.projectA)].name + "＋" + OpsCatalog.Projects[OpsCatalog.Index(p.projectB)].name;
         public static string ActionName(string action) => action == "audit" ? "現状調査" : action == "listen" ? "社員との対話" : "重要業務の確認";
@@ -168,13 +168,14 @@ namespace PatchWorkSecure.CompanyOps
         }
         public static int StoryWeight(int year,string profile)=>year==2&&new[]{"supply","ai","remote","sharing","session"}.Contains(profile)||
             year==3&&new[]{"ransom","targeted","bec","claim","ddos"}.Contains(profile)?OpsCatalog.StoryThemeWeight:1;
-        public static string[] StorySchedule(int seed,int year,string[] used)
+        public static string[] StorySchedule(int seed,int year,string[] used,bool bosses=false)
         {
             if(year==1)return Schedule(seed,false);
             if(year<2||year>OpsCatalog.StoryYears)throw new ArgumentException("年度が不正です");
             var previous=used??new string[0];var result=new string[12];
             result[0]=year==2?"y2-branch":"y3-audit-mail";if(year==3)result[11]="y3-final";
             var fixedIds=new[]{"y2-branch","y3-audit-mail","y3-final"};
+            if(bosses)foreach(var rival in OpsCatalog.CompanyYear(year).rivals)result[rival.month]=rival.id;
             uint random=unchecked((uint)seed)^0x7F4A7C15u;
             for(int m=1;m<12;m++)
             {

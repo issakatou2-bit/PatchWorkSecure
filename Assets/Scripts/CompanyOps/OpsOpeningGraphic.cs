@@ -24,7 +24,7 @@ namespace PatchWorkSecure.CompanyOps
                 for(int n=0;n<80;n++){float t=n/80f,u=(n+1)/80f;if((n+(int)(Clock*30))%10<5)Line(vh,Link(r,t),Link(r,u),6,H("3fa9f5"));}
                 Ellipse(vh,Link(r,Mathf.Repeat(Clock/1.2f,1)),8,8,H("ffc02e"));return;
             }
-            if(Kind=="rival") {Rival(vh,r,Shape);return;}
+            if(Kind=="rival"||Kind=="bossRival") {if(Kind=="bossRival"){float margin=r.height/17;r.yMin+=margin;r.yMax-=margin;}Rival(vh,r,Shape);return;}
             if(Kind=="ally-veil")
             {
                 var a=H("1d2a44");a.a=.92f;var b=a;b.a=0;int s=vh.currentVertCount;
@@ -72,7 +72,7 @@ namespace PatchWorkSecure.CompanyOps
                 if(shape==1){var vr=new Rect(p(62,128),new Vector2(96*r.width/220,58*r.height/300));Rounded(vh,vr,10,edge);vr.xMin+=2;vr.xMax-=2;vr.yMin+=2;vr.yMax-=2;Rounded(vh,vr,8,H("2a1220"));for(int n=0;n<25;n++){float t=n/25f,u=(n+1)/25f;Line(vh,p(72+76*t,100-60*t*(1-t)),p(72+76*u,100-60*u*(1-u)),3,H("ffd0da"));}}
                 var eye=edge;eye.a=Mathf.Lerp(.25f,1,.5f+.5f*Mathf.Cos(Clock*Mathf.PI*2/1.4f));
                 Ellipse(vh,p(shape==1?92:88,shape==1?92:96),(shape==1?5:9)*r.width/220,4*r.height/300,eye);Ellipse(vh,p(shape==1?128:132,shape==1?92:96),(shape==1?5:9)*r.width/220,4*r.height/300,eye);
-                if(shape==0)for(int x=40;x<180;x+=14)Line(vh,p(x,210),p(x+6,210),2,new Color(edge.r,edge.g,edge.b,.6f));
+                if(shape==0&&Kind!="bossRival")for(int x=40;x<180;x+=14)Line(vh,p(x,210),p(x+6,210),2,new Color(edge.r,edge.g,edge.b,.6f));
             }
         }
         private static void Add(VertexHelper vh,Vector2 p,Color c){var v=UIVertex.simpleVert;v.position=p;v.color=c;vh.AddVert(v);}
@@ -101,7 +101,7 @@ namespace PatchWorkSecure.CompanyOps
             if(Kind=="zoom")r.localScale=Vector3.one*Mathf.Lerp(1.25f,1,e);
             if(Kind=="pop"||Kind=="big"||Kind=="stamp")
             {float scale=t<.6f?Mathf.Lerp(Kind=="pop"?.4f:Kind=="stamp"?2.4f:2.6f,.95f,t/.6f):Mathf.Lerp(.95f,1,(t-.6f)/.4f);r.localScale=Vector3.one*scale;if(Kind=="stamp")r.localRotation=Quaternion.Euler(0,0,Mathf.Lerp(18,8,e));}
-            if(Kind=="link"||Kind=="rival"){var g=GetComponent<OpsOpeningGraphic>();g.Clock=elapsed;g.SetVerticesDirty();}
+            if(Kind=="link"||Kind=="rival"||Kind=="bossRival"){var g=GetComponent<OpsOpeningGraphic>();g.Clock=elapsed;g.SetVerticesDirty();}
         }
     }
 }

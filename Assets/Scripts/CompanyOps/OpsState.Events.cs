@@ -137,6 +137,7 @@ namespace PatchWorkSecure.CompanyOps
                 eventSchedule==null||eventSchedule.Length!=12||eventSchedule.Any(previousStoryEvents.Contains)||eventSchedule[0]!=(storyCalendarYear==2?"y2-branch":"y3-audit-mail")||
                 storyCalendarYear==3&&eventSchedule[11]!="y3-final"))return false;
             if (eventRules < 0 || eventRules > 1) return false;
+            if(yearGrowthRules>0&&(storyCalendarYear<2||eventSchedule==null||eventSchedule.Length!=12||OpsCatalog.CompanyYear(storyCalendarYear).rivals.Any(r=>eventSchedule[r.month]!=r.id)))return false;
             if (eventRules == 0) return (eventSchedule == null || eventSchedule.Length == 0) && (ticketSchedule == null || ticketSchedule.Length == 0) &&
                 string.IsNullOrEmpty(ticketResolution) && history.All(r=>string.IsNullOrEmpty(r.eventId));
             if (eventSchedule == null || eventSchedule.Length != 12 || eventSchedule.Distinct().Count() != 12 || eventSchedule.Any(id=>OpsEventCatalog.Event(id)==null) ||

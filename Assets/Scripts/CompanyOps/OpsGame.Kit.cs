@@ -138,8 +138,10 @@ namespace PatchWorkSecure.CompanyOps
             }
             if(kind=="month"||kind=="incident")
             {
+                var boss=kind=="incident"?State.CurrentBoss:null;
                 var overlay=Box(Surface,"PhasePresentation",0,0,1600,900,kind=="month"?Color.black:new Color(.76f,.07f,.2f,.22f));
-                var alpha=overlay.gameObject.AddComponent<CanvasGroup>();alpha.blocksRaycasts=false;
+                var alpha=overlay.gameObject.AddComponent<CanvasGroup>();alpha.blocksRaycasts=boss!=null;
+                if(boss!=null)overlay.GetComponent<Image>().raycastTarget=true;
                 RectTransform page=null;CanvasGroup pageAlpha=null;
                 if(kind=="month")
                 {
@@ -150,6 +152,7 @@ namespace PatchWorkSecure.CompanyOps
                     string[] seasons={"新年度の準備","連休後の点検","雨の季節","夏の備え","夏休みの当番","上期の締め","下期スタート","年末への備え","年末の繁忙期","年始の確認","年度末の準備","一年の総仕上げ"};
                     PText(page,"CalendarSeason",seasons[State.month],20,224,340,50,22,PlanGray,true,true);
                 }
+                else if(boss!=null){DrawBossEntry(overlay,boss);PlayPresentationCue(OpsCue.Alert);}
                 else
                 {
                     IncidentShape(overlay,"IncidentEntryTapeTop","tape",0,280,1600,28,Hex("ffd23f"));
@@ -157,7 +160,7 @@ namespace PatchWorkSecure.CompanyOps
                     PText(overlay,"IncidentEntryTitle","緊急",0,360,1600,160,110,Color.white,true,true);
                     PlayPresentationCue(OpsCue.Alert);
                 }
-                float duration=kind=="month"?1.5f:.8f;
+                float duration=kind=="month"?1.5f:boss!=null?OpsCatalog.BossAppearSeconds:.8f;
                 for(float t=0;t<duration&&!phasePresentationSkipped;t+=Time.unscaledDeltaTime)
                 {
                     alpha.alpha=Mathf.Min(t/(kind=="month"?.5f:.12f),(duration-t)/.18f,1);

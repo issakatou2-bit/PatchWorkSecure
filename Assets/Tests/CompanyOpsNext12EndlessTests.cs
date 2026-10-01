@@ -28,7 +28,7 @@ namespace PatchWorkSecure.Tests
                 FinishStoryTestYear(e.state);FinishStoryTestYear(s.state);Assert.AreEqual(s.state.AnnualScore,e.state.AnnualScore);Assert.AreEqual(s.state.budget,e.state.budget);
                 Assert.IsTrue(e.Valid());if(year<3){Assert.IsTrue(e.AdvanceYear());Assert.IsTrue(s.AdvanceYear());}
             }
-            Assert.IsTrue(e.AdvanceYear());Assert.AreEqual(4,e.year);Assert.AreEqual(42,e.state.yearPressure);Assert.IsTrue(e.Valid());
+            Assert.IsTrue(e.AdvanceYear());Assert.AreEqual(4,e.year);Assert.AreEqual(OpsCatalog.EndlessPressure(4),e.state.yearPressure);Assert.IsTrue(e.Valid());
             var weak=OpsEndless.Begin(71,null);FinishStoryTestYear(weak.state);weak.state.totalLoss=1000;Assert.AreEqual("C",weak.state.RankCode);Assert.IsTrue(weak.RecordYear());Assert.IsTrue(weak.CanAdvance);Assert.IsTrue(weak.AdvanceYear());Assert.IsTrue(weak.Valid());
         }
         [Test] public void Next12Endless_全額繰越と四年以降の仲間設備と抽選を保つ()
@@ -41,7 +41,21 @@ namespace PatchWorkSecure.Tests
                 Assert.IsTrue(e.Valid());Assert.AreEqual(12,e.state.eventSchedule.Distinct().Count());Assert.AreEqual(OpsCatalog.EndlessPressure(year+1),e.state.yearPressure);
                 if(year>=3){Assert.AreEqual(4,e.state.StaffCount);Assert.IsTrue(Enumerable.Range(0,15).All(e.state.EquipmentAvailable));Assert.IsTrue(e.state.levels.All(n=>n==1));Assert.IsTrue(e.state.RequestEngineerResearch());}
             }
-            Assert.AreEqual(234,OpsCatalog.EndlessPressure(10));e.state.yearPressure++;Assert.IsFalse(e.Valid());
+            Assert.AreEqual(OpsCatalog.EndlessPressureBase+7*OpsCatalog.EndlessPressureLinear+49*OpsCatalog.EndlessPressureQuadratic,OpsCatalog.EndlessPressure(10));e.state.yearPressure++;Assert.IsFalse(e.Valid());
+        }
+        [Test] public void Next12Endless_月収の成長は四年目以降だけで実際の入金と保存再開に反映する()
+        {
+            foreach(int trust in new[]{0,45,100})
+            {
+                var s=new OpsState(14,true){trust=trust};int oldGrant=20+trust/20;
+                for(int year=0;year<=3;year++){s.endlessYear=year;Assert.AreEqual(oldGrant,s.MonthlyGrant);}
+                for(int year=4;year<=15;year++){s.endlessYear=year;Assert.AreEqual(oldGrant+(year-3)*OpsCatalog.EndlessMonthlyIncomePerYear,s.MonthlyGrant);}
+                s.endlessYear=0;s.storyCalendarYear=3;s.yearPressure=OpsCatalog.GrowthStoryPressures[2];Assert.AreEqual(oldGrant,s.MonthlyGrant,"本編には加算しない");
+            }
+            var e=OpsEndless.Begin(14,null);for(int y=1;y<4;y++){FinishEndlessTestYear(e.state);e.AdvanceYear();}
+            var resumed=JsonUtility.FromJson<OpsEndless>(JsonUtility.ToJson(e));Assert.IsTrue(resumed.Valid());Assert.AreEqual(e.state.MonthlyGrant,resumed.state.MonthlyGrant);
+            var state=resumed.state;state.BeginIncident();Assert.IsTrue(state.Resolve("scope"));if(state.QuarterRewardPending)state.ClaimQuarterReward("budget");
+            int budget=state.budget,income=state.MonthlyGrant,upkeep=state.Upkeep;Assert.IsTrue(state.NextMonth());Assert.AreEqual(budget+income-upkeep,state.budget,"月替わりで実際に入金される");
         }
         [Test] public void Next12Endless_運営終了年だけ得点を半分にして引退は全額で二重記録しない()
         {
@@ -72,7 +86,7 @@ namespace PatchWorkSecure.Tests
                 FinishEndlessTestYear(game.State);Assert.IsTrue(game.NextEndlessYear());Assert.IsTrue(game.YearOpeningActive);
                 if(y<3){game.PreviewYearOpening(3);yield return new WaitForSecondsRealtime(2);Assert.IsNotNull(Find<TextMeshProUGUI>("AllyName"));game.SkipYearOpening();game.AdvanceYearOpening();}
             }
-            yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual("4年目",Find<TextMeshProUGUI>("OpeningHeading").text);Assert.AreEqual("脅威 +42",Find<TextMeshProUGUI>("OpeningPressure").text);Capture("next12-endless-opening-y4");
+            yield return new WaitForSecondsRealtime(.5f);Assert.AreEqual("4年目",Find<TextMeshProUGUI>("OpeningHeading").text);Assert.AreEqual("脅威 +"+OpsCatalog.EndlessPressure(4),Find<TextMeshProUGUI>("OpeningPressure").text);Capture("next12-endless-opening-y4");
             var exported=game.ExportProgress();Assert.IsTrue(exported.Valid());game.AdvanceYearOpening();Assert.IsTrue(game.RestoreProgress(exported));Assert.AreEqual(4,game.RunYear);Assert.IsNull(game.Story);Assert.AreEqual(OpsPhase.Planning,game.State.phase);Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
     }

@@ -25,6 +25,20 @@ public static class CompanyOpsThreeYears
     static string Cell(object v)=>"\""+(v??"").ToString().Replace("\"","\"\"")+"\"";
     static void Check(bool ok,string reason){if(!ok)throw new Exception(reason);}
     static PersonaCommand Command(string kind,string id)=>new PersonaCommand(kind,id);
+    // エンドレス試算だけの判断。本編の方針・ゲームの導入条件は変更しない。
+    static int EndlessPurchaseMargin=3;
+    static bool CashSafe(OpsState s,int index)=>s.endlessYear==0||s.MonthlyGrant-s.Upkeep-OpsCatalog.AllProjects[index].upkeep>=EndlessPurchaseMargin;
+    static void CheckCashPolicy()
+    {
+        var s=new OpsState(14,true);int next=OpsCatalog.Index("backup");
+        for(int i=0;i<s.levels.Length;i++)s.levels[i]=2;
+        Check(CashSafe(s,next),"本編の導入判断にエンドレスの資金繰りが混入した");
+        s.endlessYear=1;Check(!CashSafe(s,next),"赤字の導入を見送っていない");
+        Array.Clear(s.levels,0,s.levels.Length);int before=s.budget;string levels=string.Join(";",s.levels);
+        Check(CashSafe(s,next)==(s.MonthlyGrant-OpsCatalog.AllProjects[next].upkeep>=EndlessPurchaseMargin),"導入後の余裕の判定が違う");
+        Check(before==s.budget&&levels==string.Join(";",s.levels),"試算判断で実際の予算・設備を変更した");
+        Console.WriteLine("資金繰り判断の回帰：本編の従来判断、赤字の見送り、余裕の境界、読み取り専用を確認");
+    }
     static string[] Priorities(Profile p,OpsState s)
     {
         string[] baseOrder=p.role==0 ? new[]{"automation","runbook","education","inventory","backup","drill","patch","mfa","monitor","segment","redundancy"} :
@@ -72,7 +86,7 @@ public static class CompanyOpsThreeYears
         if(p.depth==2&&s.Situation.stopLossCap>0&&s.ActionBlock("prepare")=="")return Command("act","prepare");
         var priorities=Priorities(p,s);
         var eligible=priorities.Select(OpsCatalog.Index).Where(i=>s.Level(OpsCatalog.AllProjects[i].id)<(p.depth==2?2:1)).ToArray();
-        var buyable=eligible.Where(i=>s.UpgradeBlock(i)==""&&s.budget>=s.Cost(i)+p.Reserve);
+        var buyable=eligible.Where(i=>s.UpgradeBlock(i)==""&&s.budget>=s.Cost(i)+p.Reserve&&CashSafe(s,i));
         if(p.depth==2)buyable=buyable.OrderByDescending(i=>UpgradeValue(p,s,i));
         if(turn.purchases<(p.depth==0?1:2))
         {
@@ -81,7 +95,7 @@ public static class CompanyOpsThreeYears
                 foreach(int i in eligible)
                 {
                     var project=OpsCatalog.AllProjects[i];
-                    if(s.capacity>=s.WorkCost(i)+1&&s.budget+(Production?s.ProposalOffer:12+s.Evidence*3)>=s.Cost(i)+p.Reserve&&
+                    if(CashSafe(s,i)&&s.capacity>=s.WorkCost(i)+1&&s.budget+(Production?s.ProposalOffer:12+s.Evidence*3)>=s.Cost(i)+p.Reserve&&
                         (string.IsNullOrEmpty(project.requires)||s.Level(project.requires)>0))return Command("proposal",project.group);
                 }
         }
@@ -241,18 +255,22 @@ public static class CompanyOpsThreeYears
     static void RunEndless(string[] args)
     {
         Production=true;int factorCount=args.Length>2?int.Parse(args[2]):1;
+        int cohorts=args.Length>4?int.Parse(args[4]):100;EndlessPurchaseMargin=args.Length>5?int.Parse(args[5]):3;
+        Check(cohorts>0&&cohorts<=100&&EndlessPurchaseMargin>=0,"試算入力が不正");
+        CheckCashPolicy();
         Check(factorCount>=0&&factorCount<=OpsCatalog.StoryFactorSlots,"因子数が不正");
         string dir=args.Length>1?args[1]:"Artifacts/Next12/Endless";Directory.CreateDirectory(dir);
         var rows=new List<string>{"role,depth,policy,cohort,seed,duration_months,completed_years,total_score,overall_rank,end_year"};
         var summaries=new List<string>{"role,depth,policy,p25_years,median_years,p90_years,max_years,median_score,ss_percent,target_met"};
         var deepScores=new List<double>();bool targets=true;double maximum=0;
-        Console.WriteLine("終わりなき年度：9方針×100挑戦 / 本編の引き継ぎと同じ / 社員に任せる50点");
+        Console.WriteLine("終わりなき年度：9方針×"+cohorts+"挑戦 / 本編の引き継ぎと同じ / 社員に任せる50点");
         Console.WriteLine("脅威：1〜3年は確定した本編の値 / 4年以降 "+OpsCatalog.EndlessPressureBase+" + "+OpsCatalog.EndlessPressureLinear+"n + "+OpsCatalog.EndlessPressureQuadratic+"n²");
         Console.WriteLine("入力仮説：本編クリアで解放済み、因子 "+factorCount+"枠を方針の優先設備から選択。人間の試遊・学習効果ではない。");
+        Console.WriteLine("資金繰り判断：導入後の月次収入−維持費が "+EndlessPurchaseMargin+"万円未満なら見送る（エンドレス試算のみ）。4年目以降は年ごとに月収 +"+OpsCatalog.EndlessMonthlyIncomePerYear+"万円。");
         foreach(int role in Enumerable.Range(0,3))foreach(int depth in Enumerable.Range(0,3))
         {
             var p=new Profile{role=role,depth=depth,name=Names[role][depth]};var years=new List<double>();var scores=new List<double>();int ss=0;
-            for(int cohort=0;cohort<100;cohort++)
+            for(int cohort=0;cohort<cohorts;cohort++)
             {
                 int seed=14+cohort*997;var factors=Priorities(p,new OpsState(seed,true)).Where(id=>string.IsNullOrEmpty(OpsCatalog.AllProjects[OpsCatalog.Index(id)].requires)).Take(factorCount).ToArray();
                 var run=OpsEndless.Begin(seed,factors);
@@ -267,12 +285,13 @@ public static class CompanyOpsThreeYears
                 rows.Add(string.Join(",",new object[]{role,depth,Cell(p.name),cohort,seed,run.DurationMonths,run.CompletedYears,run.TotalScore,rank,run.year}));
             }
             double q25=Quantile(years,.25),median=Quantile(years,.5),q90=Quantile(years,.9),max=years.Max(),score=Quantile(scores,.5);bool met=median>=(depth==0?2:6)&&median<=(depth==0?4:9);targets&=met;maximum=Math.Max(maximum,max);
-            summaries.Add(string.Join(",",new object[]{role,depth,Cell(p.name),q25.ToString("F2"),median.ToString("F2"),q90.ToString("F2"),max.ToString("F2"),score,ss,met}));
-            Console.WriteLine(p.name+"：25% "+q25.ToString("F2")+"年 / 中央 "+median.ToString("F2")+"年 / 90% "+q90.ToString("F2")+"年 / 最長 "+max.ToString("F2")+"年 / 合計点中央 "+score+" / SS "+ss+"% / 中央の目安 "+(met?"内":"外"));
+            double ssPercent=100.0*ss/cohorts;
+            summaries.Add(string.Join(",",new object[]{role,depth,Cell(p.name),q25.ToString("F2"),median.ToString("F2"),q90.ToString("F2"),max.ToString("F2"),score,ssPercent,met}));
+            Console.WriteLine(p.name+"：25% "+q25.ToString("F2")+"年 / 中央 "+median.ToString("F2")+"年 / 90% "+q90.ToString("F2")+"年 / 最長 "+max.ToString("F2")+"年 / 合計点中央 "+score+" / SS "+ssPercent.ToString("F1")+"% / 中央の目安 "+(met?"内":"外"));
         }
         File.WriteAllLines(Path.Combine(dir,"runs.csv"),rows,new UTF8Encoding(true));File.WriteAllLines(Path.Combine(dir,"summary.csv"),summaries,new UTF8Encoding(true));
         Console.WriteLine("深度1・2の得点分位：10% "+Quantile(deepScores,.1)+" / 40% "+Quantile(deepScores,.4)+" / 70% "+Quantile(deepScores,.7)+" / 90% "+Quantile(deepScores,.9));
         Console.WriteLine("中央・最長の目安（15年程度まで、判定上限17年）："+(targets&&maximum<=17?"内":"外"));
-        if(args.Length>3&&args[3]=="check")Check(targets&&maximum<=17,"Next-12の継続年数の目安の外。成功扱いにしないこと");
+        if(args.Length>3&&args[3]=="check")Check(cohorts==100&&targets&&maximum<=17,"Next-12の継続年数の目安の外、または正式試算100挑戦ではない。成功扱いにしないこと");
     }
 }

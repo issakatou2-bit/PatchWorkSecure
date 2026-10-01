@@ -104,7 +104,7 @@ namespace PatchWorkSecure.CompanyOps
         public int SituationFatigue => situationPrepared ? 0 : Math.Max(0, Situation.extraFatigue - 4 * Level("runbook"));
         public int Level(string id) { int i = OpsCatalog.Index(id); return i < 0 || i>=levels.Length || !EquipmentAvailable(i) ? 0 : levels[i]; }
         public int Upkeep => Enumerable.Range(0,levels.Length).Sum(i=>OpsCatalog.AllProjects[i].upkeep*Level(OpsCatalog.AllProjects[i].id));
-        public int MonthlyGrant => 20 + trust / 20;
+        public int MonthlyGrant => 20 + trust / 20 + OpsCatalog.EndlessIncome(endlessYear);
         public int MaxCapacity => 4 + Level("automation") + (growthRules > 0 ? monthExtraCapacity + (supportOrder == "routine" ? 1 : 0) : 0);
         public int Evidence => (audited ? 1 : 0) + (listened ? 1 : 0) + (mapped ? 1 : 0);
         public int MissionCount => completedMissions == null ? 0 : completedMissions.Count;

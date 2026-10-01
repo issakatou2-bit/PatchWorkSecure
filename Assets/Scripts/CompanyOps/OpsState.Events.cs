@@ -62,6 +62,9 @@ namespace PatchWorkSecure.CompanyOps
         // 旧セーブは0のまま。新年度でのみ抽選し、イベントIDを保存する。
         public int eventRules;
         public string[] eventSchedule, ticketSchedule;
+        // 0は従来の年度。古い途中保存は暦・抽選を変えず次年度から新方式へ。
+        public int storyCalendarYear;
+        public string[] previousStoryEvents;
         public string ticketResolution = "";
         public OpsState(int yearSeed, bool randomEvents) : this(yearSeed)
         {
@@ -80,7 +83,7 @@ namespace PatchWorkSecure.CompanyOps
             var calendar = OpsCatalog.Months[targetMonth]; var e = EventAt(targetMonth);
             if (e == null) return calendar;
             var p = OpsEventCatalog.Profile(e.profile);
-            return new OpsMonth { name=calendar.name, season=calendar.season, @base=calendar.@base, title=e.title, news=e.news, boss=e.boss,
+            return new OpsMonth { name=calendar.name, season=storyCalendarYear>=2?OpsCatalog.StorySeasons[storyCalendarYear-1][targetMonth]:calendar.season, @base=calendar.@base, title=e.title, news=e.news, boss=e.boss,
                 person=e.person, staff=e.staff, hint=e.hint, kind=p.kind, @event=e.title, symptom=e.symptom, finding=e.finding, lesson=p.lesson, calm=e.calm };
         }
         public OpsMission CurrentMission
@@ -127,6 +130,12 @@ namespace PatchWorkSecure.CompanyOps
         }
         private bool ValidEvents()
         {
+            if(storyCalendarYear!=0&&storyCalendarYear!=2&&storyCalendarYear!=3)return false;
+            if(storyCalendarYear==0&&(previousStoryEvents?.Length??0)>0)return false;
+            if(storyCalendarYear>0&&(eventRules!=1||yearPressure!=OpsCatalog.StoryPressures[storyCalendarYear-1]||previousStoryEvents==null||
+                previousStoryEvents.Length>12*(storyCalendarYear-1)||previousStoryEvents.Distinct().Count()!=previousStoryEvents.Length||previousStoryEvents.Any(id=>OpsEventCatalog.Event(id)==null)||
+                eventSchedule==null||eventSchedule.Length!=12||eventSchedule.Any(previousStoryEvents.Contains)||eventSchedule[0]!=(storyCalendarYear==2?"y2-branch":"y3-audit-mail")||
+                storyCalendarYear==3&&eventSchedule[11]!="y3-final"))return false;
             if (eventRules < 0 || eventRules > 1) return false;
             if (eventRules == 0) return (eventSchedule == null || eventSchedule.Length == 0) && (ticketSchedule == null || ticketSchedule.Length == 0) &&
                 string.IsNullOrEmpty(ticketResolution) && history.All(r=>string.IsNullOrEmpty(r.eventId));

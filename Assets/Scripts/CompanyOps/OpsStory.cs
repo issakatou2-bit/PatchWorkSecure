@@ -15,6 +15,11 @@ namespace PatchWorkSecure.CompanyOps
             var s=new OpsState(yearSeed,true){yearPressure=OpsCatalog.StoryPressures[year-1]};
             if(previous!=null)
             {
+                s.storyCalendarYear=year;
+                // 旧2年目の保存にも対応。初年度の既存抽選を種から復元し、今の年度は引き直さない。
+                var earlier=previous.previousStoryEvents??(year==3?OpsEventCatalog.Schedule(unchecked(yearSeed-(year-1)*OpsCatalog.StorySeedStride),false):new string[0]);
+                s.previousStoryEvents=earlier.Concat(previous.eventSchedule??new string[0]).Distinct().ToArray();
+                s.eventSchedule=OpsEventCatalog.StorySchedule(yearSeed,year,s.previousStoryEvents);
                 for(int i=0;i<s.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
                 s.staffExperience=(int[])previous.staffExperience.Clone();s.culture=previous.culture;
                 s.trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;

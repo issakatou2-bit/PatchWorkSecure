@@ -105,7 +105,14 @@ namespace PatchWorkSecure.CompanyOps
         private static OpsEvent E(string id, string profile, string title, string news, string boss, string staff, string symptom, string finding, string hint,
             int[] threats, bool operational=false, string calm=null, string source=null) => new OpsEvent { id=id, profile=profile, title=title, news=news, boss=boss,
                 person="社長・加藤", staff=staff, symptom=symptom, finding=finding, hint=hint, threats=threats, operational=operational, calm=calm, source=source };
-        public static OpsEvent Event(string id) => Array.Find(Events, e => e.id == id);
+        // 通常年度の40件には足さない。1年モードの抽選系列・計算を保つ。
+        public static readonly OpsEvent[] StoryEvents={
+            E("y2-branch","supply","新しい拠点がつながる","拠点を増やした会社で、拠点の機器から本社へ侵入された事例。","新しい拠点、来月から本社と同じように使えるよね？","佐伯：拠点のルーターが初期設定のままです。","拠点の機器から、本社の共有へ見慣れない接続。","拠点の機器・設定・接続先を台帳と照合。","つなぐ前に、拠点も台帳に入れて同じ守りをそろえる。",new[]{2,8}),
+            E("y3-audit-mail","bec","大手取引先の「確認」メール","取引開始の直後に、取引先を装った「セキュリティ確認」で情報を聞き出す手口。","大きな取引が決まった！ 先方の確認にはすぐ答えて。","森：先方の担当者から、社内の構成表を送ってほしいと。","取引先に似たドメインから、社内情報の提出依頼。","既知の窓口へ折り返し、依頼の有無を確認。","大きな取引ほど狙われる。急ぎの確認ほど、既知の窓口で確かめる。",new[]{10,5}),
+            E("y3-passkey","change","パスキーに切り替えたら","認証方式の切替で、社員がログインできなくなった事例。","パスワードをやめられるなら、やってほしい。","佐伯：古い端末の社員が、新しい方式に対応していません。","切替の翌朝、ログインできない問い合わせが集中。","対象端末・移行手順・代替の手段を確認。","良い仕組みも、移行の段取りが要る。戻し方と代替の道を先に用意する。",new int[0],operational:true),
+            E("y3-final","ransom","3年目の総決算","取引先として狙われ、暗号化と情報の持ち出しを同時に受けた事例。","3年でここまで来た。この会社、守り切れるか？","ひなた：先輩、全部の拠点で同時に異常が出てます！","複数の拠点で同時にファイルの異常と大量の外向き通信。","記録の保全、範囲の特定、復元元の健全性を確認。","3年かけて積んだ備えは、この日のためにある。",new[]{1,5})
+        };
+        public static OpsEvent Event(string id) => Array.Find(Events, e => e.id == id)??Array.Find(StoryEvents,e=>e.id==id);
         public static OpsEventProfile Profile(string id) => Array.Find(Profiles, p => p.id == id);
         public static string ProjectNames(OpsEventProfile p) => OpsCatalog.Projects[OpsCatalog.Index(p.projectA)].name + "＋" + OpsCatalog.Projects[OpsCatalog.Index(p.projectB)].name;
         public static string ActionName(string action) => action == "audit" ? "現状調査" : action == "listen" ? "社員との対話" : "重要業務の確認";
@@ -152,6 +159,29 @@ namespace PatchWorkSecure.CompanyOps
                 // ランタイムのRandom実装に依存しない。抽選結果は保存して再抽選を防ぐ。
                 unchecked { random += 0x6D2B79F5u; random ^= random >> 15; random *= 2246822519u; random ^= random >> 13; }
                 result[m] = ids[random % (uint)ids.Length];
+            }
+            return result;
+        }
+        public static int StoryWeight(int year,string profile)=>year==2&&new[]{"supply","ai","remote","sharing","session"}.Contains(profile)||
+            year==3&&new[]{"ransom","targeted","bec","claim","ddos"}.Contains(profile)?OpsCatalog.StoryThemeWeight:1;
+        public static string[] StorySchedule(int seed,int year,string[] used)
+        {
+            if(year==1)return Schedule(seed,false);
+            if(year<2||year>OpsCatalog.StoryYears)throw new ArgumentException("年度が不正です");
+            var previous=used??new string[0];var result=new string[12];
+            result[0]=year==2?"y2-branch":"y3-audit-mail";if(year==3)result[11]="y3-final";
+            var fixedIds=new[]{"y2-branch","y3-audit-mail","y3-final"};
+            uint random=unchecked((uint)seed)^0x7F4A7C15u;
+            for(int m=1;m<12;m++)
+            {
+                if(result[m]!=null)continue;
+                bool operational=m==3||m==4||m==7||m==9;
+                var pool=Events.Concat(StoryEvents).Where(e=>e.operational==operational&&!previous.Contains(e.id)&&!result.Contains(e.id)&&!fixedIds.Contains(e.id)).ToArray();
+                int total=pool.Sum(e=>StoryWeight(year,e.profile));
+                if(total==0)throw new InvalidOperationException("3年分の重複しない出来事が足りません");
+                unchecked{random+=0x6D2B79F5u;random^=random>>15;random*=2246822519u;random^=random>>13;}
+                int pick=(int)(random%(uint)total);
+                foreach(var e in pool){pick-=StoryWeight(year,e.profile);if(pick<0){result[m]=e.id;break;}}
             }
             return result;
         }

@@ -24,6 +24,12 @@ public const int StorySaveBudgetLimit=LegacySaveBudgetLimit+StoryInitialBudget*(
 public const int ProgressSaveVersion=2, StorySaveVersion=1, ProgressSaveBytes=300000;
 public static readonly string[] StoryGoals={"B","A","A"};
 public static readonly int[] StoryPressures={0,12,24};
+public const int StoryThemeWeight=2;
+public static readonly string[][] StorySeasons={
+    new[]{"はじまり","新しい仲間","繁忙期の入口","繁忙期","夏季休暇","上期の振り返り","下期の投資","納品準備","年末の山場","仕組みの見直し","年度末への備え","一年の集大成"},
+    new[]{"拠点が増える春","在宅が増える","夏前の山場","クラウドへの引っ越し","拠点の夏休み","上期の山場","新しい道具","拠点の点検","年末の山場","整理の冬","来年の計画","二年目の締めくくり"},
+    new[]{"大きな取引の春","後輩がやってくる","狙われはじめる","暑さと負荷","任せる夏","監査の季節","下期の勝負","ひとりで回せるか","年末の山場","引き継ぎの冬","3年の仕上げ","3年目の総決算"}
+};
 // 因子カードの推薦文。星は演出だけで、Lv1の効果・枠数には触れない。
 public static string FactorRecommendation(string id)
 {

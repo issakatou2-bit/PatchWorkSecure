@@ -63,6 +63,9 @@ body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);back
 .thumb.end{background:linear-gradient(160deg,#fff6d6,#ffe7a3)}
 #book .thumb{width:78px;height:92px;font-size:14px}#book .thumb small{font-size:10px}#book .thumb.wide{width:112px}
 #book .polaroid{width:160px;height:192px}
+.memo{position:absolute;width:250px;padding:14px 16px 12px;background:linear-gradient(180deg,#fff6b8,#ffef8a);box-shadow:0 6px 10px rgba(0,0,0,.15);transform:rotate(-3deg);font-size:17px;line-height:1.55;z-index:2}
+.memo b{display:block;font-family:"M PLUS Rounded 1c";font-weight:800;font-size:12px;color:#9a7a00;letter-spacing:.1em;margin-bottom:2px}
+.memo::before{content:"";position:absolute;left:50%;top:-10px;width:70px;height:20px;margin-left:-35px;background:rgba(255,255,255,.55);transform:rotate(2deg)}
 #nav{position:fixed;left:8px;bottom:8px;z-index:99;display:flex;gap:6px}
 #nav button{font:700 12px 'Zen Kaku Gothic New';border:0;border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer}
 </style>
@@ -83,9 +86,9 @@ body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);back
         被害は 2万円、止まったのは 1時間だけ。<br>
         大野さんが移行の手順を見直してくれた！
       </div>
-      <div class="sticker" style="--r:-12deg;left:470px;top:470px;width:120px;height:120px;background:radial-gradient(circle at 35% 30%,#ff94ae,#f45a80)"><span style="font-size:13px">運用ランク</span><span style="font-size:48px;line-height:1">S</span></div>
-      <div class="sticker" style="--r:10deg;left:360px;top:610px;width:96px;height:96px;background:radial-gradient(circle at 35% 30%,#7fc4ff,#2f93dc);animation-delay:.25s"><span style="font-size:11px">ログ調べ</span><span style="font-size:36px;line-height:1">A</span></div>
-      <div class="polaroid" style="left:90px;top:470px;transform:rotate(-5deg)"><div class="ph"><img src="../../ArtSource/Hinata/gen-20260929/cut/pose_laptop.png" alt=""></div><span class="hand">夜ふかし中</span></div><svg class="doodle" style="left:300px;top:640px" width="60" height="60" viewBox="0 0 30 30"><path d="M15 2 l3.5 7 7.5 1-5.5 5.5 1.3 7.5-6.8-3.6-6.8 3.6 1.3-7.5L4 10l7.5-1z" fill="#ffd23f"/></svg>
+      <div class="memo hand" style="left:300px;top:436px;width:270px"><b>情シスあるある</b>「ちょっとした変更」は、金曜の夕方にやらない</div><div class="sticker" style="--r:-12deg;left:470px;top:585px;width:120px;height:120px;background:radial-gradient(circle at 35% 30%,#ff94ae,#f45a80)"><span style="font-size:13px">運用ランク</span><span style="font-size:48px;line-height:1">S</span></div>
+      <div class="sticker" style="--r:10deg;left:350px;top:655px;width:90px;height:90px;background:radial-gradient(circle at 35% 30%,#7fc4ff,#2f93dc);animation-delay:.25s"><span style="font-size:11px">ログ調べ</span><span style="font-size:36px;line-height:1">A</span></div>
+      <div class="polaroid" style="left:90px;top:470px;transform:rotate(-5deg)"><div class="ph"><img src="../../ArtSource/Hinata/gen-20260929/cut/pose_laptop.png" alt=""></div><span class="hand">夜ふかし中</span></div><svg class="doodle" style="left:300px;top:610px" width="44" height="44" viewBox="0 0 30 30"><path d="M15 2 l3.5 7 7.5 1-5.5 5.5 1.3 7.5-6.8-3.6-6.8 3.6 1.3-7.5L4 10l7.5-1z" fill="#ffd23f"/></svg>
     </div>
     <div class="page rt">
       <div class="lines" style="top:110px"></div>
@@ -101,7 +104,7 @@ body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);back
         「手順は、未来の自分への手紙」って、<br>わたしの口ぐせ、うつってた。
       </div>
       
-      <svg class="doodle" style="right:70px;top:150px" width="70" height="62" viewBox="0 0 90 80"><path d="M45 72 C 10 48 6 22 26 14 C 36 10 44 18 45 26 C 46 18 54 10 64 14 C 84 22 80 48 45 72 Z" fill="#ffb3c4" opacity=".85"/></svg>
+      <svg class="doodle" style="right:60px;top:140px" width="60" height="54" viewBox="0 0 90 80"><path d="M45 72 C 10 48 6 22 26 14 C 36 10 44 18 45 26 C 46 18 54 10 64 14 C 84 22 80 48 45 72 Z" fill="#ffb3c4" opacity=".85"/></svg>
       <button class="voice" style="left:70px;bottom:28px"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span>ひなたの声で聞く</button>
       <button class="close">とじる</button>
     </div>
@@ -123,7 +126,7 @@ body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);back
         被害は 18万円。<br>
         小川さんが、お客さんへの連絡を引き受けてくれた。
       </div>
-      <div class="sticker" style="--r:8deg;left:480px;top:480px;width:110px;height:110px;background:radial-gradient(circle at 35% 30%,#b8c4d8,#7d8aa3)"><span style="font-size:13px">運用ランク</span><span style="font-size:44px;line-height:1">B</span></div>
+      <div class="memo hand" style="left:300px;top:436px;width:270px;transform:rotate(2deg)"><b>情シスあるある</b>再起動で直ると、ほっとするけど、ちょっと不安</div><div class="sticker" style="--r:8deg;left:470px;top:600px;width:110px;height:110px;background:radial-gradient(circle at 35% 30%,#b8c4d8,#7d8aa3)"><span style="font-size:13px">運用ランク</span><span style="font-size:44px;line-height:1">B</span></div>
       <div class="polaroid" style="left:90px;top:470px;transform:rotate(-4deg)"><div class="ph" style="background:linear-gradient(160deg,#e6ecf8,#d6deee)"><img src="../../ArtSource/Hinata/gen-20260929/cut/pose_exhausted.png" alt=""></div><span class="hand">くやしい日</span></div>
     </div>
     <div class="page rt">

@@ -42,6 +42,9 @@ MonoBehaviour:
   logoIcon: {fileID: 21300000, guid: 091baccbd643c3b4ea45daa240edbee1, type: 3}
   logoWordmark: {fileID: 21300000, guid: d566bfb9ba57e8d4ea675630b72448eb, type: 3}
   titleKeyVisual: {fileID: 21300000, guid: e6a847928ac5c004e907d30b1b1d3c65, type: 3}
+  focusEngineer: {fileID: 21300000, guid: 8afb9aaec418ee54ba4f5427855e6616, type: 3}
+  focusHinata: {fileID: 21300000, guid: 1154a172cb0fa604aa80de68a766dc53, type: 3}
+  focusSecretary: {fileID: 21300000, guid: c62a386a97a483640ab2fb67f4d7bda2, type: 3}
   bubbleNormal: {fileID: -8951921073280002231, guid: 0d15523c74fc61542b10daac70ccce3f, type: 3}
   bubbleConsult: {fileID: 1378210057481052027, guid: 7a12e61f1a8c61f4090bf310c7fe046b, type: 3}
   bubbleRare: {fileID: -427348944157872813, guid: 080029fbe646a214eb518f08729e0b24, type: 3}

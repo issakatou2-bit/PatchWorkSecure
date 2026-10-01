@@ -24,7 +24,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             IncidentShape(screen,"StoryBackground",dark?"story-factor-background":failed?"story-fail-background":"story-clear-background",0,0,1600,900,Color.white);
             if(failed)return;
-            var rays=IncidentShape(screen,"StoryRays","rays",0,0,dark?1800:1600,dark?1800:1600,new Color(1,.824f,.247f,dark?.08f:.16f));
+            // Linear色空間で暗い背景へ重ねるとCSSより明るくなるため、因子画面だけ濃度を合わせる。
+            var rays=IncidentShape(screen,"StoryRays","rays",0,0,dark?1800:1600,dark?1800:1600,new Color(1,.824f,.247f,dark?.02f:.16f));
             rays.pivot=new Vector2(.5f,.5f);rays.anchoredPosition=new Vector2(dark?800:300,dark?-430:-250);Motion(rays,"rotate",dark?60:40);
             if(!dark)StoryConfetti();
         }
@@ -68,7 +69,7 @@ namespace PatchWorkSecure.CompanyOps
             rank.pivot=new Vector2(.5f,.5f);rank.anchoredPosition+=new Vector2(150,-150);
             KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));rank.GetComponent<Image>().pixelsPerUnitMultiplier=PlanningArt.round28.border.x/56;
             var edge=rank.gameObject.AddComponent<Outline>();edge.effectColor=Color.white;edge.effectDistance=new Vector2(8,-8);
-            IncidentShape(rank,"RankStitch","rounded-dashed",14,14,272,272,new Color(1,1,1,.7f));Reveal(rank,0,true);
+            IncidentShape(rank,"RankStitch","rounded-dashed",14,14,272,272,new Color(1,1,1,.7f)).GetComponent<OpsIncidentGraphic>().StrokeWidth=5;Reveal(rank,0,true);
             StoryText(rank,"RankHeading","運用ランク",0,45,300,40,22,Color.white,true);
             StoryText(rank,"CompanyRank",State.RankCode,0,83,300,205,State.RankCode=="SS"?130:170,Color.white,true);
             StoryText(screen,"ScoreHeading","年間得点",80,500,380,26,15,PlanGray,true);
@@ -158,7 +159,7 @@ namespace PatchWorkSecure.CompanyOps
             var ownedHeading=StoryText(reward,"OwnedFactorsHeading","持っている因子",26,292,104,56,13,new Color(1,1,1,.8f));ownedHeading.textWrappingMode=TextWrappingModes.NoWrap;
             for(int i=0;i<OpsCatalog.StoryFactorSlots;i++)StoryFactorSlot(reward,"OwnedFactor"+i,i<Career.factors.Count?TitleFactorName(Career.factors[i]):"空き",128+i*164,292,154,56,i<Career.factors.Count);
             Portrait(screen,"StoryPortrait",1310,610,250,290,"pose_fists");StorySpeech("ここまで来られたのは本物だよ。\n次は山場に備えて、もう一回！",920,676,380,88);
-            StoryButton("BackHome","タイトルへ",80,780,326,()=>{storyAnnualDetails=false;RenderHome();});
+            StoryButton("BackHome","タイトルへ",80,780,326,StoryTitleOrFactor);
             StoryButton("StoryRecord","因子を選んで次の挑戦へ",422,780,458,OpenStoryFactors,true);
         }
         private void StoryFailureRow(Transform parent,string id,string title,string value,float y,Color bg,Color fg)
@@ -169,14 +170,16 @@ namespace PatchWorkSecure.CompanyOps
         private static string StoryMinigameName(OpsOutcome r)
         {var e=OpsEventCatalog.Event(r.eventId);var p=e==null?null:OpsEventCatalog.Profile(e.profile);string kind=p?.kind??OpsCatalog.Months[r.month].kind;return OpsCatalog.Months[r.month].kind=="identity"||p?.id=="session"||p?.id=="remote"?"多要素認証の関所":p?.id=="bec"||p?.id=="targeted"?"メールの仕分け":kind=="outage"||p?.id=="change"||p?.id=="storage"||p?.id=="service"?"復旧の順番":"感染の封じ込め";}
         private void StoryStars(Transform parent,string id,int count,float x,float y)
-        {for(int i=0;i<count;i++)PImage(parent,id+i,PlanningArt.star,x+i*24,y,22,22,Hex("ffd23f"));}
+        {for(int i=0;i<count;i++)IncidentShape(parent,id+i,"solid-star",x+i*24,y,22,22,Hex("ffd23f"));}
         private RectTransform StoryFactorSlot(Transform parent,string id,string value,float x,float y,float w,float h,bool full)
         {
             var slot=PCard(parent,id,x,y,w,h,full?Hex("fff6d6"):Color.clear,16,false);
             if(full){KitGradient(slot.GetComponent<Image>(),Hex("fff6d6"),Hex("ffe7a3"));var outline=slot.gameObject.AddComponent<Outline>();outline.effectColor=Color.white;outline.effectDistance=new Vector2(3,-3);}
-            else IncidentShape(slot,id+"Dashes","dashed",2,2,w-4,h-4,new Color(1,1,1,.45f));
+            else {var d=IncidentShape(slot,id+"Dashes","rounded-dashed",2,2,w-4,h-4,new Color(1,1,1,.45f));d.GetComponent<OpsIncidentGraphic>().StrokeWidth=3;}
             StoryText(slot,id+"Text",value,8,0,w-16,h,15,full?Hex("7a5a00"):new Color(1,1,1,.7f),true);return slot;
         }
-        private void OpenStoryFactors(){StoryRecord();}
+        private void OpenStoryFactors(){ShowStoryFactors(()=>StartStory(Environment.TickCount));}
+        private void StoryTitleOrFactor()
+        {if(Story!=null&&Story.finished&&!Story.rewardClaimed){ShowStoryFactors(RenderHome);return;}storyAnnualDetails=false;RenderHome();}
     }
 }

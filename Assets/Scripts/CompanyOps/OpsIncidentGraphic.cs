@@ -32,10 +32,10 @@ namespace PatchWorkSecure.CompanyOps
                 for(int corner=0;corner<4;corner++)
                 {
                     Vector2 center=new Vector2(corner==0||corner==3?r.xMax-radius:r.xMin+radius,corner<2?r.yMax-radius:r.yMin+radius);
-                    for(int j=0;j<12;j+=2){float a=(corner*90+j*7.5f)*Mathf.Deg2Rad,b=(corner*90+(j+1)*7.5f)*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*radius,5);}
+                    for(int j=0;j<12;j+=2){float a=(corner*90+j*7.5f)*Mathf.Deg2Rad,b=(corner*90+(j+1)*7.5f)*Mathf.Deg2Rad;Line(vh,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,center+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*radius,StrokeWidth);}
                 }
-                for(float x=radius;x<w-radius;x+=15){Line(vh,new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMin),5);Line(vh,new Vector2(r.xMin+x,r.yMax),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMax),5);}
-                for(float y=radius;y<h-radius;y+=15){Line(vh,new Vector2(r.xMin,r.yMin+y),new Vector2(r.xMin,r.yMin+Mathf.Min(y+9,h-radius)),5);Line(vh,new Vector2(r.xMax,r.yMin+y),new Vector2(r.xMax,r.yMin+Mathf.Min(y+9,h-radius)),5);}
+                for(float x=radius;x<w-radius;x+=15){Line(vh,new Vector2(r.xMin+x,r.yMin),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMin),StrokeWidth);Line(vh,new Vector2(r.xMin+x,r.yMax),new Vector2(r.xMin+Mathf.Min(x+9,w-radius),r.yMax),StrokeWidth);}
+                for(float y=radius;y<h-radius;y+=15){Line(vh,new Vector2(r.xMin,r.yMin+y),new Vector2(r.xMin,r.yMin+Mathf.Min(y+9,h-radius)),StrokeWidth);Line(vh,new Vector2(r.xMax,r.yMin+y),new Vector2(r.xMax,r.yMin+Mathf.Min(y+9,h-radius)),StrokeWidth);}
             }
             else if(Kind=="staff-face")
             {
@@ -65,6 +65,10 @@ namespace PatchWorkSecure.CompanyOps
                 else if(k==3){for(int ring=0;ring<3;ring++)for(int i=0;i<16;i++){float a=(40+i*6)*Mathf.Deg2Rad,b=(40+(i+1)*6)*Mathf.Deg2Rad,ra=w*(.3f+ring*.25f);Line(vh,new Vector2(r.center.x,r.yMin)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*ra,new Vector2(r.center.x,r.yMin)+new Vector2(Mathf.Cos(b),Mathf.Sin(b))*ra,2.3f);}}
                 else{line(.1f,.25f,.9f,.25f);line(.9f,.25f,.9f,.8f);line(.9f,.8f,.1f,.8f);line(.1f,.8f,.1f,.25f);if(k==6){line(.1f,.8f,.5f,.45f);line(.5f,.45f,.9f,.8f);}else if(k==0){line(.25f,.8f,.25f,1);line(.25f,1,.75f,1);line(.75f,1,.75f,.8f);line(.3f,.5f,.7f,.5f);}else{line(.5f,.25f,.5f,.05f);line(.3f,.05f,.7f,.05f);}}
             }
+            else if(Kind=="solid-star")
+            {
+                int start=vh.currentVertCount;Add(vh,r.center,color);for(int i=0;i<=10;i++){float a=(90+i*36)*Mathf.Deg2Rad;Add(vh,r.center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*Mathf.Min(w,h)*(i%2==0?.5f:.22f),color);if(i>0)vh.AddTriangle(start,start+i,start+i+1);}
+            }
             else if(Kind=="heart")
             {
                 var p=new[]{new Vector2(.5f,.73f),new Vector2(.35f,.94f),new Vector2(.18f,.97f),new Vector2(.04f,.83f),new Vector2(.03f,.64f),new Vector2(.17f,.4f),new Vector2(.5f,.05f),new Vector2(.83f,.4f),new Vector2(.97f,.64f),new Vector2(.96f,.83f),new Vector2(.82f,.97f),new Vector2(.65f,.94f)};
@@ -72,6 +76,11 @@ namespace PatchWorkSecure.CompanyOps
             }
             else if(Kind=="play")Polygon(vh,new[]{new Vector2(r.xMin+w*.2f,r.yMin),new Vector2(r.xMax,r.center.y),new Vector2(r.xMin+w*.2f,r.yMax)},color);
             else if(Kind=="arrow"){Line(vh,new Vector2(r.xMin,r.center.y),new Vector2(r.xMax,r.center.y),2.6f);Line(vh,new Vector2(r.center.x,r.yMax),new Vector2(r.xMax,r.center.y),2.6f);Line(vh,new Vector2(r.center.x,r.yMin),new Vector2(r.xMax,r.center.y),2.6f);}
+            else if(Kind=="story-card-shade")
+            {
+                int s=vh.currentVertCount;var navy=new Color(.114f,.165f,.267f,.985f);Add(vh,new Vector2(r.xMin,r.yMin),navy);Add(vh,new Vector2(r.xMax,r.yMin),navy);Add(vh,new Vector2(r.xMax,r.yMin+h*.7f),navy);Add(vh,new Vector2(r.xMin,r.yMin+h*.7f),navy);vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);
+                s=vh.currentVertCount;Add(vh,new Vector2(r.xMin,r.yMin+h*.7f),navy);Add(vh,new Vector2(r.xMax,r.yMin+h*.7f),navy);Add(vh,new Vector2(r.xMax,r.yMax),new Color(.114f,.165f,.267f,0));Add(vh,new Vector2(r.xMin,r.yMax),new Color(.114f,.165f,.267f,0));vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);
+            }
             else if(Kind=="title-bottom-veil")
             {
                 int s=vh.currentVertCount;Add(vh,new Vector2(r.xMin,r.yMin),new Color(240/255f,248/255f,1,.7f));Add(vh,new Vector2(r.xMax,r.yMin),new Color(240/255f,248/255f,1,.7f));Add(vh,new Vector2(r.xMax,r.yMax),new Color(240/255f,248/255f,1,0));Add(vh,new Vector2(r.xMin,r.yMax),new Color(240/255f,248/255f,1,0));vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);

@@ -75,8 +75,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             StopVoice();string rows=string.Join("\n",Story.records.Select(r=>r.year+"年目  "+r.rank+" / "+r.score+"点 / 被害 "+r.loss+"万円・停止 "+r.stop+"時間 / "+(r.goalMet?"目標達成":"目標未達")));
             string factor=string.IsNullOrEmpty(Story.earnedFactor)?"":OpsCatalog.Projects[OpsCatalog.Index(Story.earnedFactor)].name;
-            var d=Dialog(Story.cleared?"3年の本編クリア":"挑戦の記録",rows+"\n\n因子："+factor+"（自動選択）\n次の挑戦の1年目からLv1。最大3枠。"+(Story.cleared?"\nエンドレスの解放を記録しました。本体は今後追加します。":""),560);
-            PButton(d,"StoryTitle","タイトルへ",32,490,420,48,()=>{SkipTutorialVisual();tutorialStep=-1;RenderHome();},PlanPink,Color.white);
+            var d=Dialog(Story.cleared?"3年の本編クリア":"挑戦の記録",rows+"\n\n"+(Story.rewardClaimed?"受け取った因子："+factor:"因子を1つ選んで持ち帰れます。")+"\n次の挑戦の1年目からLv1。最大3枠。"+(Story.cleared?"\nエンドレスの解放を記録しました。本体は今後追加します。":""),560);
+            PButton(d,"StoryTitle","タイトルへ",32,490,420,48,StoryTitleOrFactor,PlanPink,Color.white);
         }
     }
 }

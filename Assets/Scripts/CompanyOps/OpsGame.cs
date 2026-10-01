@@ -56,13 +56,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(Story==null||State.phase!=OpsPhase.Ended)return;
             bool changed=Story.RecordYear();
-            if(Story.finished&&!Story.rewardClaimed)
-            {
-                // 選択画面はNext-9。仮操作では前提不要・未所持の備えからおすすめを1つ自動受取。
-                string id=Career.factors.Count==OpsCatalog.StoryFactorSlots?Career.factors[0]:OpsCatalog.Projects
-                    .Where(p=>string.IsNullOrEmpty(p.requires)&&!Career.factors.Contains(p.id)).OrderByDescending(p=>State.Level(p.id)).First().id;
-                changed|=Career.Claim(Story,id);
-            }
+            if(Story.cleared&&!Career.endlessUnlocked){Career.endlessUnlocked=true;changed=true;}
             if(changed)Save();
         }
         public bool NextStoryYear()

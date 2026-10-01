@@ -73,6 +73,7 @@ namespace PatchWorkSecure.CompanyOps
         private void ConfirmNewYear(bool story)
         {
             Action begin=()=>{if(story)StartStory(Environment.TickCount);else StartYear(Environment.TickCount);};
+            if(Story!=null&&Story.finished&&!Story.rewardClaimed){ShowStoryFactors(begin);return;}
             if(saved==null&&string.IsNullOrEmpty(SaveWarning)){begin();return;}
             var d=Dialog(story?"3年の本編を始めますか？":"新しい一年を始めますか？","進行中の年度を置き換えます。因子・解放状況と旧版のセーブは残ります。",340);
             Button(d,"ConfirmNewYear",story?"3年の本編をはじめる":"1年だけ遊ぶ",32,270,420,48,begin,Accent);

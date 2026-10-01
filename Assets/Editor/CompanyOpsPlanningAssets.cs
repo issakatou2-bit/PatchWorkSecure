@@ -31,9 +31,9 @@ namespace PatchWorkSecure.EditorTools
                     if(bubble==null)throw new InvalidOperationException("泡素材未インポート："+suffix);
                     field.SetValue(palette,bubble);continue;
                 }
-                if(field.Name=="titleKeyVisual")
+                if(field.Name=="titleKeyVisual"||field.Name.StartsWith("focus"))
                 {
-                    const string kvPath="Assets/Art/KeyVisual/title-kv.png";
+                    string kvPath="Assets/Art/KeyVisual/"+(field.Name=="titleKeyVisual"?"title-kv":field.Name=="focusEngineer"?"focus-engineer":field.Name=="focusHinata"?"focus-hinata":"focus-secretary")+".png";
                     AssetDatabase.ImportAsset(kvPath);
                     var importer=AssetImporter.GetAtPath(kvPath) as TextureImporter;
                     if(importer==null)throw new InvalidOperationException("承認済みタイトル画像がありません。");

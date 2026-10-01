@@ -13,6 +13,18 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [UnityTest] public IEnumerator Next9FactorSelection_明示選択と入替と保存復帰を撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.Career.factors.Add("backup");game.StartStory(14);
+            FinishStoryTestYear(game.State);game.NextStoryYear();FinishStoryTestYear(game.State);game.State.totalLoss+=100;game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
+            Assert.IsFalse(game.Story.rewardClaimed);Assert.AreEqual(1,game.Career.factors.Count);var s=JsonUtility.ToJson(game.State);
+            CheckPointer("StoryRecord");Click("StoryRecord");yield return new WaitForSecondsRealtime(2);CheckPointer("ChooseFactor0");CheckPointer("ChooseFactor1");CheckPointer("ChooseFactor2");CheckPointer("ConfirmFactor");Capture("next9-factor");
+            Assert.AreEqual(s,JsonUtility.ToJson(game.State));Click("ChooseFactor0");yield return null;var chosen=game.Story.FactorCandidates(game.Career)[0].id;
+            Click("ConfirmFactor");yield return new WaitForSecondsRealtime(2);Assert.AreEqual(1,game.Career.finishedAttempts);Assert.AreEqual(2,game.Career.factors.Count);Assert.AreEqual(1,game.State.Level(chosen));
+            game.Career.factors.Clear();game.Career.factors.AddRange(new[]{"backup","mfa","inventory"});game.StartStory(9);game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
+            Click("BackHome");yield return null;Assert.IsFalse(Find<Button>("ConfirmFactor").interactable);Click("ReplaceFactor1");yield return null;Assert.IsTrue(Find<Button>("ConfirmFactor").interactable);
+            string replaced=game.Story.FactorCandidates(game.Career)[1].id;Click("ConfirmFactor");yield return null;Assert.AreEqual(3,game.Career.factors.Count);Assert.AreEqual(replaced,game.Career.factors[1]);Assert.AreEqual(2,game.Career.finishedAttempts);Assert.IsTrue(game.ExportProgress().Valid());CheckText();Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         [Test] public void Next9Factors_推薦は未所持と前提不要で星は表示だけ()
         {
             var story=OpsStory.Begin(14,null);FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());FinishStoryTestYear(story.state);story.state.totalLoss=1000;story.RecordYear();

@@ -24,6 +24,25 @@ public const int StorySaveBudgetLimit=LegacySaveBudgetLimit+StoryInitialBudget*(
 public const int ProgressSaveVersion=2, StorySaveVersion=1, ProgressSaveBytes=300000;
 public static readonly string[] StoryGoals={"B","A","A"};
 public static readonly int[] StoryPressures={0,12,24};
+// 因子カードの推薦文。星は演出だけで、Lv1の効果・枠数には触れない。
+public static string FactorRecommendation(string id)
+{
+    switch(id)
+    {
+        case "backup":return "大切なデータを、戻せる会社へ";
+        case "drill":return "戻せることは、試して確かめよう";
+        case "inventory":return "何を守るか分かれば、判断が変わる";
+        case "mfa":return "パスワードだけに頼らない入口へ";
+        case "monitor":return "「いつもと違う」に早く気づける";
+        case "segment":return "一つの侵入で、全部を巻き込ませない";
+        case "education":return "相談が集まる会社は強い";
+        case "automation":return "毎日の手間を減らして、備える時間へ";
+        case "patch":return "新しくする前に、影響と戻し方を確認";
+        case "redundancy":return "一つ止まっても、仕事を続けられる";
+        case "runbook":return "誰かが休んでも、次の一手が分かる";
+        default:return "次の挑戦の備えを、一緒に整えよう";
+    }
+}
 // 山場と年間評価。進行中の旧年度には適用しない。
 public const int PeakRulesVersion=1, JunePeak=2, SeptemberPeak=5, DecemberPeak=8, MarchPeak=11;
 public const int JuneLossGoal=8, JuneStopGoal=8, SeptemberLossGoal=5, SeptemberStopGoal=6;

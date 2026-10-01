@@ -48,6 +48,8 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(39,OpsDiaryCatalog.Entries.Length);Assert.AreEqual(38,OpsDiaryCatalog.Entries.Select(e=>e.voiceId).Where(id=>id!="").Distinct().Count());
             for(int y=1;y<=3;y++)for(int m=0;m<12;m++){var e=OpsDiaryCatalog.Entries[OpsDiaryCatalog.Page(y,m)];Assert.AreEqual(y,e.year);Assert.AreEqual(m,e.month);Assert.IsNotEmpty(e.body);Assert.IsNotEmpty(e.memo);}
             StringAssert.Contains("DNS",OpsDiaryCatalog.Entries[15].intro);StringAssert.Contains("TTL",OpsDiaryCatalog.Entries[15].intro);
+            StringAssert.Contains("試験は一回で受かったけど、会議は三回すっぽかした。……得意と苦手は、人それぞれ",OpsDiaryCatalog.Entries[9].body);
+            StringAssert.DoesNotContain("私も一回落ちた",OpsDiaryCatalog.Entries[9].body);
             Assert.IsTrue(new OpsCareer{diary=null}.Valid());var career=new OpsCareer();career.diary.Add(new OpsDiaryRecord{key=0,content=0,recap="実記録",thought="ひとこと",rank="B",minigame=""});Assert.IsTrue(career.Valid());career.diary.Add(career.diary[0]);Assert.IsFalse(career.Valid());
         }
     }

@@ -1,6 +1,6 @@
 # Irodori-TTS（ローカル・無料）で、秘書さんとエンジニアさんの声の候補を作り、キャラの1枚絵つきの試聴ページを書き出す。
 # 使い方（Irodori-TTSの仮想環境のPythonで実行）:
-#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--lock|--round2] [--only-page]
+#   C:/Users/issak/Tools/Irodori-TTS/.venv/Scripts/python.exe Tools/Irodori-Audition.py [--model small|large] [--lock|--round2|--round3] [--only-page]
 #   （小さいモデルと大きいモデルは別々に実行する）
 # 出力：Artifacts/VoiceAudition/（gitでは追跡しない）。index.html をブラウザで開くと聞き比べられる。
 # 声の性格は文字（キャプション）だけで作る。実在の人の声を手本にしない（Irodoriの利用条件）。
@@ -224,6 +224,73 @@ def round2_section():
 <p class="about">秘書さんは上段の大型の声から4通り、エンジニアさんは上段の見本を小さいモデルで、くぐもりを晴らして「クールだけど抜けてる」方向へ4通り。キープの3本は、それぞれの声で5行。</p>{''.join(groups)}</section>'''
 
 
+# 3回目（10/1）：声を決めて、キャラらしい台詞と短い反応を言わせる。「全部再生」で続けて聞く。
+ROUND3 = [
+    ('secretary', '秘書さん（2回目の派生1・大型の声）', 'secretary-small-c3-l1.wav', SEC_CAP, 'large', [
+        '社長のスケジュール、来週の火曜なら三十分空けられるわ。',
+        'その資料、数字の根拠が弱いわね。……でも、着眼点は悪くない。',
+        '経営会議で通したいなら、まず、何が止まるかから話しなさい。',
+        'あら、今日はずいぶん頑張ったのね。コーヒー、淹れてあげる。',
+        'ミスを責めても、次は防げないわ。仕組みで守るのよ。',
+        '取引先からの急ぎの依頼？　一度、電話で確かめてからにしましょう。',
+        'ふふ、困った顔も可愛いけど……そろそろ答えを聞かせて？',
+        'お疲れさま。今月も、何事もなくてよかったわ。',
+    ], ['ふふっ。', 'あら。', 'なるほどね。', 'それは困ったわね。', '上出来よ。', '……もう。', 'はいはい。', 'ええ、任せて。']),
+    ('engineer', 'エンジニアさん（2回目の派生1・クリア・小さいモデル）', 'engineer-large-c1-l1.wav', ENG_CAP + CLEAR, 'small', [
+        '……ログ、見た。三時に、変なのが一回。',
+        '設定、直しといた。……たぶん。いや、ちゃんと直した。',
+        'その更新、まず二台で試そう。全部は、そのあと。',
+        'ポテト、あと一袋ある。……半分いる？',
+        '止める範囲は、ここだけでいい。全部は止めなくていい。',
+        '……あ。会議、今日だった。',
+    ], ['……ん。', '了解。', 'へぇ。', 'ふぁ……。', 'まあ、いいけど。', '……え、ほんと？', 'それ、いいね。', 'おつかれ。']),
+]
+
+
+def r3_path(cid, kind, i):
+    return OUT / 'audio' / 'r3' / f'{cid}-{kind}{i + 1:02d}.wav'
+
+
+def generate_round3(model):
+    sys.path.insert(0, str(IRODORI))
+    import infer
+    from irodori_tts.inference_runtime import get_cached_runtime
+
+    class Cached:
+        @staticmethod
+        def from_key(key):
+            return get_cached_runtime(key)[0]
+    infer.InferenceRuntime = Cached
+    done = 0
+    for cid, name, ref, cap, m, lines, reacts in ROUND3:
+        if m != model:
+            continue
+        for kind, items in (('line', lines), ('react', reacts)):
+            for i, text in enumerate(items):
+                out = r3_path(cid, kind, i)
+                if out.exists():
+                    continue
+                out.parent.mkdir(parents=True, exist_ok=True)
+                sys.argv = ['infer.py', '--hf-checkpoint', MODELS[m][1], '--model-precision', 'bf16', '--text', text,
+                            '--caption', cap, '--ref-wav', str(OUT / 'audio' / ref), '--seed', str(SEED), '--output-wav', str(out)]
+                infer.main()
+                done += 1
+    print('3回目', done, '本')
+
+
+def round3_section():
+    blocks = []
+    for cid, name, ref, cap, m, lines, reacts in ROUND3:
+        parts = []
+        for kind, label, items in (('line', '台詞', lines), ('react', '短い反応', reacts)):
+            files = [f'audio/r3/{r3_path(cid, kind, i).name}' for i in range(len(items)) if r3_path(cid, kind, i).exists()]
+            chips = ''.join(f'<span class="chip"><button class="sm" onclick="play(this,&quot;audio/r3/{r3_path(cid, kind, i).name}&quot;)">▶</button>{html.escape(t)}</span>'
+                            for i, t in enumerate(items) if r3_path(cid, kind, i).exists())
+            parts.append(f'<div class="row"><b>{label}</b><button class="all" onclick="playAll(this,{html.escape(json.dumps(files))})">全部再生</button></div><div class="chips">{chips}</div>')
+        blocks.append(f'<h3>{html.escape(name)}</h3><p class="about">{html.escape(cap)}（{MODELS[m][0].split("（")[0]}、見本 {ref}）</p>{"".join(parts)}')
+    return f'''<section class="char" style="display:block;padding:20px 24px;box-shadow:0 0 0 3px #fff,0 0 0 7px #ff94ae,0 14px 34px rgba(27,35,64,.14)"><h2>3回目：決めた声で、キャラらしい台詞と短い反応</h2>{''.join(blocks)}</section>'''
+
+
 def page():
     import shutil
     (OUT / 'art').mkdir(exist_ok=True)
@@ -254,15 +321,17 @@ header{{padding:28px 40px 6px}} h1{{font-family:'M PLUS Rounded 1c';margin:0;fon
 .char img{{width:300px;object-fit:cover;object-position:50% 15%}}
 .body{{padding:20px 24px 22px 0;flex:1}} h2{{font-family:'M PLUS Rounded 1c';margin:0;font-size:28px}} h3{{font-family:'M PLUS Rounded 1c';margin:18px 0 6px;font-size:20px}} .about{{margin:4px 0 12px;color:#6b7894;font-weight:700}}
 table{{border-collapse:collapse;width:100%;font-size:14px}} th,td{{padding:8px 6px;border-bottom:1px solid #eef1f6;text-align:center;vertical-align:middle}}
-th{{color:#6b7894;font-weight:700}} .cap{{text-align:left;max-width:330px;line-height:1.5}} .ln{{font-size:12px;max-width:170px;line-height:1.4}} .lg{{background:#fff8e6}} .md{{font-size:12px;color:#6b7894}}
+th{{color:#6b7894;font-weight:700}} .cap{{text-align:left;max-width:330px;line-height:1.5}} .ln{{font-size:12px;max-width:170px;line-height:1.4}} .lg{{background:#fff8e6}} .md{{font-size:12px;color:#6b7894}} .row{{display:flex;align-items:center;gap:12px;margin:12px 0 6px}} .chips{{display:flex;flex-wrap:wrap;gap:8px}} .chip{{display:inline-flex;align-items:center;gap:8px;background:#f3f6fb;border-radius:14px;padding:5px 12px 5px 5px;font-weight:700;font-size:15px}} button.sm{{width:34px;height:34px;font-size:13px;border-radius:10px}} button.all{{width:auto;height:38px;padding:0 16px;font-size:14px;font-family:'M PLUS Rounded 1c'}}
 button{{width:46px;height:46px;border:0;border-radius:14px;cursor:pointer;font-size:18px;color:#fff;background:linear-gradient(180deg,#ff94ae,#ff6f91);box-shadow:0 4px 0 #c9486c}}
 button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0 #1f75b8}} .miss{{color:#b5bccb;font-size:12px}}
 </style></head><body><header><h1>秘書さん・エンジニアさんの声の試聴</h1>
 <p>Irodori-TTS（ローカル・無料）。声は文字の説明だけで作った候補です。気に入った候補に「これ」を付けてください（この画面の中だけの印です）。</p></header>
+{round3_section() if (OUT / 'audio' / 'r3').exists() else ''}
 {round2_section() if (OUT / 'audio' / 'r2').exists() else ''}
 {lock_section() if any((OUT / 'audio' / m).exists() for m in ('large', 'small')) else ''}
 {''.join(cards)}
-<script>let a=null,b=null;function play(btn,src){{if(a){{a.pause();b&&b.classList.remove('on')}}a=new Audio(src);b=btn;btn.classList.add('on');a.onended=()=>btn.classList.remove('on');a.play()}}</script>
+<script>let a=null,b=null,q=[];function playAll(btn,list){{q=list.slice();next(btn)}}function next(btn){{if(!q.length){{btn.classList.remove('on');return}}const src=q.shift();if(a)a.pause();a=new Audio(src);btn.classList.add('on');a.onended=()=>setTimeout(()=>next(btn),350);a.play()}}
+let _=0;function play(btn,src){{if(a){{a.pause();b&&b.classList.remove('on')}}a=new Audio(src);b=btn;btn.classList.add('on');a.onended=()=>btn.classList.remove('on');a.play()}}</script>
 </body></html>'''
     (OUT / 'index.html').write_text(doc, encoding='utf-8')
     print('試聴ページ', OUT / 'index.html')
@@ -270,7 +339,9 @@ button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0
 
 if __name__ == '__main__':
     (OUT / 'audio').mkdir(parents=True, exist_ok=True)
-    if '--round2' in sys.argv:
+    if '--round3' in sys.argv:
+        generate_round3(sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large')
+    elif '--round2' in sys.argv:
         generate_round2(sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large')
     elif '--lock' in sys.argv:
         m = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv else 'large'

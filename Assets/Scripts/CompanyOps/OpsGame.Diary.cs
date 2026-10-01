@@ -54,7 +54,9 @@ namespace PatchWorkSecure.CompanyOps
         public void OpenMonthlyDiary()
         {
             if(State?.Latest==null||State.phase!=OpsPhase.Review)return;
-            var r=State.Latest;int year=Story?.year??1,key=OpsDiaryCatalog.Page(year,r.month),content=key;
+            // 連載は36か月分。4年目以降の記録で既読ページを上書きしない。
+            if(Endless!=null&&RunYear>3){if(State.QuarterRewardPending)QuarterRewardDialogAfterDiary();else Next();return;}
+            var r=State.Latest;int year=RunYear,key=OpsDiaryCatalog.Page(year,r.month),content=key;
             bool ends=r.month==11||State.budget<0||State.stability==0;
             bool met=r.month==11&&State.budget>=0&&State.stability>0&&(Story==null||OpsStory.RankValue(State.RankCode)>=OpsStory.RankValue(Story.Goal));
             int ending=!met?OpsDiaryCatalog.FailEnding:State.RankCode=="SS"?OpsDiaryCatalog.SSEnding:OpsDiaryCatalog.ClearEnding;

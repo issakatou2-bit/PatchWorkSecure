@@ -43,7 +43,14 @@ namespace PatchWorkSecure.CompanyOps
             if(SaveWarning!="")PText(screen,"SaveWarning",SaveWarning,90,864,1420,28,15,Coral,false);
         }
         private static string TitleFactorName(string id)=>id=="inventory"?"台帳":OpsCatalog.AllProjects[OpsCatalog.Index(id)].name;
-        private void EndlessNotice(){Dialog("終わりなき年度","準備中です。解放の記録は保存されています。",340);}
+        private void EndlessNotice()
+        {
+            if(!Career.endlessUnlocked)return;
+            Action begin=()=>StartEndless(Environment.TickCount);
+            if(Story!=null&&Story.finished&&!Story.rewardClaimed){ShowStoryFactors(begin);return;}
+            if(State!=null&&State.phase!=OpsPhase.Ended){var d=Dialog("新しい挑戦をはじめますか？","進行中の年度を置き換えます。因子・解放状況と旧版のセーブは残ります。",340);Button(d,"ConfirmEndless","終わりなき年度をはじめる",32,270,420,48,begin,Accent);return;}
+            begin();
+        }
         private Button StoryModeButton(string id,string title,string hint,float y,float h,float size,bool primary,Action action)
         {
             var b=PButton(screen,id,title,90,y,470,h,action,primary?PlanPink:Color.white,primary?Color.white:PlanInk);TitleButtonStyle(b,primary);

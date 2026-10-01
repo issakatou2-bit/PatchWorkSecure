@@ -481,7 +481,7 @@ namespace PatchWorkSecure.CompanyOps
             if(missionBudgetRules<0||missionBudgetRules>1||missionBudgetPaid<0||missionBudgetPaid>MissionBudgetReward||acceptedMissionMonth < -1||acceptedMissionMonth>month)return false;
             if(rankBenefitRules<0||rankBenefitRules>1||rankQuarterBonusPaid<0||rankQuarterBonusPaid>1||rankQuarterBonusPaid>0&&(!quarterRewardClaimed||!QuarterPeak))return false;
             if (version != SaveVersion || situationRules < 0 || situationRules > 1 || month < 0 || month > 11 || !Enum.IsDefined(typeof(OpsPhase), phase) ||
-                budget < -500 || budget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || capacity < 0 || capacity > 8 ||
+                budget < -500 || budget > SaveBudgetLimit || capacity < 0 || capacity > 8 ||
                 proposalGrant < 0 || proposalGrant > 21+(rankBenefitRules>0?1:0)+SecretaryProposalBonus || (proposalGrant != 0 && !proposed) ||
                 new[] { stability, culture, trust, fatigue }.Any(n => n < 0 || n > 100) ||
                 !ValidYearEquipment() || levels.Any(n => n < 0 || n > 2) ||
@@ -493,12 +493,12 @@ namespace PatchWorkSecure.CompanyOps
                 completedMissions.Any(m => m < 0 || m > month))) return false;
             if (situationPrepared && (situationRules == 0 || string.IsNullOrEmpty(Situation.action))) return false;
             if (learned.Any(t => OpsCatalog.Term(t) == null) || journal.Any(t => t == null || t.Length > 1500)) return false;
-            if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > 200 || r.downtime < 0 || r.downtime > 200 ||
+            if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > SaveIncidentLimit || r.downtime < 0 || r.downtime > SaveIncidentLimit ||
                 r.missionBonus<0||r.missionBonus>MissionBudgetReward||
                 (r.minigameRecorded && (r.minigameScore<0 || r.minigameScore>OpsCatalog.MinigameMaxScore || r.delegated&&r.minigameScore!=OpsCatalog.MinigameDelegateScore)) ||
                 !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
-                (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > (yearPressure==0?OpsCatalog.LegacySaveBudgetLimit:OpsCatalog.StorySaveBudgetLimit) || r.closingStability < 0 || r.closingStability > 100)) ||
-                (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > 200 || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > 200 || r.forecast.cost < 0 || r.forecast.cost > 200)) ||
+                (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > SaveBudgetLimit || r.closingStability < 0 || r.closingStability > 100)) ||
+                (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > SaveIncidentLimit || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > SaveIncidentLimit || r.forecast.cost < 0 || r.forecast.cost > 200)) ||
                 r.businessLoss < 0 || r.businessLoss > 6 || r.businessLoss > r.loss || r.extraFatigue < 0 || r.extraFatigue > 8 ||
                 r.chainLossReduction < 0 || r.chainLossReduction > 6 || r.chainDowntimeReduction < 0 || r.chainDowntimeReduction > 6 ||
                 (!string.IsNullOrEmpty(r.recoveryChain) && r.recoveryChain != "復元連携" && r.recoveryChain != "再開連携") ||

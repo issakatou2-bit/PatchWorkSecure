@@ -13,7 +13,7 @@ namespace PatchWorkSecure.CompanyOps
         public int YearOpeningStage{get;private set;}
         private float openingElapsed;
         private bool openingRepeated,buildingYearOpening;
-        private OpsYearDefinition OpeningYear=>OpsCatalog.CompanyYear(Story.year);
+        private OpsYearDefinition OpeningYear=>OpsCatalog.CompanyYear(RunYear);
         private RectTransform OpeningShape(Transform p,string id,string kind,float x,float y,float w,float h,Color? color=null,float radius=30,int shape=0)
         {var r=Rect(p,id,x,y,w,h);var g=r.gameObject.AddComponent<OpsOpeningGraphic>();g.Kind=kind;g.color=color??Color.white;g.Radius=radius;g.Shape=shape;g.raycastTarget=false;return r;}
         private void OpeningMotion(RectTransform r,string kind,float seconds=.6f,float delay=0)
@@ -38,7 +38,7 @@ namespace PatchWorkSecure.CompanyOps
             var card=OpeningCard(p,id,x,y,size,size,Color.white,satellite?new Color(.247f,.663f,.961f,.45f):(Color?)null,30);
             card.gameObject.AddComponent<Mask>().showMaskGraphic=false;
             var image=PImage(card,id+"Art",OfficeArt,0,0,size,size).GetComponent<Image>();
-            if(satellite){image.material=OfficeHue(Story.year);var r=image.rectTransform;r.pivot=new Vector2(.5f,.5f);r.anchoredPosition=new Vector2(size/2,-size/2);r.localScale=new Vector3(-1,1,1);card.gameObject.AddComponent<OpsTransientMaterial>().Material=image.material;}
+            if(satellite){image.material=OfficeHue(RunYear);var r=image.rectTransform;r.pivot=new Vector2(.5f,.5f);r.anchoredPosition=new Vector2(size/2,-size/2);r.localScale=new Vector3(-1,1,1);card.gameObject.AddComponent<OpsTransientMaterial>().Material=image.material;}
             var text=satellite?"NEW  "+OpeningYear.location:"本社";float width=text.Length*18+36;
             var tag=OpeningShape(card,id+"Tag","rounded",18,16,width,36,satellite?PlanBlue:PlanInk,12);StoryText(tag,id+"Label",text,14,0,width-28,36,18,Color.white).textWrappingMode=TextWrappingModes.NoWrap;
             OpeningMotion(card,satellite?"right":"zoom",satellite?.8f:1.4f,satellite?.5f:0);
@@ -46,11 +46,11 @@ namespace PatchWorkSecure.CompanyOps
         private void OpeningPill(Transform p,string id,string text,float x,float y,float w,Color tone,Color fg)
         {var r=PCard(p,id,x,y,w,32,tone,20,false);KitGradient(r.GetComponent<Image>(),Color.Lerp(tone,Color.white,.55f),tone);var o=r.gameObject.AddComponent<Outline>();o.effectColor=Color.white;o.effectDistance=new Vector2(3,-3);StoryText(r,id+"Text",text,5,0,w-10,32,15,fg,true);}
         public void PreviewYearOpening(int stage,bool paused=true)
-        {if(Story==null||Story.year<2||State.phase!=OpsPhase.Planning)return;YearOpeningPaused=paused;YearOpeningStage=Mathf.Clamp(stage,0,4);openingElapsed=0;OpeningScreen();}
+        {if(Story==null&&Endless==null||RunYear<2||State.phase!=OpsPhase.Planning)return;YearOpeningPaused=paused;YearOpeningStage=RunYear>3?4:Mathf.Clamp(stage,0,4);openingElapsed=0;if(RunYear>3)EndlessShortOpening();else OpeningScreen();}
         private void BeginYearOpening()
         {
-            Career.seenOpeningYears=Career.seenOpeningYears??new System.Collections.Generic.List<int>();openingRepeated=Career.seenOpeningYears.Contains(Story.year);
-            if(!openingRepeated)Career.seenOpeningYears.Add(Story.year);Save();PreviewYearOpening(0,false);
+            Career.seenOpeningYears=Career.seenOpeningYears??new System.Collections.Generic.List<int>();openingRepeated=Career.seenOpeningYears.Contains(RunYear);
+            if(!openingRepeated&&RunYear<=3)Career.seenOpeningYears.Add(RunYear);Save();PreviewYearOpening(0,false);
         }
         public void AdvanceYearOpening(){if(!YearOpeningActive)return;if(YearOpeningStage==4){YearOpeningActive=false;YearOpeningPaused=false;Render();return;}PreviewYearOpening(YearOpeningStage+1,YearOpeningPaused);}
         public void SkipYearOpening(){if(YearOpeningActive)PreviewYearOpening(4,false);}
@@ -80,7 +80,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             OpeningHeader("THE COMPANY GROWS",OpeningYear.growthHeading,PlanPink);OpeningMap(screen,"OpeningHeadOffice",150,190,560,false);OpeningMap(screen,"OpeningLocation",930,250,440,true);
             var link=OpeningShape(screen,"OpeningLink","link",700,430,240,80);OpeningMotion(link,"link",1);
-            var prev=OpsCatalog.CompanyYear(Story.year-1);string[] names={"社員","守る端末",Story.year==3?"つながる会社":"拠点"};int[] before={prev.employees,prev.devices,Story.year==3?prev.partners:prev.branches},after={OpeningYear.employees,OpeningYear.devices,Story.year==3?OpeningYear.partners:OpeningYear.branches};
+            var prev=OpsCatalog.CompanyYear(RunYear-1);string[] names={"社員","守る端末",RunYear==3?"つながる会社":"拠点"};int[] before={prev.employees,prev.devices,RunYear==3?prev.partners:prev.branches},after={OpeningYear.employees,OpeningYear.devices,RunYear==3?OpeningYear.partners:OpeningYear.branches};
             for(int i=0;i<3;i++){float x=570+i*180;StoryText(screen,"OpeningCountLabel"+i,names[i],x,770,150,22,15,PlanInk,true);StoryText(screen,"OpeningCountBefore"+i,before[i]+" →",x,806,62,46,22,PlanGray,true);StoryText(screen,"OpeningCountAfter"+i,after[i].ToString(),x+63,782,100,90,54,PlanInk,true).textWrappingMode=TextWrappingModes.NoWrap;}
         }
         private void OpeningUnlock()
@@ -93,7 +93,7 @@ namespace PatchWorkSecure.CompanyOps
                 bool twoLines=data.name.Contains("（");StoryText(card,"OpeningEquipmentName"+i,data.name.Replace("（","\n（"),28,128,340,twoLines?84:44,28);StoryText(card,"EquipmentDescription"+i,data.description,28,twoLines?224:176,324,70,16,Hex("52607a"),false,true);
                 var ribbon=PCard(card,"NewRibbon"+i,250,17,180,30,PlanPink,12,false);ribbon.pivot=new Vector2(.5f,.5f);ribbon.anchoredPosition=new Vector2(337,-53);ribbon.localRotation=Quaternion.Euler(0,0,-38);StoryText(ribbon,"NewRibbonText"+i,"NEW",0,0,180,30,15,Color.white,true);Shine(card,380,300);OpeningMotion(card,"pop",.6f,.15f+i*.3f);
             }
-            string[] chips=new[]{Story.year+"年目の成長目標"}.Concat(State.GrowthGoals.Select(g=>g.name)).ToArray();float[] widths=chips.Select(t=>t.Length*15f+28).ToArray();float x=(1600-widths.Sum()-48)/2;
+            string[] chips=new[]{RunYear+"年目の成長目標"}.Concat(State.GrowthGoals.Select(g=>g.name)).ToArray();float[] widths=chips.Select(t=>t.Length*15f+28).ToArray();float x=(1600-widths.Sum()-48)/2;
             for(int i=0;i<chips.Length;i++){OpeningPill(screen,"OpeningGoal"+i,chips[i],x,600,widths[i],i==0?Hex("eef2f8"):Hex("ffc02e"),i==0?Hex("52607a"):Hex("7a5a00"));x+=widths[i]+16;}StoryText(screen,"OpeningUnlockNote",OpeningYear.unlockNote,0,680,1600,36,20,Hex("52607a"),true);
         }
         private void OpeningRivals()
@@ -119,11 +119,20 @@ namespace PatchWorkSecure.CompanyOps
         private void OpeningTitle()
         {
             var art=PImage(screen,"OpeningKeyVisual",PlanningArt.titleKeyVisual,0,0,1600,900,new Color(1,1,1,.55f));OpeningMotion(art,"zoom",3);OpeningShape(screen,"OpeningTitleVeil","title-veil",0,0,1600,900);
-            var ch=StoryText(screen,"OpeningChapter","CHAPTER "+Story.year,0,200,1600,30,18,Hex("ffd23f"),true);ch.characterSpacing=32;OpeningMotion(ch.rectTransform,"rise",.5f,.1f);
-            StoryText(screen,"OpeningYearShadow",Story.year+"年目",0,202,1600,280,200,new Color(1,.435f,.569f,.85f),true);var year=StoryText(screen,"OpeningYear",Story.year+"年目",0,192,1600,280,200,Color.white,true);OpeningMotion(year.rectTransform,"big",.9f,.2f);
+            var ch=StoryText(screen,"OpeningChapter","CHAPTER "+RunYear,0,200,1600,30,18,Hex("ffd23f"),true);ch.characterSpacing=32;OpeningMotion(ch.rectTransform,"rise",.5f,.1f);
+            StoryText(screen,"OpeningYearShadow",RunYear+"年目",0,202,1600,280,200,new Color(1,.435f,.569f,.85f),true);var year=StoryText(screen,"OpeningYear",RunYear+"年目",0,192,1600,280,200,Color.white,true);OpeningMotion(year.rectTransform,"big",.9f,.2f);
             float width=OpeningYear.theme.Length*36+70;var theme=PCard(screen,"OpeningTheme",(1600-width)/2,450,width,66,PlanPink,16,false);KitGradient(theme.GetComponent<Image>(),Hex("ff94ae"),PlanPink,true);StoryText(theme,"OpeningThemeText",OpeningYear.theme,30,0,width-60,66,36,Color.white,true).textWrappingMode=TextWrappingModes.NoWrap;OpeningMotion(theme,"pop",.5f,.9f);
             var cry=StoryText(screen,"OpeningCry",OpeningYear.cry,400,600,800,74,44,Hex("ffd23f"),true);cry.characterSpacing=20;OpeningMotion(cry.rectTransform,"stamp",.6f,1.3f);
             var flash=PImage(screen,"OpeningFlash",null,0,0,1600,900,new Color(1,1,1,.95f));OpeningMotion(flash,"flash",.5f,.15f);
+        }
+        private void EndlessShortOpening()
+        {
+            buildingYearOpening=true;NewScreen();buildingYearOpening=false;YearOpeningActive=true;PhasePresentationRunning=false;StopVoice();
+            OpeningShape(screen,"OpeningBackground","rivals",0,0,1600,900,PlanInk,0);OpeningShape(screen,"OpeningScan","scan",0,0,1600,900);
+            OpeningHeader("NEXT YEAR",RunYear+"年目",PlanPink,true);
+            OpeningShape(screen,"RivalSilhouette","rival",600,170,400,450,null,0,OpeningYear.rivals[2].shape);
+            StoryText(screen,"OpeningPressure","脅威 +"+State.yearPressure,0,620,1600,65,40,Color.white,true);
+            PButton(screen,"OpeningAdvance","迎え撃つ",630,755,340,62,AdvanceYearOpening,PlanPink,Color.white,23);
         }
     }
     public sealed class OpsOpeningCover : MonoBehaviour

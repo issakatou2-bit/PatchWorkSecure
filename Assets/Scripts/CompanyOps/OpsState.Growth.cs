@@ -170,7 +170,7 @@ namespace PatchWorkSecure.CompanyOps
         private bool ValidGrowth()
         {
             if(yearThreatRules<0||yearThreatRules>OpsCatalog.StoryThreatVersion||yearThreatRules>0&&(yearGrowthRules==0||storyCalendarYear<2)||
-                yearPressure<0||yearPressure>OpsCatalog.StoryPressure(OpsCatalog.StoryYears,yearThreatRules))return false;
+                yearPressure<0||!ValidEndlessYear()||endlessYear==0&&yearPressure>OpsCatalog.StoryPressure(OpsCatalog.StoryYears,yearThreatRules))return false;
             if (growthRules < 0 || growthRules > 1 || monthExtraCapacity < 0 || monthExtraCapacity > 1 || nextMonthExtraCapacity < 0 || nextMonthExtraCapacity > 1 ||
                 (nextMonthExtraCapacity > 0 && !quarterRewardClaimed) || (quarterRewardClaimed && (!QuarterPeak || month == 11))) return false;
             if (history != null && !history.All(r => r != null && ValidGrowthResult(r))) return false;

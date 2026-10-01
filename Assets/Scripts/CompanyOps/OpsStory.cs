@@ -22,15 +22,19 @@ namespace PatchWorkSecure.CompanyOps
                 var earlier=previous.previousStoryEvents??(year==3?OpsEventCatalog.Schedule(unchecked(yearSeed-(year-1)*OpsCatalog.StorySeedStride),false):new string[0]);
                 s.previousStoryEvents=earlier.Concat(previous.eventSchedule??new string[0]).Distinct().ToArray();
                 s.eventSchedule=OpsEventCatalog.StorySchedule(yearSeed,year,s.previousStoryEvents,true);
-                for(int i=0;i<previous.levels.Length;i++)s.levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
-                s.staffExperience=new int[s.StaffCount];Array.Copy(previous.staffExperience,s.staffExperience,previous.staffExperience.Length);s.culture=previous.culture;
-                s.trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
-                // 全額繰越。試算用のMax=999を本番の上限にしない。
-                s.budget=checked(OpsCatalog.StoryInitialBudget+Math.Max(0,previous.budget));
+                s.CarryYear(previous);
             }
             else foreach(string id in ids)s.levels[OpsCatalog.Index(id)]=OpsCatalog.StoryEquipmentLevel;
             s.monthStartMetrics=s.ReportMetrics;
             return s;
+        }
+        private void CarryYear(OpsState previous)
+        {
+            for(int i=0;i<previous.levels.Length;i++)levels[i]=Math.Min(OpsCatalog.StoryEquipmentLevel,previous.levels[i]);
+            staffExperience=new int[StaffCount];Array.Copy(previous.staffExperience,staffExperience,previous.staffExperience.Length);culture=previous.culture;
+            trust=(previous.trust+OpsCatalog.StoryTrustBaseline)/OpsCatalog.StoryTrustDivisor;
+            // 全額繰越。試算用のMax=999を本番の上限にしない。
+            budget=checked(OpsCatalog.StoryInitialBudget+Math.Max(0,previous.budget));
         }
     }
     [Serializable] public sealed class OpsStoryYear
@@ -95,7 +99,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public bool Valid()
         {
-            if(version!=OpsCatalog.StorySaveVersion||year<1||year>OpsCatalog.StoryYears||state==null||!state.Valid()||state.seed!=YearSeed||state.yearPressure!=OpsCatalog.StoryPressure(year,state.yearThreatRules)||!OpsCareer.ValidFactors(factors))return false;
+            if(version!=OpsCatalog.StorySaveVersion||year<1||year>OpsCatalog.StoryYears||state==null||state.endlessYear!=0||!state.Valid()||state.seed!=YearSeed||state.yearPressure!=OpsCatalog.StoryPressure(year,state.yearThreatRules)||!OpsCareer.ValidFactors(factors))return false;
             if(records==null||records.Count<year-1||records.Count>year||records.Any(r=>r==null||!r.Valid()))return false;
             for(int i=0;i<records.Count;i++)if(records[i].year!=i+1||i<year-1&&!records[i].goalMet)return false;
             bool recorded=records.Count==year;
@@ -135,10 +139,14 @@ namespace PatchWorkSecure.CompanyOps
     {
         public int format=OpsCatalog.ProgressSaveVersion;
         public bool storyMode;
+        public bool endlessMode;
         public OpsState single;
         public OpsStory story;
+        public OpsEndless endless;
         public OpsCareer career=new OpsCareer();
-        public OpsState Current=>story==null?single:story.state;
-        public bool Valid()=>format==OpsCatalog.ProgressSaveVersion&&career!=null&&career.Valid()&&(story==null?single!=null&&single.Valid()&&single.yearPressure==0:single==null&&story.Valid())&&(!((story?.cleared??false)&&(story?.rewardClaimed??false))||career.endlessUnlocked);
+        public OpsState Current=>endless!=null?endless.state:story==null?single:story.state;
+        public bool Valid()=>format==OpsCatalog.ProgressSaveVersion&&career!=null&&career.Valid()&&
+            (endless!=null?story==null&&single==null&&career.endlessUnlocked&&endless.Valid():story==null?single!=null&&single.endlessYear==0&&single.Valid()&&single.yearPressure==0:single==null&&story.Valid())&&
+            (!((story?.cleared??false)&&(story?.rewardClaimed??false))||career.endlessUnlocked);
     }
 }

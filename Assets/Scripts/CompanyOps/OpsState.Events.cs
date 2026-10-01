@@ -132,7 +132,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(storyCalendarYear!=0&&storyCalendarYear!=2&&storyCalendarYear!=3)return false;
             if(storyCalendarYear==0&&(previousStoryEvents?.Length??0)>0)return false;
-            if(storyCalendarYear>0&&(eventRules!=1||yearPressure!=OpsCatalog.StoryPressure(storyCalendarYear,yearThreatRules)||previousStoryEvents==null||
+            if(storyCalendarYear>0&&(eventRules!=1||yearPressure!=(endlessYear>0?OpsCatalog.EndlessPressure(endlessYear):OpsCatalog.StoryPressure(storyCalendarYear,yearThreatRules))||previousStoryEvents==null||
                 previousStoryEvents.Length>12*(storyCalendarYear-1)||previousStoryEvents.Distinct().Count()!=previousStoryEvents.Length||previousStoryEvents.Any(id=>OpsEventCatalog.Event(id)==null)||
                 eventSchedule==null||eventSchedule.Length!=12||eventSchedule.Any(previousStoryEvents.Contains)||eventSchedule[0]!=(storyCalendarYear==2?"y2-branch":"y3-audit-mail")||
                 storyCalendarYear==3&&eventSchedule[11]!="y3-final"))return false;

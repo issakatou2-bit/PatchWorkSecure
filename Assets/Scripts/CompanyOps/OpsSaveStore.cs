@@ -6,7 +6,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public static class OpsSaveStore
     {
-        [Serializable] private sealed class Header { public int format=0; public bool storyMode=false; }
+        [Serializable] private sealed class Header { public int format=0; public bool storyMode=false,endlessMode=false; }
         public static OpsProgress ReadProgress(string path,out string warning)
         {
             warning="";
@@ -25,7 +25,8 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     progress=JsonUtility.FromJson<OpsProgress>(json);
                     // Unityのインライン直列化はnullのクラスを空の実体にするため、明示のモードで復元する。
-                    if(progress!=null){if(header.storyMode)progress.single=null;else progress.story=null;}
+                    if(header.storyMode&&header.endlessMode)throw new InvalidDataException();
+                    if(progress!=null){if(header.endlessMode){progress.single=null;progress.story=null;}else if(header.storyMode){progress.single=null;progress.endless=null;}else{progress.story=null;progress.endless=null;}}
                 }
                 if(progress==null||!progress.Valid())throw new InvalidDataException();return progress;
             }
@@ -38,6 +39,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 if(progress==null||!progress.Valid())throw new InvalidDataException();
                 progress.storyMode=progress.story!=null;
+                progress.endlessMode=progress.endless!=null;
                 return WriteJson(path,JsonUtility.ToJson(progress,true),out warning);
             }
             catch(Exception){warning="保存できませんでした。このまま遊べますが終了すると進行を失います。";return false;}

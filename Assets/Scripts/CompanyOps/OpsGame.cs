@@ -20,6 +20,8 @@ namespace PatchWorkSecure.CompanyOps
         private OpsState saved;
         private OpsProgress savedProgress;
         public OpsStory Story {get;private set;}
+        public OpsEndless Endless {get;private set;}
+        public int RunYear=>Endless?.year??Story?.year??1;
         public OpsCareer Career {get;private set;}=new OpsCareer();
         private int tab;
         private string filter = "all";
@@ -44,17 +46,20 @@ namespace PatchWorkSecure.CompanyOps
             if(OpsSaveStore.WriteProgress(SavePath,progress,out string warning)){savedProgress=progress;saved=State;}
             SaveWarning = warning;
         }
-        public void StartYear(int seed){Story=null;EnterYear(new OpsState(seed,true),true);}
-        public void StartStory(int seed){Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
+        public void StartYear(int seed){Story=null;Endless=null;EnterYear(new OpsState(seed,true),true);}
+        public void StartStory(int seed){Endless=null;Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
+        public bool StartEndless(int seed)
+        {if(!Career.endlessUnlocked)return false;Story=null;Endless=OpsEndless.Begin(seed,Career.factors);EnterYear(Endless.state,true);return true;}
         private void EnterYear(OpsState next,bool tutorial)
         {storyAnnualDetails=false;CancelMinigame();StopVoice();SkipTutorialVisual();tutorialStep=-1;voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false;resolutionActive=false;pendingRankBenefit="";statEffectPending=false;roomFilter="";budgetGainPending=false;rankBefore=rankAfter=null;rankedReports.Clear();workCompletePending=false;workCompleteMonth=-1;State=next;statChanges=new int[6];tab=0;Save();Render();if(tutorial)TutorialNewYear();}
-        public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null?State:null,story=Story,storyMode=Story!=null,career=Career};
+        public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null&&Endless==null?State:null,story=Story,endless=Endless,storyMode=Story!=null,endlessMode=Endless!=null,career=Career};
         public bool RestoreProgress(OpsProgress progress)
-        {if(progress==null||!progress.Valid())return false;Story=progress.story;Career=progress.career;EnterYear(progress.Current,false);return true;}
+        {if(progress==null||!progress.Valid())return false;Story=progress.story;Endless=progress.endless;Career=progress.career;EnterYear(progress.Current,false);return true;}
         private void ContinueSaved()=>RestoreProgress(savedProgress??new OpsProgress{single=saved,career=Career});
         private void RecordStoryOutcome()
         {
             if(State!=null&&Career.RecordBoss(State,State.Latest))Save();
+            if(Endless!=null){if(Endless.RecordYear())Save();return;}
             if(Story==null||State.phase!=OpsPhase.Ended)return;
             bool changed=Story.RecordYear();
             if(Story.cleared&&!Career.endlessUnlocked){Career.endlessUnlocked=true;changed=true;}
@@ -62,6 +67,10 @@ namespace PatchWorkSecure.CompanyOps
         }
         public bool NextStoryYear()
         {if(Story==null||MinigameActive)return false;RecordStoryOutcome();if(!Story.AdvanceYear())return false;EnterYear(Story.state,false);BeginYearOpening();return true;}
+        public bool NextEndlessYear()
+        {if(Endless==null||MinigameActive)return false;RecordStoryOutcome();if(!Endless.AdvanceYear())return false;EnterYear(Endless.state,false);BeginYearOpening();return true;}
+        public bool RetireEndless()
+        {if(Endless==null||MinigameActive||!Endless.Retire())return false;Save();Render();return true;}
         public void OpenTab(int next) { if(MinigameActive)return;roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {

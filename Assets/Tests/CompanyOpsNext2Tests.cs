@@ -17,13 +17,13 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next3Title_承認済み一枚絵と縮尺と字幕と低減設定を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
-            var kv=Find<Image>("TitleKeyVisual");Assert.AreSame(game.PlanningArt.titleKeyVisual,kv.sprite);Assert.AreEqual(new Vector2(1672,941),kv.sprite.rect.size);Assert.AreEqual(new Vector2(.7f,.6f),kv.rectTransform.pivot);
-            Assert.AreEqual("kv",kv.GetComponent<OpsPlanningMotion>().Kind);Assert.AreEqual(20,kv.GetComponent<OpsPlanningMotion>().Period);Assert.That(kv.rectTransform.localScale.x,Is.InRange(1.02f,1.06f));Assert.AreEqual(.84f,Find<RectTransform>("TitleBrand").localScale.x);
+            var kv=Find<Image>("TitleKeyVisual");Assert.AreSame(game.PlanningArt.titleKeyVisual,kv.sprite);Assert.AreEqual(new Vector2(1672,941),kv.sprite.rect.size);Assert.AreEqual(new Vector2(0,1),kv.rectTransform.pivot);
+            Assert.IsNull(kv.GetComponent<OpsPlanningMotion>());Assert.AreEqual(Vector3.one,kv.rectTransform.localScale);Assert.AreEqual(1,Find<RectTransform>("TitleBrand").localScale.x);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="HomePortrait"||t.name=="HomeGreeting"));CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");Capture("134-title-kv");
             game.SpeakSceneLine("think_01",0);yield return new WaitForSecondsRealtime(.4f);Assert.AreEqual(game.LastReactionCaption,Find<TextMeshProUGUI>("TitleCaption").text);Assert.IsFalse(game.PortraitVoicePlaying);
             game.SpeakSceneLine(game.ActiveVoiceBank.lines.OrderByDescending(l=>l.caption.Length).First().id,0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual(TextWrappingModes.NoWrap,Find<TextMeshProUGUI>("TitleCaption").textWrappingMode);Assert.IsFalse(Find<TextMeshProUGUI>("TitleCaption").text.Contains("\n"));CheckText();
             Click("HomeSettings");yield return new WaitForSecondsRealtime(.5f);Click("CaptionToggle");Click("ReduceMotion");Click("CloseDialog");yield return new WaitForSecondsRealtime(.5f);
-            game.SpeakSceneLine("think_02",0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual("",Find<TextMeshProUGUI>("TitleCaption").text);Assert.AreEqual(1.02f,Find<RectTransform>("TitleKeyVisual").localScale.x);CheckText();Capture("134-title-kv-reduced");LogAssert.NoUnexpectedReceived();
+            game.SpeakSceneLine("think_02",0);yield return new WaitForSecondsRealtime(.1f);Assert.AreEqual("",Find<TextMeshProUGUI>("TitleCaption").text);Assert.AreEqual(1,Find<RectTransform>("TitleKeyVisual").localScale.x);CheckText();Capture("134-title-kv-reduced");LogAssert.NoUnexpectedReceived();
         }
         [Test] public void Next3Bubbles_固定抽選と一度だけの報酬と旧保存を検証する()
         {

@@ -52,10 +52,11 @@ namespace PatchWorkSecure.CompanyOps
             {
                 int s=vh.currentVertCount;Add(vh,new Vector2(r.xMin,r.yMin),new Color(240/255f,248/255f,1,.7f));Add(vh,new Vector2(r.xMax,r.yMin),new Color(240/255f,248/255f,1,.7f));Add(vh,new Vector2(r.xMax,r.yMax),new Color(240/255f,248/255f,1,0));Add(vh,new Vector2(r.xMin,r.yMax),new Color(240/255f,248/255f,1,0));vh.AddTriangle(s,s+1,s+2);vh.AddTriangle(s,s+2,s+3);
             }
-            else if(Kind=="title-veil"||Kind=="title-kv-veil")
+            else if(Kind=="title-veil"||Kind=="title-kv-veil"||Kind=="story-title-veil")
             {
                 float[] stops=Kind=="title-kv-veil"?new[]{0,.26f,.4f,.5f}:new[]{0,.34f,.62f,1};
                 Color[] colors=Kind=="title-kv-veil"?new[]{new Color(240/255f,248/255f,1,.94f),new Color(240/255f,248/255f,1,.82f),new Color(1,240/255f,245/255f,.25f),new Color(1,240/255f,245/255f,0)}:new[]{new Color(.918f,.961f,1,.97f),new Color(.918f,.961f,1,.9f),new Color(1,.89f,.925f,.15f),new Color(1,.89f,.925f,0)};
+                if(Kind=="story-title-veil"){stops=new[]{0,.3f,.44f,1};colors=new[]{new Color(1,244/255f,236/255f,.94f),new Color(1,244/255f,236/255f,.78f),new Color(1,244/255f,236/255f,0),new Color(1,244/255f,236/255f,0)};}
                 for(int i=0;i<3;i++)Quad(vh,r.xMin+w*stops[i],r.yMin,w*(stops[i+1]-stops[i]),h,colors[i],colors[i+1]);
             }
             else if(Kind=="trend-up"||Kind=="trend-down")

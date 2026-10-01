@@ -15,7 +15,7 @@ namespace PatchWorkSecure.CompanyOps
     public string title, equipmentRoute, fieldRoute, projectA, projectB, actionA, actionB;
 }
 
-public static class OpsCatalog
+public static partial class OpsCatalog
 {
 public sealed class GrowthGoal
 {

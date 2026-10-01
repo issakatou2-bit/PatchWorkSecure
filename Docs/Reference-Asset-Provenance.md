@@ -78,3 +78,8 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - モデル：`Aratako/Irodori-TTS-v4.1-Small`（重みもMIT。商用可、ライセンス表記を同梱）と、話題の大型`Aratako/Irodori-TTS-v4-Large-Quantized`の`int8-weight-only`（**Googleの「Gemmaの利用規約」と禁止用途の決まりが適用**。商用は可だが、配布物に規約の写しと注意書きが要る）。採用する前に、その時点のモデルカードの条件を確認する。
 - 声の作り方：文字の説明（キャプション）だけで作り、参照の音声は使わない。実在の人（声優・著名人）の声を手本にしない（モデルの利用条件。偶然似る可能性はモデルカードにも注意書きあり）。
 - 試聴の生成：`Tools/Irodori-Audition.py`（候補4つ×台詞3行＋大型モデルで1行目）。出力`Artifacts/VoiceAudition/`（gitで追跡しない）。採用が決まったら、台本・キャプション・種・モデル名をここに記録してから本番の音声を作る。
+
+## 2026-10-02 年度開幕の仮表示
+
+- 承認済み `Docs/Mockups/year-opening.html` のCSS・SVGをuGUIの図形描画へ移したもの。新しい第三者画像・生成画像は使わない。既存オフィスの色違いにはUI用の色相・彩度シェーダーを使用し、2・3年目の撮影で動作を確認する。
+- 仲間の絵とタイトルKVは既存の承認素材。強敵の影はモックの仮図形。仲間のLv・相談文化は実状態を表示する。

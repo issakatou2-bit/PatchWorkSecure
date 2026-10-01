@@ -60,7 +60,7 @@ namespace PatchWorkSecure.CompanyOps
             if(changed)Save();
         }
         public bool NextStoryYear()
-        {if(Story==null||MinigameActive)return false;RecordStoryOutcome();if(!Story.AdvanceYear())return false;EnterYear(Story.state,false);return true;}
+        {if(Story==null||MinigameActive)return false;RecordStoryOutcome();if(!Story.AdvanceYear())return false;EnterYear(Story.state,false);BeginYearOpening();return true;}
         public void OpenTab(int next) { if(MinigameActive)return;roomFilter="";tab = next; Render(); }
         public void ChooseAction(string action, string group = "recover")
         {

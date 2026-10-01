@@ -16,13 +16,13 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
             var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);
-            FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);
+            FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());game.SkipYearOpening();game.AdvanceYearOpening();yield return new WaitForSecondsRealtime(3);
             Assert.AreEqual("拠点まで見える",Find<UnityEngine.UI.Button>("Goal0").transform.Find("GoalLabel").GetComponent<TextMeshProUGUI>().text);Capture("next10-year2-goals");
             Click("Goal0");yield return new WaitForSecondsRealtime(1);StringAssert.Contains("台帳Lv2",Find<TextMeshProUGUI>("DialogBody").text);Capture("next10-year2-goal-detail");
             game.OpenTab(0);FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
             Click("StoryAnnualReview");yield return new WaitForSecondsRealtime(3);Capture("next10-year2-annual-goals");
             Assert.IsTrue(game.State.GrowthGoals.All(g=>game.State.milestones.Contains(g.name)||!game.State.GrowthSteps(g).All(done=>done)));
-            Assert.IsTrue(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);Capture("next10-year3-goals");
+            Assert.IsTrue(game.NextStoryYear());game.SkipYearOpening();game.AdvanceYearOpening();yield return new WaitForSecondsRealtime(3);Capture("next10-year3-goals");
             Assert.AreEqual("戻せることを証明した",Find<UnityEngine.UI.Button>("Goal0").transform.Find("GoalLabel").GetComponent<TextMeshProUGUI>().text);
             CheckText();Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }

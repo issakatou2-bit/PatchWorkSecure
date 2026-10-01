@@ -96,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            YearOpeningActive=false;
             DiaryActive=false;
             FactorRevealActive=false;
             PhasePresentationRunning=false;
@@ -115,7 +116,7 @@ namespace PatchWorkSecure.CompanyOps
             if (PlanningArt != null) PImage(screen,"SharedBackground",PlanningArt.gradient,0,0,1600,900);
             if(outgoingScreen!=null)outgoingScreen.SetParent(Surface,false);
             foreach(var depart in departures)depart();
-            if (Application.isPlaying&&PortraitEntering) StartCoroutine(ScreenWipe(screen));
+            if (Application.isPlaying&&PortraitEntering&&!buildingYearOpening) StartCoroutine(ScreenWipe(screen));
         }
         private void Bar(Transform parent, string title, int value, float x, float y, float w, Color color)
         {
@@ -189,8 +190,9 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Update()
         {
-            TickVoice();
             TickMusic();
+            if(YearOpeningActive){TickYearOpening(Time.unscaledDeltaTime);return;}
+            TickVoice();
             if(FactorRevealActive&&!FactorRevealPaused)TickFactorReveal(Time.unscaledDeltaTime);
             AlignDialogFooter(); RefreshTutorial();
             if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)

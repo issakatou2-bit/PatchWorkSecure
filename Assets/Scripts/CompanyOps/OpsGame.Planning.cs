@@ -150,6 +150,9 @@ namespace PatchWorkSecure.CompanyOps
         private Vector2 BubblePosition(int kind,int index)
         {
             Vector2[] rooms={new Vector2(95,110),new Vector2(245,190),new Vector2(280,290),new Vector2(505,300),new Vector2(705,200),new Vector2(760,420),new Vector2(600,235)};
+            // 年度で増えた実際の部屋にも泡が届く。抽選・個数・報酬は変えない。
+            if(State.storyCalendarYear>=2)rooms[4]=new Vector2(690,465);
+            if(State.storyCalendarYear>=3)rooms[5]=new Vector2(430,520);
             if(kind<7)return rooms[kind];
             var occupied=Enumerable.Range(0,4).Where(i=>State.BubbleKind(i)<7).Select(i=>rooms[State.BubbleKind(i)]).ToList();
             int rareIndex=Enumerable.Range(0,index).Count(i=>State.BubbleKind(i)==7);

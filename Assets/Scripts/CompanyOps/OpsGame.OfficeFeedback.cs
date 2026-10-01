@@ -9,10 +9,10 @@ namespace PatchWorkSecure.CompanyOps
     public partial class OpsGame
     {
         private string roomFilter="";
-        public static string ProjectRoom(string id)=>id=="mfa"||id=="inventory"?"office":id=="education"||id=="drill"||id=="runbook"||id=="automation"?"meeting":"server";
+        public static string ProjectRoom(string id)=>id=="zeroTrust"||id=="edr"?"branch":id=="threatSharing"||id=="csirt"?"partners":id=="mfa"||id=="inventory"?"office":id=="education"||id=="drill"||id=="runbook"||id=="automation"?"meeting":"server";
         public static string EventRoom(string kind,string profile)=>profile=="bec"||kind=="supply"?"reception":kind=="leak"||kind=="identity"?"office":kind=="social"?"meeting":"server";
         private string CurrentRoom=>EventRoom(State.Current.kind,State.CurrentProfile?.id);
-        private static string RoomName(string room)=>room=="office"?"執務室":room=="meeting"?"会議室":room=="reception"?"受付":"サーバー室";
+        private static string RoomName(string room)=>room=="branch"?"横浜拠点":room=="partners"?"取引先連携":room=="office"?"執務室":room=="meeting"?"会議室":room=="reception"?"受付":"サーバー室";
         private static Rect RoomBounds(string room)=>room=="office"?new Rect(86,96,246,207):room=="meeting"?new Rect(570,96,244,200):room=="reception"?new Rect(330,340,227,269):new Rect(342,96,214,226);
         private void PlanningRooms(RectTransform stage)
         {
@@ -43,9 +43,29 @@ namespace PatchWorkSecure.CompanyOps
                 }
             }
             PButton(stage,"Room_officeLower","",86,308,220,222,()=>OpenRoomProjects("office"),Color.clear,Color.clear,16);
+            if(State.storyCalendarYear>=2)
+            {
+                PlanningSatellite(stage,"branch",620,420,210,140,2);
+                if(State.storyCalendarYear>=3)PlanningSatellite(stage,"partners",350,492,194,110,3);
+            }
+        }
+        private void PlanningSatellite(RectTransform stage,string id,float x,float y,float w,float h,int year)
+        {
+            var r=PCard(stage,"SatelliteFrame_"+id,x-3,y-3,w+6,h+6,Color.white,20);
+            var map=PCard(r,"SatelliteMap",3,3,w,h,PlanInk,16,false);map.gameObject.AddComponent<Mask>().showMaskGraphic=false;
+            var art=PImage(map,"SatelliteArt",OfficeArt,0,0,w,w).GetComponent<Image>();
+            var shader=Resources.Load<Shader>("OpsOfficeHue");if(shader!=null){var m=new Material(shader){hideFlags=HideFlags.DontSave};m.SetFloat("_Hue",year==3?250:160);m.SetFloat("_Saturation",year==3?.9f:.8f);art.material=m;map.gameObject.AddComponent<OpsTransientMaterial>().Material=m;}
+            var button=PButton(stage,"Room_"+id,"",x,y,w,h,()=>OpenRoomProjects(id),Color.clear,Color.clear);
+            var label=PCard(button.transform,"RoomLabel",8,7,w-16,26,PlanBlue,12,false);PText(label,"RoomLabelText",RoomName(id),0,0,w-16,26,14,Color.white,true,true);
+            Hover(button,RoomName(id)+" / "+string.Join("・",OpsCatalog.Projects.Where(p=>ProjectRoom(p.id)==id).Select(p=>p.name)));
         }
         private void OpenRoomProjects(string room)
         {
+            if((room=="branch"||room=="partners")&&!OpsCatalog.Projects.Any(p=>ProjectRoom(p.id)==room))
+            {
+                var company=OpsCatalog.CompanyYear(State.storyCalendarYear);
+                Dialog(RoomName(room),"社員 "+company.employees+"人 / 守る端末 "+company.devices+"台 / 拠点 "+company.branches+"\n"+(room=="branch"?"本社と拠点の接続・端末の備えを整える場所。":"取引先と情報を共有し、事件対応の連絡を整える場所。"),440);return;
+            }
             if(room=="reception")
             {
                 var d=Dialog("受付 / 社外とのやりとり","外部委託先や訪問者、請求・送金の依頼を確認する窓口。侵害が起きた場所を確定する表示ではありません。",440);

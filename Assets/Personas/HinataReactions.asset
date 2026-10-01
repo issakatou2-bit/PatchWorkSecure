@@ -1408,8 +1408,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 1\u5E74\u76EE5\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y1_06
-    caption: "\u793E\u9577\u306E\u79D8\u66F8\u3055\u3093\u306B\u3001\u4E88\u7B97\u306E\u66F8\u304D\u65B9\u3092\u6559\u308F\u3063\u305F\u3088\uFF01"
+  - id: diary_y1_06_kanon
+    caption: "\u793E\u9577\u79D8\u66F8\u306E\u304B\u306E\u3093\u3055\u3093\u306B\u3001\u4E88\u7B97\u306E\u66F8\u304D\u65B9\u3092\u6559\u308F\u3063\u305F\u3088\uFF01"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_sparkle
@@ -1516,8 +1516,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 2\u5E74\u76EE5\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y2_06
-    caption: "\u79D8\u66F8\u3055\u3093\u3068\u3001AI\u306E\u30EB\u30FC\u30EB\u3092\u8003\u3048\u305F\u3088"
+  - id: diary_y2_06_kanon
+    caption: "\u304B\u306E\u3093\u3055\u3093\u3068\u3001AI\u306E\u30EB\u30FC\u30EB\u3092\u8003\u3048\u305F\u3088"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_normal
@@ -1579,8 +1579,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 2\u5E74\u76EE12\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y2_01
-    caption: "\u5408\u683C\u3057\u3066\u305F\uFF01\u3000\u79D8\u66F8\u3055\u3093\u304C\u30B1\u30FC\u30AD\u8CB7\u3063\u3066\u304D\u3066\u304F\u308C\u305F\u306E"
+  - id: diary_y2_01_kanon
+    caption: "\u5408\u683C\u3057\u3066\u305F\uFF01\u3000\u304B\u306E\u3093\u3055\u3093\u304C\u30B1\u30FC\u30AD\u8CB7\u3063\u3066\u304D\u3066\u304F\u308C\u305F\u306E"
     reaction: 0
     clip: {fileID: 0}
     faceId: face_sparkle

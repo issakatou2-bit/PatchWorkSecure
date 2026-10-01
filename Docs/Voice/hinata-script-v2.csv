@@ -154,7 +154,7 @@ maxim_usb,格言,基本,知らないUSBは、挿さない！,face_akire,pose_poi
 maxim_estimate,格言,見積もりの読み方,見積もりは目安。確率じゃなくて、幅で考えるんだよ！,face_normal,pose_think,[explaining],目安＝めやす
 diary_y1_04,日記,日記 1年目4月,こっそり復元を試したら、本番に上書きしかけた……,face_embarrassed,pose_think,[nervous laugh],
 diary_y1_05,日記,日記 1年目5月,新人さんのピーシー、20台セットアップした！……付箋、見つけちゃった,face_worried,pose_laptop,"[proud, then hesitant]",字幕はPC（声だけかな書き）
-diary_y1_06,日記,日記 1年目6月,社長の秘書さんに、予算の書き方を教わったよ！,face_sparkle,pose_fists,[excited],
+diary_y1_06_kanon,日記,日記 1年目6月,社長秘書のかのんさんに、予算の書き方を教わったよ！,face_sparkle,pose_fists,[excited],
 diary_y1_07,日記,日記 1年目7月,ネットが遅い原因、会議室のケーブルが輪っかになってたの,face_doya,pose_point,[amused],
 diary_y1_08,日記,日記 1年目8月,休み中に、証明書の期限が切れちゃってた……,face_sad,pose_exhausted,[sighing],
 diary_y1_09,日記,日記 1年目9月,試験の勉強、はじめました！　過去問、むずかしい……,face_determined,pose_magnifier,[determined],
@@ -166,14 +166,14 @@ diary_y1_02,日記,日記 1年目2月,毎晩5分、ログを読むことにし�
 diary_y1_03,日記,日記 1年目3月,手順書、できた！……付箋だらけで戻ってきたけど,face_relieved,pose_peace,"[happy, wry]",
 diary_y2_04,日記,日記 2年目4月,受かってたーっ！……拠点のルーター、パスワードが初期のままだった,face_sparkle,pose_jump,"[overjoyed, then surprised]",
 diary_y2_05,日記,日記 2年目5月,ブイピーエヌがつながらない問い合わせ、半分は家のワイファイだった,face_akire,pose_think,[wry],字幕はVPN・Wi-Fi（声だけかな書き）
-diary_y2_06,日記,日記 2年目6月,秘書さんと、AIのルールを考えたよ,face_normal,pose_point,[thoughtful],
+diary_y2_06_kanon,日記,日記 2年目6月,かのんさんと、AIのルールを考えたよ,face_normal,pose_point,[thoughtful],
 diary_y2_07,日記,日記 2年目7月,ディーエヌエスの切り替え、前の日にティーティーエルを短くしておくの、覚えた！,face_doya,pose_laptop,[proud],字幕はDNS・TTL（声だけかな書き）
 diary_y2_08,日記,日記 2年目8月,講習会、質問にちゃんと答えられなかった。悔しい,face_pout,pose_think,[frustrated],
 diary_y2_09,日記,日記 2年目9月,毎晩のログ読み、役に立ってる気がする！,face_sparkle,pose_magnifier,[hopeful],
 diary_y2_10,日記,日記 2年目10月,休んじゃった。でも、会社はちゃんと回ってた,face_relieved,pose_coffee,[tired but warm],
 diary_y2_11,日記,日記 2年目11月,試験、終わった……。半分くらい、できたかな,face_worried,pose_typing,[uncertain],
 diary_y2_12,日記,日記 2年目12月,来年、後輩ができるんだって。どうしよう、緊張する,face_worried,pose_please,[nervous],
-diary_y2_01,日記,日記 2年目1月,合格してた！　秘書さんがケーキ買ってきてくれたの,face_sparkle,pose_jump,[overjoyed],
+diary_y2_01_kanon,日記,日記 2年目1月,合格してた！　かのんさんがケーキ買ってきてくれたの,face_sparkle,pose_jump,[overjoyed],
 diary_y2_02,日記,日記 2年目2月,手順書、分かりにくいって言われちゃった。書き直し！,face_determined,pose_typing,"[cheerful, determined]",
 diary_y2_03,日記,日記 2年目3月,来年は、わたしが教える番なんだね,face_relieved,pose_wave,[gentle],
 diary_y3_04,日記,日記 3年目4月,後輩ちゃんが来たよ。わたし、先輩になっちゃった,face_embarrassed,pose_wave,"[shy, happy]",

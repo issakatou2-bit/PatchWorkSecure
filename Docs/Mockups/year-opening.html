@@ -5,7 +5,7 @@
 <title>年度の開幕演出</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* 2年目・3年目の開幕演出（約11秒・クリックで飛ばせる）。①会社が広がる ②新しい設備 ③まだ見ぬ強敵 ④心強い仲間 ⑤迎え撃て。#shot=growth / unlock / rivals / allies / title で各場面を止めて開く */
+/* 2年目・3年目の開幕演出（約11秒・クリックで飛ばせる）。①会社が広がる ②新しい設備 ③まだ見ぬ強敵 ④心強い仲間 ⑤迎え撃て。#shot=growth / unlock / rivals / allies / title で各場面を止めて開く。末尾に-y3で3年目の版（例 #shot=rivals-y3）。#shot=appear は山場の月の「強敵 出現！」の札 */
 :root{--pink:#ff6f91;--navy:#1d2a44;--gold:#ffc02e;--blue:#3fa9f5;--red:#e0405f}
 body{margin:0;background:#0d1426;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy)}
 .r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
@@ -131,19 +131,64 @@ body{margin:0;background:#0d1426;font-family:'Zen Kaku Gothic New',sans-serif;co
   <div class="flash" style="animation-delay:.15s"></div>
 </div>
 
+
+<!-- ⑥ 強敵 出現！（2・3年目の山場の月、事件の画面に入る前に約1.5秒。正体の名前を明かす） -->
+<div class="scene" id="appear" style="background:radial-gradient(ellipse at 50% 50%,#4a1026,#0d0710 72%)">
+  <div class="scan"></div>
+  <div style="position:absolute;left:0;right:0;top:0;height:120px;background:repeating-linear-gradient(-45deg,#ffc02e 0 26px,#1d2a44 26px 52px);opacity:.9;animation:slideL .4s both"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:120px;background:repeating-linear-gradient(-45deg,#ffc02e 0 26px,#1d2a44 26px 52px);opacity:.9;animation:slideR .4s both"></div>
+  <div class="r" style="position:absolute;left:0;right:0;top:150px;text-align:center;font-size:120px;color:#fff;letter-spacing:.08em;text-shadow:0 0 30px rgba(255,77,115,.9),0 8px 0 #a8193e;animation:bigin .6s .1s cubic-bezier(.2,.8,.2,1) both,glitch 1.4s .8s infinite">強敵 出現！</div>
+  <div style="position:absolute;left:420px;top:330px;width:760px;height:400px;border-radius:26px;background:linear-gradient(180deg,#2a0f1d,#130810);box-shadow:0 0 0 3px rgba(255,80,110,.75),0 0 60px rgba(224,64,95,.55);overflow:hidden;animation:pop .5s .35s both">
+    <svg style="position:absolute;left:30px;top:30px" width="220" height="340" viewBox="0 0 220 300"><path d="M110 20 C 60 20 46 70 52 110 C 30 130 18 170 20 300 L 200 300 C 202 170 190 130 168 110 C 174 70 160 20 110 20 Z" fill="#1a0a12" stroke="#ff4d73" stroke-width="2"/><ellipse cx="88" cy="96" rx="9" ry="4" fill="#ff4d73" style="animation:blink 1.4s infinite"/><ellipse cx="132" cy="96" rx="9" ry="4" fill="#ff4d73" style="animation:blink 1.4s infinite"/></svg>
+    <div style="position:absolute;left:280px;top:46px;right:30px;color:#ffd0da">
+      <div style="background:rgba(224,64,95,.85);color:#fff;display:inline-block;border-radius:9px;padding:3px 12px;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px">2年目 6月の山場</div>
+      <div style="color:#ff6f91;font-size:24px;letter-spacing:3px;margin-top:14px">★★★</div>
+      <div class="r" style="font-size:34px;margin-top:4px;color:#fff;white-space:nowrap">委託先から忍び寄る影</div>
+      <div style="font-size:17px;margin-top:10px;line-height:1.7;font-weight:700">正体：保守会社の、使われていないはずのID。<br>信頼している相手の入口から入ってくる。</div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><span class="lvup" style="background:linear-gradient(180deg,#7fc4ff,#3fa9f5);color:#fff">効く備え：ゼロトラスト接続</span><span class="lvup" style="background:linear-gradient(180deg,#7fc4ff,#3fa9f5);color:#fff">台帳</span></div>
+    </div>
+  </div>
+  <div class="flash" style="animation-delay:.05s"></div>
+</div>
+
 <div id="bar"></div>
 <button id="skip">スキップ ▶▶</button>
 </div>
 <div id="nav"></div>
 <script>
+
+// 3年目の版（#shot=〇〇-y3、または ?y=3）。データだけ差し替える
+const Y3={
+ growth:{t:'取引先とつながった',sub:'NEW　取引先連携',counts:[['社員','38 →','52'],['守る端末','56 →','80'],['つながる会社','1 →','4']],hue:'hue-rotate(250deg) saturate(.9)'},
+ unlock:{t:'新しい設備が使えるようになった',cards:[['脅威情報の共有','情','業界の仲間と、攻撃の手口を<br>先に知らせ合う'],['事件対応の体制（CSIRT）','C','いざという時、誰が何をするかを<br>決めて、すぐ動ける']],goals:['3年目の成長目標','戻せることを証明した','気づいて止める','相談が文化になった']},
+ rivals:[['6月の山場','★★★','なりすます取引先','大きな取引ほど、確認を装って来る'],['9月の山場','★★★★','声をまとう偽役員','映像も声も、本物そっくり'],['12月の山場','★★★★','拠点を渡る侵入者','つながった分だけ、道も増える']],
+ allies:{eng:'週2日の常駐に慣れた。<br>強敵の正体を、真っ先に見抜く',hin:'応用情報に合格！<br>後輩の先輩になった',sec:'取引先の監査にも同席。<br>説明の数字を一緒に作る',lv:['森 Lv3','佐伯 Lv3','小川 Lv2','後輩 Lv1 新加入']},
+ title:{ch:'CHAPTER 3',y:'3年目',theme:'狙われる会社',cry:'守り抜け！'}
+};
+function applyY3(){
+  const g=document.getElementById('growth');g.querySelector('.band .t').textContent=Y3.growth.t;g.querySelectorAll('.r')[2].textContent=Y3.growth.sub;
+  g.querySelector('img[style*="hue-rotate"]').style.filter=Y3.growth.hue+' brightness(1.05)';
+  g.querySelectorAll('.count').forEach((c,i)=>{c.querySelector('small').textContent=Y3.growth.counts[i][0];c.querySelector('.arrow').textContent=Y3.growth.counts[i][1];c.querySelector('b').textContent=Y3.growth.counts[i][2]});
+  const u=document.getElementById('unlock');u.querySelector('.band .t').textContent=Y3.unlock.t;
+  u.querySelectorAll('.uc').forEach((c,i)=>{c.querySelector('.ic').textContent=Y3.unlock.cards[i][1];c.querySelector('.r').textContent=Y3.unlock.cards[i][0];c.querySelectorAll('div')[2].innerHTML=Y3.unlock.cards[i][2]});
+  u.querySelectorAll('.lvup').forEach((c,i)=>c.textContent=Y3.unlock.goals[i]);
+  document.querySelectorAll('#rivals .rival').forEach((c,i)=>{const r=Y3.rivals[i];c.querySelector('.month').textContent=r[0];const n=c.querySelector('.nm').children;n[0].textContent=r[1];n[1].textContent=r[2];n[2].textContent=r[3]});
+  document.querySelector('#rivals .r[style*="正体"],#rivals > .r')&&(document.querySelector('#rivals > .r').textContent='そして3月、まだ誰も見たことのない「？？？」が来る');
+  const al=document.querySelectorAll('#allies .ally .cap div:nth-child(2)');al[0].innerHTML=Y3.allies.eng;al[1].innerHTML=Y3.allies.hin;al[2].innerHTML=Y3.allies.sec;
+  document.querySelectorAll('#allies .lvup').forEach((c,i)=>c.textContent=Y3.allies.lv[i]);
+  const t=document.getElementById('title');t.querySelector('.en').textContent=Y3.title.ch;t.querySelectorAll('.r')[0].textContent=Y3.title.y;t.querySelectorAll('.r')[1].textContent=Y3.title.theme;t.querySelectorAll('.r')[2].textContent=Y3.title.cry;
+}
 const order=['growth','unlock','rivals','allies','title'],dur=[2400,2200,2400,2200,2600];
 let i=0,t0=0,tid;
 function show(id){document.querySelectorAll('.scene').forEach(s=>{const on=s.id===id;s.classList.toggle('on',on);if(on){s.querySelectorAll('*').forEach(e=>{const a=e.style.animation;if(a){e.style.animation='none';void e.offsetWidth;e.style.animation=a}})}})}
 function step(){show(order[i]);if(order[i]==='rivals')document.getElementById('stage').style.animation='shake .4s';else document.getElementById('stage').style.animation='';const d=dur[i];const b=document.getElementById('bar');b.style.transition='none';b.style.width=(100*order.slice(0,i).length/order.length)+'%';void b.offsetWidth;b.style.transition='width '+d+'ms linear';b.style.width=(100*(i+1)/order.length)+'%';i++;if(i<order.length)tid=setTimeout(step,d)}
 document.getElementById('skip').onclick=()=>{clearTimeout(tid);i=order.length-1;step()};
 // 撮影用：場面を止めて開く（#shot=growth / unlock / rivals / allies / title）
-const m=location.hash.match(/^#shot=([\w-]+)/);
-if(m&&order.includes(m[1])){show(m[1]);document.getElementById('skip').style.display='none';document.getElementById('bar').style.width=(100*(order.indexOf(m[1])+1)/order.length)+'%'}
+let m=location.hash.match(/^#shot=([\w-]+)/);
+if(/y3/.test(location.hash)||/[?&]y=3/.test(location.search))applyY3();
+if(m&&m[1].endsWith('-y3'))m=[m[0],m[1].slice(0,-3)];
+if(m&&m[1]==='appear'){show('appear');document.getElementById('skip').style.display='none'}
+else if(m&&order.includes(m[1])){show(m[1]);document.getElementById('skip').style.display='none';document.getElementById('bar').style.width=(100*(order.indexOf(m[1])+1)/order.length)+'%'}
 else{step();document.getElementById('nav').innerHTML='<button onclick="i=0;clearTimeout(tid);step()">最初から</button>'+order.map(o=>`<button onclick="clearTimeout(tid);show('${o}')">${o}</button>`).join('')}
 </script>
 </body>

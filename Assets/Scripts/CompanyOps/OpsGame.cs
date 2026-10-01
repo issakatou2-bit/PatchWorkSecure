@@ -203,7 +203,7 @@ namespace PatchWorkSecure.CompanyOps
             if (State.phase == OpsPhase.Review && resolutionActive) { ResolutionScreen(); return; }
             resolutionActive = false;
             if (State.phase == OpsPhase.Review) { MonthlyScreen();ScreenVoice();return; }
-            if (State.phase == OpsPhase.Ended) { if(Story!=null&&Story.CanAdvance&&!storyAnnualDetails){StoryRenewScreen();return;}AnnualScreen();ScreenVoice();return; }
+            if (State.phase == OpsPhase.Ended) { if(Story!=null&&!storyAnnualDetails){if(Story.CanAdvance){StoryRenewScreen();return;}if(!Story.cleared){StoryFailScreen();return;}}AnnualScreen();ScreenVoice();return; }
             Header();
             Sidebar(); Office();
             if (State.phase == OpsPhase.Ended) { Ending(); return; }

@@ -65,6 +65,7 @@ namespace PatchWorkSecure.CompanyOps
             StoryCategory(screen,"StoryCategory","YEAR "+year+" CLEAR",60,32,450,PlanPink);
             StoryText(screen,"EndingTitle",year+"年目　目標達成！",60,52,560,66,42);StoryRoad(640,36);
             var rank=PCard(screen,"RankBadge",120,170,300,300,PlanPink,28);rank.localEulerAngles=new Vector3(0,0,6);
+            rank.pivot=new Vector2(.5f,.5f);rank.anchoredPosition+=new Vector2(150,-150);
             KitGradient(rank.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));rank.GetComponent<Image>().pixelsPerUnitMultiplier=PlanningArt.round28.border.x/56;
             var edge=rank.gameObject.AddComponent<Outline>();edge.effectColor=Color.white;edge.effectDistance=new Vector2(8,-8);
             IncidentShape(rank,"RankStitch","rounded-dashed",14,14,272,272,new Color(1,1,1,.7f));Reveal(rank,0,true);
@@ -121,5 +122,61 @@ namespace PatchWorkSecure.CompanyOps
                 if(renew){var badge=PCard(eq,"EquipmentReview"+i,177,-10,51,20,PlanBlue,12,false);StoryText(badge,"EquipmentReviewLabel"+i,"見直し",0,0,51,20,11,Color.white,true);}Reveal(eq,i*.05f);
             }
         }
+        private void StoryFailScreen()
+        {
+            StoryBackground(true);StoryCategory(screen,"StoryCategory","CHALLENGE RECORD",60,32,450,PlanGray);
+            StoryText(screen,"EndingTitle","挑戦の記録　"+Story.year+"年目で終了",60,52,590,66,42);StoryRoad(640,36,true);
+            var panel=PCard(screen,"StoryFailure",80,170,700,470,Color.white,24);foreach(var outline in panel.GetComponents<Outline>())DestroyImmediate(outline);var whiteEdge=panel.gameObject.AddComponent<Outline>();whiteEdge.effectColor=Color.white;whiteEdge.effectDistance=new Vector2(3,-3);StoryCategory(panel,"FailureCategory","WHAT HAPPENED",26,22,300,PlanPink);
+            StoryText(panel,"FailureHeading",Story.year+"年目、"+(State.IsClear?"あと少しだった":"運営を続けられなかった"),26,46,648,40,21);
+            var score=StoryText(panel,"FailureScore",State.AnnualScore.ToString("N0"),26,93,180,64,56,Hex("c23a60"));score.textWrappingMode=TextWrappingModes.NoWrap;
+            int threshold=StoryGoalPoints(Story.Goal);float marker=432*.897f,fill=marker*Mathf.Clamp01(State.AnnualScore/(float)threshold);
+            PCard(panel,"StoryGoalTrack",210,103,432,16,Hex("eef2f8"),12,false);if(fill>0){var f=PCard(panel,"StoryGoalFill",210,103,fill,16,PlanPink,12,false);KitGradient(f.GetComponent<Image>(),Hex("ffb3c4"),PlanPink,true);}
+            PImage(panel,"StoryGoalMarker",null,210+marker,99,3,24,PlanInk);
+            StoryText(panel,"StoryGoalResult",!State.IsClear&&State.AnnualScore>=threshold?"得点は目標内 / 会社の運営継続も必要だった":"目標 "+Story.Goal+"（"+threshold.ToString("N0")+"点）まで あと"+Math.Max(0,threshold-State.AnnualScore).ToString("N0")+"点",210,125,446,30,13,PlanGray);
+            var worst=State.history.OrderByDescending(r=>r.loss+r.downtime).FirstOrDefault();
+            string painful=worst==null?"事件の対応記録なし":OpsCatalog.Months[worst.month].name+" "+(worst.eventTitle??OpsCatalog.Months[worst.month].@event)+"　被害 "+worst.loss+"万円・停止 "+worst.downtime+"時間";
+            var potential=State.history.Where(r=>r.potentialInvestmentEffects!=null).SelectMany(r=>r.potentialInvestmentEffects.Select(e=>new{record=r,effect=e})).OrderByDescending(p=>p.effect.avoidedLoss*7+p.effect.avoidedDowntime*4).FirstOrDefault();
+            string next=potential==null?"個別比較の記録なし / 次の計画で備えを確認":OpsCatalog.Projects[OpsCatalog.Index(potential.effect.projectId)].name+"（"+OpsCatalog.Months[potential.record.month].name+"の個別比較：停止 −"+potential.effect.avoidedDowntime+"時間・被害 −"+potential.effect.avoidedLoss+"万円）";
+            var best=State.history.Where(r=>r.minigameRecorded&&!r.delegated).GroupBy(r=>StoryMinigameName(r)).OrderByDescending(g=>g.Average(r=>r.minigameScore)).FirstOrDefault();
+            string good="山場 "+State.history.Count(r=>r.peakGoalRecorded)+"つ中 "+State.PeakMedals+"つ達成"+(best==null?"・自分で遊んだミニゲームは未記録":"・"+best.Key+" 平均"+Mathf.RoundToInt((float)best.Average(r=>r.minigameScore))+"点");
+            StoryFailureRow(panel,"WorstMonth","一番痛かった月",painful,166,Hex("ffe9ee"),Hex("c23a60"));
+            StoryFailureRow(panel,"PotentialEquipment","次に効きそうな備え",next,226,Hex("e6f3ff"),Hex("1f75b8"));
+            StoryFailureRow(panel,"GoodWork","よくできた",good,286,Hex("fff6d6"),Hex("7a5a00"));
+            var reward=PCard(screen,"StoryFactorReward",820,170,700,470,PlanInk,24);KitGradient(reward.GetComponent<Image>(),PlanInk,Hex("2b3a5e"));
+            var rewardEdge=reward.gameObject.AddComponent<Outline>();rewardEdge.effectColor=Color.white;rewardEdge.effectDistance=new Vector2(3,-3);
+            StoryCategory(reward,"FactorRewardCategory","FACTOR GET",26,22,260,Hex("ffd23f"));StoryText(reward,"FactorRewardHeading","因子を1つ持ち帰れる",26,46,648,40,21,Color.white);
+            StoryText(reward,"FactorRewardHint","次の挑戦は、選んだ設備を最初からLv1で始められる。\n届いた年が進むほど、候補の星が増える。",26,86,648,58,14,new Color(1,1,1,.85f),false,true);
+            var candidates=Story.FactorCandidates(Career);
+            for(int i=0;i<candidates.Length;i++)
+            {
+                var c=candidates[i];var card=PCard(reward,"FactorPreview"+i,26+i*220,153,206,116,new Color(1,1,1,.1f),20,false);
+                if(i==0)IncidentShape(card,"FactorPreviewBorder","story-outline",0,0,206,116,new Color(1,.824f,.247f,.6f));
+                StoryStars(card,"FactorPreviewStars"+i,c.stars,103-c.stars*12,18);
+                StoryText(card,"FactorPreviewName"+i,OpsCatalog.Projects[OpsCatalog.Index(c.id)].name,12,48,182,32,18,Color.white,true);
+                StoryText(card,"FactorPreviewReason"+i,c.reason,12,84,182,24,12,new Color(1,1,1,.8f),true);
+            }
+            var ownedHeading=StoryText(reward,"OwnedFactorsHeading","持っている因子",26,292,104,56,13,new Color(1,1,1,.8f));ownedHeading.textWrappingMode=TextWrappingModes.NoWrap;
+            for(int i=0;i<OpsCatalog.StoryFactorSlots;i++)StoryFactorSlot(reward,"OwnedFactor"+i,i<Career.factors.Count?TitleFactorName(Career.factors[i]):"空き",128+i*164,292,154,56,i<Career.factors.Count);
+            Portrait(screen,"StoryPortrait",1310,610,250,290,"pose_fists");StorySpeech("ここまで来られたのは本物だよ。\n次は山場に備えて、もう一回！",920,676,380,88);
+            StoryButton("BackHome","タイトルへ",80,780,326,()=>{storyAnnualDetails=false;RenderHome();});
+            StoryButton("StoryRecord","因子を選んで次の挑戦へ",422,780,458,OpenStoryFactors,true);
+        }
+        private void StoryFailureRow(Transform parent,string id,string title,string value,float y,Color bg,Color fg)
+        {
+            var row=PCard(parent,id,26,y,648,50,bg,16,false);var chip=PCard(row,id+"Chip",14,9,160,32,Color.white,16,false);
+            StoryText(chip,id+"Label",title,0,0,160,32,14,fg,true);StoryText(row,id+"Value",value,186,0,448,50,14,null,false,true);
+        }
+        private static string StoryMinigameName(OpsOutcome r)
+        {var e=OpsEventCatalog.Event(r.eventId);var p=e==null?null:OpsEventCatalog.Profile(e.profile);string kind=p?.kind??OpsCatalog.Months[r.month].kind;return OpsCatalog.Months[r.month].kind=="identity"||p?.id=="session"||p?.id=="remote"?"多要素認証の関所":p?.id=="bec"||p?.id=="targeted"?"メールの仕分け":kind=="outage"||p?.id=="change"||p?.id=="storage"||p?.id=="service"?"復旧の順番":"感染の封じ込め";}
+        private void StoryStars(Transform parent,string id,int count,float x,float y)
+        {for(int i=0;i<count;i++)PImage(parent,id+i,PlanningArt.star,x+i*24,y,22,22,Hex("ffd23f"));}
+        private RectTransform StoryFactorSlot(Transform parent,string id,string value,float x,float y,float w,float h,bool full)
+        {
+            var slot=PCard(parent,id,x,y,w,h,full?Hex("fff6d6"):Color.clear,16,false);
+            if(full){KitGradient(slot.GetComponent<Image>(),Hex("fff6d6"),Hex("ffe7a3"));var outline=slot.gameObject.AddComponent<Outline>();outline.effectColor=Color.white;outline.effectDistance=new Vector2(3,-3);}
+            else IncidentShape(slot,id+"Dashes","dashed",2,2,w-4,h-4,new Color(1,1,1,.45f));
+            StoryText(slot,id+"Text",value,8,0,w-16,h,15,full?Hex("7a5a00"):new Color(1,1,1,.7f),true);return slot;
+        }
+        private void OpenStoryFactors(){StoryRecord();}
     }
 }

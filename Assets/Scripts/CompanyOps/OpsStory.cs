@@ -31,7 +31,10 @@ namespace PatchWorkSecure.CompanyOps
         public int year,score,loss,stop;
         public string rank;
         public bool operated,goalMet;
-        public bool Valid()=>year>=1&&year<=OpsCatalog.StoryYears&&score>=0&&loss>=0&&stop>=0&&OpsStory.RankValue(rank)>=0&&goalMet==(operated&&OpsStory.RankValue(rank)>=OpsStory.RankValue(OpsCatalog.StoryGoals[year-1]));
+        // 表示用の個別比較の記録。古い保存のnullは未記録。総効果や報酬には足さない。
+        public List<OpsInvestmentEffect> presentationEffects;
+        public bool Valid()=>year>=1&&year<=OpsCatalog.StoryYears&&score>=0&&loss>=0&&stop>=0&&OpsStory.RankValue(rank)>=0&&goalMet==(operated&&OpsStory.RankValue(rank)>=OpsStory.RankValue(OpsCatalog.StoryGoals[year-1]))&&
+            (presentationEffects==null||presentationEffects.Count<=OpsCatalog.Projects.Length&&presentationEffects.All(e=>e!=null&&OpsCatalog.Index(e.projectId)>=0&&e.avoidedLoss>=0&&e.avoidedDowntime>=0));
     }
     [Serializable] public sealed class OpsStory
     {
@@ -55,13 +58,33 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(state==null||state.phase!=OpsPhase.Ended||records.Count!=year-1)return false;
             bool met=state.IsClear&&RankValue(state.RankCode)>=RankValue(Goal);
-            records.Add(new OpsStoryYear{year=year,rank=state.RankCode,score=state.AnnualScore,loss=state.totalLoss,stop=state.totalDowntime,operated=state.IsClear,goalMet=met});
+            records.Add(new OpsStoryYear{year=year,rank=state.RankCode,score=state.AnnualScore,loss=state.totalLoss,stop=state.totalDowntime,operated=state.IsClear,goalMet=met,
+                presentationEffects=state.history.Where(r=>r.investmentEffects!=null).SelectMany(r=>r.investmentEffects).Where(e=>e.avoidedLoss>0||e.avoidedDowntime>0).GroupBy(e=>e.projectId).Select(g=>new OpsInvestmentEffect{projectId=g.Key,level=1,avoidedLoss=g.Sum(e=>e.avoidedLoss),avoidedDowntime=g.Sum(e=>e.avoidedDowntime)}).ToList()});
             finished=!met||year==OpsCatalog.StoryYears;cleared=met&&year==OpsCatalog.StoryYears;return true;
         }
         public bool AdvanceYear()
         {
             RecordYear();if(!CanAdvance)return false;
             var previous=state;year++;state=OpsState.NewStoryYear(YearSeed,year,previous,factors);return true;
+        }
+        public OpsFactorCandidate[] FactorCandidates(OpsCareer career)
+        {
+            var result=new List<OpsFactorCandidate>();
+            Action<string,string,int> add=(id,reason,source)=>
+            {
+                if(OpsCatalog.Index(id)<0)return;
+                var p=OpsCatalog.Projects[OpsCatalog.Index(id)];
+                while(!string.IsNullOrEmpty(p.requires))p=OpsCatalog.Projects[OpsCatalog.Index(p.requires)];
+                if(career.factors.Contains(p.id)||result.Any(c=>c.id==p.id)||result.Count>=OpsCatalog.StoryFactorSlots)return;
+                result.Add(new OpsFactorCandidate{id=p.id,reason=reason,sourceYear=source,stars=year});
+            };
+            var potential=state.history.Where(r=>r.potentialInvestmentEffects!=null).SelectMany(r=>r.potentialInvestmentEffects).OrderByDescending(e=>e.avoidedLoss*7+e.avoidedDowntime*4);
+            foreach(var e in potential){add(e.projectId,"いちばん効きそう",year);if(result.Count>0)break;}
+            add(state.Level("inventory")==0?"inventory":state.culture<65?"education":"runbook","把握と判断を助ける",year);
+            var effects=records.Where(r=>r.presentationEffects!=null).SelectMany(r=>r.presentationEffects).GroupBy(e=>e.projectId).OrderByDescending(g=>g.Sum(e=>e.avoidedLoss*7+e.avoidedDowntime*4));
+            foreach(var g in effects){int source=records.First(r=>r.presentationEffects!=null&&r.presentationEffects.Any(e=>e.projectId==g.Key)).year;add(g.Key,"挑戦のMVP",source);if(result.Count>=3)break;}
+            foreach(var p in OpsCatalog.Projects.Where(p=>string.IsNullOrEmpty(p.requires)).OrderByDescending(p=>state.Level(p.id)))add(p.id,"次の挑戦の備え",year);
+            return result.ToArray();
         }
         public bool Valid()
         {
@@ -75,6 +98,7 @@ namespace PatchWorkSecure.CompanyOps
             return rewardClaimed?OpsCatalog.Index(earnedFactor)>=0:string.IsNullOrEmpty(earnedFactor);
         }
     }
+    public sealed class OpsFactorCandidate { public string id,reason; public int stars,sourceYear; }
     [Serializable] public sealed class OpsCareer
     {
         public int version=OpsCatalog.StorySaveVersion,finishedAttempts;

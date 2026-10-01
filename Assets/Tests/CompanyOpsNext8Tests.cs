@@ -30,7 +30,7 @@ namespace PatchWorkSecure.Tests
             game.OpenTab(0);Assert.AreEqual(1,game.Career.finishedAttempts);Assert.IsFalse(game.NextStoryYear());yield return new WaitForSecondsRealtime(3);Capture("next8-story-clear");Click("StoryRecord");yield return new WaitForSecondsRealtime(2);CheckPointer("StoryTitle");Capture("next8-story-record");Click("StoryTitle");yield return null;
             Click("SingleYear");yield return null;Assert.IsNull(game.Story);Assert.IsTrue(game.State.levels.All(v=>v==0));Assert.IsTrue(game.Career.endlessUnlocked);
             game.StartStory(9);Assert.AreEqual(1,game.State.Level(game.Career.factors[0]));game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return null;
-            Assert.IsTrue(game.Story.finished&&!game.Story.cleared);Assert.AreEqual(2,game.Career.finishedAttempts);StringAssert.Contains("届かない",Find<TextMeshProUGUI>("StoryGoalResult").text);yield return new WaitForSecondsRealtime(3);Capture("next8-story-fail");CheckPointer("StoryRecord");CheckPointer("BackHome");
+            Assert.IsTrue(game.Story.finished&&!game.Story.cleared);Assert.AreEqual(2,game.Career.finishedAttempts);StringAssert.Contains("目標 B",Find<TextMeshProUGUI>("StoryGoalResult").text);yield return new WaitForSecondsRealtime(3);Capture("next8-story-fail");CheckPointer("StoryRecord");CheckPointer("BackHome");
             Assert.IsTrue(game.ExportProgress().Valid());CheckText();Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
         private static void FinishStoryTestYear(OpsState s)

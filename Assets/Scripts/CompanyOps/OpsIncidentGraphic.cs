@@ -119,9 +119,9 @@ namespace PatchWorkSecure.CompanyOps
             {
                 Polygon(vh,new[]{new Vector2(r.xMin+w*.34f,r.yMax),new Vector2(r.xMin+w*.6f,r.yMax),new Vector2(r.xMin+w*.6f,r.yMin+h*.55f),new Vector2(r.xMax,r.yMin+h*.5f),new Vector2(r.xMin+w*.85f,r.yMin),new Vector2(r.xMin+w*.2f,r.yMin),new Vector2(r.xMin,r.yMin+h*.35f),new Vector2(r.xMin+w*.34f,r.yMin+h*.3f)},color);
             }
-            else if(Kind=="alarm")
+            else if(Kind=="alarm"||Kind=="story-outline")
             {
-                Quad(vh,r.xMin,r.yMin,w,h,new Color(color.r,color.g,color.b,.14f),new Color(color.r,color.g,color.b,.14f));
+                if(Kind=="alarm")Quad(vh,r.xMin,r.yMin,w,h,new Color(color.r,color.g,color.b,.14f),new Color(color.r,color.g,color.b,.14f));
                 const float radius=16;
                 var centers=new[]{new Vector2(r.xMax-radius,r.yMax-radius),new Vector2(r.xMin+radius,r.yMax-radius),new Vector2(r.xMin+radius,r.yMin+radius),new Vector2(r.xMax-radius,r.yMin+radius)};
                 for(int corner=0;corner<4;corner++)

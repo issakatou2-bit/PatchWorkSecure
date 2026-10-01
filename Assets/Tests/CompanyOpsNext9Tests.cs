@@ -13,6 +13,22 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Test] public void Next9Factors_推薦は未所持と前提不要で星は表示だけ()
+        {
+            var story=OpsStory.Begin(14,null);FinishStoryTestYear(story.state);Assert.IsTrue(story.AdvanceYear());FinishStoryTestYear(story.state);story.state.totalLoss=1000;story.RecordYear();
+            var career=new OpsCareer{factors=new System.Collections.Generic.List<string>{"backup"}};var before=JsonUtility.ToJson(story);var candidates=story.FactorCandidates(career);
+            Assert.AreEqual(3,candidates.Length);Assert.AreEqual(3,candidates.Select(c=>c.id).Distinct().Count());Assert.IsTrue(candidates.All(c=>!career.factors.Contains(c.id)&&string.IsNullOrEmpty(OpsCatalog.Projects[OpsCatalog.Index(c.id)].requires)));
+            Assert.IsTrue(candidates.All(c=>c.stars==2));Assert.AreEqual(before,JsonUtility.ToJson(story));
+            Assert.IsTrue(career.Claim(story,candidates[0].id));Assert.AreEqual(1,OpsStory.Begin(3,career.factors).state.Level(candidates[0].id));
+        }
+        [UnityTest] public IEnumerator Next9Fail_目標差と痛い月と候補と記録なしを撮影する()
+        {
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.Career.factors.Add("backup");game.StartStory(14);
+            FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());FinishStoryTestYear(game.State);game.State.totalLoss+=100;game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next9-year-fail");
+            Assert.IsTrue(game.Story.finished&&!game.Story.cleared);StringAssert.Contains("目標 A",Find<TextMeshProUGUI>("StoryGoalResult").text);Find<TextMeshProUGUI>("FailureScore").ForceMeshUpdate();Assert.AreEqual(1,Find<TextMeshProUGUI>("FailureScore").textInfo.lineCount);Assert.IsNotNull(Find<TextMeshProUGUI>("WorstMonthValue"));CheckPointer("StoryRecord");CheckPointer("BackHome");
+            game.StartStory(9);game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
+            Assert.AreEqual("事件の対応記録なし",Find<TextMeshProUGUI>("WorstMonthValue").text);Assert.IsNotNull(Find<TextMeshProUGUI>("GoodWorkValue"));Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
+        }
         [UnityTest] public IEnumerator Next9Renew_全額繰越と設備見直しと年度の道のりを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);

@@ -310,6 +310,17 @@ ROUND4 = [
     ]),
 ]
 
+# 4回目の直し（加藤さんの感想）：「今日」を「こんにち」と読んでいるらしい→かなで書く。声4の通話のような音質→種を変える。
+# エンジニアさん→話す速さを1割速める（--duration-scale 0.9）
+GREET = ['おはようございます。きょうも、よろしくお願いしますね。']
+ROUND4 += [
+    ('new1g', '新しい声1　あいさつ（「きょう」をかなで）', None, ROUND4[0][3], 'large', GREET, ['--seed', str(SEED)]),
+    ('new2g', '新しい声2　あいさつ（「きょう」をかなで）', None, ROUND4[1][3], 'large', GREET, ['--seed', str(SEED + 1)]),
+    ('new3g', '新しい声3　あいさつ（「きょう」をかなで）', None, ROUND4[2][3], 'large', GREET, ['--seed', str(SEED + 2)]),
+    ('new4s', '新しい声4　種を変えた版（通話のような音質の直し）', None, ROUND4[3][3], 'large', GREET + NEW_LINES[1:], ['--seed', str(SEED + 40)]),
+    ('engf', 'エンジニアさん　1割速く', 'engineer-large-c1-l1.wav', ENG_CAP + CLEAR, 'small', ROUND4[4][5], ['--seed', str(SEED + 4), '--duration-scale', '0.9']),
+]
+
 
 def r4_path(sid, i):
     return OUT / 'audio' / 'r4' / f'{sid}-{i + 1:02d}.wav'
@@ -326,7 +337,8 @@ def generate_round4(model):
             return get_cached_runtime(key)[0]
     infer.InferenceRuntime = Cached
     done = 0
-    for k, (sid, name, ref, cap, m, lines) in enumerate(ROUND4):
+    for k, (sid, name, ref, cap, m, lines, *rest) in enumerate(ROUND4):
+        extra = rest[0] if rest else []
         if m != model:
             continue
         for i, text in enumerate(lines):
@@ -336,7 +348,7 @@ def generate_round4(model):
             out.parent.mkdir(parents=True, exist_ok=True)
             ref_args = ['--ref-wav', str(OUT / 'audio' / ref)] if ref else ['--no-ref']
             sys.argv = ['infer.py', '--hf-checkpoint', MODELS[m][1], '--model-precision', 'bf16', '--text', text,
-                        '--caption', cap, *ref_args, '--seed', str(SEED + k), '--output-wav', str(out)]
+                        '--caption', cap, *ref_args, '--seed', str(SEED + k), *extra, '--output-wav', str(out)]
             infer.main()
             done += 1
     print('4回目', done, '本')
@@ -344,7 +356,7 @@ def generate_round4(model):
 
 def round4_section():
     blocks = []
-    for sid, name, ref, cap, m, lines in ROUND4:
+    for sid, name, ref, cap, m, lines, *rest in ROUND4:
         files = [f'audio/r4/{r4_path(sid, i).name}' for i in range(len(lines)) if r4_path(sid, i).exists()]
         chips = ''.join(f'<span class="chip"><button class="sm" onclick="play(this,&quot;audio/r4/{r4_path(sid, i).name}&quot;)">▶</button>{html.escape(t)}</span>'
                         for i, t in enumerate(lines) if r4_path(sid, i).exists())

@@ -31,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
             PImage(book,"DiaryBookShadow",PlanningArt.shadow,-32,-2,1444,840,new Color(.2f,.1f,.05f,.65f),true);
             for(int i=0;i<2;i++)
             {
-                var page=PImage(book,"DiaryPage"+i,PlanningArt.round20,i*690,0,690,780,Hex("fffdf6"),true);
+                var page=Rect(book,"DiaryPage"+i,i*690,0,690,780);var paper=page.gameObject.AddComponent<OpsDiaryGraphic>();paper.Kind=i==0?"page-left":"page-right";paper.color=Hex("fffdf6");
                 var binding=Rect(page,"BindingShade",i==0?605:0,0,85,780);var graphic=binding.gameObject.AddComponent<OpsDiaryGraphic>();graphic.Kind=i==0?"binding-left":"binding-right";
                 for(int row=0;row<14;row++){int y=(i==0?150:110)+43+row*45;if(y>740)break;PImage(page,"Rule"+row,null,i==0?56:40,y,i==0?594:610,2,Hex("dfe7f3"));}
             }
@@ -40,7 +40,6 @@ namespace PatchWorkSecure.CompanyOps
                 var ring=PCard(book,"DiaryRing"+i,672,40+i*686f/9,36,14,Color.white,12,false);
                 KitGradient(ring.GetComponent<Image>(),Hex("f2f2f2"),Hex("9aa0aa"));var s=ring.gameObject.AddComponent<Shadow>();s.effectColor=new Color(0,0,0,.3f);s.effectDistance=new Vector2(0,-2);
             }
-            DiaryTape(book,250,-12,150,false,-4);DiaryTape(book,1190,-10,130,true,5);
             if(Application.isPlaying){var motion=book.gameObject.AddComponent<OpsDiaryMotion>();motion.Kind="open";motion.Owner=this;}
             return book;
         }
@@ -80,6 +79,7 @@ namespace PatchWorkSecure.CompanyOps
         public void OpenDiaryBook()
         {
             var book=DiaryPaper();
+            DiaryTape(book,220,-12,200,false,-2);
             // 一覧には罫線を出さない（モックの白いページ）。
             foreach(var tr in book.GetComponentsInChildren<Transform>())if(tr.name.StartsWith("Rule"))tr.gameObject.SetActive(false);
             PText(book,"DiaryBookTitle","ひなたの日記帳",66,46,568,46,34,DiaryInk);
@@ -111,12 +111,16 @@ namespace PatchWorkSecure.CompanyOps
         private void DiarySpread(OpsDiaryRecord r,Action close,bool collapsed,bool archive=false)
         {
             if(r==null)return;var e=OpsDiaryCatalog.Entries[r.content];var book=DiaryPaper();bool annual=r.yearEnd;
+            if(annual)DiaryTape(book,230,-12,170,false,-3);
+            else if(r.mood==2)DiaryTape(book,230,-12,150,true,3);
+            else {DiaryTape(book,250,-12,150,false,-4);DiaryTape(book,1190,-10,130,true,5);}
             int year=r.key<36?r.key/12+1:e.year,month=r.key<36?r.key%12:e.month;
             var weather=Rect(book,"DiaryWeather",66,54,46,46);var graphic=weather.gameObject.AddComponent<OpsDiaryGraphic>();graphic.Owner=this;graphic.Kind=r.mood==2?"rain":r.mood==0||r.mood==4?"sun":"cloud";
             DiaryText(book,"DiaryDate",annual?year+"年目のおわりに":year+"年目　"+OpsCatalog.Months[month].name+"の日記",126,54,405,46,30);
-            if(!annual)DiaryTag(book,r.season??"",386,62,206,Hex("e3f2ff"),Hex("1f75b8"),24);
+            if(!annual)DiaryTag(book,r.season??"",386,62,Mathf.Clamp((r.season??"").Length*14+24,50,280),r.mood==2?Hex("eef2f8"):Hex("e3f2ff"),r.mood==2?Hex("52607a"):Hex("1f75b8"),24);
             if(annual)
             {
+                foreach(Transform child in book.Find("DiaryPage0"))if(child.name.StartsWith("Rule"))child.gameObject.SetActive(false);
                 DiaryText(book,"DiaryAnnualLabel","この一年のできごと",66,118,568,30,18);
                 for(int m=0;m<12;m++)
                 {
@@ -125,7 +129,9 @@ namespace PatchWorkSecure.CompanyOps
                     PText(card,"DiaryMonthLabel",OpsCatalog.Months[m].name,0,8,133,28,15,DiaryInk,true,true);
                     var t=PText(card,"DiaryMonthNote",note,8,38,117,38,11,Hex("8a8399"),false,true);t.textWrappingMode=TextWrappingModes.Normal;
                 }
-                DiaryText(book,"DiaryAnnualBest","いちばん効いた備え：\n"+(r.bestEquipment??"比較は未記録")+"\nいちばん助けてくれた人："+(r.bestSupport??"未記録"),66,478,540,150,22);
+                var best=DiaryText(book,"DiaryAnnualBest","いちばん効いた備え："+(r.bestEquipment??"比較は未記録")+"\nいちばん助けてくれた人："+(r.bestSupport??"未記録"),66,464,568,150,22);
+                string[] prefixes={"いちばん効いた備え：","いちばん助けてくれた人："},values={r.bestEquipment??"比較は未記録",r.bestSupport??"未記録"};
+                for(int i=0;i<2;i++){float offset=best.GetPreferredValues(prefixes[i]).x,width=Mathf.Min(best.GetPreferredValues(values[i]).x,568-offset);var mark=PImage(book,"DiaryAnnualBestMarker"+i,null,66+offset,484+i*45,width,10,new Color(1,.878f,.4f,.9f));mark.SetSiblingIndex(best.transform.GetSiblingIndex());}
                 DiarySticker(book,"DiaryRankSticker",year+"年目",r.rank,500,600,130,Hex("e0a500"),-10,0);
                 DiaryTag(book,"先輩へ",760,98,86,Hex("ffe9ee"),Hex("d94a70"));
                 DiaryPhoto(book,1120,470,190,226,e.pose,year+"年目 おしまい",-6);
@@ -136,11 +142,11 @@ namespace PatchWorkSecure.CompanyOps
                 var marker=PImage(book,"DiaryMarker",null,66,253,260,14,new Color(1,.878f,.4f,.9f));
                 DiaryText(book,"DiaryActualRecord",r.recap,66,204,568,240,22);
                 float memoHeight=e.memo.Length>40?138:110;
-                var memoShadow=PImage(book,"DiaryMemoShadow",PlanningArt.shadow,276,420,350,memoHeight+48,Color.white,true);memoShadow.localEulerAngles=new Vector3(0,0,3);
-                var memo=PImage(book,"DiaryMemo",null,300,436,302,memoHeight,Hex("fff6b8"));memo.localEulerAngles=new Vector3(0,0,3);KitGradient(memo.GetComponent<Image>(),Hex("fff6b8"),Hex("ffef8a"));
+                var memoShadow=PImage(book,"DiaryMemoShadow",PlanningArt.shadow,276,420,350,memoHeight+48,Color.white,true);memoShadow.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);
+                var memo=PImage(book,"DiaryMemo",null,300,436,302,memoHeight,Hex("fff6b8"));memo.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);KitGradient(memo.GetComponent<Image>(),Hex("fff6b8"),Hex("ffef8a"));
                 PImage(memo,"MemoTape",null,116,-10,70,20,new Color(1,1,1,.55f));PText(memo,"MemoCategory","情シスあるある",16,14,270,24,12,Hex("9a7a00"));DiaryText(memo,"DiaryMemoText",e.memo,16,42,270,memoHeight-44,17);
-                DiaryPhoto(book,90,470,190,226,r.mood==2?"pose_exhausted":e.pose,r.mood==2?"くやしい日":"今月のひなた",-5);
-                DiarySticker(book,"DiaryRankSticker","運用ランク",r.rank,470,585,120,r.mood==2?Hex("7d8aa3"):Hex("f45a80"),-12,0);
+                DiaryPhoto(book,90,470,190,226,r.mood==2?"pose_exhausted":e.pose,r.mood==2?"くやしい日":"今月のひなた",r.mood==2?-4:-5,r.mood==2);
+                DiarySticker(book,"DiaryRankSticker","運用ランク",r.rank,470,r.mood==2?600:585,r.mood==2?110:120,r.mood==2?Hex("7d8aa3"):Hex("f45a80"),r.mood==2?8:-12,0);
                 if(!string.IsNullOrEmpty(r.minigame))DiarySticker(book,"DiaryMinigameSticker","対応",r.minigame.Split(' ').Last(),350,655,90,Hex("2f93dc"),10,.25f);
                 DiaryTag(book,"ひなたのひとこと",760,98,158,Hex("fff6d6"),Hex("7a5a00"));
                 DiaryText(book,"DiaryThought",r.thought,760,174,568,145,26);
@@ -165,19 +171,20 @@ namespace PatchWorkSecure.CompanyOps
             while(text!=null&&elapsed<2.4f){elapsed+=Time.unscaledDeltaTime;text.maxVisibleCharacters=Mathf.CeilToInt(first*elapsed/2.4f);yield return null;}
             if(text!=null)text.maxVisibleCharacters=int.MaxValue;
         }
-        private void DiaryPhoto(Transform p,float x,float y,float w,float h,string pose,string label,float angle)
+        private void DiaryPhoto(Transform p,float x,float y,float w,float h,string pose,string label,float angle,bool quiet=false)
         {
             var photoShadow=PImage(p,"DiaryPhotoShadow",PlanningArt.shadow,x-24,y-16,w+48,h+48,Color.white,true);photoShadow.localEulerAngles=new Vector3(0,0,-angle);
             var photo=PImage(p,"DiaryPolaroid",null,x,y,w,h,Color.white);photo.localEulerAngles=new Vector3(0,0,-angle);
-            var inner=PImage(photo,"DiaryPhoto",null,12,12,w-24,h-52,Color.white);KitGradient(inner.GetComponent<Image>(),Hex("ffe3ec"),Hex("dcefff"));inner.gameObject.AddComponent<RectMask2D>();
+            var inner=PImage(photo,"DiaryPhoto",null,12,12,w-24,h-52,Color.white);KitGradient(inner.GetComponent<Image>(),quiet?Hex("e6ecf8"):Hex("ffe3ec"),quiet?Hex("d6deee"):Hex("dcefff"));inner.gameObject.AddComponent<RectMask2D>();
             Portrait(inner,"DiaryPortrait",-18,8-(h-52)*.2f,w+12,(h-52)*1.2f,pose);DiaryText(photo,"DiaryPhotoCaption",label,0,h-36,w,28,17,true);
         }
         private void DiarySticker(Transform p,string name,string title,string rank,float x,float y,float size,Color color,float angle,float delay)
         {
             var outer=Rect(p,name,x-5,y-5,size+10,size+10);
-            var shape=Rect(outer,"StickerCircle",5,5,size,size);var g=shape.gameObject.AddComponent<OpsDiaryGraphic>();g.Kind="circle";g.color=color;
+            var shape=Rect(outer,"StickerCircle",5,5,size,size);var g=shape.gameObject.AddComponent<OpsDiaryGraphic>();g.Kind="sticker";g.color=color;
             // 円形の白い縁もメッシュで描く。
             var edge=outer.gameObject.AddComponent<OpsDiaryGraphic>();edge.Kind="circle";edge.color=Color.white;
+            var shadow=outer.gameObject.AddComponent<Shadow>();shadow.effectColor=new Color(0,0,0,.18f);shadow.effectDistance=new Vector2(0,-6);
             PText(outer,"StickerCategory",title,5,size*.24f,size,22,size*.108f,Color.white,true,true);PText(outer,"StickerRank",rank,5,size*.4f,size,size*.5f,size*.4f,Color.white,true,true);
             outer.localEulerAngles=new Vector3(0,0,-angle);if(Application.isPlaying){var m=outer.gameObject.AddComponent<OpsDiaryMotion>();m.Owner=this;m.Kind="stick";m.Delay=delay;m.Angle=-angle;}
         }

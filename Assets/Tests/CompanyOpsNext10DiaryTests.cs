@@ -26,15 +26,20 @@ namespace PatchWorkSecure.Tests
             for(int m=0;m<3;m++){DiaryTestMonth(game.State);if(game.State.QuarterRewardPending)game.State.ClaimQuarterReward("budget");game.State.NextMonth();}
             DiaryTestMonth(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-good-before");
             string before=JsonUtility.ToJson(game.State);game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-good");
+            Assert.AreEqual(2,Object.FindObjectsByType<OpsDiaryGraphic>().Count(g=>g.Kind=="pink-tape"||g.Kind=="blue-tape"));
+            Assert.IsNotNull(Object.FindObjectsByType<OpsDiaryGraphic>().FirstOrDefault(g=>g.Kind=="page-left"));
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));Assert.AreEqual(OpsDiaryCatalog.Entries[15].body,Find<TextMeshProUGUI>("DiaryBody").text);Assert.IsNotNull(Find<Button>("DiaryReplay"));
             Assert.AreEqual("KleeOneDiary",Find<TextMeshProUGUI>("DiaryBody").font.name.Split(new[]{"_Test_"},System.StringSplitOptions.None)[0]);
             Assert.IsTrue(game.Career.Valid(),"日記のキャリア");Assert.IsTrue(game.State.Valid(),"年度の状態");Assert.IsTrue(game.Story.Valid(),"本編の状態");
             string path=System.IO.Path.Combine(Application.dataPath,"../Artifacts/Next10/diary-save-test.json");Assert.IsTrue(OpsSaveStore.WriteProgress(path,game.ExportProgress(),out var warning),warning);var saved=OpsSaveStore.ReadProgress(path,out warning);Assert.IsNotNull(saved,warning);Assert.IsTrue(saved.Valid());Assert.AreEqual(1,saved.career.diary.Count);
             game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(.8f);Assert.IsNotNull(Find<Button>("DiaryExpand"));Find<Button>("DiaryExpand").onClick.Invoke();Assert.AreEqual(OpsDiaryCatalog.Entries[15].body,Find<TextMeshProUGUI>("DiaryBody").text);
             game.OpenDiaryBook();yield return new WaitForSecondsRealtime(.8f);Assert.IsFalse(Find<Button>("DiaryPage_16").interactable);Assert.IsTrue(Find<Button>("DiaryPage_15").interactable);Capture("next10-diary-book");
+            Assert.AreEqual(1,Object.FindObjectsByType<OpsDiaryGraphic>().Count(g=>g.Kind=="pink-tape"||g.Kind=="blue-tape"));
             // 悪い月の実記録。連載の試験結果とゲームの成績は独立した欄。
             game.StartYear(2);game.State.budget=400;for(int m=0;m<9;m++){DiaryTestMonth(game.State);if(game.State.QuarterRewardPending)game.State.ClaimQuarterReward("budget");game.State.NextMonth();}DiaryTestMonth(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-bad-before");game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(3);Capture("next10-diary-month-bad");
             StringAssert.Contains(game.State.Latest.loss+"万円",Find<TextMeshProUGUI>("DiaryActualRecord").text);Assert.AreEqual("diary_y1_01",game.LastReactionId);
+            Assert.AreEqual(1,Object.FindObjectsByType<OpsDiaryGraphic>().Count(g=>g.Kind=="pink-tape"||g.Kind=="blue-tape"));
+            Assert.AreEqual(new Vector2(110,110),Find<OpsDiaryGraphic>("StickerCircle").rectTransform.sizeDelta);
             game.StartStory(14);for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=2;game.State.culture=game.State.trust=100;game.State.budget=400;
             for(int m=0;m<11;m++){DiaryTestMonth(game.State);if(game.State.QuarterRewardPending)game.State.ClaimQuarterReward("budget");game.State.NextMonth();}DiaryTestMonth(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);Capture("next10-diary-year-end-before");game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(3);Capture("next10-diary-year-end");Assert.AreEqual("1年目のおわりに",Find<TextMeshProUGUI>("DiaryDate").text);Assert.AreEqual(12,game.Career.diary.Single(p=>p.key==11).monthNotes.Length);
             Find<Button>("DiaryClose").onClick.Invoke();yield return null;Assert.AreEqual(OpsPhase.Ended,game.State.phase);Assert.IsNotNull(Find<Button>("NextStoryYear"));

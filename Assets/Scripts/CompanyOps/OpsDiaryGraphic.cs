@@ -13,7 +13,33 @@ namespace PatchWorkSecure.CompanyOps
         protected override void OnPopulateMesh(VertexHelper v)
         {
             v.Clear();raycastTarget=false;var r=rectTransform.rect;float w=r.width,h=r.height;
-            if(Kind=="desk")
+            if(Kind=="page-left"||Kind=="page-right")
+            {
+                Add(v,r.center,color);
+                for(int corner=0;corner<4;corner++)
+                {
+                    bool right=corner==0||corner==3;float radius=(Kind=="page-left"?right:!right)?4:18;
+                    Vector2 center=new Vector2(right?r.xMax-radius:r.xMin+radius,corner<2?r.yMax-radius:r.yMin+radius);
+                    for(int i=0;i<=12;i++){float a=(corner*90+i*7.5f)*Mathf.Deg2Rad;Add(v,center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,color);}
+                }
+                for(int i=1;i<v.currentVertCount-1;i++)v.AddTriangle(0,i,i+1);v.AddTriangle(0,v.currentVertCount-1,1);
+            }
+            else if(Kind=="sticker")
+            {
+                float radius=Mathf.Min(w,h)*.5f;Vector2 center=r.center+new Vector2(-w*.15f,h*.2f);
+                for(int j=0;j<12;j++)for(int i=0;i<64;i++)
+                {
+                    int start=v.currentVertCount;
+                    for(int k=0;k<4;k++)
+                    {
+                        float a=(i+(k==1||k==2?1:0))*Mathf.PI*2/64,t=(j+(k>=2?1:0))/12f;Vector2 d=new Vector2(Mathf.Cos(a),Mathf.Sin(a)),offset=center-r.center;
+                        float b=Vector2.Dot(offset,d),length=-b+Mathf.Sqrt(b*b+radius*radius-offset.sqrMagnitude);
+                        Add(v,center+d*length*t,Color.Lerp(Color.Lerp(color,Color.white,.4f),color,t));
+                    }
+                    v.AddTriangle(start,start+1,start+2);v.AddTriangle(start,start+2,start+3);
+                }
+            }
+            else if(Kind=="desk")
             {
                 for(float x=0;x<w;x+=12){Quad(v,r,x,0,3,h,new Color32(201,154,107,255));Quad(v,r,x+3,0,4,h,new Color32(196,148,95,255));Quad(v,r,x+7,0,5,h,new Color32(207,159,112,255));}
                 for(int y=0;y<24;y++)for(int x=0;x<40;x++)
@@ -46,6 +72,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private static void Quad(VertexHelper v,Rect r,float x,float y,float w,float h,Color c)
         {int n=v.currentVertCount;v.AddVert(new Vector3(r.x+x,r.yMax-y),c,Vector2.zero);v.AddVert(new Vector3(r.x+x+w,r.yMax-y),c,Vector2.zero);v.AddVert(new Vector3(r.x+x+w,r.yMax-y-h),c,Vector2.zero);v.AddVert(new Vector3(r.x+x,r.yMax-y-h),c,Vector2.zero);v.AddTriangle(n,n+1,n+2);v.AddTriangle(n,n+2,n+3);}
+        private static void Add(VertexHelper v,Vector2 position,Color tint){v.AddVert(position,tint,Vector2.zero);}
         private static void Circle(VertexHelper v,Rect r,float x,float y,float radius,Color c)
         {int n=v.currentVertCount;v.AddVert(new Vector3(r.x+x,r.yMax-y),c,Vector2.zero);for(int i=0;i<=48;i++){float a=i*Mathf.PI*2/48;v.AddVert(new Vector3(r.x+x+Mathf.Cos(a)*radius,r.yMax-y+Mathf.Sin(a)*radius),c,Vector2.zero);if(i>0)v.AddTriangle(n,n+i,n+i+1);}}
     }

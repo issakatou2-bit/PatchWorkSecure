@@ -65,14 +65,14 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - `Assets/Art/UI/Bubbles/`の4PNG（困りごとの泡の青・ピンク・金と、金の点線の輪）は、`ArtSource/UI/bubbles.html`のCSS（放射グラデーション・縁・影）をClaude CodeがEdgeで背景透明のまま書き出したもの。AI画像生成・第三者素材は使っていない。
 - `Assets/Art/UI/Craft/`の8PNG（縫い目の枠・上からの光沢・箔押しの光・斜めの帯・紙の地紋・網点・走査線・集中線）は、`Tools/Make-CraftTextures.py`でClaude CodeがPillowで描いたもの。白で描き、Unity側で色を付けて使う。AI画像生成・第三者素材は使っていない。使い方は`Docs/Visual-Craft-2026-09-29.md`。
 
-## 2026-10-01 秘書さん・エンジニアさんの声の試し（Irodori-TTS）
-
-### 日記の手書き風字体 Klee One
+## 2026-10-01 日記の手書き風字体 Klee One
 
 - 正規配布元：Google Fonts `https://github.com/google/fonts/tree/main/ofl/kleeone`。`KleeOne-SemiBold.ttf`（600）と同フォルダのOFL.txtを取得。Copyright 2020 The Klee Project Authors。SIL Open Font License 1.1。
 - 取得した字体のSHA256：`B031EC426C23CA1143EF1F7D58BEE7A79EFE119ED654152F121C922202B303FD`。ライセンス原文は`Assets/Fonts/CompanyYear/KleeOne-OFL.txt`。Windows版の`FontLicenses/`へ同梱する。
 - TMP用は`Resources/KleeOneDiary`。44pt・余白5・1024の動的アトラス、スケール1、ビルド時に作業字形を消去。TestModeでは字体とフォールバックを専用コピーにし、元の作業用データを変えない。
 - ノート・机・テープ・リング・天気・シールは承認HTMLのCSSをUnity UIで描画したもの。第三者画像や新しい生成画像は使っていない。
+
+## 2026-10-01 秘書さん・エンジニアさんの声の試し（Irodori-TTS）
 
 - 道具：Irodori-TTS（Aratako氏、GitHub `Aratako/Irodori-TTS`、コードはMIT License）。このPCの中だけで動かす（`C:\Users\issak\Tools\Irodori-TTS`、Python 3.11、PyTorch 2.10 CUDA 12.8、RTX 4060 Ti）。アカウント登録なし。
 - モデル：`Aratako/Irodori-TTS-v4.1-Small`（重みもMIT。商用可、ライセンス表記を同梱）と、話題の大型`Aratako/Irodori-TTS-v4-Large-Quantized`の`int8-weight-only`（**Googleの「Gemmaの利用規約」と禁止用途の決まりが適用**。商用は可だが、配布物に規約の写しと注意書きが要る）。採用する前に、その時点のモデルカードの条件を確認する。

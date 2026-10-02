@@ -18,12 +18,12 @@ namespace PatchWorkSecure.CompanyOps
         public int SecretaryProposalBonus=>HasYearAllies&&QuarterPeak?OpsCatalog.SecretaryPeakBudget:0;
         public int ProposalOffer=>12+Evidence*3+ProposalRankBonus+SecretaryProposalBonus;
         private int EngineerKnowledgeGain=>HasYearAllies&&engineerRequested?OpsCatalog.EngineerKnowledge:0;
-        public string EngineerResearchBlock=>!HasYearAllies?"エンジニアさんが情シスに来るのは2年目から":phase!=OpsPhase.Planning?"計画中に調査を頼めます":engineerRequested?"今月は調査済み":SituationKnowledge>=OpsCatalog.KnowledgeMax?"状況の把握は最大です":"";
+        public string EngineerResearchBlock=>!HasYearAllies?"りりぃが情シスに来るのは2年目から":phase!=OpsPhase.Planning?"計画中に調査を頼めます":engineerRequested?"今月は調査済み":SituationKnowledge>=OpsCatalog.KnowledgeMax?"状況の把握は最大です":"";
         public bool RequestEngineerResearch()
         {
             if(EngineerResearchBlock!="")return false;
             engineerRequested=true;capacity-=OpsCatalog.EngineerWork;
-            Note("エンジニアさんに調査を依頼 / 工数 "+OpsCatalog.EngineerWork+"・状況の把握 +"+OpsCatalog.EngineerKnowledge+"。記録を整理した。侵害が確定したという意味ではない。");return true;
+            Note("りりぃに調査を依頼 / 工数 "+OpsCatalog.EngineerWork+"・状況の把握 +"+OpsCatalog.EngineerKnowledge+"。記録を整理した。侵害が確定したという意味ではない。");return true;
         }
         public bool SelectSupportMember(int member)
         {

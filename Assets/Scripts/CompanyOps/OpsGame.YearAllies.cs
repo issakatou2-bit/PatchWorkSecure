@@ -7,7 +7,7 @@ namespace PatchWorkSecure.CompanyOps
         public void RequestEngineer()
         {
             if(State==null||MinigameActive||!State.RequestEngineerResearch())return;
-            Save();Render();Toast("エンジニアさんの調査 / 状況の把握 +"+OpsCatalog.EngineerKnowledge,true,OpsCue.Action);
+            Save();Render();Toast("りりぃの調査 / 状況の把握 +"+OpsCatalog.EngineerKnowledge,true,OpsCue.Action);
             QueueCompanionScene("investigate");
         }
         private void SelectTeamMember(int member)

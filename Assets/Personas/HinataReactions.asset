@@ -1603,8 +1603,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 1\u5E74\u76EE9\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y1_10_v2
-    caption: "\u958B\u767A\u90E8\u306E\u30A8\u30F3\u30B8\u30CB\u30A2\u3055\u3093\u3001\u3059\u3054\u304B\u3063\u305F\u3002\u30DD\u30C6\u30C8\u98DF\u3079\u3066\u305F\u3051\u3069"
+  - id: diary_y1_10_v3
+    caption: "\u958B\u767A\u90E8\u306E\u308A\u308A\u3043\u3055\u3093\u3001\u3059\u3054\u304B\u3063\u305F\u3002\u30DD\u30C6\u30C8\u98DF\u3079\u3066\u305F\u3051\u3069"
     speaker: 
     reaction: 0
     clip: {fileID: 0}
@@ -1803,8 +1803,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 3\u5E74\u76EE5\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y3_06
-    caption: "\u30A8\u30F3\u30B8\u30CB\u30A2\u3055\u3093\u306B\u3001\u5224\u65AD\u304C\u65E9\u304F\u306A\u3063\u305F\u3063\u3066\u8A00\u308F\u308C\u305F\uFF01"
+  - id: diary_y3_06_v2
+    caption: "\u308A\u308A\u3043\u3055\u3093\u306B\u3001\u5224\u65AD\u304C\u65E9\u304F\u306A\u3063\u305F\u3063\u3066\u8A00\u308F\u308C\u305F\uFF01"
     speaker: 
     reaction: 0
     clip: {fileID: 0}

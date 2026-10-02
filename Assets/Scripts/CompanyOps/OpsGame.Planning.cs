@@ -94,9 +94,9 @@ namespace PatchWorkSecure.CompanyOps
             if(State.HasYearAllies)
             {
                 string block=State.EngineerResearchBlock;
-                var research=PButton(stage,"EngineerResearch",State.engineerRequested?"エンジニアさん / 調査済み":"調査を頼む / 0工数",414,16,240,34,RequestEngineer,Color.white,PlanInk,16,null,block=="");
+                var research=PButton(stage,"EngineerResearch",State.engineerRequested?"りりぃ / 調査済み":"調査を頼む / 0工数",414,16,240,34,RequestEngineer,Color.white,PlanInk,16,null,block=="");
                 research.GetComponentInChildren<TextMeshProUGUI>().fontSizeMax=14;
-                Hover(research,block==""?"エンジニアさん / 月1回・状況の把握 +"+OpsCatalog.EngineerKnowledge+"。侵害の確定ではありません。":block);
+                Hover(research,block==""?"りりぃ / 月1回・状況の把握 +"+OpsCatalog.EngineerKnowledge+"。侵害の確定ではありません。":block);
             }
             if(State.CultureEarlySignal)
             {

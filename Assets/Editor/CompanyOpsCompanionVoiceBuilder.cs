@@ -24,7 +24,7 @@ namespace PatchWorkSecure.EditorTools
                 var cells=Cells(row);
                 if(cells.Count!=5||cells[1]!="かのん"&&cells[1]!="エンジニア")throw new FormatException("仲間の台本の形式が不正です");
                 string voice="Assets/Audio/CompanyYear/Voice/"+(cells[1]=="かのん"?"Kanon":"Engineer")+"/"+cells[0]+".wav";
-                lines.Add(new OpsReactionLine{id=cells[0],speaker=cells[1],scene=cells[2],caption=cells[3],fullSpeech=true,clip=AssetDatabase.LoadAssetAtPath<AudioClip>(voice)});
+                lines.Add(new OpsReactionLine{id=cells[0],speaker=cells[1]=="エンジニア"?"りりぃ":cells[1],scene=cells[2],caption=cells[3],fullSpeech=true,clip=AssetDatabase.LoadAssetAtPath<AudioClip>(voice)});
             }
             if(lines.Count!=24||lines.Select(l=>l.id).Distinct().Count()!=24)throw new FormatException("仲間の台本は重複のない24本が必要です");
             var bank=AssetDatabase.LoadAssetAtPath<OpsReactionBank>(path);

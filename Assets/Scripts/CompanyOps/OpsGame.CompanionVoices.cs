@@ -13,7 +13,8 @@ namespace PatchWorkSecure.CompanyOps
         private OpsReactionLine FindVoiceLine(string id)
         {
             if(id=="maxim_hurry"||id=="maxim_link")id+="_v2";
-            if(id=="diary_y1_10")id="diary_y1_10_v2";
+            if(id=="diary_y1_10"||id=="diary_y1_10_v2")id="diary_y1_10_v3";
+            if(id=="diary_y3_06")id="diary_y3_06_v2";
             if(id=="final_restore_bridge")return new OpsReactionLine{id=id,caption="戻す前に、確かめる、だよ！",reaction=OpsReaction.Think};
             if(CompanionVoices==null)CompanionVoices=Resources.Load<OpsReactionBank>("CompanionVoices");
             return CompanionVoices?.Find(id)??ReactionBank?.Find(id);
@@ -108,7 +109,7 @@ namespace PatchWorkSecure.CompanyOps
             if(marker.Badge!=null)marker.Badge.gameObject.SetActive(companion);
             if(companion&&marker.Face!=null)
             {
-                bool engineer=CurrentSpeaker=="エンジニア";
+                bool engineer=CurrentSpeaker=="りりぃ";
                 Sprite art=engineer?PlanningArt.focusEngineer:PlanningArt.focusSecretary;
                 marker.Face.texture=art==null?null:art.texture;
                 marker.Face.uvRect=engineer?new Rect(.484f,.57f,.23f,.41f):new Rect(.22f,.60f,.235f,.418f);

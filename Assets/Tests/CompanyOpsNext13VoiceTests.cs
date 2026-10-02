@@ -24,7 +24,7 @@ namespace PatchWorkSecure.Tests
             CollectionAssert.AreEquivalent(bank.lines.Select(l=>l.id),scenes.SelectMany(OpsGame.CompanionSceneLines));
             foreach(var line in bank.lines)
             {
-                Assert.IsNotEmpty(line.caption);Assert.Contains(line.speaker,new[]{"かのん","エンジニア"});Assert.IsTrue(line.fullSpeech);
+                Assert.IsNotEmpty(line.caption);Assert.Contains(line.speaker,new[]{"かのん","りりぃ"});Assert.IsTrue(line.fullSpeech);
                 // 音声を除いた取得環境も許容。音源がある場合は対応と長さを確認する。
                 if(line.clip!=null){Assert.AreEqual(line.id,line.clip.name);Assert.Greater(line.clip.length,.1f);}
             }

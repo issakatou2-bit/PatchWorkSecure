@@ -22,7 +22,7 @@ namespace PatchWorkSecure.Tests
                 var e=OpsDiaryCatalog.Entries[page];StringAssert.Contains("かのんさん",e.intro);StringAssert.EndsWith("_kanon",e.voiceId);
                 Assert.AreEqual(e.intro,OpsReactionBank.ScriptV2().Single(l=>l.id==e.voiceId).caption);
             }
-            foreach(int year in new[]{2,3}){Assert.AreEqual("かのん",OpsCatalog.CompanyYear(year).allyNames[2]);Assert.AreEqual("エンジニアさん",OpsCatalog.CompanyYear(year).allyNames[0]);}
+            foreach(int year in new[]{2,3}){Assert.AreEqual("かのん",OpsCatalog.CompanyYear(year).allyNames[2]);Assert.AreEqual("りりぃ",OpsCatalog.CompanyYear(year).allyNames[0]);}
             StringAssert.Contains("試験は一回で受かったけど、会議は三回すっぽかした",OpsDiaryCatalog.Entries[9].body);
         }
         [UnityTest] public IEnumerator Next12NamesUI_日記と開幕と因子の表示を撮影する()
@@ -36,7 +36,7 @@ namespace PatchWorkSecure.Tests
             Assert.Contains("かのん",Object.FindObjectsByType<TextMeshProUGUI>().Where(t=>t.name=="AllyName").Select(t=>t.text).ToArray());
             game.SkipYearOpening();game.AdvanceYearOpening();FinishStoryTestYear(game.State);game.NextStoryYear();game.SkipYearOpening();game.AdvanceYearOpening();FinishStoryTestYear(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(3);
             Find<Button>("BackHome").onClick.Invoke();game.SkipFactorReveal();yield return new WaitForSecondsRealtime(1);Capture("next12-names-factor");
-            StringAssert.StartsWith("かのんの推薦：",Find<TextMeshProUGUI>("FactorRecommendation2").text);StringAssert.StartsWith("エンジニアさんの推薦：",Find<TextMeshProUGUI>("FactorRecommendation0").text);
+            StringAssert.StartsWith("かのんの推薦：",Find<TextMeshProUGUI>("FactorRecommendation2").text);StringAssert.StartsWith("りりぃの推薦：",Find<TextMeshProUGUI>("FactorRecommendation0").text);
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
     }

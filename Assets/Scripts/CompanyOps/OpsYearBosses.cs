@@ -9,7 +9,7 @@ namespace PatchWorkSecure.CompanyOps
         // 通常年度の40件と既存の8件は変えない。年別の山場にだけ固定する。
         public static readonly OpsEvent[] BossEvents=OpsCatalog.StoryCompanies.Skip(1).SelectMany(y=>y.rivals)
             .Where(r=>r.id!="y3-final").Select(r=>new OpsEvent{id=r.id,profile=r.profile,title=r.name,news=r.hint,
-                boss="この依頼や兆候、本物か確認して対応できる？",person="社長・加藤",staff="エンジニアさん：記録と依頼の経路を照合しよう。",
+                boss="この依頼や兆候、本物か確認して対応できる？",person="社長・加藤",staff="りりぃ：記録と依頼の経路を照合しよう。",
                 symptom=r.identity,finding="関係する端末・接続先・承認の記録を照合。",hint=r.hint,
                 threats=r.profile=="ransom"?new[]{1}:r.profile=="supply"?new[]{2}:r.profile=="bec"?new[]{10,3}:new[]{5},
                 calm="記録と既知の経路を確かめた結果、正当な活動でした。感染や侵害は確認されませんでした。",source="ipa"}).ToArray();

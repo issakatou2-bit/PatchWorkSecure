@@ -26,7 +26,7 @@ namespace PatchWorkSecure.CompanyOps
             StoryText(screen,"EndingTitle","持ち帰る因子を1つ選ぶ",0,54,1600,64,40,Color.white,true);
             StoryText(screen,"FactorHint","次の挑戦は、選んだ設備を最初から Lv1 で始められる",0,116,1600,30,15,new Color(1,1,1,.8f),true);
             Sprite[] art={PlanningArt.focusEngineer,PlanningArt.focusHinata,PlanningArt.focusSecretary};
-            string[] speakers={"エンジニアさん","ひなた","かのん"};
+            string[] speakers={"りりぃ","ひなた","かのん"};
             for(int i=0;i<factorCandidates.Length;i++)
             {
                 int index=i;var c=factorCandidates[i];bool selected=selectedFactor==i;float x=190+i*430,y=selected?158:170;

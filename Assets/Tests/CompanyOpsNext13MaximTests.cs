@@ -27,7 +27,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
             yield return new WaitForSecondsRealtime(.5f);string state=JsonUtility.ToJson(game.State);
-            foreach(string id in OpsMaxims.Ids){Assert.IsTrue(game.SpeakSceneLine(id));Assert.AreEqual(id,game.LastReactionId);}
+            foreach(string id in OpsMaxims.Ids){Assert.IsTrue(game.SpeakSceneLine(id));Assert.AreEqual(id,OpsMaxims.Canonical(game.LastReactionId));}
             Assert.AreEqual(20,game.Career.yearMaxims.Count);Assert.AreEqual(20,game.Career.heardMaxims.Count);
             game.SpeakSceneLine("maxim_logs");Assert.AreEqual("think_01",game.LastReactionId);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
             var restored=new OpsProgress{single=JsonUtility.FromJson<OpsState>(JsonUtility.ToJson(game.State)),career=JsonUtility.FromJson<OpsCareer>(JsonUtility.ToJson(game.Career))};Assert.IsTrue(game.RestoreProgress(restored));game.SpeakSceneLine("maxim_logs");Assert.AreEqual("think_01",game.LastReactionId);

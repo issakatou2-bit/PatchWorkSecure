@@ -133,9 +133,9 @@ mg_mail_miss,掛け声,メールの仕分けで見逃す,あっ、それ開い�
 mg_mfa_block,掛け声,多要素認証で偽の依頼を弾く,弾いた！　本人じゃないね！,face_doya,pose_armscross,[confident],
 mg_mfa_breach,掛け声,多要素認証で許可してしまう,その人、今ログインしてないよ〜！,face_shocked,pose_startled,[panicked],
 maxim_backup,格言,戻せることを確かめる,バックアップは、戻せてこそバックアップ、だよ！,face_doya,pose_point,[confident],
-maxim_hurry,格言,確かめてから信じる,「急いで」「内密に」は、詐欺の合図だよ！,face_alert,pose_point,[warning],内密＝ないみつ
+maxim_hurry_v2,格言,確かめてから信じる,「急いで」「内密に」は、詐欺によくある合図！　いつもの連絡先で確かめよう！,face_alert,pose_point,[warning],内密＝ないみつ（音声未作成・字幕先行）
 maxim_sender,格言,確かめてから信じる,名前より中身！　差出人は、確かめるものだよ！,face_determined,pose_magnifier,[confident],
-maxim_link,格言,確かめてから信じる,リンクは押す前に、行き先を確かめよ！,face_normal,pose_point,[friendly],
+maxim_link_v2,格言,確かめてから信じる,リンクは押す前に、行き先を確かめよう！　似た名前にも気をつけて！,face_normal,pose_point,[friendly],音声未作成・字幕先行
 maxim_account,格言,確かめてから信じる,口座の変更は、いつもの連絡先で確かめる。これ鉄則！,face_determined,pose_armscross,[firm],鉄則＝てっそく
 maxim_mfa,格言,確かめてから信じる,心当たりのない承認は、ぜったい拒否だよ！,face_alert,pose_shield,[firm],
 maxim_least,格言,最小権限,権限は、必要な人に、必要な分だけ！,face_tease,pose_point,[playful],

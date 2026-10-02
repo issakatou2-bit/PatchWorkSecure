@@ -87,9 +87,9 @@ namespace PatchWorkSecure.CompanyOps
             new OpsMailQuestion("meeting",false,"制作 大野","ono@nw-shoji.co.jp","Re: 明日の打ち合わせ","資料ありがとうございます。明日14時で大丈夫です。会議室Bを取っておきます。"),
             new OpsMailQuestion("signin",true,"Microsoft 365","no-reply@micros0ft-365.com","サインインの異常を検知しました","不審なサインインがありました。<mark=#ffe06666>24時間以内</mark>に確認しない場合、アカウントを制限します。","micros0ft（oが数字の0）。本物の通知もリンクから入らず、いつもの入口から確認する","http://micros0ft-365.com/verify","アカウントを確認",markAddress:true),
             new OpsMailQuestion("morning",false,"社長 加藤","kato@nw-shoji.co.jp","月曜の朝会で話したいこと","月曜の朝会で、情シスのみなさんの取り組みを紹介したいと思います。5分ほどお願いできますか。"),
-            new OpsMailQuestion("macro",true,"取引先 相田様","aida@partner-trade.co.jp","見積書の送付","見積書を添付しました。<mark=#ffe06666>マクロを有効にして</mark>ご確認ください。","マクロを有効にさせる添付は危険。取引先でも、いつもと違う形式なら確認する",attachment:"見積書.xlsm"),
+            new OpsMailQuestion("macro",true,"取引先 西村様","nishimura@partner-trade.co.jp","見積書の送付","見積書を添付しました。<mark=#ffe06666>マクロを有効にして</mark>ご確認ください。","マクロを有効にさせる添付は危険。取引先でも、いつもと違う形式なら確認する",attachment:"見積書.xlsm"),
             new OpsMailQuestion("printer",false,"情シス ひなた","hinata@nw-shoji.co.jp","プリンタ設定の変更について","3階のプリンタを新しい機種に入れ替えました。印刷先の選び方は社内ポータルにまとめています。",link:"https://portal.nw-shoji.co.jp/it/printer",label:"手順を見る"),
-            new OpsMailQuestion("salary",true,"人事部","jinji@nw-shoji.co.jp.hr-update.net","【要回答】給与振込口座の再登録","システム更新のため、<mark=#ffe06666>全社員</mark>の給与口座を再登録してください。","アドレスの最後が hr-update.net。途中に会社名が入っていても、最後の部分が本当の送り主","http://nw-shoji.co.jp.hr-update.net/form","再登録フォーム",markAddress:true),
+            new OpsMailQuestion("salary",true,"人事部","jinji@nw-shoji.co.jp.hr-update.net","【要回答】給与振込口座の再登録","システム更新のため、<mark=#ffe06666>全社員</mark>の給与口座を再登録してください。","アドレスの最後が hr-update.net。最後の部分が本当のドメイン（住所）。表示の名前や途中の文字は偽れる","http://nw-shoji.co.jp.hr-update.net/form","再登録フォーム",markAddress:true),
             new OpsMailQuestion("backup",false,"監視システム","alert@monitor.nw-shoji.co.jp","[定期] バックアップ完了（成功）","昨夜のバックアップが正常に完了しました。所要時間42分。")
         };
     }

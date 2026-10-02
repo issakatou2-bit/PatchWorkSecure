@@ -40,11 +40,12 @@ namespace PatchWorkSecure.CompanyOps
             var kinds=Enumerable.Repeat(-1,OpsCatalog.LogNormalCount).ToList();int pos=3;
             kinds.Insert(pos,0);kinds.Insert(pos+1,1);pos+=4+rng.Next(4);
             foreach(int kind in others){kinds.Insert(Math.Min(pos,kinds.Count),kind);pos+=3+rng.Next(4);}
-            string attackIp="185.220."+rng.Next(1,255)+"."+rng.Next(1,255),attackUser=Users[rng.Next(Users.Length)];int minute=9*60;
+            rng.Next(1,255); // 旧IPの第3オクテット分を消費し、出題順と採点を変えない。
+            string attackIp="198.51.100."+rng.Next(1,255),attackUser=Users[rng.Next(Users.Length)];int minute=9*60;
             foreach(int kind in kinds)
             {
                 minute+=3+rng.Next(9);int normal=rng.Next(Normal.Length);
-                string ip=kind==0||kind==1?attackIp:kind==6?"45.83.64."+rng.Next(1,255):normal==6&&kind<0?"203.0.113.5":"10.0."+rng.Next(1,3)+"."+rng.Next(10,60);
+                string ip=kind==0||kind==1?attackIp:kind==6?"198.51.100."+rng.Next(1,255):normal==6&&kind<0?"203.0.113.5":"10.0."+rng.Next(1,3)+"."+rng.Next(10,60);
                 queue.Add(new OpsLogRow{Id=queue.Count,Kind=kind,Time=(kind==2?3:minute/60%24).ToString("00")+":"+(minute%60).ToString("00"),User=kind==0||kind==1?attackUser:Users[rng.Next(Users.Length)],Ip=ip,Event=kind<0?Normal[normal]:Bad[kind],Reason=kind<0?"":Reasons[kind]});
             }
         }

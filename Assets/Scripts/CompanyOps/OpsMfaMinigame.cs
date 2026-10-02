@@ -31,7 +31,7 @@ namespace PatchWorkSecure.CompanyOps
         private static readonly string[] LoginActivities={"PCを開いてログイン中","メールを開こうとしている","経費システムに入ろうとしている","会議室でノートPCを起動"};
         private static readonly string[] IdleActivities={"会議中（PCは閉じている）","昼休み","外出中","電話対応中"};
         private static readonly string[] Apps={"メール","経費システム","社内ポータル","ファイル共有"};
-        private static readonly string[] ForeignPlaces={"海外（不明）","ロシア","オランダ","シンガポール"};
+        private static readonly string[] ForeignPlaces={"海外（普段と違う国）","海外のクラウド事業者","匿名化の通信網","海外（不明）"};
         private readonly Random random;
         private readonly bool benign;
         private readonly OpsMfaPerson[] people=new OpsMfaPerson[4];
@@ -81,7 +81,7 @@ namespace PatchWorkSecure.CompanyOps
             else if(allow)
             {
                 result=OpsMfaAnswer.Breach;Breaches++;Streak=0;Feedback=person.Name+"さんは今ログインしてない！ 侵入されちゃった…";
-                logs.Add(new OpsMfaLog("侵入："+person.Name+"さんは「"+person.Activity+"」だったのに許可",result));person.Activity="（パスワードの変更が必要）";
+                logs.Add(new OpsMfaLog("侵入："+person.Name+"さんは「"+person.Activity+"」だったのに許可",result));person.Activity="（パスワードの変更とセッションの失効が必要）";
             }
             else
             {

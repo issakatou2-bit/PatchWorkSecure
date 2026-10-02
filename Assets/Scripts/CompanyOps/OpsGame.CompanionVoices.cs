@@ -12,6 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         private string companionSceneKey="";
         private OpsReactionLine FindVoiceLine(string id)
         {
+            if(id=="maxim_hurry"||id=="maxim_link")id+="_v2";
             if(id=="final_restore_bridge")return new OpsReactionLine{id=id,caption="戻す前に、確かめる、だよ！",reaction=OpsReaction.Think};
             if(CompanionVoices==null)CompanionVoices=Resources.Load<OpsReactionBank>("CompanionVoices");
             return CompanionVoices?.Find(id)??ReactionBank?.Find(id);

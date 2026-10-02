@@ -84,7 +84,11 @@ namespace PatchWorkSecure.Tests
             Capture("next11-edr-play");
             // 50点の互換は本編の事件でも確認。別の新しいセッションを社員に任せる。
             game.StartYear(1);Assert.IsTrue(game.RestoreProgress(new OpsProgress{story=story}));game.ChooseResponse("scope");game.DelegateMinigame();
-            yield return null;game.ConfirmMinigame();Assert.AreEqual(expected.loss,state.Latest.loss);Assert.AreEqual(expected.downtime,state.Latest.downtime);Assert.IsTrue(game.ExportProgress().Valid());
+            yield return null;game.ConfirmMinigame();
+            // 総決算はBのあとにGが続く。両方を50点で任せてから従来結果を比較する。
+            Assert.IsInstanceOf<OpsRestoreMinigame>(game.Minigame);Assert.AreEqual(OpsPhase.Incident,state.phase);
+            game.DelegateMinigame();yield return null;game.ConfirmMinigame();
+            Assert.AreEqual(expected.loss,state.Latest.loss);Assert.AreEqual(expected.downtime,state.Latest.downtime);Assert.IsTrue(game.ExportProgress().Valid());
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator Next11EquipmentUI_年別設備と四画面の十五設備の参照を撮影する()

@@ -166,8 +166,15 @@ namespace PatchWorkSecure.Tests
                 if(game.LastReactionId=="incident_activate"||game.LastReactionId=="incident_missing")Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("ResolutionReaction").text);
                 yield return null;
             }
-            Assert.IsFalse(game.ResolutionActive);yield return new WaitForSecondsRealtime(5.5f);
-            Assert.AreEqual("mission_done",game.LastReactionId);Assert.IsTrue(game.State.CurrentMissionCompleted);Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("mission_done").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
+            Assert.IsFalse(game.ResolutionActive);
+            // 月報では依頼の結果のあとに未読の格言が続く。固定秒数後の最後の台詞ではなく順番を確認する。
+            limit=Time.realtimeSinceStartup+8;while(game.LastReactionId!="mission_done"&&Time.realtimeSinceStartup<limit)yield return null;
+            Assert.AreEqual("mission_done",game.LastReactionId);Assert.IsTrue(game.State.CurrentMissionCompleted);
+            limit=Time.realtimeSinceStartup+2;string doneCaption=OpsGame.SpeechLines(game.ActiveVoiceBank.Find("mission_done").caption);
+            while(Find<TextMeshProUGUI>("NavigatorSpeech").text!=doneCaption&&Time.realtimeSinceStartup<limit)yield return null;
+            Assert.AreEqual(doneCaption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
+            limit=Time.realtimeSinceStartup+5;while(game.LastReactionId!="maxim_report"&&Time.realtimeSinceStartup<limit)yield return null;
+            Assert.AreEqual("maxim_report",game.LastReactionId);Assert.Contains("maxim_report",game.Career.yearMaxims);
             Click("NextMonth");yield return null;Assert.AreEqual("season_05",game.LastReactionId);Assert.AreEqual(1,game.State.month);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()

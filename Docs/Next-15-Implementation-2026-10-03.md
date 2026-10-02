@@ -15,3 +15,9 @@ Next-14の全280件2回連続成功・Windows更新・完了報告の後に着�
 - 実装前の`runInBackground`はfalseだったので指示どおり維持。隠した自動検証だけが一時的にtrueにする従来の仕組みも維持した。通常プレイの背景音継続を新たに保証したものではない。
 - 新しいPlayerPrefsキーも存在・型・値ごと復帰する。Editor/TestModeではOSの解像度を変えない。Canvasの既存Expand（1600×900）のまま、上下・左右に余白で収める。
 - Next15Display 2/2、3アセンブリのコンパイル成功。13画面×5サイズ＝65枚を実寸描画し、全操作領域の画面内・重要文字の欠け・状態不変を検査。5枚の一覧と設定前後を目視。`Artifacts/Next15/<サイズ>/`、`02-settings-comparison.png`。写真を拡大して解像度対応と見せていない。
+
+## ③ テストの後片付け
+
+- TestRunnerの終了後・Editor起動時に遅延点検。テスト中、コンパイル中、開いているシーンは削除しない。
+- `Assets`直下の`InitTestScene<GUID>.unity`かつTest Frameworkの起動用コンポーネントを持つものだけ。元ファイルとmetaを`Artifacts/TestCleanup/`へ退避後、AssetDatabaseで削除する。名前が似ているだけの通常シーンは残す。
+- Next15Cleanup 2/2、3アセンブリのコンパイル成功。Editorで作った検証用2シーンにより、開いているもの0件削除・確認できた取り残し1件を退避して削除・通常シーン0件削除を確認。`Artifacts/Next15/cleanup-integration.json`。利用者の素材を削除した検証ではない。

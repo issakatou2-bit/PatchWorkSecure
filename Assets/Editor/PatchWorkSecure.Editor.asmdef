@@ -8,7 +8,8 @@
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
         "Unity.InputSystem",
-        "Unity.InputSystem.ForUI"
+        "Unity.InputSystem.ForUI",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [
         "Editor"

@@ -29,6 +29,7 @@ namespace PatchWorkSecure.CompanyOps
             homeVisible=false;StopVoice();NewScreen();StoryBackground();
             recordsActive=true;
             StoryCategory(screen,"RecordsCategory","RECORDS",80,36,600,PlanPink);StoryText(screen,"RecordsHeading","記録",80,66,1440,70,42);
+            StoryText(screen,"HeardMaxims","聞いた格言　"+(Career.heardMaxims?.Count??0)+" / "+OpsMaxims.Ids.Length,1120,94,350,32,18,PlanGray);
             string[] names={"最長の年数","最高の合計点","最高の総合ランク"};
             string[] values={Career.bestDurationMonths==0?"未記録":DurationLabel(Career.bestDurationMonths),Career.bestDurationMonths==0?"未記録":Career.bestTotalScore.ToString("N0")+"<size=22>点</size>",Career.bestOverallRank??"—"};
             for(int i=0;i<3;i++)

@@ -43,6 +43,25 @@ namespace PatchWorkSecure.CompanyOps
         private bool rankVoicePending;
         private bool carryResolutionVoice;
         private readonly Queue<string> followingVoice=new Queue<string>();
+        private readonly HashSet<string> practiceMaxims=new HashSet<string>();
+        private OpsReactionLine SelectMaximLine(OpsReactionLine line)
+        {
+            if(line==null||!line.id.StartsWith("maxim_"))return line;
+            foreach(string id in OpsMaxims.Candidates(line.id))
+            {
+                bool used=DailyPracticeActive?practiceMaxims.Contains(id):Career.yearMaxims?.Contains(id)==true;
+                if(used)continue;
+                var candidate=ReactionBank?.lines.FirstOrDefault(l=>OpsMaxims.Canonical(l.id)==id);
+                if(candidate!=null)return candidate;
+            }
+            return FindVoiceLine("think_01");
+        }
+        private void RecordPresentedMaxim(string id)
+        {
+            if(!OpsMaxims.Ids.Contains(OpsMaxims.Canonical(id)))return;
+            if(DailyPracticeActive)practiceMaxims.Add(OpsMaxims.Canonical(id));
+            if(Career.HeardMaxim(id,!DailyPracticeActive&&State!=null))SaveCareer();
+        }
         public bool VoicePending => pendingVoice!=null;
         public OpsReactionBank ActiveVoiceBank => ReactionBank;
         private OpsReactionBank ReactionBank
@@ -78,8 +97,9 @@ namespace PatchWorkSecure.CompanyOps
             var line=FindVoiceLine(id);if(line==null)return false;
             StopVoice();BeginVoice(line,delay,5,target);return true;
         }
-        private void BeginVoice(OpsReactionLine line,float delay,int priority,string target)
+        private void BeginVoice(OpsReactionLine line,float delay,int priority,string target,bool shownMaxim=false)
         {
+            if(!shownMaxim)line=SelectMaximLine(line);if(line==null)return;
             CurrentSpeaker=line.speaker??"";
             LastReactionId=line.id;LastReactionCaption=line.caption;voiceCaptionTarget=homeVisible&&target=="NavigatorSpeech"?"TitleCaption":target;speakingPriority=priority;
             ApplyVoiceCaption();if(CurrentSpeaker=="")ApplyReactionFace(line.reaction,line);
@@ -104,6 +124,7 @@ namespace PatchWorkSecure.CompanyOps
                 // 字幕に数値通知を重ねない。成果の数値はHUD・月報・発動内訳に残る。
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);
                 UpdateSpeakerBadge(label);
+                if(CaptionsEnabled&&label.gameObject.activeInHierarchy)RecordPresentedMaxim(LastReactionId);
                 if(CurrentSpeaker=="")PortraitSpeech(label);
             }
         }
@@ -115,6 +136,7 @@ namespace PatchWorkSecure.CompanyOps
                 if(VoiceEnabled&&!muted&&voiceVolume>0&&line.clip!=null)
                 {
                     if(voiceAudio==null)voiceAudio=NewAudioSource();voiceAudio.Stop();voiceAudio.clip=line.clip;voiceAudio.volume=voiceVolume;voiceAudio.Play();
+                    RecordPresentedMaxim(line.id);
                 }
             }
             if(pendingVoice==null&&!VoicePlaying&&Time.unscaledTime>=voiceBusyUntil&&followingVoice.Count>0)
@@ -160,10 +182,12 @@ namespace PatchWorkSecure.CompanyOps
                 if(carryResolutionVoice){carryResolutionVoice=false;voiceCaptionTarget="NavigatorSpeech";ApplyVoiceCaption();ApplyReactionFace(OpsReaction.Think,ReactionBank.Find(LastReactionId));if(State.Latest.peakGoalRecorded&&!State.Latest.peakGoalMet)followingVoice.Enqueue(PeakResultVoiceId(State));followingVoice.Enqueue(id);}
                 else if(State.Latest.peakGoalRecorded){SpeakSceneLine(PeakResultVoiceId(State),.65f);followingVoice.Enqueue(id);}
                 else SpeakSceneLine(id,.65f);
+                followingVoice.Enqueue("maxim_report");
             }
             else if(State.phase==OpsPhase.Ended)
             {
                 SpeakSceneLine("annual_"+State.RankCode.ToLowerInvariant(),State.history.Count*.08f+.95f);
+                followingVoice.Enqueue("maxim_human");
             }
         }
         private void TutorialVoice()

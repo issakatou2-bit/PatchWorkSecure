@@ -22,7 +22,23 @@ namespace PatchWorkSecure.CompanyOps
         public string bestOverallRank;
         public List<string> titles=new List<string>();
         public List<OpsPracticeRecord> practiceRecords=new List<OpsPracticeRecord>();
+        public List<string> heardMaxims=new List<string>(),yearMaxims=new List<string>();
+        public bool maximYearReady;
+        public int maximYearSeed,maximYear;
+        public void PrepareMaximYear(int seed,int year,bool newAttempt=false)
+        {
+            if(newAttempt||!maximYearReady||maximYearSeed!=seed||maximYear!=year)yearMaxims=new List<string>();
+            maximYearReady=true;maximYearSeed=seed;maximYear=year;
+        }
+        public bool HeardMaxim(string id,bool annual)
+        {
+            id=OpsMaxims.Canonical(id);if(!OpsMaxims.Ids.Contains(id))return false;
+            heardMaxims=heardMaxims??new List<string>();yearMaxims=yearMaxims??new List<string>();bool changed=false;
+            if(!heardMaxims.Contains(id)){heardMaxims.Add(id);changed=true;}
+            if(annual&&!yearMaxims.Contains(id)){yearMaxims.Add(id);changed=true;}return changed;
+        }
         private bool ValidRecords()=>bestDurationMonths>=0&&bestTotalScore>=0&&(string.IsNullOrEmpty(bestOverallRank)||OpsStory.RankValue(bestOverallRank)>=0)&&ValidTitles(titles)&&
+            OpsMaxims.Valid(heardMaxims)&&OpsMaxims.Valid(yearMaxims)&&(!maximYearReady||maximYear>0)&&
             (practiceRecords==null||practiceRecords.Count<=OpsDailyPractice.Ids.Length&&practiceRecords.All(r=>r!=null&&r.Valid())&&practiceRecords.Select(r=>r.id).Distinct().Count()==practiceRecords.Count);
         public OpsPracticeRecord PracticeRecord(string id)=>practiceRecords?.FirstOrDefault(r=>r.id==id);
         public bool RecordPractice(string id,int day,OpsMinigame result)
@@ -67,6 +83,23 @@ namespace PatchWorkSecure.CompanyOps
             if(rank=="SS")changed|=Award("overall-ss",run);
             if(run.retired&&run.CompletedYears>=OpsCatalog.EndlessRetireTitleYears)changed|=Award("retire-5",run);
             run.bestUpdated=best;run.recordedCareer=true;return true;
+        }
+    }
+    public static class OpsMaxims
+    {
+        // 声の版を更新しても、同じ格言の既読は引き継ぐ。
+        public static readonly string[] Ids={"maxim_backup","maxim_hurry","maxim_sender","maxim_link","maxim_account","maxim_mfa","maxim_least","maxim_layers","maxim_segment","maxim_uptime","maxim_baseline","maxim_logs","maxim_priority","maxim_restore","maxim_runbook","maxim_human","maxim_report","maxim_password","maxim_usb","maxim_estimate"};
+        public static string Canonical(string id)=>id=="maxim_hurry_v2"?"maxim_hurry":id=="maxim_link_v2"?"maxim_link":id;
+        public static bool Valid(List<string> ids)=>ids==null||ids.Count<=Ids.Length&&ids.Distinct().Count()==ids.Count&&ids.All(Ids.Contains);
+        public static string[] Candidates(string id)
+        {
+            id=Canonical(id);
+            if(new[]{"maxim_hurry","maxim_sender","maxim_link","maxim_account"}.Contains(id))return new[]{id,"maxim_sender","maxim_link","maxim_account","maxim_hurry","maxim_report"}.Distinct().ToArray();
+            if(id=="maxim_mfa")return new[]{id,"maxim_password","maxim_human"};
+            if(id=="maxim_logs")return new[]{id,"maxim_baseline","maxim_estimate"};
+            if(id=="maxim_restore")return new[]{id,"maxim_backup","maxim_runbook","maxim_uptime"};
+            if(id=="maxim_priority")return new[]{id,"maxim_runbook","maxim_human"};
+            return new[]{id};
         }
     }
     [Serializable] public sealed class OpsPracticeRecord

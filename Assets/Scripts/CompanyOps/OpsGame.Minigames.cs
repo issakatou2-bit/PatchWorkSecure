@@ -197,7 +197,7 @@ namespace PatchWorkSecure.CompanyOps
             if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn&&Time.unscaledTime>=minigameResultAt)MinigameResult();
             // 終了の掛け声と数え上げを遮らない。続ける操作はいつでも可能。
             if(minigameResultDrawn&&!MinigameCounting&&!minigameMaximSpoken&&minigameMaxim!=""&&!VoicePending&&!PortraitVoicePlaying&&Time.unscaledTime>=voiceBusyUntil)
-            {minigameMaximSpoken=true;SpeakSceneLine(minigameMaxim,0,"MinigameMaxim");}
+            {minigameMaximSpoken=true;var line=FindVoiceLine(minigameMaxim);if(line!=null){StopVoice();BeginVoice(line,0,5,"MinigameMaxim",true);}}
         }
         private TextMeshProUGUI FindMinigameText(string name)=>minigameCanvas.GetComponentsInChildren<TextMeshProUGUI>(true).First(t=>t.name==name);
         private void RefreshCurrentMinigame()
@@ -235,7 +235,9 @@ namespace PatchWorkSecure.CompanyOps
             if(decision)
             {
                 minigameMaxim=Minigame is OpsMailMinigame mail?mail.ResultMaxim:Minigame is OpsLogMinigame?"maxim_logs":Minigame is OpsBlockMinigame?"maxim_priority":restore?"maxim_restore":"maxim_mfa";
-                PText(card,"MinigameMaxim",CaptionsEnabled?SpeechLines(ReactionBank?.Find(minigameMaxim)?.caption??""):"",222,170,432,70,16,PlanInk,false);
+                var line=SelectMaximLine(FindVoiceLine(minigameMaxim));minigameMaxim=line?.id??"";
+                PText(card,"MinigameMaxim",CaptionsEnabled?SpeechLines(line?.caption??""):"",222,170,432,70,16,PlanInk,false);
+                if(CaptionsEnabled)RecordPresentedMaxim(minigameMaxim);
             }
             string detail=Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail();
             if(DailyPracticeActive)detail=string.Join("\n",detail.Split('\n').Take(2))+"\n練習の点数を記録します。本編の進行・数値は変わりません。";

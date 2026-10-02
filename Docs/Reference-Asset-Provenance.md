@@ -83,3 +83,11 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 
 - 承認済み `Docs/Mockups/year-opening.html` のCSS・SVGをuGUIの図形描画へ移したもの。新しい第三者画像・生成画像は使わない。既存オフィスの色違いにはUI用の色相・彩度シェーダーを使用し、2・3年目の撮影で動作を確認する。
 - 仲間の絵とタイトルKVは既存の承認素材。強敵の影はモックの仮図形。仲間のLv・相談文化は実状態を表示する。
+
+## 2026-10-02 かのん・エンジニアの本編用の声（Irodori-TTS、配布可）
+
+- 24本（各12）：`Assets/Audio/CompanyYear/Voice/Kanon/`・`Engineer/`、台本`Docs/Voice/kanon-engineer-script.csv`、作成`Tools/Irodori-CharacterLines.py`（種20261002）。
+- かのん：`Aratako/Irodori-TTS-v4-Large-Quantized/int8-weight-only`（**Gemmaの利用規約**。配布物に規約の写し・注意書きを同梱し、禁止用途の決まりを守る）。見本`ArtSource/Voice/Irodori-refs/secretary-ref.wav`。
+- エンジニア：`Aratako/Irodori-TTS-v4.1-Small`（**MIT**。ライセンス表記を同梱）。見本`ArtSource/Voice/Irodori-refs/engineer-ref.wav`、話す速さ0.8倍。
+- 見本はどちらもこの道具で文字の説明だけから作った声（実在の人の声は使っていない）。Irodoriは聞こえない透かし（SilentCipher）を入れる。
+- ElevenLabsの無料枠の音声（ひなた）と違い、gitで追跡してよく、配布できる（上の条件を守る）。

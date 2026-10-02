@@ -54,7 +54,21 @@ SKIT = [
     ('lily', '……努力する。たぶん。いや、する。', '……努力する。たぶん。いや、する。', '……努力する。たぶん😅。いや、する。',
      '目をそらして小声で。「たぶん」で自信がなくなり、「いや、する」で少しだけ意地を見せる。'),
 ]
-VARIANTS = ('a', 'b')
+VARIANTS = ('a', 'b', 'c', 'd')
+# c＝bの文で、見本への寄せ方を弱め（話者3）、演技の指示を強める（説明5）。d＝cと同じ設定を、3人とも新しい小型（v4.1-Small）で
+LOOSE = ['--cfg-scale-speaker', '3', '--cfg-scale-caption', '5']
+
+
+def text_of(var, ta, tb):
+    return ta if var == 'a' else tb.replace('😅', '🫣')  # 😅は大型の絵文字の一覧に無いので、照れの🫣に
+
+
+def setting(var, who):
+    v = VOICE[who]
+    if var in ('a', 'b'):
+        return v['model'], v['extra']
+    dur = ['--duration-scale', '0.85'] if who == 'lily' else []
+    return ('small' if var == 'd' else v['model']), dur + LOOSE
 
 
 def cap(who, direction):
@@ -74,15 +88,17 @@ def generate(model):
     done = 0
     for i, (who, _, ta, tb, direction) in enumerate(SKIT):
         v = VOICE[who]
-        if v['model'] != model:
-            continue
-        for var, text in zip(VARIANTS, (ta, tb)):
+        for var in VARIANTS:
+            m, extra = setting(var, who)
+            if m != model:
+                continue
+            text = text_of(var, ta, tb)
             out = OUT / 'audio' / f'{var}-{i + 1:02d}.wav'
             if out.exists():
                 continue
             out.parent.mkdir(parents=True, exist_ok=True)
             sys.argv = ['infer.py', '--hf-checkpoint', MODELS[model], '--model-precision', 'bf16', '--text', text, '--caption', cap(who, direction),
-                        '--ref-wav', str(v['ref']), '--seed', str(SEED), *v['extra'], '--output-wav', str(out)]
+                        '--ref-wav', str(v['ref']), '--seed', str(SEED), *extra, '--output-wav', str(out)]
             infer.main()
             done += 1
     print('生成', done, '本')
@@ -115,9 +131,9 @@ def page():
     for i, (who, text, _, _, direction) in enumerate(SKIT):
         n = f'{i + 1:02d}'
         heard = ''.join(f'<div class="heard">{var}の書き起こし：{html.escape(tr[f"{var}-{n}.wav"])}</div>' for var in VARIANTS if f'{var}-{n}.wav' in tr)
-        rows += (f'<tr><td><span class="who {who}">{NAMES[who]}</span></td><td>{btn(f"v4/skit-{n}.wav", "o")}</td><td>{btn(f"audio/a-{n}.wav")}</td><td>{btn(f"audio/b-{n}.wav")}</td>'
+        rows += (f'<tr><td><span class="who {who}">{NAMES[who]}</span></td><td>{btn(f"v4/skit-{n}.wav", "o")}</td>' + ''.join(f'<td>{btn(f"audio/{var}-{n}.wav")}</td>' for var in VARIANTS) +
                  f'<td><div>{html.escape(text)}</div><div class="dir">演技：{html.escape(direction)}</div>{heard}</td></tr>')
-    lists = {k: json.dumps([f'{d}/{p}-{i + 1:02d}.wav' if d == 'audio' else f'v4/skit-{i + 1:02d}.wav' for i in range(len(SKIT))]) for k, d, p in (('v4', 'v4', ''), ('a', 'audio', 'a'), ('b', 'audio', 'b'))}
+    lists = {k: json.dumps([f'{d}/{p}-{i + 1:02d}.wav' if d == 'audio' else f'v4/skit-{i + 1:02d}.wav' for i in range(len(SKIT))]) for k, d, p in (('v4', 'v4', ''), *((var, 'audio', var) for var in VARIANTS))}
     doc = f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>掛け合い その6</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -133,10 +149,10 @@ button.sm{{width:34px;height:34px;font-size:13px}} button.o{{background:linear-g
 button.all{{height:34px;padding:0 14px;font-size:13px;font-family:'M PLUS Rounded 1c';margin-right:8px}} button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0 #1f75b8}}
 </style></head><body><header><h1>掛け合い その6　会話として作り直し</h1>
 <p>前（その4）は、声に渡す文をひらがなと読点だらけにしていたため、単語の切れ目と高低の手がかりが消えていた。<br>
-a：ふつうの漢字かな交じり（読み違える語だけかな）＋1行ごとの演技の指示。b：aに、絵文字による話し方の指定を足したもの（絵文字は字幕には出ない）。<br>
+a：ふつうの漢字かな交じり（読み違える語だけかな）＋1行ごとの演技の指示。b：aに、絵文字による話し方の指定を足したもの（絵文字は字幕には出ない）。c：bの文で、見本の声への寄せ方を弱め、演技の指示を強めたもの。d：cと同じ設定を、3人とも新しい小型モデル（v4.1-Small）で。<br>
 ひなたは今はElevenLabsの声を見本にした私的な試し（公開用の声が決まったら差し替え）。</p></header>
-<section><button class="all" onclick="playAll(this,{html.escape(lists['v4'])})">前（その4）を通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['a'])})">aを通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['b'])})">bを通しで</button>
-<table><tr><th>話す人</th><th>前</th><th>a</th><th>b</th><th>台詞</th></tr>{rows}</table></section>
+<section><button class="all" onclick="playAll(this,{html.escape(lists['v4'])})">前（その4）を通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['a'])})">aを通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['b'])})">bを通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['c'])})">cを通しで</button><button class="all" onclick="playAll(this,{html.escape(lists['d'])})">dを通しで</button>
+<table><tr><th>話す人</th><th>前</th><th>a</th><th>b</th><th>c</th><th>d</th><th>台詞</th></tr>{rows}</table></section>
 <script>let a=null,q=[];function play(btn,src){{q=[];if(a)a.pause();document.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));a=new Audio(src);btn.classList.add('on');a.onended=()=>btn.classList.remove('on');a.play()}}
 function playAll(btn,list){{if(a)a.pause();q=list.slice();btn.classList.add('on');step(btn)}}function step(btn){{if(!q.length){{btn.classList.remove('on');return}}a=new Audio(q.shift());a.onerror=a.onended=()=>setTimeout(()=>step(btn),250);a.play().catch(()=>step(btn))}}</script>
 </body></html>'''

@@ -18,7 +18,7 @@ namespace PatchWorkSecure.CompanyOps
         public int SecretaryProposalBonus=>HasYearAllies&&QuarterPeak?OpsCatalog.SecretaryPeakBudget:0;
         public int ProposalOffer=>12+Evidence*3+ProposalRankBonus+SecretaryProposalBonus;
         private int EngineerKnowledgeGain=>HasYearAllies&&engineerRequested?OpsCatalog.EngineerKnowledge:0;
-        public string EngineerResearchBlock=>!HasYearAllies?"エンジニアさんの常駐は2年目から":phase!=OpsPhase.Planning?"計画中に調査を頼めます":engineerRequested?"今月は調査済み":SituationKnowledge>=OpsCatalog.KnowledgeMax?"状況の把握は最大です":"";
+        public string EngineerResearchBlock=>!HasYearAllies?"エンジニアさんが情シスに来るのは2年目から":phase!=OpsPhase.Planning?"計画中に調査を頼めます":engineerRequested?"今月は調査済み":SituationKnowledge>=OpsCatalog.KnowledgeMax?"状況の把握は最大です":"";
         public bool RequestEngineerResearch()
         {
             if(EngineerResearchBlock!="")return false;

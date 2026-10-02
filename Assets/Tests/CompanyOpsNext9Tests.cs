@@ -95,7 +95,10 @@ namespace PatchWorkSecure.Tests
             var label=Find<Button>("NewYear").GetComponentInChildren<TextMeshProUGUI>();label.ForceMeshUpdate();Assert.IsTrue(label.textInfo.characterInfo.Any(c=>c.isVisible),"本編のボタン名が描画されている");
             Assert.AreEqual("因子 2/3",Find<TextMeshProUGUI>("StoryFactors").text);CheckText();
             game.Career.endlessUnlocked=true;game.BuildPreview();yield return null;
-            CheckPointer("EndlessYear");Click("EndlessYear");StringAssert.Contains("準備中",Find<TextMeshProUGUI>("DialogBody").text);
+            CheckPointer("EndlessYear");Click("EndlessYear");yield return null;
+            Assert.IsNotNull(game.Endless,"解放した終わりなき年度をタイトルから開始できる");
+            Assert.IsNull(game.Story);Assert.AreEqual(1,game.Endless.year);Assert.AreEqual(OpsPhase.Planning,game.State.phase);
+            Assert.IsTrue(game.ExportProgress().Valid());Assert.IsNotNull(Find<Button>("AdvanceMonth"));
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
     }

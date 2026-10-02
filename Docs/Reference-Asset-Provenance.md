@@ -90,6 +90,7 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - かのん：`Aratako/Irodori-TTS-v4-Large-Quantized/int8-weight-only`（**Gemmaの利用規約**。配布物に規約の写し・注意書きを同梱し、禁止用途の決まりを守る）。見本`ArtSource/Voice/Irodori-refs/secretary-ref.wav`。
 - エンジニア：`Aratako/Irodori-TTS-v4.1-Small`（**MIT**。ライセンス表記を同梱）。見本`ArtSource/Voice/Irodori-refs/engineer-ref.wav`、話す速さ0.8倍。
 - 見本はどちらもこの道具で文字の説明だけから作った声（実在の人の声は使っていない）。Irodoriは聞こえない透かし（SilentCipher）を入れる。
+- 10/3：`kanon_opening`を「数字のことは、わたしに任せて。あなたたちは、守ることに集中して。」に作り直し（情報の点検FC15-02。同じid・同じファイル名、同じ声・説明・見本・種20261002）。
 - ElevenLabsの無料枠の音声（ひなた）と違い、gitで追跡してよく、配布できる（上の条件を守る）。
 
 ## 2026-10-02 承認済みの二人絵（Next-14）

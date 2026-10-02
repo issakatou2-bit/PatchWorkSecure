@@ -45,7 +45,7 @@
 | 出典7リンクと事件・チケットの対応 | 下の7件、全54事件・18チケットのsource指定 | 7リンクの本文・案内は確認できた。ただし存在の確認と、個別の出来事の裏付けは別。参考資料を事件の実証としない。IPA本編PDFは取得できず未確認（付録7/8は確認） |
 | かのん・りりぃの台本 | 24行 | 技術的に明らかな誤りは確認しなかった。因子の確実性と数字を作る表現は、強気なキャラ演技か教育上の保証かの判断が必要なので変更せず要相談。内部話者キー・音源24本は維持 |
 
-確認日はリンクを開いた2026-10-02、実装は2026-10-03。全情報の無誤りを証明した検証ではなく、対象文を一次資料と照合して明らかな誤りを直したもの。
+確認日はリンクを開いた2026-10-02（helpdeskは10/3に再確認）、実装は2026-10-03。全情報の無誤りを証明した検証ではなく、対象文を一次資料と照合して明らかな誤りを直したもの。
 
 ### 出典の残り
 
@@ -54,7 +54,7 @@
 | crowdstrike | [当事者のRCA案内](https://www.crowdstrike.com/en-us/blog/channel-file-291-rca-available/)は2024年7月19日のWindows向けコンテンツ更新障害。`ops-update`の論点と対応。`ops-sso`/`ops-batch`/`y3-passkey`の個別事例を裏付ける資料ではない |
 | jpcert-quarter | [2025年度第4四半期PDF](https://www.jpcert.or.jp/qr/2026/QR_FY2025-Q4.pdf) p.20の2.1.4に、技術的根拠の乏しい侵害主張。`geo-claim`の確認済み・未確認を区別する論点と対応 |
 | jpcert | [注意喚起一覧](https://www.jpcert.or.jp/at/)は確認。一覧そのものは`remote-vpn`/`vuln-web`/`vuln-legacy`の個別事件の出典ではない |
-| helpdesk | [グリーンパートナーズの実務記事](https://techblog.glpgs.com/entry/2022/01/11/152535)にSlackの受付集約・Notionでの記録。`helpdesk`/`faq`の参考。法令や全社共通の標準ではない |
+| helpdesk | [ガラパゴスの実務記事](https://techblog.glpgs.com/entry/2022/01/11/152535)にSlackの受付集約・Notionでの記録。`helpdesk`/`faq`の参考。法令や全社共通の標準ではない |
 | gree | [GREEの実務記事](https://note.com/gree_it/n/n584799ef1a86)はAI回答の検証、人への引継ぎ、段階展開の参考。`ai-guide`/`ai-helpdesk`と対応。ゲームの機密漏えい事件が実際にこの会社で起きたと示すものではない |
 | identity | [SmartHRのIdP記事](https://tech.smarthr.jp/entry/2024/08/28/144133)は2024年時点のSAMLとIdPの説明。プロビジョニングは当時の今後の予定。4チケットの入退社・異動・契約終了の手順を直接実証していない |
 | sme | [IPAのガイドライン案内](https://www.ipa.go.jp/security/guide/sme/about.html)は第4.0版の案内。付録7のクラウド責任分担、付録8の対応・復旧は確認。[本編PDF](https://www.ipa.go.jp/security/guide/sme/ug65p90000019cbk-att/sme_guideline_v4.0.pdf)は取得が時間切れで**未確認**。各チケット・障害の参考と個別事例の出典を混同しない |

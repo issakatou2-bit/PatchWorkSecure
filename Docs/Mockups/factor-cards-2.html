@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>因子のカード 2種類</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 因子のカードを「仲間（人）」と「備え（物）」の2種類に。3枠は共有。#shot=choose / slots */
+body{margin:0;background:#1d2a44;font-family:'Zen Kaku Gothic New',sans-serif;color:#1d2a44}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+.en{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;letter-spacing:.32em}
+.stage{position:relative;width:1600px;height:900px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#3b4f7d 0%,#1d2a44 70%);display:none}
+.stage.on{display:block}
+@keyframes rays{to{transform:rotate(360deg)}}
+@keyframes foil{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes rise{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
+.card{position:absolute;width:300px;height:470px;border-radius:24px;overflow:hidden;box-shadow:0 0 0 4px #fff,0 18px 40px rgba(0,0,0,.35);animation:rise .5s both}
+.card .art{position:absolute;inset:0}
+.card img{width:100%;height:100%;object-fit:cover;object-position:50% 16%}
+.card .foil{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 45%,rgba(255,240,180,.3) 50%,transparent 62%);background-size:200% 100%;animation:foil 3.6s linear infinite;mix-blend-mode:screen}
+.card .kind{position:absolute;left:14px;top:14px;border-radius:10px;padding:4px 12px;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 0 2px #fff}
+.card .band{position:absolute;left:0;right:0;bottom:0;padding:14px 16px 16px;background:linear-gradient(180deg,rgba(29,42,68,0),rgba(29,42,68,.94) 26%);color:#fff}
+.card .stars{font-size:19px;color:#ffd23f;letter-spacing:2px}
+.card .eff{display:inline-block;margin-top:6px;background:rgba(255,255,255,.16);border-radius:9px;padding:4px 10px;font-size:13px;font-weight:700}
+.people .kind{background:linear-gradient(180deg,#ff94ae,#ff6f91)}
+.people{box-shadow:0 0 0 4px #fff,0 0 0 9px rgba(255,111,145,.55),0 18px 40px rgba(0,0,0,.35)}
+.things .kind{background:linear-gradient(180deg,#7fc4ff,#3fa9f5)}
+.things{box-shadow:0 0 0 4px #fff,0 0 0 9px rgba(63,169,245,.55),0 18px 40px rgba(0,0,0,.35)}
+/* 備えのカードの絵（仮）：同じ画風の小物絵ができるまで、図形で描く */
+.thing{position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,#eaf5ff,#b9d9f5 60%,#7fb2e0);display:flex;align-items:flex-start;justify-content:center;padding-top:70px;box-sizing:border-box}
+.thing svg{filter:drop-shadow(0 10px 14px rgba(29,42,68,.35))}
+.sel{transform:translateY(-12px);box-shadow:0 0 0 4px #fff,0 0 0 10px #ffd23f,0 18px 40px rgba(0,0,0,.35)}
+.slot{width:250px;height:78px;border-radius:16px;border:3px dashed rgba(255,255,255,.45);display:flex;align-items:center;gap:10px;padding:0 14px;color:rgba(255,255,255,.75);font-family:'M PLUS Rounded 1c';font-weight:800;font-size:15px;box-sizing:border-box}
+.slot.p{border:0;background:linear-gradient(180deg,#ffe3ec,#ffc2d2);color:#a3264d;box-shadow:0 0 0 3px #fff}
+.slot.t{border:0;background:linear-gradient(180deg,#e3f2ff,#bfe2ff);color:#1f5f99;box-shadow:0 0 0 3px #fff}
+.slot small{display:block;font-size:11px;opacity:.8}
+.btn{border:0;cursor:pointer;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:20px;height:60px;border-radius:18px;padding:0 30px;color:#fff;background:linear-gradient(180deg,#ff94ae,#ff6f91 55%,#f45a80);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #c9486c}
+#nav{position:fixed;left:8px;bottom:8px;z-index:99;display:flex;gap:6px}#nav button{font:700 12px 'Zen Kaku Gothic New';border:0;border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="stage" id="choose">
+  <div style="position:absolute;left:800px;top:430px;width:1800px;height:1800px;margin:-900px 0 0 -900px;background:repeating-conic-gradient(rgba(255,210,63,.08) 0 6deg,transparent 6deg 12deg);animation:rays 60s linear infinite"></div>
+  <div style="position:absolute;left:0;right:0;top:26px;text-align:center;color:#fff"><span class="en" style="color:#ffd23f;font-size:13px">CHOOSE A FACTOR</span><div class="r" style="font-size:38px;margin-top:4px">持ち帰る因子を1つ選ぶ</div>
+    <div style="margin-top:8px;display:flex;justify-content:center;gap:12px;font-weight:700;font-size:15px"><span style="background:rgba(255,111,145,.25);border-radius:10px;padding:4px 12px">仲間のカード：人の力で始まりを助ける</span><span style="background:rgba(63,169,245,.25);border-radius:10px;padding:4px 12px">備えのカード：設備をLv1から始める</span></div></div>
+  <!-- 仲間（人） -->
+  <div class="card people" style="left:110px;top:170px;animation-delay:.05s"><div class="art"><img src="../../Assets/Art/KeyVisual/focus-secretary.png" alt=""></div><div class="foil"></div><span class="kind">仲間</span>
+    <div class="band"><div class="stars">★★</div><div class="r" style="font-size:24px">かのんの後押し</div><div style="font-size:13px;opacity:.9;margin-top:3px;font-weight:700">「予算の話は、結論から。わたしが通すわ」</div><span class="eff">最初の予算 +10万円</span></div></div>
+  <div class="card people sel" style="left:440px;top:170px;animation-delay:.1s"><div class="art"><img src="../../Assets/Art/KeyVisual/focus-hinata.png" alt=""></div><div class="foil"></div><span class="kind">仲間</span>
+    <div class="band"><div class="stars">★★★</div><div class="r" style="font-size:24px">ひなたの相談窓口</div><div style="font-size:13px;opacity:.9;margin-top:3px;font-weight:700">「迷ったら相談！ ぜんぶ聞くよ！」</div><span class="eff">相談文化 +10 で始まる</span></div></div>
+  <!-- 備え（物） -->
+  <div class="card things" style="left:810px;top:170px;animation-delay:.15s"><div class="thing">
+      <svg width="190" height="200" viewBox="0 0 190 200"><rect x="35" y="20" width="120" height="160" rx="14" fill="#2b3a55"/><rect x="50" y="38" width="90" height="22" rx="5" fill="#5fd39b"/><rect x="50" y="70" width="90" height="22" rx="5" fill="#5fd39b"/><rect x="50" y="102" width="90" height="22" rx="5" fill="#ffd23f"/><circle cx="62" cy="49" r="4" fill="#fff"/><circle cx="62" cy="81" r="4" fill="#fff"/><circle cx="62" cy="113" r="4" fill="#fff"/><path d="M95 140 a26 26 0 1 1 -2 0" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M93 130 l10 10 -12 6" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="foil"></div><span class="kind">備え</span>
+    <div class="band"><div class="stars">★★</div><div class="r" style="font-size:24px">分離バックアップ</div><div style="font-size:13px;opacity:.9;margin-top:3px;font-weight:700">エンジニアの推薦「戻せる、を最初から」</div><span class="eff">最初から Lv1</span></div></div>
+  <div class="card things" style="left:1140px;top:170px;animation-delay:.2s"><div class="thing">
+      <svg width="190" height="200" viewBox="0 0 190 200"><path d="M95 18 L160 42 V96 C160 140 130 168 95 184 C60 168 30 140 30 96 V42 Z" fill="#3fa9f5" stroke="#fff" stroke-width="6"/><circle cx="95" cy="92" r="30" fill="#fff"/><circle cx="95" cy="92" r="14" fill="#2b3a55"/><path d="M58 92 Q95 58 132 92 Q95 126 58 92 Z" fill="none" stroke="#2b3a55" stroke-width="5"/></svg></div>
+    <div class="foil"></div><span class="kind">備え</span>
+    <div class="band"><div class="stars">★</div><div class="r" style="font-size:24px">監視と通知の整理</div><div style="font-size:13px;opacity:.9;margin-top:3px;font-weight:700">ひなたの推薦「いつもと違う、に気づける」</div><span class="eff">最初から Lv1</span></div></div>
+  <div style="position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:16px;align-items:center"><span class="r" style="color:#fff;font-size:15px;opacity:.85">持っている因子</span>
+    <div class="slot t"><span>備え<small>分離バックアップ</small></span></div><div class="slot" style="border-color:#ff6f91;color:#ff94ae">＋ 仲間：ひなたの相談窓口</div><div class="slot">空き</div><button class="btn" style="margin-left:20px">これにする</button></div>
+</div>
+
+<div class="stage" id="slots" style="background:linear-gradient(160deg,#fff4ec,#ffe3ec 55%,#dcefff)">
+  <div style="position:absolute;left:0;right:0;top:40px;text-align:center"><span class="en" style="color:#ff6f91;font-size:13px">FACTORS</span><div class="r" style="font-size:38px;margin-top:4px">次の挑戦に持っていく因子</div><div style="font-size:15px;color:#52607a;font-weight:700;margin-top:6px">3枠は仲間と備えで共有。人を厚くするか、設備を厚くするかで、1年目の組み立てが変わる</div></div>
+  <div style="position:absolute;left:0;right:0;top:220px;display:flex;justify-content:center;gap:40px">
+    <div class="card people" style="position:relative;width:280px;height:420px"><div class="art"><img src="../../Assets/Art/KeyVisual/focus-hinata.png" alt=""></div><div class="foil"></div><span class="kind">仲間</span><div class="band"><div class="stars">★★★</div><div class="r" style="font-size:22px">ひなたの相談窓口</div><span class="eff">相談文化 +10 で始まる</span></div></div>
+    <div class="card people" style="position:relative;width:280px;height:420px"><div class="art"><img src="../../Assets/Art/KeyVisual/focus-engineer.png" alt=""></div><div class="foil"></div><span class="kind">仲間</span><div class="band"><div class="stars">★★</div><div class="r" style="font-size:22px">エンジニアの早出</div><span class="eff">1年目から月1回の調査</span></div></div>
+    <div class="card things" style="position:relative;width:280px;height:420px"><div class="thing" style="padding-top:60px"><svg width="170" height="180" viewBox="0 0 190 200"><rect x="35" y="20" width="120" height="160" rx="14" fill="#2b3a55"/><rect x="50" y="38" width="90" height="22" rx="5" fill="#5fd39b"/><rect x="50" y="70" width="90" height="22" rx="5" fill="#5fd39b"/><rect x="50" y="102" width="90" height="22" rx="5" fill="#ffd23f"/></svg></div><div class="foil"></div><span class="kind">備え</span><div class="band"><div class="stars">★★</div><div class="r" style="font-size:22px">分離バックアップ</div><span class="eff">最初から Lv1</span></div></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:50px;text-align:center;font-size:14px;color:#6b7894;font-weight:700">仲間のカードの効果の強さは、3年の難しさ（初回42%・4回目までに68%）を崩さないよう、作ってから試算して決める</div>
+</div>
+
+<div id="nav"></div>
+<script>
+const ids=[...document.querySelectorAll('.stage')].map(e=>e.id);
+function show(id){document.querySelectorAll('.stage').forEach(e=>e.classList.toggle('on',e.id===id))}
+const m=location.hash.match(/^#shot=([\w-]+)/);
+if(m&&ids.includes(m[1]))show(m[1]);else{show(ids[0]);document.getElementById('nav').innerHTML=ids.map(i=>`<button onclick="show('${i}')">${i}</button>`).join('')}
+</script>
+</body>
+</html>

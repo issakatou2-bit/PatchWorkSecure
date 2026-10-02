@@ -180,7 +180,7 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="maxim_restore", caption="止まったときは、支えてる仕組みから戻すの！", scene="依存関係と業務影響", faceId="face_normal", poseId="pose_typing" },
             new OpsReactionLine { id="maxim_runbook", caption="手順書は、未来の自分への手紙だよ！", scene="手順を残す", faceId="face_sparkle", poseId="pose_peace" },
             new OpsReactionLine { id="maxim_human", caption="人は間違えるもの。だから、仕組みで守ろ！", scene="性弱説", faceId="face_relieved", poseId="pose_please" },
-            new OpsReactionLine { id="maxim_report", caption="迷ったら相談！　早い報告ほど、被害は小さいよ！", scene="相談文化", faceId="face_sparkle", poseId="pose_wave" },
+            new OpsReactionLine { id="maxim_report_v2", caption="迷ったら相談！　早い報告ほど、打てる手が増えるよ！", scene="相談文化", faceId="face_sparkle", poseId="pose_wave" },
             new OpsReactionLine { id="maxim_password", caption="パスワードの使い回しは、ぜったいダメだよ〜！", scene="基本", faceId="face_pout", poseId="pose_armscross" },
             new OpsReactionLine { id="maxim_usb", caption="知らないUSBは、挿さない！", scene="基本", faceId="face_akire", poseId="pose_point" },
             new OpsReactionLine { id="maxim_estimate", caption="見積もりは目安。確率じゃなくて、幅で考えるんだよ！", scene="見積もりの読み方", faceId="face_normal", poseId="pose_think" },

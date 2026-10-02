@@ -1503,8 +1503,8 @@ MonoBehaviour:
     scene: "\u6027\u5F31\u8AAC"
     fullSpeech: 0
     extra: 0
-  - id: maxim_report
-    caption: "\u8FF7\u3063\u305F\u3089\u76F8\u8AC7\uFF01\u3000\u65E9\u3044\u5831\u544A\u307B\u3069\u3001\u88AB\u5BB3\u306F\u5C0F\u3055\u3044\u3088\uFF01"
+  - id: maxim_report_v2
+    caption: "\u8FF7\u3063\u305F\u3089\u76F8\u8AC7\uFF01\u3000\u65E9\u3044\u5831\u544A\u307B\u3069\u3001\u6253\u3066\u308B\u624B\u304C\u5897\u3048\u308B\u3088\uFF01"
     speaker: 
     reaction: 0
     clip: {fileID: 0}
@@ -1813,8 +1813,8 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 3\u5E74\u76EE6\u6708"
     fullSpeech: 1
     extra: 0
-  - id: diary_y3_07
-    caption: "\u652F\u63F4\u58EB\u306E\u5348\u5F8C\u554F\u984C\u3001\u9577\u3044\u2026\u2026\u591C\u304C\u8DB3\u308A\u306A\u3044"
+  - id: diary_y3_07_v2
+    caption: "\u652F\u63F4\u58EB\u306E\u79D1\u76EEB\u3001\u9577\u3044\u2026\u2026\u591C\u304C\u8DB3\u308A\u306A\u3044"
     speaker: 
     reaction: 0
     clip: {fileID: 0}

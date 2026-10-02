@@ -32,6 +32,7 @@ namespace PatchWorkSecure.CompanyOps
                     32+i*380, 465, 364, 48, ()=>ChooseTicket(delegated), delegated ? Edge : Accent, block=="");
             }
             Button(d, "TicketKnowledge", "関連する知識", 32, 540, 350, 48, ()=>Knowledge(t.lesson));
+            if(t.source=="identity") Text(d,"TicketReference","参考：IdP（社員の認証をまとめる仕組み）の説明",400,540,190,48,13,Muted);
         }
         private void EventBriefDialog()
         {
@@ -45,6 +46,7 @@ namespace PatchWorkSecure.CompanyOps
             Text(d, "EventPreparation", "社内依頼 / "+State.CurrentMission.title+"\n設備："+State.CurrentMission.equipmentRoute+"\n現場："+State.CurrentMission.fieldRoute, 32, 344, 748, 106, 21, Ink);
             Text(d, "EventReference", "公表資料の論点を、架空の会社向けに組み直した出来事です。\n抑制力・費用・停止時間はゲーム用のモデルです。", 32, 475, 748, 63, 18, Ink);
             Button(d, "EventKnowledge", "関連する知識", 32, 579, 350, 48, ()=>Knowledge(State.Current.lesson));
+            Text(d,"EventFictionNote","この出来事は架空の想定です。資料は考え方の参考です。",232,579,158,48,12,Muted);
             if (p!=null) Button(d, "EventSource", "参考資料を開く", 400, 579, 190, 48, ()=>Application.OpenURL(OpsEventCatalog.SourceUrl(e.source ?? p.source)));
         }
         private static string TicketRecord(OpsOutcome result)

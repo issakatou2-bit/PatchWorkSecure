@@ -102,6 +102,27 @@ namespace PatchWorkSecure.CompanyOps
                 buttons[1].GetComponentInChildren<TextMeshProUGUI>().alignment=TextAlignmentOptions.Center;
             }
             primary.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            // 資料の注記がある行だけ、既存ボタンの余白を注記へ割り当てる。
+            var reference=card.Find("EventFictionNote") as RectTransform??card.Find("TicketReference") as RectTransform;
+            if(reference!=null)
+            {
+                if(buttons.Length>1)
+                {
+                    rect.anchoredPosition=new Vector2(230,-card.rect.height+70);rect.sizeDelta=new Vector2(190,48);
+                    var secondary=(RectTransform)buttons[1].transform;secondary.anchoredPosition=new Vector2(438,-card.rect.height+70);secondary.sizeDelta=new Vector2(172,48);
+                    reference.anchoredPosition=new Vector2(630,-card.rect.height+70);reference.sizeDelta=new Vector2(158,48);
+                }
+                else
+                {
+                    rect.sizeDelta=new Vector2(264,48);
+                    reference.anchoredPosition=new Vector2(566,-card.rect.height+70);reference.sizeDelta=new Vector2(222,48);
+                }
+                foreach(var button in buttons)
+                {
+                    var light=button.transform.Find("KitTopLight") as RectTransform;
+                    if(light!=null)light.sizeDelta=new Vector2(Mathf.Max(0,((RectTransform)button.transform).rect.width-16),light.sizeDelta.y);
+                }
+            }
         }
         private IEnumerator CloseWindow(RectTransform old)
         {

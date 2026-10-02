@@ -148,7 +148,7 @@ maxim_priority,格言,優先順位,更新は、危ないものから順番に！
 maxim_restore,格言,依存関係と業務影響,止まったときは、支えてる仕組みから戻すの！,face_normal,pose_typing,[explaining],
 maxim_runbook,格言,手順を残す,手順書は、未来の自分への手紙だよ！,face_sparkle,pose_peace,[warm],
 maxim_human,格言,性弱説,人は間違えるもの。だから、仕組みで守ろ！,face_relieved,pose_please,[warm],性弱説＝せいじゃくせつ（台詞には出さない）
-maxim_report,格言,相談文化,迷ったら相談！　早い報告ほど、被害は小さいよ！,face_sparkle,pose_wave,[cheerful],
+maxim_report_v2,格言,相談文化,迷ったら相談！　早い報告ほど、打てる手が増えるよ！,face_sparkle,pose_wave,[cheerful],
 maxim_password,格言,基本,パスワードの使い回しは、ぜったいダメだよ〜！,face_pout,pose_armscross,[scolding playfully],使い回し＝つかいまわし
 maxim_usb,格言,基本,知らないUSBは、挿さない！,face_akire,pose_point,[firm],挿さない＝ささない
 maxim_estimate,格言,見積もりの読み方,見積もりは目安。確率じゃなくて、幅で考えるんだよ！,face_normal,pose_think,[explaining],目安＝めやす
@@ -179,7 +179,7 @@ diary_y2_03,日記,日記 2年目3月,来年は、わたしが教える番なん
 diary_y3_04,日記,日記 3年目4月,後輩ちゃんが来たよ。わたし、先輩になっちゃった,face_embarrassed,pose_wave,"[shy, happy]",
 diary_y3_05,日記,日記 3年目5月,後輩ちゃん、すぐ報告してくれた。ちゃんと、ありがとうって言えたよ,face_relieved,pose_peace,[warm],
 diary_y3_06_v2,日記,日記 3年目6月,りりぃさんに、判断が早くなったって言われた！,face_sparkle,pose_fists,[excited],改名・音声未作成・字幕先行（旧diary_y3_06は再生しない）
-diary_y3_07,日記,日記 3年目7月,支援士の午後問題、長い……夜が足りない,face_sleepy,pose_coffee,[tired],
+diary_y3_07_v2,日記,日記 3年目7月,支援士の科目B、長い……夜が足りない,face_sleepy,pose_coffee,[tired],
 diary_y3_08,日記,日記 3年目8月,今日は3人でお祭り。仕事の話、一回もしなかった,face_normal,pose_peace,"[happy, relaxed]",
 diary_y3_09,日記,日記 3年目9月,監査の質問、全部答えられたの。3年前のわたしに見せたい,face_proud,pose_shield,[proud],
 diary_y3_10,日記,日記 3年目10月,後輩ちゃんが、ひとりで直せたの！,face_sparkle,pose_jump,[delighted],

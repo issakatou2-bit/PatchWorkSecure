@@ -67,7 +67,7 @@ namespace PatchWorkSecure.Tests
             finally{game.enabled=enabled;}
             Assert.AreEqual(state,JsonUtility.ToJson(game.State),"撮影で年度の数値を変更しない");
         }
-        private static void Next15Shot(string screen,int width,int height)
+        private static void Next15Shot(string screen,int width,int height,string artifactFolder="Next15")
         {
             var canvas=Find<Canvas>("CompanyOpsCanvas");var originalMode=canvas.renderMode;var originalCamera=canvas.worldCamera;float originalDistance=canvas.planeDistance;
             var cameraObject=new GameObject("画面サイズ検証用カメラ",typeof(Camera));var camera=cameraObject.GetComponent<Camera>();
@@ -90,7 +90,7 @@ namespace PatchWorkSecure.Tests
                 }
                 CheckText();foreach(var label in canvas.GetComponentsInChildren<TextMeshProUGUI>().Where(t=>t.name.StartsWith("ScreenMode")||t.name=="ScreenFullscreenLabel"||t.name=="ScreenWindowedLabel"))Assert.IsFalse(label.isTextOverflowing,label.name);
                 RenderTexture.active=target;texture=new Texture2D(width,height,TextureFormat.RGB24,false);texture.ReadPixels(new Rect(0,0,width,height),0,0);texture.Apply();
-                string folder=Path.Combine(Application.dataPath,"../Artifacts/Next15/"+width+"x"+height);Directory.CreateDirectory(folder);File.WriteAllBytes(Path.Combine(folder,screen+".png"),texture.EncodeToPNG());
+                string folder=Path.Combine(Application.dataPath,"../Artifacts/"+artifactFolder+"/"+width+"x"+height);Directory.CreateDirectory(folder);File.WriteAllBytes(Path.Combine(folder,screen+".png"),texture.EncodeToPNG());
             }
             finally
             {

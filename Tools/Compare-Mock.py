@@ -58,7 +58,7 @@ def main():
     parser.add_argument('unity_png')
     parser.add_argument('out')
     parser.add_argument('crop', nargs='?')
-    parser.add_argument('--mock-image', help='書き出し済みの1600×900モックPNG。指定時はブラウザを起動しない')
+    parser.add_argument('--mock-image', help='書き出し済みの1600×900モックPNG。Unity参考なら原寸のPNGも可。指定時はブラウザを起動しない')
     parser.add_argument('--mock-shot', help='HTMLの #shot= に渡す撮影状態。--mock-image と同時には使えない')
     parser.add_argument('--browser-exe', default=EDGE, help='ローカルHTMLの撮影に使うブラウザ実行ファイル。既定はEdge')
     parser.add_argument('--reference-kind', choices=('mock', 'unity'), default='mock', help='左の出典。既存Unity部品との比較をモックと呼ばない')
@@ -81,7 +81,7 @@ def main():
     if args.mock_image:
         mock_path = args.mock_image
         with Image.open(mock_path) as source:
-            if source.size != (1600, 900):
+            if args.reference_kind == 'mock' and source.size != (1600, 900):
                 parser.error('書き出し済みのモックPNGは1600×900にしてください')
     else:
         render(mock_html, tmp, os.path.join(scratch.name, 'browser-profile'), args.mock_shot, args.browser_exe)
@@ -92,10 +92,16 @@ def main():
         mock_path = os.path.abspath(out) + '.mock.png'
         with Image.open(tmp) as source:
             source.save(mock_path)
-    a = Image.open(mock_path).convert('RGB').resize((1600, 900))
-    b = Image.open(unity_png).convert('RGB').resize((1600, 900))
+    a = Image.open(mock_path).convert('RGB')
+    b = Image.open(unity_png).convert('RGB')
+    original_a, original_b = a.size, b.size
+    comparison_size = a.size if args.reference_kind == 'unity' else (1600, 900)
+    a, b = a.resize(comparison_size), b.resize(comparison_size)
     if crop:
         x, y, w, h = crop
+        if args.reference_kind == 'unity':
+            x, w = round(x * comparison_size[0] / 1600), round(w * comparison_size[0] / 1600)
+            y, h = round(y * comparison_size[1] / 900), round(h * comparison_size[1] / 900)
         a, b = a.crop((x, y, x + w, y + h)), b.crop((x, y, x + w, y + h))
     w, h = a.size
     sheet = Image.new('RGB', (w * 2 + 30, h + 50), (255, 255, 255))
@@ -110,7 +116,9 @@ def main():
                    'mock_image': os.path.abspath(mock_path), 'mock_image_sha256': digest(mock_path),
                    'unity_image': os.path.abspath(unity_png), 'unity_image_sha256': digest(unity_png),
                    'rendered_here': not bool(args.mock_image), 'browser': None if args.mock_image else args.browser_exe,
-                   'mock_shot': args.mock_shot, 'crop': crop}, record, ensure_ascii=False, indent=2)
+                   'mock_shot': args.mock_shot, 'crop': crop,
+                   'reference_original_size': original_a, 'unity_original_size': original_b,
+                   'comparison_size': comparison_size}, record, ensure_ascii=False, indent=2)
     print('saved', out, sheet.size)
 
 if __name__ == '__main__':

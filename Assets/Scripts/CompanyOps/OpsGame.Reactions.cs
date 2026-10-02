@@ -99,6 +99,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"||label.name=="DiaryVoiceCaption"||label.name=="CompanionCaption"||CurrentSpeaker!=""?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
                 if(label.name=="ResolutionReaction")label.fontSizeMin=12;
+                if(label.name=="FinalRecoveryVoice")label.text=CaptionsEnabled?(CurrentSpeaker==""?"ひなた：":"")+LastReactionCaption:"";
                 if(CurrentSpeaker!="")label.maxVisibleCharacters=int.MaxValue;
                 // 字幕に数値通知を重ねない。成果の数値はHUD・月報・発動内訳に残る。
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);
@@ -206,7 +207,7 @@ namespace PatchWorkSecure.CompanyOps
                 Minigame is OpsMailMinigame?"pose_magnifier":Minigame is OpsMfaMinigame?"pose_laptop":line.poseId:line.poseId;
             if(Minigame is OpsLogMinigame&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose="pose_magnifier";
             if(Minigame is OpsBlockMinigame blocks&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose=blocks.Automation?"pose_fists":"pose_think";
-            if(Minigame is OpsRestoreMinigame&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose="pose_typing";
+            if(Minigame is OpsRestoreMinigame restore&&Minigame.Phase==OpsMinigamePhase.Playing&&line.id.StartsWith("mg_start"))pose=restore.Scenario=="ransom"?"pose_magnifier":"pose_typing";
             foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())
                 if(DiaryActive&&identity.name=="DiaryPortrait")continue;
                 else if(identity.FaceIcon)identity.GetComponent<UnityEngine.UI.Image>().sprite=Navigator.Face(string.IsNullOrEmpty(line.faceId)?"face_normal":line.faceId);

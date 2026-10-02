@@ -135,13 +135,13 @@ namespace PatchWorkSecure.CompanyOps
             Toast(achieved ? "社内依頼 達成 / 信頼 +3・年間 +45点"+(State.missionBudgetPaid>0?"・予算 +"+State.missionBudgetPaid+"万円":"") : "状況発生 / 対応方針を選択", achieved, achieved ? OpsCue.Growth : OpsCue.Alert);
         }
         public void Resolve(string response)=>Resolve(response,OpsCatalog.MinigameDelegateScore,true);
-        private void Resolve(string response,int score,bool delegated)
+        private void Resolve(string response,int score,bool delegated,int? recoveryScore=null,bool recoveryDelegated=true)
         {
             if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response))return;
             var previous = ReadStats();
             var oldLevels = State.GrowthLevels;
             var estimate = State.Estimate(response);
-            if (!State.Resolve(response,score,delegated)) return;
+            if (!(recoveryScore.HasValue?State.ResolveFinal(response,score,delegated,recoveryScore.Value,recoveryDelegated):State.Resolve(response,score,delegated))) return;
             CancelMinigame();
             RecordStatChanges(previous);
             Save(); resolutionEstimate = estimate; resolutionLevelUp = LevelUpNotice(oldLevels);

@@ -23,6 +23,14 @@ namespace PatchWorkSecure.CompanyOps
         public void ChooseResponse(string response)
         {
             if(State==null||State.phase!=OpsPhase.Incident||!ResponseIds.Contains(response)||MinigameActive)return;
+            if(State.SupportsFinalRecovery)
+            {
+                OpenMinigame(State.CreateContainment(),response,b=>
+                {
+                    if(OpenMinigame(State.CreateFinalRestore(),response,g=>Resolve(response,b.Score,b.Delegated,g.Score,g.Delegated)))
+                    {SpeakSceneLine("eng_found",.3f,"FinalRecoveryVoice");followingVoice.Enqueue("final_restore_bridge");}
+                });return;
+            }
             OpsMinigame session=State.CreateMail();
             if(session==null)session=State.CreateMfa();
             if(session==null)session=State.CreateRestore();
@@ -89,6 +97,12 @@ namespace PatchWorkSecure.CompanyOps
                 card.anchoredPosition=new Vector2(290,-171);card.sizeDelta=new Vector2(700,418);DecisionPanel(card);
                 PText(card,"MinigameInstructions","社内のシステムが止まった。止まる範囲は事故ごとにかわる。\nシステムを押すと、手の空いている人が立ち上げ始める（2人で同時）。\n支えている仕組みが動いていないと失敗して30分を失う。\n黄色の枠は、止まっている間ずっと損失が出る業務。目標復旧時間までに戻そう。\n作業時間・損失・2人目の合流・月末かどうかも毎回かわる。",26,104,648,148,15,null,false);
                 PText(card,"MinigameEquipment",(restore.Runbook?"導入済み":"未導入")+"：手順書（支えている仕組みのつながりが最初から見える）",26,274,648,40,15,null,false);
+                if(State.SupportsFinalRecovery)
+                {
+                    FindMinigameText("MinigameInstructions").text="次は復旧。停止への影響は、この対応の点数で決まる。\n支えている仕組みを確かめ、2人で順番に立ち上げよう。\n復元元と侵入経路の安全確認より先に戻すと再暗号化。\n黄色の枠の業務は、目標復旧時間までに戻そう。";
+                    FindMinigameText("MinigameInstructions").rectTransform.sizeDelta=new Vector2(648,100);
+                    PText(card,"FinalRecoveryVoice","",26,216,648,54,17,PlanInk,false);
+                }
                 PButton(card,"MinigameStart","復旧を始める",26,334,314,58,StartMinigame,Hex("2bb673"),Color.white,22,Hex("1d8a55"));
                 PButton(card,"MinigameDelegate","社員に任せる / 50点",350,334,324,58,DelegateMinigame,Color.white,PlanInk,16);return;
             }
@@ -209,7 +223,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,decision?250:224,628,restore?86:112,16,null,false);
             if(restore&&!Minigame.Delegated)DrawRestoreResults(card);
             bool practice=Minigame is OpsMailMinigame training&&training.Practice || Minigame is OpsLogMinigame||Minigame is OpsBlockMinigame;
-            PButton(card,"MinigameContinue",practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):"結果を反映する",26,restore?520:decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
+            PButton(card,"MinigameContinue",practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):Minigame is OpsContainmentMinigame&&State.SupportsFinalRecovery?"復旧へ進む":"結果を反映する",26,restore?520:decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
             if(!Minigame.Delegated)StartCoroutine(CountMinigameResult(stamp,Minigame.Score));
         }
         public void ConfirmMinigame()

@@ -52,7 +52,11 @@ namespace PatchWorkSecure.CompanyOps
                     var rto=PCard(button.transform,"RestoreRto_"+id,94,82,90,20,new Color(1,1,1,.14f),12,false);
                     PText(rto,"RestoreRtoLabel_"+id,"目標 "+node.Rto.ToString("0.#")+"時間",0,0,90,20,11,Color.white,true,true);
                 }
-                if(node.Encrypted)PText(button.transform,"RestoreEncrypted","暗号化",12,-18,110,24,11,Hex("ff7a93"));
+                if(node.Encrypted)
+                {
+                    var tag=PCard(button.transform,"RestoreEncrypted",12,-12,56,20,Hex("e0405f"),6,false);
+                    PText(tag,"RestoreEncryptedText","暗号化",0,0,56,20,11,Color.white,true,true);
+                }
                 var progress=PCard(button.transform,"RestoreProgress_"+id,10,104,176,6,new Color(1,1,1,.2f),12,false);
                 PCard(progress,"Fill",0,0,176,6,Hex("7fd0ff"),12,false);progress.gameObject.SetActive(false);
                 if(node.Up)restoreCompleted.Add(id);
@@ -64,7 +68,7 @@ namespace PatchWorkSecure.CompanyOps
             var speech=PCard(restoreSide,"MinigameSpeech",18,174,240,64,Color.white,16,false);
             var outline=speech.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ffd3de");outline.effectDistance=new Vector2(2,-2);
             PText(speech,"NavigatorSpeech",CaptionsEnabled?"支えている仕組みから戻そう。":"",12,8,216,48,15,null,false);
-            Portrait(restoreSide,"NavigatorPortrait",154,418,200,230,"pose_typing");RefreshRestorePresentation();
+            Portrait(restoreSide,"NavigatorPortrait",154,418,200,230,game.Scenario=="ransom"?"pose_magnifier":"pose_typing");RefreshRestorePresentation();
         }
         private static string RestoreClock(double hour)=>((int)hour)+":"+((int)System.Math.Round((hour%1)*60)).ToString("00");
         private void RefreshRestorePresentation()
@@ -74,7 +78,8 @@ namespace PatchWorkSecure.CompanyOps
             if(restoreRevision==game.Revision)return;restoreRevision=game.Revision;
             foreach(var node in game.Nodes)
             {
-                var button=restoreButtons[node.Id];KitGradient(button.GetComponent<Image>(),node.Up?Hex("5fd39b"):node.Busy?Hex("34507a"):Hex("2b3a55"),node.Up?Hex("2bb673"):node.Busy?Hex("34507a"):Hex("2b3a55"));
+                var button=restoreButtons[node.Id];Color down=node.Encrypted?Hex("4a2438"):Hex("2b3a55");KitGradient(button.GetComponent<Image>(),node.Up?Hex("5fd39b"):node.Busy?Hex("34507a"):down,node.Up?Hex("2bb673"):node.Busy?Hex("34507a"):down);
+                var encrypted=button.transform.Find("RestoreEncrypted");if(encrypted!=null)encrypted.gameObject.SetActive(!node.Up);
                 button.interactable=game.Phase==OpsMinigamePhase.Playing&&!node.Up&&!node.Busy;
                 foreach(string label in new[]{"RestoreName_","RestoreSub_","RestoreWork_"})FindMinigameText(label+node.Id).color=node.Up?Color.white:Hex("cfe0ff");
                 var lamp=button.transform.Find("RestoreLamp_"+node.Id).GetComponent<Image>();lamp.color=node.Up?Color.white:Hex("e0405f");

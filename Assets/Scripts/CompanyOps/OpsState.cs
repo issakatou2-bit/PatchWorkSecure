@@ -42,6 +42,8 @@ namespace PatchWorkSecure.CompanyOps
         // 旧記録のfalseは点数なし。表示・計算とも50点として扱う。
         public bool minigameRecorded, delegated;
         public int minigameScore;
+        public bool recoveryMinigameRecorded, recoveryDelegated;
+        public int recoveryMinigameScore;
         public int EffectiveMinigameScore=>minigameRecorded?minigameScore:OpsCatalog.MinigameDelegateScore;
     }
 
@@ -374,14 +376,16 @@ namespace PatchWorkSecure.CompanyOps
                     " / 対応力 " + responsePower + "。" + (dataLoss ? "復旧の備えでデータ被害 -" + recovery + "万円。" : "この出来事はバックアップだけでは防げない。") };
         }
         // 真相を使うのは対応確定後だけ。見積もり自体は変更しない。
-        private OpsOutcome ScoredPreview(string response,int score,OpsEstimate publicRange=null)
+        private OpsOutcome ScoredPreview(string response,int score,OpsEstimate publicRange=null,int? recoveryScore=null)
         {
             var result=Preview(response);
-            if(score==OpsCatalog.MinigameDelegateScore)return result;
+            if(score==OpsCatalog.MinigameDelegateScore&&(!recoveryScore.HasValue||recoveryScore.Value==OpsCatalog.MinigameDelegateScore))return result;
             var range=publicRange??Estimate(response);
             double factor=1-OpsCatalog.MinigameResultInfluence*(score-OpsCatalog.MinigameDelegateScore)/OpsCatalog.MinigameDelegateScore;
-            if(!SupportsRestore)result.loss=BoundMinigameResult(result.loss,range.lossMin,range.lossMax,factor);
-            result.downtime=BoundMinigameResult(result.downtime,range.stopMin,range.stopMax,factor);
+            if(!SupportsRestore&&score!=OpsCatalog.MinigameDelegateScore)result.loss=BoundMinigameResult(result.loss,range.lossMin,range.lossMax,factor);
+            int stopScore=recoveryScore??score;
+            double stopFactor=1-OpsCatalog.MinigameResultInfluence*(stopScore-OpsCatalog.MinigameDelegateScore)/OpsCatalog.MinigameDelegateScore;
+            if(stopScore!=OpsCatalog.MinigameDelegateScore)result.downtime=BoundMinigameResult(result.downtime,range.stopMin,range.stopMax,stopFactor);
             result.businessLoss=Math.Min(result.businessLoss,result.loss);
             return result;
         }
@@ -390,18 +394,26 @@ namespace PatchWorkSecure.CompanyOps
         public bool SupportsContainment=>EventSpread==OpsCatalog.SpreadHigh;
         public bool SupportsMinigame=>SupportsContainment||SupportsMail||SupportsMfa||SupportsRestore;
         public bool Resolve(string response)=>Resolve(response,OpsCatalog.MinigameDelegateScore,true);
-        public bool Resolve(string response,int score,bool delegated)
+        public bool Resolve(string response,int score,bool delegated)=>ResolveScored(response,score,delegated,null,true);
+        public bool ResolveFinal(string response,int containmentScore,bool containmentDelegated,int recoveryScore,bool recoveryDelegated)
+        {
+            if(!SupportsFinalRecovery||recoveryScore<0||recoveryScore>OpsCatalog.MinigameMaxScore||recoveryDelegated&&recoveryScore!=OpsCatalog.MinigameDelegateScore)return false;
+            return ResolveScored(response,containmentScore,containmentDelegated,recoveryScore,recoveryDelegated);
+        }
+        private bool ResolveScored(string response,int score,bool delegated,int? recoveryScore,bool recoveryDelegated)
         {
             if (phase != OpsPhase.Incident || !new[] { "contain", "scope", "recover" }.Contains(response) ||
                 score<0 || score>OpsCatalog.MinigameMaxScore || delegated&&score!=OpsCatalog.MinigameDelegateScore || !SupportsMinigame&&score!=OpsCatalog.MinigameDelegateScore) return false;
-            var result = ScoredPreview(response,score);
+            var result = ScoredPreview(response,score,null,recoveryScore);
             if(SupportsContainment||(SupportsMail||SupportsMfa||SupportsRestore)&&!delegated){result.minigameRecorded=true;result.minigameScore=score;result.delegated=delegated;}
+            // 全委任の旧記録はそのまま。実際に復旧を遊んだ場合だけ別の点数を保存する。
+            if(recoveryScore.HasValue&&!recoveryDelegated){result.recoveryMinigameRecorded=true;result.recoveryMinigameScore=recoveryScore.Value;result.recoveryDelegated=false;}
             result.forecast = Estimate(response);
             result.metricsBefore = monthStartMetrics == null ? null : (int[])monthStartMetrics.Clone();
             // 同じ事件・対応・社員・点数・公開幅で、設備と運用整備の有無だけを比較する。
             var withoutInvestment = CopyForComparison();
             Array.Clear(withoutInvestment.levels, 0, withoutInvestment.levels.Length);
-            var baseline = withoutInvestment.ScoredPreview(response,score,result.forecast);
+            var baseline = withoutInvestment.ScoredPreview(response,score,result.forecast,recoveryScore);
             result.avoidedLoss = baseline.loss - result.loss;
             result.avoidedDowntime = baseline.downtime - result.downtime;
             result.hasInvestmentComparison = true;
@@ -411,7 +423,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 if (levels[i] == 0) continue;
                 var withoutOne = CopyForComparison(); withoutOne.levels[i] = 0;
-                var comparison = withoutOne.ScoredPreview(response,score,result.forecast);
+                var comparison = withoutOne.ScoredPreview(response,score,result.forecast,recoveryScore);
                 result.investmentEffects.Add(new OpsInvestmentEffect { projectId = OpsCatalog.AllProjects[i].id, level = levels[i],
                     avoidedLoss = comparison.loss - result.loss, avoidedDowntime = comparison.downtime - result.downtime });
             }
@@ -422,7 +434,7 @@ namespace PatchWorkSecure.CompanyOps
                 var project = OpsCatalog.AllProjects[i];
                 if (levels[i] > 0 || (!string.IsNullOrEmpty(project.requires) && Level(project.requires) == 0)) continue;
                 var withOne = CopyForComparison(); withOne.levels[i] = 1;
-                var comparison = withOne.ScoredPreview(response,score,result.forecast);
+                var comparison = withOne.ScoredPreview(response,score,result.forecast,recoveryScore);
                 int loss = result.loss - comparison.loss, stop = result.downtime - comparison.downtime;
                 if (loss > 0 || stop > 0) result.potentialInvestmentEffects.Add(new OpsInvestmentEffect {
                     projectId = project.id, level = 1, avoidedLoss = loss, avoidedDowntime = stop });
@@ -496,6 +508,7 @@ namespace PatchWorkSecure.CompanyOps
             if (history.Any(r => r == null || r.month < 0 || r.month > 11 || r.loss < 0 || r.loss > SaveIncidentLimit || r.downtime < 0 || r.downtime > SaveIncidentLimit ||
                 r.missionBonus<0||r.missionBonus>MissionBudgetReward||
                 (r.minigameRecorded && (r.minigameScore<0 || r.minigameScore>OpsCatalog.MinigameMaxScore || r.delegated&&r.minigameScore!=OpsCatalog.MinigameDelegateScore)) ||
+                (r.recoveryMinigameRecorded && (r.recoveryMinigameScore<0 || r.recoveryMinigameScore>OpsCatalog.MinigameMaxScore || r.recoveryDelegated&&r.recoveryMinigameScore!=OpsCatalog.MinigameDelegateScore)) ||
                 !ValidReportMetrics(r.metricsBefore) || !ValidReportMetrics(r.metricsAfter) ||
                 (r.hasClosingState && (r.closingBudget < -500 || r.closingBudget > SaveBudgetLimit || r.closingStability < 0 || r.closingStability > 100)) ||
                 (r.forecast != null && (r.forecast.lossMin < 0 || r.forecast.lossMax < r.forecast.lossMin || r.forecast.lossMax > SaveIncidentLimit || r.forecast.stopMin < 0 || r.forecast.stopMax < r.forecast.stopMin || r.forecast.stopMax > SaveIncidentLimit || r.forecast.cost < 0 || r.forecast.cost > 200)) ||

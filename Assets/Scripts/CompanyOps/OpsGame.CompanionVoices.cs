@@ -12,6 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         private string companionSceneKey="";
         private OpsReactionLine FindVoiceLine(string id)
         {
+            if(id=="final_restore_bridge")return new OpsReactionLine{id=id,caption="戻す前に、確かめる、だよ！",reaction=OpsReaction.Think};
             if(CompanionVoices==null)CompanionVoices=Resources.Load<OpsReactionBank>("CompanionVoices");
             return CompanionVoices?.Find(id)??ReactionBank?.Find(id);
         }
@@ -120,6 +121,7 @@ namespace PatchWorkSecure.CompanyOps
         public Vector2 NameSize,TagSize;
         public RectTransform Badge;
         public UnityEngine.UI.RawImage Face;
+        private void OnDestroy(){if(Badge!=null)Destroy(Badge.gameObject);}
     }
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class OpsVoiceCircle:UnityEngine.UI.MaskableGraphic

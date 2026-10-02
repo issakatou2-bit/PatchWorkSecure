@@ -139,5 +139,8 @@ namespace PatchWorkSecure.CompanyOps
     {
         public bool SupportsRestore=>CurrentProfile!=null?new[]{"change","storage","service"}.Contains(CurrentProfile.id)||CurrentProfile.kind=="outage":Current.kind=="outage";
         public OpsRestoreMinigame CreateRestore()=>phase==OpsPhase.Incident&&SupportsRestore?new OpsRestoreMinigame(this,CurrentProfile?.id=="change"?"change":CurrentProfile?.id=="storage"?"storage":"power",Benign):null;
+        // エンドレスの4年目以降は3年目の暦を使うが、総決算の2本立てにはしない。
+        public bool SupportsFinalRecovery=>storyCalendarYear==3&&(endlessYear==0||endlessYear==3)&&month==11&&CurrentEvent?.id=="y3-final";
+        public OpsRestoreMinigame CreateFinalRestore()=>phase==OpsPhase.Incident&&SupportsFinalRecovery?new OpsRestoreMinigame(this,"ransom",Benign):null;
     }
 }

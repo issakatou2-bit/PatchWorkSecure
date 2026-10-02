@@ -58,8 +58,8 @@ namespace PatchWorkSecure.CompanyOps
         private void Reveal(RectTransform rect, float delay = 0, bool stamp = false)
         {
             if (!Application.isPlaying) return;
-            var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay; reveal.Stamp = stamp;
-            reveal.Duration=RepeatDuration("reveal_"+rect.name,.45f,.27f);
+            var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay/PresentationRate; reveal.Stamp = stamp;
+            reveal.Duration=RepeatDuration("reveal_"+rect.name,.45f,.27f)/PresentationRate;
         }
         public void StampImpact()
         {
@@ -125,7 +125,7 @@ namespace PatchWorkSecure.CompanyOps
             {
                 var cover = IncidentShape(Surface, "ScreenWipe", "cutin", -1900, 0, 1900, 900, PlanPink);
                 var group = cover.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
-                for (float t = 0; t < .3f; t += Time.unscaledDeltaTime)
+                for (float t = 0; t < .3f; t += Time.unscaledDeltaTime*PresentationRate)
                 {
                     if (ReducedMotion) group.alpha = Mathf.Sin(t / .3f * Mathf.PI) * .25f;
                     else cover.anchoredPosition = new Vector2(Mathf.Lerp(-1900, 1700, t / .3f), 0);
@@ -161,7 +161,7 @@ namespace PatchWorkSecure.CompanyOps
                     PlayPresentationCue(OpsCue.Alert);
                 }
                 float duration=kind=="month"?1.5f:boss!=null?OpsCatalog.BossAppearSeconds:.8f;
-                for(float t=0;t<duration&&!phasePresentationSkipped;t+=Time.unscaledDeltaTime)
+                for(float t=0;t<duration&&!phasePresentationSkipped;t+=Time.unscaledDeltaTime*PresentationRate)
                 {
                     alpha.alpha=Mathf.Min(t/(kind=="month"?.5f:.12f),(duration-t)/.18f,1);
                     if(outgoingScreen!=null&&t>=(kind=="month"?.5f:.12f)){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}

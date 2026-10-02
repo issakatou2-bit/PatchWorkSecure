@@ -55,7 +55,7 @@ namespace PatchWorkSecure.CompanyOps
                 bool isMail=session is OpsMailMinigame;
                 KitGradient(screen.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
                 KitGradient(minigameCanvas.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
-                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else if(session is OpsBlockMinigame)DrawBlockPresentation();else if(session is OpsRestoreMinigame)DrawRestorePresentation();else DrawMfaPresentation();MinigameBrief();return true;
+                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else if(session is OpsBlockMinigame)DrawBlockPresentation();else if(session is OpsRestoreMinigame)DrawRestorePresentation();else DrawMfaPresentation();MinigameBrief();ShortenMinigameBrief();return true;
             }
             IncidentShape(minigameCanvas,"MinigameHazard","tape",0,0,1280,14,Hex("ffc02e"));
             var top=PCard(minigameCanvas,"MinigameTop",0,24,1280,70,Color.white,20);
@@ -78,7 +78,18 @@ namespace PatchWorkSecure.CompanyOps
             var outline=speech.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ffd3de");outline.effectDistance=new Vector2(2,-2);
             PText(speech,"NavigatorSpeech",CaptionsEnabled?"備えと判断を活かして対応しよう。":"",12,8,304,70,15,null,false);
             Portrait(side,"NavigatorPortrait",156,344,198,210,"pose_startled");
-            MinigameBrief();return true;
+            MinigameBrief();ShortenMinigameBrief();return true;
+        }
+        private void ShortenMinigameBrief()
+        {
+            if(!FastPresentation)return;
+            string text=Minigame is OpsMailMinigame?"怪しいメールは報告（→）。本物は仕事を進める（←）。\nリンクの行き先はカーソル／長押しで確認。40秒で10通。":
+                Minigame is OpsMfaMinigame?"社員の今の様子を見て、本人のログインだけ許可（→）。\n心当たりのない承認は拒否（←）。30秒。":
+                Minigame is OpsLogMinigame?"流れてくる記録の、おかしな行を押そう。\n普段どおりの行は空振り。画面外の行は押せない。":
+                Minigame is OpsBlockMinigame?"作業を選んで予定表へ。期限と条件を守って埋めよう。\n回転はR・右クリック・ホイール。90秒。":
+                Minigame is OpsRestoreMinigame restore?(restore.Scenario=="ransom"?"戻す前に安全確認。先に戻すと再暗号化。\n":"支えている仕組みから順に戻そう。\n")+"2人で同時に作業できる。黄色の業務は目標時間内に。":
+                "端末を押して隔離。部屋を調べると感染が3秒見える。\n部屋ごと止めると速いが、正常な端末も止まる。20秒。";
+            FindMinigameText("MinigameInstructions").text=text;
         }
         private RectTransform MinigameModal(string title)
         {
@@ -175,7 +186,7 @@ namespace PatchWorkSecure.CompanyOps
                 var fill=minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill") as RectTransform;
                 if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:Minigame is OpsMfaMinigame?670:Minigame is OpsBlockMinigame?550:Minigame is OpsLogMinigame?722:310)*Minigame.Remaining/Minigame.Duration);
                 RefreshCurrentMinigame();
-                if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();}
+                if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f/PresentationRate;ShowMinigameFinish();}
             }
             if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn&&Time.unscaledTime>=minigameResultAt)MinigameResult();
             // 終了の掛け声と数え上げを遮らない。続ける操作はいつでも可能。
@@ -274,7 +285,7 @@ namespace PatchWorkSecure.CompanyOps
             if(!ReducedMotion)while(value<score&&Minigame==session)
             {
                 value=Mathf.Min(score,value+step);label.text=value+"点";MinigameTone(700+value*6,"triangle");
-                yield return new WaitForSecondsRealtime(.035f);
+                yield return new WaitForSecondsRealtime(.035f/PresentationRate);
             }
             if(Minigame!=session||stamp==null)yield break;
             label.text=score+"点";MinigameCounting=false;stamp.gameObject.SetActive(true);

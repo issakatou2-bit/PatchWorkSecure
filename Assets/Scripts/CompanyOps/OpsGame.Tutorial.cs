@@ -35,7 +35,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             SkipTutorialVisual();
             tutorialStep = -1;
-            if (!TestMode && PlayerPrefs.GetInt(TutorialKey,0) == 0) StartTutorial();
+            if (!TestMode && !(Story!=null&&RepeatedChallenge) && Endless==null && PlayerPrefs.GetInt(TutorialKey,0) == 0) StartTutorial();
         }
         private void SkipTutorialVisual()
         {

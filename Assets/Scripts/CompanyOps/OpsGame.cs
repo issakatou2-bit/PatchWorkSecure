@@ -47,7 +47,7 @@ namespace PatchWorkSecure.CompanyOps
             SaveWarning = warning;
         }
         public void StartYear(int seed){Story=null;Endless=null;EnterYear(new OpsState(seed,true),true);}
-        public void StartStory(int seed){Endless=null;Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
+        public void StartStory(int seed){Endless=null;Career.startedStoryAttempts=Math.Max(Career.startedStoryAttempts,Career.finishedAttempts)+1;Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
         public bool StartEndless(int seed)
         {if(!Career.endlessUnlocked)return false;Story=null;Endless=OpsEndless.Begin(seed,Career.factors);EnterYear(Endless.state,true);return true;}
         private void EnterYear(OpsState next,bool tutorial)

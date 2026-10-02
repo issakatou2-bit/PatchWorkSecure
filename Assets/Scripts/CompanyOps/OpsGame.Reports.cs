@@ -9,6 +9,13 @@ namespace PatchWorkSecure.CompanyOps
 {
     public partial class OpsGame
     {
+        private readonly System.Collections.Generic.Dictionary<TextMeshProUGUI,string> reportCounts=new System.Collections.Generic.Dictionary<TextMeshProUGUI,string>();
+        public bool ReportCounting=>reportCounts.Keys.Any(t=>t!=null);
+        public void FinishReportCounts()
+        {
+            foreach(var item in reportCounts)if(item.Key!=null){item.Key.text=item.Value;item.Key.transform.localScale=Vector3.one;}
+            reportCounts.Clear();if(countAudio!=null)countAudio.Stop();
+        }
         private RectTransform ReportPanel(string id,float x,float y,float w,float h,float delay=0)
         {
             var p=PCard(screen,id,x,y,w,h,Color.white); Reveal(p,delay); return p;
@@ -33,19 +40,20 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ReportCount(TextMeshProUGUI label,int value,string unit)
         {
-            float started=Time.realtimeSinceStartup;
+            float started=Time.realtimeSinceStartup,duration=.6f/PresentationRate;reportCounts[label]=value.ToString("N0")+unit;
             yield return null;
             if(label==null)yield break;
-            if(value!=0&&Time.realtimeSinceStartup-started<.6f)PlayPresentationCue(OpsCue.Count);
-            while(Time.realtimeSinceStartup-started<.6f)
+            if(value!=0&&reportCounts.ContainsKey(label)&&Time.realtimeSinceStartup-started<duration)PlayPresentationCue(OpsCue.Count);
+            while(reportCounts.ContainsKey(label)&&Time.realtimeSinceStartup-started<duration)
             {
                 if(label==null)yield break;
                 float t=Time.realtimeSinceStartup-started;
-                label.text=Mathf.RoundToInt(value*Mathf.SmoothStep(0,1,t/.6f)).ToString("N0")+unit;yield return null;
+                label.text=Mathf.RoundToInt(value*Mathf.SmoothStep(0,1,t/duration)).ToString("N0")+unit;yield return null;
             }
             if(label==null)yield break;label.text=value.ToString("N0")+unit;
+            if(!reportCounts.Remove(label))yield break;
             StartCoroutine(FinishCountSound());
-            for(float t=0;t<.18f;t+=Time.unscaledDeltaTime)
+            for(float t=0;t<.18f;t+=Time.unscaledDeltaTime*PresentationRate)
             {if(label==null)yield break;label.transform.localScale=Vector3.one*(ReducedMotion?1:1+.1f*Mathf.Sin(t/.18f*Mathf.PI));yield return null;}
             if(label!=null)label.transform.localScale=Vector3.one;
         }

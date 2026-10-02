@@ -195,7 +195,7 @@ namespace PatchWorkSecure.CompanyOps
         private void MinigameVisual(RectTransform target,string kind,float duration,Vector2 direction=default)
         {
             var old=target.GetComponent<OpsMinigameVisual>();if(old!=null){old.Stop();Destroy(old);}
-            var motion=target.gameObject.AddComponent<OpsMinigameVisual>();motion.Owner=this;motion.Kind=kind;motion.Duration=duration;motion.Direction=direction;
+            var motion=target.gameObject.AddComponent<OpsMinigameVisual>();motion.Owner=this;motion.Kind=kind;motion.Duration=kind=="stamp"?duration/PresentationRate:duration;motion.Direction=direction;
         }
         private void MinigameTone(float frequency,string wave="sine")
         {

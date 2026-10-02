@@ -96,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            FinishReportCounts();
             YearOpeningActive=false;
             DiaryActive=false;
             FactorRevealActive=false;

@@ -11,17 +11,23 @@ namespace PatchWorkSecure.CompanyOps
         public bool CaptionsEnabled {get;private set;}=true;
         public bool ShortenInterruptions {get;private set;}
         public int TextSize {get;private set;}=1;
+        public bool FastPresentation {get;private set;}
+        public float PresentationRate=>FastPresentation?2f:1f;
+        public bool RepeatedChallenge=>Career.startedStoryAttempts>1||Career.finishedAttempts>0;
+        public void SetPresentationSpeed(bool fast){FastPresentation=fast;StoreDisplaySettings();}
         public float TextScale => TextSize==0?.9f:TextSize==2?1.12f:1;
         private void LoadDisplaySettings()
         {
             if(TestMode)return;
             CaptionsEnabled=PlayerPrefs.GetInt("pws_ops_captions",1)!=0;
             ShortenInterruptions=PlayerPrefs.GetInt("pws_ops_shorten",0)!=0;
+            FastPresentation=PlayerPrefs.GetInt("pws_ops_speed",0)!=0;
             TextSize=Mathf.Clamp(PlayerPrefs.GetInt("pws_ops_text_size",1),0,2);
         }
         private void StoreDisplaySettings()
         {
             if(TestMode)return;
+            PlayerPrefs.SetInt("pws_ops_speed",FastPresentation?1:0);
             PlayerPrefs.SetInt("pws_ops_captions",CaptionsEnabled?1:0);PlayerPrefs.SetInt("pws_ops_shorten",ShortenInterruptions?1:0);PlayerPrefs.SetInt("pws_ops_text_size",TextSize);PlayerPrefs.Save();
         }
         private void Menu()
@@ -32,7 +38,7 @@ namespace PatchWorkSecure.CompanyOps
             SettingsSection(d,"SOUND",30,100,PlanPink);
             SettingsSlider(d,"MusicVolume","BGM",130,musicVolume,v=>{musicVolume=v;StoreFeedbackSettings();TickMusic();});
             SettingsSlider(d,"SoundVolume","効果音",204,soundVolume,v=>{soundVolume=v;StoreFeedbackSettings();if(buttonAudio!=null)buttonAudio.volume=v*.65f;if(eventAudio!=null)eventAudio.volume=v;SetPresentationVolume(v);});
-            SettingsSlider(d,"VoiceVolume","ひなたの声",278,voiceVolume,v=>{voiceVolume=v;StoreFeedbackSettings();if(voiceAudio!=null)voiceAudio.volume=v;if(v<=0)StopVoice();});
+            SettingsSlider(d,"VoiceVolume","声",278,voiceVolume,v=>{voiceVolume=v;StoreFeedbackSettings();if(voiceAudio!=null)voiceAudio.volume=v;if(v<=0)StopVoice();});
             SettingsSection(d,"DISPLAY",30,358,PlanBlue);
             var text=SettingsRow(d,"TextSizeRow","文字の大きさ",388);
             for(int i=0;i<3;i++)
@@ -40,10 +46,14 @@ namespace PatchWorkSecure.CompanyOps
                 int selected=i;string[] labels={"小","標準","大"};PButton(text,"TextSize"+i,labels[i],184+i*78,9,72,44,()=>{TextSize=selected;StoreDisplaySettings();ApplyTextPreferences();Menu();},TextSize==i?PlanPink:PlanTrack,TextSize==i?Color.white:Hex("52607a"),16);
             }
             PText(text,"TextSizePreview","あいうえお  ABC 123",440,13,410,36,16,Hex("52607a"),false);
-            SettingsToggle(d,"CaptionToggle","字幕","ひなたの声を文字でも表示",462,CaptionsEnabled,()=>{CaptionsEnabled=!CaptionsEnabled;ApplyVoiceCaption();StoreDisplaySettings();Menu();});
+            SettingsToggle(d,"CaptionToggle","字幕","キャラクターの声を文字でも表示",462,CaptionsEnabled,()=>{CaptionsEnabled=!CaptionsEnabled;ApplyVoiceCaption();StoreDisplaySettings();Menu();});
             SettingsSection(d,"MOTION",30,542,PlanMint);
             SettingsToggle(d,"ReduceMotion","動きを減らす","揺れ・粒子・画面の揺れを止める",572,ReducedMotion,()=>{ReducedMotion=!ReducedMotion;StoreFeedbackSettings();Menu();});
-            SettingsToggle(d,"ShortenInterruptions","演出の短縮","2回目以降の割り込み演出を短くする",646,ShortenInterruptions,()=>{ShortenInterruptions=!ShortenInterruptions;StoreDisplaySettings();Menu();});
+            var speed=SettingsRow(d,"PresentationSpeedRow","演出の速さ",646);
+            PButton(speed,"SpeedStandard","標準",184,9,82,44,()=>{SetPresentationSpeed(false);Menu();},FastPresentation?PlanTrack:PlanPink,FastPresentation?PlanGray:Color.white,16);
+            PButton(speed,"SpeedFast","速い",274,9,82,44,()=>{SetPresentationSpeed(true);Menu();},FastPresentation?PlanPink:PlanTrack,FastPresentation?Color.white:PlanGray,16);
+            PText(speed,"PresentationSpeedHint","制限時間・声はそのまま",374,13,246,36,14,PlanGray,false);
+            PButton(speed,"ShortenInterruptions","割り込み短縮 "+(ShortenInterruptions?"ON":"OFF"),650,9,212,44,()=>{ShortenInterruptions=!ShortenInterruptions;StoreDisplaySettings();Menu();},ShortenInterruptions?PlanMint:PlanTrack,ShortenInterruptions?Color.white:PlanGray,14);
             PButton(d,"DeleteRecords","記録を消す…",30,738,142,40,ConfirmDeleteRecords,new Color(0,0,0,0),Hex("c23a60"),16);
             PButton(d,"AdvancedSettings","記録・試聴",188,738,162,40,DiagnosticMenu,Color.white,PlanGray,16);
             PButton(d,"ReplayTutorial","操作ガイド",370,738,164,40,ReplayTutorial,Color.white,PlanGray,16);

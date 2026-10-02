@@ -17,7 +17,7 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform OpeningShape(Transform p,string id,string kind,float x,float y,float w,float h,Color? color=null,float radius=30,int shape=0)
         {var r=Rect(p,id,x,y,w,h);var g=r.gameObject.AddComponent<OpsOpeningGraphic>();g.Kind=kind;g.color=color??Color.white;g.Radius=radius;g.Shape=shape;g.raycastTarget=false;return r;}
         private void OpeningMotion(RectTransform r,string kind,float seconds=.6f,float delay=0)
-        {if(!Application.isPlaying)return;var m=r.gameObject.AddComponent<OpsOpeningMotion>();m.Owner=this;m.Kind=kind;m.Duration=seconds;m.Delay=delay;}
+        {if(!Application.isPlaying)return;var m=r.gameObject.AddComponent<OpsOpeningMotion>();m.Owner=this;m.Kind=kind;m.Duration=seconds/PresentationRate;m.Delay=delay/PresentationRate;}
         private void OpeningHeader(string en,string title,Color tone,bool dark=false)
         {var e=StoryText(screen,"OpeningCategory",en,0,54,1600,23,15,tone,true);e.characterSpacing=32;StoryText(screen,"OpeningHeading",title,0,81,1600,68,46,dark?Color.white:PlanInk,true);}
         private RectTransform OpeningCard(Transform p,string id,float x,float y,float w,float h,Color background,Color? border=null,float radius=26)
@@ -49,14 +49,14 @@ namespace PatchWorkSecure.CompanyOps
         {if(Story==null&&Endless==null||RunYear<2||State.phase!=OpsPhase.Planning)return;YearOpeningPaused=paused;YearOpeningStage=RunYear>3?4:Mathf.Clamp(stage,0,4);openingElapsed=0;if(RunYear>3)EndlessShortOpening();else OpeningScreen();}
         private void BeginYearOpening()
         {
-            Career.seenOpeningYears=Career.seenOpeningYears??new System.Collections.Generic.List<int>();openingRepeated=Career.seenOpeningYears.Contains(RunYear);
+            Career.seenOpeningYears=Career.seenOpeningYears??new System.Collections.Generic.List<int>();openingRepeated=RepeatedChallenge||Career.seenOpeningYears.Contains(RunYear);
             if(!openingRepeated&&RunYear<=3)Career.seenOpeningYears.Add(RunYear);Save();PreviewYearOpening(0,false);
         }
         public void AdvanceYearOpening(){if(!YearOpeningActive)return;if(YearOpeningStage==4){YearOpeningActive=false;YearOpeningPaused=false;Render();return;}PreviewYearOpening(YearOpeningStage+1,YearOpeningPaused);}
         public void SkipYearOpening(){if(YearOpeningActive)PreviewYearOpening(4,false);}
         private void TickYearOpening(float dt)
         {
-            if(!YearOpeningPaused){openingElapsed+=dt;if(openingElapsed>=OpsCatalog.YearOpeningSeconds[YearOpeningStage]){carryCompanionVoice=true;try{AdvanceYearOpening();}finally{carryCompanionVoice=false;}return;}}
+            if(!YearOpeningPaused){openingElapsed+=dt*PresentationRate;if(openingElapsed>=OpsCatalog.YearOpeningSeconds[YearOpeningStage]){carryCompanionVoice=true;try{AdvanceYearOpening();}finally{carryCompanionVoice=false;}return;}}
             var bar=screen.Find("OpeningProgress") as RectTransform;if(bar!=null)bar.sizeDelta=new Vector2(1600*(YearOpeningStage+(YearOpeningPaused?1:Mathf.Clamp01(openingElapsed/OpsCatalog.YearOpeningSeconds[YearOpeningStage])))/5,5);
             var k=UnityEngine.InputSystem.Keyboard.current;if(k!=null&&(k.spaceKey.wasPressedThisFrame||k.enterKey.wasPressedThisFrame))AdvanceYearOpening();else if(k!=null&&k.escapeKey.wasPressedThisFrame)SkipYearOpening();
         }
@@ -69,11 +69,12 @@ namespace PatchWorkSecure.CompanyOps
             if(YearOpeningStage==0||YearOpeningStage==1||YearOpeningStage==3)
             {var rays=IncidentShape(screen,"OpeningRays","rays",-150,-480,1900,1900,new Color(YearOpeningStage==3?.247f:1,YearOpeningStage==1?.753f:YearOpeningStage==3?.663f:.58f,YearOpeningStage==1?.18f:YearOpeningStage==3?.961f:.68f,YearOpeningStage==1?.16f:.1f));rays.pivot=new Vector2(.5f,.5f);rays.anchoredPosition=new Vector2(800,-470);Motion(rays,"rotate",YearOpeningStage==1?24:YearOpeningStage==3?36:40);}
             if(YearOpeningStage==0)OpeningGrowth();else if(YearOpeningStage==1)OpeningUnlock();else if(YearOpeningStage==2)OpeningRivals();else if(YearOpeningStage==3)OpeningAllies();else OpeningTitle();
-            var skip=PButton(screen,"OpeningSkip","スキップ",1438,830,136,48,SkipYearOpening,new Color(1,1,1,openingRepeated?.32f:.18f),Color.white,16);skip.GetComponentInChildren<TextMeshProUGUI>().fontSize=15;
+            bool largeSkip=openingRepeated||RepeatedChallenge;
+            var skip=PButton(screen,"OpeningSkip","スキップ",largeSkip?1374:1438,largeSkip?818:830,largeSkip?200:136,largeSkip?60:48,SkipYearOpening,new Color(1,1,1,largeSkip?.32f:.18f),Color.white,largeSkip?20:16);skip.GetComponentInChildren<TextMeshProUGUI>().fontSize=largeSkip?20:15;
             foreach(var effect in skip.GetComponents<BaseMeshEffect>())DestroyImmediate(effect);
             var topLight=skip.transform.Find("KitTopLight");if(topLight!=null)DestroyImmediate(topLight.gameObject);
-            skip.GetComponent<Image>().color=new Color(1,1,1,openingRepeated?.32f:.18f);
-            for(int i=0;i<2;i++)IncidentShape(skip.transform,"SkipTriangle"+i,"play",107+i*10,18,8,11,Color.white);
+            skip.GetComponent<Image>().color=new Color(1,1,1,largeSkip?.32f:.18f);
+            for(int i=0;i<2;i++)IncidentShape(skip.transform,"SkipTriangle"+i,"play",(largeSkip?169:107)+i*10,largeSkip?24:18,8,11,Color.white);
             PImage(screen,"OpeningProgress",null,0,895,1600*(YearOpeningStage+1)/5,5,PlanPink);
             if(YearOpeningStage==3)QueueCompanionScene("opening");
             else if(carryCompanionVoice&&CurrentSpeaker!=""){voiceCaptionTarget="CompanionCaption";ApplyVoiceCaption();}

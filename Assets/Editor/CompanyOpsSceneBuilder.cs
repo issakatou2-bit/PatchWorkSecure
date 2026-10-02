@@ -134,6 +134,7 @@ namespace PatchWorkSecure.EditorTools
         [MenuItem("PatchWorkSecure/新しい試作/Windows試遊版をビルド")]
         public static void BuildPlayer()
         {
+            ConfigureSteamDisplaySettings();
             Directory.CreateDirectory("Builds/CompanyYear");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
                 scenes = new[] { ScenePath }, locationPathName = "Builds/CompanyYear/PatchWorkSecure-Year.exe",
@@ -153,6 +154,16 @@ namespace PatchWorkSecure.EditorTools
             Debug.Log("[CompanyOps] Windows試遊版のビルド成功");
         }
         public static void BuildRelease() { BuildScene(); BuildPlayer(); }
+
+        public static void ConfigureSteamDisplaySettings()
+        {
+            PlayerSettings.bundleVersion="0.16.0";
+            PlayerSettings.fullScreenMode=FullScreenMode.FullScreenWindow;
+            PlayerSettings.defaultScreenWidth=1920;PlayerSettings.defaultScreenHeight=1080;
+            PlayerSettings.resizableWindow=true;
+            // 会社名・製品名・アイコン・バックグラウンド設定は変更しない。
+            AssetDatabase.SaveAssets();
+        }
 
         private static Sprite RoundedPanel()
         {

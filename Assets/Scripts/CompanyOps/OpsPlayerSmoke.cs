@@ -28,6 +28,23 @@ namespace PatchWorkSecure.CompanyOps
             yield return null; yield return null;
             var game = FindAnyObjectByType<OpsGame>();
             if (game == null) { Debug.LogError("[CompanyOps Player] 試作が見つかりません"); Application.Quit(1); yield break; }
+            if(Environment.GetCommandLineArgs().Contains("-ops-display-smoke-test"))
+            {
+                bool existed=PlayerPrefs.HasKey(OpsGame.FullscreenKey);int previous=PlayerPrefs.GetInt(OpsGame.FullscreenKey);
+                try
+                {
+                    OpsGame.TestMode=false;game.SetFullscreen(false);yield return new WaitForSecondsRealtime(.7f);
+                    if(Screen.fullScreenMode!=FullScreenMode.Windowed)failed=true;
+                    Debug.Log("[CompanyOps Player] ウィンドウ表示 "+Screen.width+"x"+Screen.height);
+                    game.SetFullscreen(true);yield return new WaitForSecondsRealtime(.7f);
+                    if(Screen.fullScreenMode!=FullScreenMode.FullScreenWindow||Application.version!="0.16.0")failed=true;
+                    Debug.Log("[CompanyOps Player] 画面切替と版の確認 "+(failed?"FAILED":"PASSED"));
+                }
+                finally
+                {
+                    OpsGame.TestMode=true;if(existed)PlayerPrefs.SetInt(OpsGame.FullscreenKey,previous);else PlayerPrefs.DeleteKey(OpsGame.FullscreenKey);PlayerPrefs.Save();
+                }
+            }
             game.StartYear(14); yield return null;
             if(Environment.GetCommandLineArgs().Contains("-ops-sfx-smoke-test"))
             {

@@ -28,8 +28,7 @@ namespace PatchWorkSecure.CompanyOps
         private string SavePath => Path.Combine(Application.persistentDataPath, "company-ops-year-v1.json");
         private void Start()
         {
-            if (!Application.isEditor) Screen.SetResolution(1600, 900, FullScreenMode.Windowed);
-            LoadFeedbackSettings(); ReadSave(); RenderHome();
+            LoadFeedbackSettings(); ApplyScreenMode(); ReadSave(); RenderHome();
         }
         public void BuildPreview() => RenderHome();
 

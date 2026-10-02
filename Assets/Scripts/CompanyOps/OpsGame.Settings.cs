@@ -12,6 +12,22 @@ namespace PatchWorkSecure.CompanyOps
         public bool ShortenInterruptions {get;private set;}
         public int TextSize {get;private set;}=1;
         public bool FastPresentation {get;private set;}
+        public const string FullscreenKey="pws_ops_fullscreen";
+        public bool FullscreenEnabled {get;private set;}=true;
+        public void SetFullscreen(bool fullscreen)
+        {
+            FullscreenEnabled=fullscreen;
+            if(!TestMode){PlayerPrefs.SetInt(FullscreenKey,fullscreen?1:0);PlayerPrefs.Save();}
+            ApplyScreenMode();
+        }
+        private void ApplyScreenMode()
+        {
+            // 再生テストとEditorのGameビューは、OSの画面設定を変更しない。
+            if(TestMode||Application.isEditor)return;
+            int width=FullscreenEnabled?Display.main.systemWidth:1920;
+            int height=FullscreenEnabled?Display.main.systemHeight:1080;
+            Screen.SetResolution(width>0?width:1920,height>0?height:1080,FullscreenEnabled?FullScreenMode.FullScreenWindow:FullScreenMode.Windowed);
+        }
         public float PresentationRate=>FastPresentation?2f:1f;
         public bool RepeatedChallenge=>Career.startedStoryAttempts>1||Career.finishedAttempts>0;
         public void SetPresentationSpeed(bool fast){FastPresentation=fast;StoreDisplaySettings();}
@@ -19,6 +35,7 @@ namespace PatchWorkSecure.CompanyOps
         private void LoadDisplaySettings()
         {
             if(TestMode)return;
+            FullscreenEnabled=PlayerPrefs.GetInt(FullscreenKey,1)!=0;
             CaptionsEnabled=PlayerPrefs.GetInt("pws_ops_captions",1)!=0;
             ShortenInterruptions=PlayerPrefs.GetInt("pws_ops_shorten",0)!=0;
             FastPresentation=PlayerPrefs.GetInt("pws_ops_speed",0)!=0;
@@ -34,7 +51,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(modal!=null){modal.gameObject.SetActive(false);Destroy(modal.gameObject);}
             WindowBackdrop();
-            var d=Box(modal,"SettingsWindow",330,50,940,800,Color.white,true);KitPanel(d,Color.white,true);WindowHeader(d,"設定","SETTINGS",940);Reveal(d);
+            var d=Box(modal,"SettingsWindow",330,13,940,874,Color.white,true);KitPanel(d,Color.white,true);WindowHeader(d,"設定","SETTINGS",940);Reveal(d);
             SettingsSection(d,"SOUND",30,100,PlanPink);
             SettingsSlider(d,"MusicVolume","BGM",130,musicVolume,v=>{musicVolume=v;StoreFeedbackSettings();TickMusic();});
             SettingsSlider(d,"SoundVolume","効果音",204,soundVolume,v=>{soundVolume=v;StoreFeedbackSettings();if(buttonAudio!=null)buttonAudio.volume=v*.65f;if(eventAudio!=null)eventAudio.volume=v;SetPresentationVolume(v);});
@@ -47,17 +64,21 @@ namespace PatchWorkSecure.CompanyOps
             }
             PText(text,"TextSizePreview","あいうえお  ABC 123",440,13,410,36,16,Hex("52607a"),false);
             SettingsToggle(d,"CaptionToggle","字幕","キャラクターの声を文字でも表示",462,CaptionsEnabled,()=>{CaptionsEnabled=!CaptionsEnabled;ApplyVoiceCaption();StoreDisplaySettings();Menu();});
-            SettingsSection(d,"MOTION",30,542,PlanMint);
-            SettingsToggle(d,"ReduceMotion","動きを減らす","揺れ・粒子・画面の揺れを止める",572,ReducedMotion,()=>{ReducedMotion=!ReducedMotion;StoreFeedbackSettings();Menu();});
-            var speed=SettingsRow(d,"PresentationSpeedRow","演出の速さ",646);
+            var screen=SettingsRow(d,"ScreenModeRow","画面",536);
+            PButton(screen,"ScreenFullscreen","フルスクリーン",184,9,188,44,()=>{SetFullscreen(true);Menu();},FullscreenEnabled?PlanPink:PlanTrack,FullscreenEnabled?Color.white:PlanGray,16);
+            PButton(screen,"ScreenWindowed","ウィンドウ",382,9,170,44,()=>{SetFullscreen(false);Menu();},FullscreenEnabled?PlanTrack:PlanPink,FullscreenEnabled?PlanGray:Color.white,16);
+            PText(screen,"ScreenModeHint","ウィンドウは1920×1080",574,13,284,36,14,PlanGray,false);
+            SettingsSection(d,"MOTION",30,616,PlanMint);
+            SettingsToggle(d,"ReduceMotion","動きを減らす","揺れ・粒子・画面の揺れを止める",646,ReducedMotion,()=>{ReducedMotion=!ReducedMotion;StoreFeedbackSettings();Menu();});
+            var speed=SettingsRow(d,"PresentationSpeedRow","演出の速さ",720);
             PButton(speed,"SpeedStandard","標準",184,9,82,44,()=>{SetPresentationSpeed(false);Menu();},FastPresentation?PlanTrack:PlanPink,FastPresentation?PlanGray:Color.white,16);
             PButton(speed,"SpeedFast","速い",274,9,82,44,()=>{SetPresentationSpeed(true);Menu();},FastPresentation?PlanPink:PlanTrack,FastPresentation?Color.white:PlanGray,16);
             PText(speed,"PresentationSpeedHint","制限時間・声はそのまま",374,13,246,36,14,PlanGray,false);
             PButton(speed,"ShortenInterruptions","割り込み短縮 "+(ShortenInterruptions?"ON":"OFF"),650,9,212,44,()=>{ShortenInterruptions=!ShortenInterruptions;StoreDisplaySettings();Menu();},ShortenInterruptions?PlanMint:PlanTrack,ShortenInterruptions?Color.white:PlanGray,14);
-            PButton(d,"DeleteRecords","記録を消す…",30,738,142,40,ConfirmDeleteRecords,new Color(0,0,0,0),Hex("c23a60"),16);
-            PButton(d,"AdvancedSettings","記録・試聴",188,738,162,40,DiagnosticMenu,Color.white,PlanGray,16);
-            PButton(d,"ReplayTutorial","操作ガイド",370,738,164,40,ReplayTutorial,Color.white,PlanGray,16);
-            PButton(d,"CloseDialog","閉じる",690,724,220,54,CloseDialog,Color.white,PlanInk,20);
+            PButton(d,"DeleteRecords","記録を消す…",30,812,142,40,ConfirmDeleteRecords,new Color(0,0,0,0),Hex("c23a60"),16);
+            PButton(d,"AdvancedSettings","記録・試聴",188,812,162,40,DiagnosticMenu,Color.white,PlanGray,16);
+            PButton(d,"ReplayTutorial","操作ガイド",370,812,164,40,ReplayTutorial,Color.white,PlanGray,16);
+            PButton(d,"CloseDialog","閉じる",690,798,220,54,CloseDialog,Color.white,PlanInk,20);
         }
         private void SettingsSection(Transform d,string title,float x,float y,Color color)
         {var t=PText(d,title+"Section",title,x,y,840,22,11,color);t.characterSpacing=3;}

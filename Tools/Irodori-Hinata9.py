@@ -15,9 +15,10 @@ HINATA = ROOT / 'Assets/Audio/CompanyYear/VoiceTest/Hinata'
 IRODORI = Path(r'C:/Users/issak/Tools/Irodori-TTS')
 MODEL = 'Aratako/Irodori-TTS-v4-Large-Quantized/int8-weight-only'
 SEEDS = list(range(20261101, 20261117))
-# その5のLD2（説明D）の系統。こもりを避けるため、音質の一文を強める
+# その5のLD2（説明D）と同じ文。1回目は「こもりや電話のような音は無い」と書き足したら、16通り中15通りがこもった
+# （打ち消しは伝わらず、「電話」という言葉に引っぱられる）。説明に「電話」「こもり」などの言葉を入れない
 CAP = ('人懐っこく、ほがらかな若い女性。やわらかく甘さのある高めの声。少し早口で、うれしそうに話す。'
-       'スタジオの近いマイクで録った、高い音まで伸びた、明るく抜けのいい音質。こもりや電話のような音は無い。')
+       '近いマイクで録った、こもりのないクリアな音質。')
 LINES = [('greet', 'おはようございます、先輩！　今日も、なにごともない一日にしようね！'),
          ('maxim', 'バックアップは、戻せてこそバックアップ、だよ！')]
 ORIG = {'greet': 'tutorial_1', 'maxim': 'maxim_backup'}  # 元の声（ElevenLabs）で近い行。聞き比べだけ
@@ -97,7 +98,7 @@ button{{border:0;cursor:pointer;color:#fff;background:linear-gradient(180deg,#ff
 button.sm{{width:34px;height:34px;font-size:13px}} button.o{{background:linear-gradient(180deg,#b9c4d6,#8a97b0);box-shadow:0 4px 0 #6b7894}} button.on{{background:linear-gradient(180deg,#7fc4ff,#3fa9f5);box-shadow:0 4px 0 #1f75b8}}
 </style></head><body><header><h1>ひなたの声 その9　ゼロから探し直す</h1>
 <p>その7がこもった原因は、見本にした3本のうち1本（その5の「今月は最初の山場だよ」）が、最初から最後まで通話のような音だったこと。<br>
-LD2の系統の説明で、種を変えて16通り作り、0.5秒ごとにこもりを調べた。こもりが1か所でもある候補は薄く表示（外す）。残り{ok}通りから、ひなたに近い声を選んでください。<br>
+LD2の系統の説明（その5と同じ文）で、種を変えて16通り作り、0.5秒ごとにこもりを調べた。こもりが1か所でもある候補は薄く表示（外す）。残り{ok}通りから、ひなたに近い声を選んでください。<br>
 選んだ声で、こもりの無い見本を作り直してから全行を作ります（見本がきれいなら安定することは、かのん・りりぃで確認済み）。</p></header>
 <section><table><tr><th>候補</th>{head}</tr>{orig}{rows}</table></section>
 <script>let a=null;function play(btn,src){{if(a)a.pause();document.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));a=new Audio(src);btn.classList.add('on');a.onended=()=>btn.classList.remove('on');a.play()}}</script>

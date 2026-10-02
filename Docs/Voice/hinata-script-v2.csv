@@ -140,7 +140,7 @@ maxim_account,格言,確かめてから信じる,口座の変更は、いつも�
 maxim_mfa,格言,確かめてから信じる,心当たりのない承認は、ぜったい拒否だよ！,face_alert,pose_shield,[firm],
 maxim_least,格言,最小権限,権限は、必要な人に、必要な分だけ！,face_tease,pose_point,[playful],
 maxim_layers,格言,多層防御,壁は一枚より、何枚も重ねるのが強いんだよ！,face_proud,pose_shield,[confident],
-maxim_segment,格言,分離,区切っておけば、広がらない！,face_doya,pose_armscross,[confident],
+maxim_segment_v2,格言,分離,区切っておけば、広がりを抑えられる！,face_doya,pose_armscross,[confident],
 maxim_uptime,格言,止めすぎない,守るのと同じくらい、仕事を止めないのも大事！,face_normal,pose_please,[gentle],
 maxim_baseline,格言,普段を知る,「いつもと違う」が、いちばんのサインだよ！,face_determined,pose_magnifier,[curious],
 maxim_logs,格言,普段を知る,ログは、残しておいてこそ役に立つんだ！,face_normal,pose_laptop,[friendly],

@@ -89,7 +89,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         // 声の版を更新しても、同じ格言の既読は引き継ぐ。
         public static readonly string[] Ids={"maxim_backup","maxim_hurry","maxim_sender","maxim_link","maxim_account","maxim_mfa","maxim_least","maxim_layers","maxim_segment","maxim_uptime","maxim_baseline","maxim_logs","maxim_priority","maxim_restore","maxim_runbook","maxim_human","maxim_report","maxim_password","maxim_usb","maxim_estimate"};
-        public static string Canonical(string id)=>id=="maxim_hurry_v2"?"maxim_hurry":id=="maxim_link_v2"?"maxim_link":id;
+        public static string Canonical(string id)=>id=="maxim_hurry_v2"?"maxim_hurry":id=="maxim_link_v2"?"maxim_link":id=="maxim_segment_v2"?"maxim_segment":id;
         public static bool Valid(List<string> ids)=>ids==null||ids.Count<=Ids.Length&&ids.Distinct().Count()==ids.Count&&ids.All(Ids.Contains);
         public static string[] Candidates(string id)
         {

@@ -172,7 +172,7 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="maxim_mfa", caption="心当たりのない承認は、ぜったい拒否だよ！", scene="確かめてから信じる", faceId="face_alert", poseId="pose_shield" },
             new OpsReactionLine { id="maxim_least", caption="権限は、必要な人に、必要な分だけ！", scene="最小権限", faceId="face_tease", poseId="pose_point" },
             new OpsReactionLine { id="maxim_layers", caption="壁は一枚より、何枚も重ねるのが強いんだよ！", scene="多層防御", faceId="face_proud", poseId="pose_shield" },
-            new OpsReactionLine { id="maxim_segment", caption="区切っておけば、広がらない！", scene="分離", faceId="face_doya", poseId="pose_armscross" },
+            new OpsReactionLine { id="maxim_segment_v2", caption="区切っておけば、広がりを抑えられる！", scene="分離", faceId="face_doya", poseId="pose_armscross" },
             new OpsReactionLine { id="maxim_uptime", caption="守るのと同じくらい、仕事を止めないのも大事！", scene="止めすぎない", faceId="face_normal", poseId="pose_please" },
             new OpsReactionLine { id="maxim_baseline", caption="「いつもと違う」が、いちばんのサインだよ！", scene="普段を知る", faceId="face_determined", poseId="pose_magnifier" },
             new OpsReactionLine { id="maxim_logs", caption="ログは、残しておいてこそ役に立つんだ！", scene="普段を知る", faceId="face_normal", poseId="pose_laptop" },

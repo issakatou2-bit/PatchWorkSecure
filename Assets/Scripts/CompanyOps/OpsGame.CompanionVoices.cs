@@ -12,7 +12,7 @@ namespace PatchWorkSecure.CompanyOps
         private string companionSceneKey="";
         private OpsReactionLine FindVoiceLine(string id)
         {
-            if(id=="maxim_hurry"||id=="maxim_link")id+="_v2";
+            if(id=="maxim_hurry"||id=="maxim_link"||id=="maxim_segment")id+="_v2";
             if(id=="diary_y1_10"||id=="diary_y1_10_v2")id="diary_y1_10_v3";
             if(id=="diary_y3_06")id="diary_y3_06_v2";
             if(id=="final_restore_bridge")return new OpsReactionLine{id=id,caption="戻す前に、確かめる、だよ！",reaction=OpsReaction.Think};

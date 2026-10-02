@@ -19,6 +19,19 @@ namespace PatchWorkSecure.EditorTools
             if(palette==null) {palette=ScriptableObject.CreateInstance<OpsPlanningArt>();AssetDatabase.CreateAsset(palette,path);}
             foreach(var field in typeof(OpsPlanningArt).GetFields(BindingFlags.Public|BindingFlags.Instance))
             {
+                if(field.Name.StartsWith("pair"))
+                {
+                    string pairName=field.Name=="pairHinataKanon"?"hinata-kanon-1":field.Name=="pairHinataEngineer"?"hinata-engineer-3":"kanon-engineer-2";
+                    string pairPath="Assets/Sprites/Pairs/"+pairName+".png";
+                    if(!Directory.Exists("Assets/Sprites/Pairs"))Directory.CreateDirectory("Assets/Sprites/Pairs");
+                    if(!File.Exists(pairPath))File.Copy("ArtSource/Characters/pairs-20261002/"+pairName+".png",pairPath);
+                    AssetDatabase.ImportAsset(pairPath);
+                    var importer=AssetImporter.GetAtPath(pairPath) as TextureImporter;
+                    importer.textureType=TextureImporterType.Sprite;importer.spriteImportMode=SpriteImportMode.Single;
+                    importer.textureCompression=TextureImporterCompression.Uncompressed;importer.maxTextureSize=2048;importer.mipmapEnabled=false;
+                    importer.alphaIsTransparency=true;var settings=new TextureImporterSettings();importer.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;importer.SetTextureSettings(settings);
+                    importer.SaveAndReimport();field.SetValue(palette,AssetDatabase.LoadAssetAtPath<Sprite>(pairPath));continue;
+                }
                 if(field.Name=="ribbonSlant")
                 {
                     var ribbon=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/UI/Craft/ribbon-slant.png");

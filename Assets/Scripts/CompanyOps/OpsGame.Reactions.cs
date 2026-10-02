@@ -243,6 +243,7 @@ namespace PatchWorkSecure.CompanyOps
 
         public void StopVoice()
         {
+            ClearMeetingPhoto();
             if(voiceAudio!=null)voiceAudio.Stop();pendingVoice=null;followingVoice.Clear();voiceBusyUntil=0;speakingPriority=0;carryResolutionVoice=false;
         }
     }

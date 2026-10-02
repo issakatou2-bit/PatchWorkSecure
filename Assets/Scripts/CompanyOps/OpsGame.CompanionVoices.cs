@@ -74,6 +74,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void UpdateSpeakerBadge(TextMeshProUGUI label)
         {
+            UpdateMeetingPhoto();
             var marker=label.GetComponent<OpsVoiceSpeakerBadge>();
             if(marker==null)
             {

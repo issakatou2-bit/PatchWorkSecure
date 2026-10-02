@@ -91,3 +91,10 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - エンジニア：`Aratako/Irodori-TTS-v4.1-Small`（**MIT**。ライセンス表記を同梱）。見本`ArtSource/Voice/Irodori-refs/engineer-ref.wav`、話す速さ0.8倍。
 - 見本はどちらもこの道具で文字の説明だけから作った声（実在の人の声は使っていない）。Irodoriは聞こえない透かし（SilentCipher）を入れる。
 - ElevenLabsの無料枠の音声（ひなた）と違い、gitで追跡してよく、配布できる（上の条件を守る）。
+
+## 2026-10-02 承認済みの二人絵（Next-14）
+
+- 加藤さん承認の3枚：`hinata-kanon-1.png`、`hinata-engineer-3.png`、`kanon-engineer-2.png`。原画と制作経緯は `ArtSource/Characters/pairs-20261002/README.md`。加藤さんのChatGPTで生成したオリジナルのキャラ絵。新たな画像生成や第三者の絵の流用はしていない。
+- `Assets/Sprites/Pairs/` に原画をそのまま複製し、Unity標準Spriteとして取り込む。最大2048、非圧縮、MipMapなし、FullRect。横長の写真窓は原画全体の比率を保ち、顔を切り抜かない。
+- 日記1年目6月/10月と3年目5月の会議の指定掛け合いだけに使用。キャプションは既存Klee One。写真の白い余白・影は既存UI部品。
+- 公開時はストアのAI生成内容の申告対象。サービスの利用条件の確認はストア素材の既存方針に従う。音声を含まない画面写真で、ElevenLabs無料音声の公開禁止を回避しているだけで、動画用の公開音声へ変更したものではない。

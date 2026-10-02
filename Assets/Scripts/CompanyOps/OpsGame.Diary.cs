@@ -144,11 +144,13 @@ namespace PatchWorkSecure.CompanyOps
                 DiaryTag(book,"今月のできごと",66,134,146,Hex("fff0f4"),Hex("d94a70"));
                 var marker=PImage(book,"DiaryMarker",null,66,253,260,14,new Color(1,.878f,.4f,.9f));
                 DiaryText(book,"DiaryActualRecord",r.recap,66,204,568,240,22);
-                float memoHeight=e.memo.Length>40?138:110;
-                var memoShadow=PImage(book,"DiaryMemoShadow",PlanningArt.shadow,276,420,350,memoHeight+48,Color.white,true);memoShadow.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);
-                var memo=PImage(book,"DiaryMemo",null,300,436,302,memoHeight,Hex("fff6b8"));memo.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);KitGradient(memo.GetComponent<Image>(),Hex("fff6b8"),Hex("ffef8a"));
-                PImage(memo,"MemoTape",null,116,-10,70,20,new Color(1,1,1,.55f));PText(memo,"MemoCategory","情シスあるある",16,14,270,24,12,Hex("9a7a00"));DiaryText(memo,"DiaryMemoText",e.memo,16,42,270,memoHeight-44,17);
-                DiaryPhoto(book,90,470,190,226,r.mood==2?"pose_exhausted":e.pose,r.mood==2?"くやしい日":"今月のひなた",r.mood==2?-4:-5,r.mood==2);
+                Sprite pair=year==1&&month==2?PlanningArt.pairHinataKanon:year==1&&month==6?PlanningArt.pairHinataEngineer:null;
+                float memoHeight=pair!=null?174:e.memo.Length>40?138:110,memoX=pair!=null?412:300,memoWidth=pair!=null?222:302;
+                var memoShadow=PImage(book,"DiaryMemoShadow",PlanningArt.shadow,memoX-24,420,memoWidth+48,memoHeight+48,Color.white,true);memoShadow.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);
+                var memo=PImage(book,"DiaryMemo",null,memoX,436,memoWidth,memoHeight,Hex("fff6b8"));memo.localEulerAngles=new Vector3(0,0,r.mood==2?-2:3);KitGradient(memo.GetComponent<Image>(),Hex("fff6b8"),Hex("ffef8a"));
+                PImage(memo,"MemoTape",null,(memoWidth-70)/2,-10,70,20,new Color(1,1,1,.55f));PText(memo,"MemoCategory","情シスあるある",16,14,memoWidth-32,24,12,Hex("9a7a00"));DiaryText(memo,"DiaryMemoText",e.memo,16,42,memoWidth-32,memoHeight-44,17);
+                if(pair!=null)PairPolaroid(book,"DiaryPair",pair,66,470,month==2?"予算のひみつ":"はじめての夜",-3);
+                else DiaryPhoto(book,90,470,190,226,r.mood==2?"pose_exhausted":e.pose,r.mood==2?"くやしい日":"今月のひなた",r.mood==2?-4:-5,r.mood==2);
                 DiarySticker(book,"DiaryRankSticker","運用ランク",r.rank,470,r.mood==2?600:585,r.mood==2?110:120,r.mood==2?Hex("7d8aa3"):Hex("f45a80"),r.mood==2?8:-12,0);
                 if(!string.IsNullOrEmpty(r.minigame))DiarySticker(book,"DiaryMinigameSticker","対応",r.minigame.Split(' ').Last(),350,655,90,Hex("2f93dc"),10,.25f);
                 DiaryTag(book,"ひなたのひとこと",760,98,158,Hex("fff6d6"),Hex("7a5a00"));

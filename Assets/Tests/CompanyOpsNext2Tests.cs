@@ -173,8 +173,8 @@ namespace PatchWorkSecure.Tests
             limit=Time.realtimeSinceStartup+2;string doneCaption=OpsGame.SpeechLines(game.ActiveVoiceBank.Find("mission_done").caption);
             while(Find<TextMeshProUGUI>("NavigatorSpeech").text!=doneCaption&&Time.realtimeSinceStartup<limit)yield return null;
             Assert.AreEqual(doneCaption,Find<TextMeshProUGUI>("NavigatorSpeech").text);Capture("129-voice-mission-done");
-            limit=Time.realtimeSinceStartup+5;while(game.LastReactionId!="maxim_report"&&Time.realtimeSinceStartup<limit)yield return null;
-            Assert.AreEqual("maxim_report",game.LastReactionId);Assert.Contains("maxim_report",game.Career.yearMaxims);
+            limit=Time.realtimeSinceStartup+5;while(game.LastReactionId!="maxim_report_v2"&&Time.realtimeSinceStartup<limit)yield return null;
+            Assert.AreEqual("maxim_report_v2",game.LastReactionId);Assert.Contains("maxim_report",game.Career.yearMaxims);
             Click("NextMonth");yield return null;Assert.AreEqual("season_05",game.LastReactionId);Assert.AreEqual(1,game.State.month);LogAssert.NoUnexpectedReceived();
         }
         [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()

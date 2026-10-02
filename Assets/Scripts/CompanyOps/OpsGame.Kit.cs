@@ -115,7 +115,7 @@ namespace PatchWorkSecure.CompanyOps
             PhasePresentationRunning=true;
             yield return null;
             if (target == null) {PhasePresentationRunning=false;yield break;}
-            string kind=homeVisible?"screen":State.phase==OpsPhase.Planning?"month":State.phase==OpsPhase.Incident?"incident":"screen";
+            string kind=homeVisible||State==null||recordsActive||DailyPracticeActive?"screen":State.phase==OpsPhase.Planning?"month":State.phase==OpsPhase.Incident?"incident":"screen";
             bool skipAllowed=presentationVisits.ContainsKey("transition_"+kind);
             RepeatDuration("transition_"+kind,1,1);
             phasePresentationSkipped=false;PhasePresentationCanSkip=skipAllowed;

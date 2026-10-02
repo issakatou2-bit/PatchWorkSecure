@@ -154,8 +154,9 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsContainmentMinigame;if(game==null)return;
             double f=1-OpsCatalog.MinigameResultInfluence*(game.Score-50)/50;
-            text=game.Finding+"\n感染 "+game.TotalInfected+"台（止めきれず "+game.Uncontained+"台） / 正常なのに停止 "+game.NormalStopped+"台\n"+(State.SupportsFinalRecovery?"被害に ×":"被害・停止に ×")+f.ToString("F2")+"。現行結果を含む目安の幅で抑えます。"+
-                (State.SupportsFinalRecovery?"\n停止への影響は、次の復旧の点数で決まります。":"")+
+            bool final=!DailyPracticeActive&&State!=null&&State.SupportsFinalRecovery;
+            text=game.Finding+"\n感染 "+game.TotalInfected+"台（止めきれず "+game.Uncontained+"台） / 正常なのに停止 "+game.NormalStopped+"台\n"+(final?"被害に ×":"被害・停止に ×")+f.ToString("F2")+"。現行結果を含む目安の幅で抑えます。"+
+                (final?"\n停止への影響は、次の復旧の点数で決まります。":"")+
                 (game.Backup?"\n分離バックアップの効果は反映済み（二重に減らしません）。":"");
         }
         private Vector2 MinigamePCCenter(int index)=>new Vector2(18+index/5*219.5f+10+185.5f/2,110+18+40+index%5*93.4f+85.4f/2);

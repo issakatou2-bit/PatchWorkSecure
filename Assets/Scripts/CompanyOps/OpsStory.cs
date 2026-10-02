@@ -141,13 +141,14 @@ namespace PatchWorkSecure.CompanyOps
         public int format=OpsCatalog.ProgressSaveVersion;
         public bool storyMode;
         public bool endlessMode;
+        public bool careerOnly;
         public OpsState single;
         public OpsStory story;
         public OpsEndless endless;
         public OpsCareer career=new OpsCareer();
         public OpsState Current=>endless!=null?endless.state:story==null?single:story.state;
         public bool Valid()=>format==OpsCatalog.ProgressSaveVersion&&career!=null&&career.Valid()&&
-            (endless!=null?story==null&&single==null&&career.endlessUnlocked&&endless.Valid():story==null?single!=null&&single.endlessYear==0&&single.Valid()&&single.yearPressure==0:single==null&&story.Valid())&&
+            (careerOnly?single==null&&story==null&&endless==null: endless!=null?story==null&&single==null&&career.endlessUnlocked&&endless.Valid():story==null?single!=null&&single.endlessYear==0&&single.Valid()&&single.yearPressure==0:single==null&&story.Valid())&&
             (!((story?.cleared??false)&&(story?.rewardClaimed??false))||career.endlessUnlocked);
     }
 }

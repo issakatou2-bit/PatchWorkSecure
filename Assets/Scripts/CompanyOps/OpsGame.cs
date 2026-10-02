@@ -46,15 +46,22 @@ namespace PatchWorkSecure.CompanyOps
             if(OpsSaveStore.WriteProgress(SavePath,progress,out string warning)){savedProgress=progress;saved=State;}
             SaveWarning = warning;
         }
+        private void SaveCareer()
+        {
+            if(TestMode)return;
+            var progress=State!=null?ExportProgress():savedProgress??new OpsProgress{careerOnly=true};progress.career=Career;
+            if(OpsSaveStore.WriteProgress(SavePath,progress,out string warning)){savedProgress=progress;saved=progress.Current;}
+            SaveWarning=warning;
+        }
         public void StartYear(int seed){Story=null;Endless=null;EnterYear(new OpsState(seed,true),true);}
         public void StartStory(int seed){Endless=null;Career.startedStoryAttempts=Math.Max(Career.startedStoryAttempts,Career.finishedAttempts)+1;Story=OpsStory.Begin(seed,Career.factors);EnterYear(Story.state,true);}
         public bool StartEndless(int seed)
         {if(!Career.endlessUnlocked)return false;Story=null;Endless=OpsEndless.Begin(seed,Career.factors);EnterYear(Endless.state,true);return true;}
         private void EnterYear(OpsState next,bool tutorial)
         {storyAnnualDetails=false;CancelMinigame();StopVoice();SkipTutorialVisual();tutorialStep=-1;voiceScreenKey="";lastTutorialVoice="";rankVoicePending=false;resolutionActive=false;pendingRankBenefit="";statEffectPending=false;roomFilter="";budgetGainPending=false;rankBefore=rankAfter=null;rankedReports.Clear();workCompletePending=false;workCompleteMonth=-1;State=next;statChanges=new int[6];tab=0;Save();Render();if(tutorial)TutorialNewYear();}
-        public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null&&Endless==null?State:null,story=Story,endless=Endless,storyMode=Story!=null,endlessMode=Endless!=null,career=Career};
+        public OpsProgress ExportProgress()=>new OpsProgress{single=Story==null&&Endless==null?State:null,story=Story,endless=Endless,storyMode=Story!=null,endlessMode=Endless!=null,career=Career,careerOnly=State==null&&Story==null&&Endless==null};
         public bool RestoreProgress(OpsProgress progress)
-        {if(progress==null||!progress.Valid())return false;Story=progress.story;Endless=progress.endless;Career=progress.career;EnterYear(progress.Current,false);return true;}
+        {if(progress==null||!progress.Valid())return false;Story=progress.story;Endless=progress.endless;Career=progress.career;if(progress.careerOnly){State=null;RenderHome();}else EnterYear(progress.Current,false);return true;}
         private void ContinueSaved()=>RestoreProgress(savedProgress??new OpsProgress{single=saved,career=Career});
         private void RecordStoryOutcome()
         {

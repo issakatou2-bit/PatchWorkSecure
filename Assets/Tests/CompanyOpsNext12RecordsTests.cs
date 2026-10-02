@@ -26,7 +26,7 @@ namespace PatchWorkSecure.Tests
         }
         [Test] public void Next12Records_九称号とランクの境界と三十九既読を検査する()
         {
-            Assert.AreEqual(9,OpsCatalog.TitleIds.Length);Assert.AreEqual(9,OpsCatalog.TitleNames.Length);Assert.AreEqual(9,OpsCatalog.TitleHints.Length);
+            Assert.AreEqual(10,OpsCatalog.TitleIds.Length);Assert.AreEqual(OpsCatalog.TitleIds.Length,OpsCatalog.TitleNames.Length);Assert.AreEqual(OpsCatalog.TitleIds.Length,OpsCatalog.TitleHints.Length);
             Assert.AreEqual("S",OpsCatalog.EndlessRank(OpsCatalog.EndlessRankSS-1));Assert.AreEqual("SS",OpsCatalog.EndlessRank(OpsCatalog.EndlessRankSS));Assert.AreEqual("C",OpsCatalog.EndlessRank(0));
             var c=new OpsCareer{diary=null,titles=null,bestOverallRank=null};Assert.IsTrue(c.Valid());Assert.IsFalse(c.RecordDiaryTitle());c.diary=new System.Collections.Generic.List<OpsDiaryRecord>();
             foreach(int key in Enumerable.Range(0,38))c.diary.Add(new OpsDiaryRecord{key=key,content=key,rank="B",recap="実記録",thought="一言",minigame=""});Assert.IsFalse(c.RecordDiaryTitle());

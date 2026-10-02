@@ -41,7 +41,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool OpenMinigame(OpsMinigame session,string response,Action<OpsMinigame> complete)
         {
             bool practice=session is OpsMailMinigame mail&&mail.Practice || session is OpsLogMinigame||session is OpsBlockMinigame;
-            if(session==null||session.Phase!=OpsMinigamePhase.Brief||State==null||(practice?State.phase!=OpsPhase.Planning:State.phase!=OpsPhase.Incident)||MinigameActive||ResolutionActive)return false;
+            if(session==null||session.Phase!=OpsMinigamePhase.Brief||(!DailyPracticeActive&&(State==null||(practice?State.phase!=OpsPhase.Planning:State.phase!=OpsPhase.Incident)))||MinigameActive||ResolutionActive)return false;
             Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
             StopVoice();homeVisible=false;NewScreen();
             var shared=screen.Find("SharedBackground");if(shared!=null)shared.gameObject.SetActive(false);
@@ -63,7 +63,7 @@ namespace PatchWorkSecure.CompanyOps
             var alert=PCard(top,"MinigameAlert",20,12,140,46,Hex("e0405f"),16,false);PText(alert,"MinigameAlertText","緊急対応",0,0,140,46,24,Color.white,true,true);
             KitGradient(alert.GetComponent<Image>(),Hex("ff7a93"),Hex("e0405f"));
             var topic=PCard(top,"MinigameTopic",172,18,328,34,PlanInk,12,false);
-            PText(topic,"MinigameEvent",State.CurrentEvent?.title??State.Current.@event,10,0,308,34,17,Color.white,true,true);
+            PText(topic,"MinigameEvent",DailyPracticeActive?"今日の一問 / "+dailyPracticeDay:State.CurrentEvent?.title??State.Current.@event,10,0,308,34,17,Color.white,true,true);
             var timer=PCard(top,"MinigameTimer",520,26,310,18,Hex("e3e8f1"),12,false);
             var fill=PCard(timer,"MinigameTimerFill",0,0,310,18,Hex("e0405f"),12,false);KitGradient(fill.GetComponent<Image>(),Hex("ffc02e"),Hex("e0405f"),true);
             PText(top,"MinigameTime","20.0",842,13,66,44,20,PlanInk,true,true);
@@ -82,6 +82,11 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ShortenMinigameBrief()
         {
+            if(DailyPracticeActive)
+            {
+                FindMinigameText("MinigameModalTitle").text=Minigame.Title+" / 今日の一問";
+                var skip=minigameCanvas.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="MinigameDelegate");skip.GetComponentInChildren<TextMeshProUGUI>().text="今回は見送る";
+            }
             if(!FastPresentation)return;
             string text=Minigame is OpsMailMinigame?"怪しいメールは報告（→）。本物は仕事を進める（←）。\nリンクの行き先はカーソル／長押しで確認。40秒で10通。":
                 Minigame is OpsMfaMinigame?"社員の今の様子を見て、本人のログインだけ許可（→）。\n心当たりのない承認は拒否（←）。30秒。":
@@ -108,7 +113,7 @@ namespace PatchWorkSecure.CompanyOps
                 card.anchoredPosition=new Vector2(290,-171);card.sizeDelta=new Vector2(700,418);DecisionPanel(card);
                 PText(card,"MinigameInstructions","社内のシステムが止まった。止まる範囲は事故ごとにかわる。\nシステムを押すと、手の空いている人が立ち上げ始める（2人で同時）。\n支えている仕組みが動いていないと失敗して30分を失う。\n黄色の枠は、止まっている間ずっと損失が出る業務。目標復旧時間までに戻そう。\n作業時間・損失・2人目の合流・月末かどうかも毎回かわる。",26,104,648,148,15,null,false);
                 PText(card,"MinigameEquipment",(restore.Runbook?"導入済み":"未導入")+"：手順書（支えている仕組みのつながりが最初から見える）",26,274,648,40,15,null,false);
-                if(State.SupportsFinalRecovery)
+                if(!DailyPracticeActive&&State.SupportsFinalRecovery)
                 {
                     FindMinigameText("MinigameInstructions").text="次は復旧。停止への影響は、この対応の点数で決まる。\n支えている仕組みを確かめ、2人で順番に立ち上げよう。\n復元元と侵入経路の安全確認より先に戻すと再暗号化。\n黄色の枠の業務は、目標復旧時間までに戻そう。";
                     FindMinigameText("MinigameInstructions").rectTransform.sizeDelta=new Vector2(648,100);
@@ -174,6 +179,7 @@ namespace PatchWorkSecure.CompanyOps
         public void DelegateMinigame()
         {
             if(Minigame==null||!Minigame.Delegate())return;
+            if(DailyPracticeActive){ConfirmMinigame();return;}
             MinigameResult();SpeakSceneLine("mg_delegate",0);
         }
         public void TickMinigame(float delta)
@@ -231,10 +237,12 @@ namespace PatchWorkSecure.CompanyOps
                 minigameMaxim=Minigame is OpsMailMinigame mail?mail.ResultMaxim:Minigame is OpsLogMinigame?"maxim_logs":Minigame is OpsBlockMinigame?"maxim_priority":restore?"maxim_restore":"maxim_mfa";
                 PText(card,"MinigameMaxim",CaptionsEnabled?SpeechLines(ReactionBank?.Find(minigameMaxim)?.caption??""):"",222,170,432,70,16,PlanInk,false);
             }
-            PText(card,"MinigameResultDetail",Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail(),26,decision?250:224,628,restore?86:112,16,null,false);
+            string detail=Minigame.Delegated?"社員に任せたため、現在と同じ50点の対応です。":MinigameResultDetail();
+            if(DailyPracticeActive)detail=string.Join("\n",detail.Split('\n').Take(2))+"\n練習の点数を記録します。本編の進行・数値は変わりません。";
+            PText(card,"MinigameResultDetail",detail,26,decision?250:224,628,restore?86:112,16,null,false);
             if(restore&&!Minigame.Delegated)DrawRestoreResults(card);
             bool practice=Minigame is OpsMailMinigame training&&training.Practice || Minigame is OpsLogMinigame||Minigame is OpsBlockMinigame;
-            PButton(card,"MinigameContinue",practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):Minigame is OpsContainmentMinigame&&State.SupportsFinalRecovery?"復旧へ進む":"結果を反映する",26,restore?520:decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
+            PButton(card,"MinigameContinue",DailyPracticeActive?"記録へ戻る":practice?(Minigame.Delegated?"計画へ戻る":"手がかりを共有する"):Minigame is OpsContainmentMinigame&&State.SupportsFinalRecovery?"復旧へ進む":"結果を反映する",26,restore?520:decision?398:352,628,58,ConfirmMinigame,PlanPink,Color.white,20);
             if(!Minigame.Delegated)StartCoroutine(CountMinigameResult(stamp,Minigame.Score));
         }
         public void ConfirmMinigame()

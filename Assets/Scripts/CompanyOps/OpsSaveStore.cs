@@ -6,7 +6,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public static class OpsSaveStore
     {
-        [Serializable] private sealed class Header { public int format=0; public bool storyMode=false,endlessMode=false; }
+        [Serializable] private sealed class Header { public int format=0; public bool storyMode=false,endlessMode=false,careerOnly=false; }
         public static OpsProgress ReadProgress(string path,out string warning)
         {
             warning="";
@@ -26,7 +26,8 @@ namespace PatchWorkSecure.CompanyOps
                     progress=JsonUtility.FromJson<OpsProgress>(json);
                     // Unityのインライン直列化はnullのクラスを空の実体にするため、明示のモードで復元する。
                     if(header.storyMode&&header.endlessMode)throw new InvalidDataException();
-                    if(progress!=null){if(header.endlessMode){progress.single=null;progress.story=null;}else if(header.storyMode){progress.single=null;progress.endless=null;}else{progress.story=null;progress.endless=null;}}
+                    if(header.careerOnly&&(header.storyMode||header.endlessMode))throw new InvalidDataException();
+                    if(progress!=null){if(header.careerOnly){progress.single=null;progress.story=null;progress.endless=null;}else if(header.endlessMode){progress.single=null;progress.story=null;}else if(header.storyMode){progress.single=null;progress.endless=null;}else{progress.story=null;progress.endless=null;}}
                 }
                 if(progress==null||!progress.Valid())throw new InvalidDataException();return progress;
             }

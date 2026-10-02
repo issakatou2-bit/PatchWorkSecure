@@ -25,4 +25,9 @@
 
 ## 最終確認
 
-①〜③の後に全PlayModeを連続2回、Verify系、1年CSVのSHA256、フォント/PlayerPrefsの保全、Windows版の更新を行う。Depthsの既知の+27ptは未達のまま記録し、判定基準は緩めない。
+- ①〜③のコミットは `a69b953` / `28989eb` / `d6f5040`。最終版の全PlayMode **280/280を2回連続成功**。3アセンブリのコンパイルも成功。
+- Core / CompanyOps / Personas / ThreeYears / EndlessYearsは成功。Depthsは既知の最適化完走率58%→85%（+27pt）で未達。限定50.25%、非優越候補平均1.980、SS10.22%。基準は変更しない。
+- 1年900年度・10,779月のCSVはNext-8前とSHA256完全一致。`years.csv` = `44EE642013CE5D216A40C75AFA8F8D718EB650E9EFF98087861613D7CCB7FA58`、`turns.csv` = `830D58BB7C57A016EB67DCCA407B68B5A0E9465CE4776211C90DF86CEFDF2C63`。エンドレス900挑戦の2CSVもNext-12の確定版と一致。本編は225/540＝41.67%、4回目まで365/540＝67.59%で不変。
+- テスト前後の新試作フォント5件とPlayerPrefs14キーの存在・型・値が一致。1回目で増えたHeadingDynamicの作業キャッシュは、開始時の5件すべてと同一だと照合したUnityの控えから復帰（復帰前も退避）。2回目後は8フォントとも同じ控えのSHA256と一致。ビルド前後も8件一致。元からあった未コミットの設定・素材metaには触れない。
+- Windows私的試遊版を更新。実装DLLの更新時刻は2026-10-02 23:54。12か月・BGM2曲・SE15用途・事件音声はすべてPASSED。終了時のComputeBuffer破棄の診断は残るため「警告なし」とはしない。
+- 根拠は `Artifacts/next-Next14-full-{1,2}-tests.json`、`Artifacts/Next14/verify-summary.json`、`endless-csv.json`、`preservation-summary.json`、`build-font-preservation.json`、`player-smoke.log`。Next-14の完了報告後にNext-15へ進む。

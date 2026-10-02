@@ -45,6 +45,7 @@ namespace PatchWorkSecure.CompanyOps
             if(ids.Count==0)StoryText(reward,"EndlessNoAwards","新しい称号はなし\nこれまでの称号と自己ベストは残る",26,126,648,100,22,PlanGray,false,true);
             StoryButton("EndlessAnnualReview",RunYear+"年目を振り返る",80,780,326,ReviewStoryAnnual);
             StoryButton("EndlessBackHome","タイトルへ",422,780,330,RenderHome,true);StoryButton("EndlessRecords","記録を見る",768,780,310,OpenRecords);
+            StorySpeech("",930,676,360,88);QueueCompanionScene(Endless.retired?"year_clear":"year_fail","StorySpeechText",true);
         }
     }
 }

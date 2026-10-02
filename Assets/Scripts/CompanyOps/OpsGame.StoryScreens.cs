@@ -87,6 +87,7 @@ namespace PatchWorkSecure.CompanyOps
             StoryButton("StoryAnnualReview",year+"年目を振り返る",120,780,310,ReviewStoryAnnual);
             if(endless){StoryButton("NextEndlessYear","次の年度へ続ける",446,780,330,()=>NextEndlessYear(),true);StoryButton("RetireEndless","ここで引退する",792,780,310,ConfirmRetireEndless);}
             else StoryButton("NextStoryYear",next+"年目をはじめる",446,780,434,()=>NextStoryYear(),true);
+            QueueCompanionScene("year_clear","StorySpeechText",true);
         }
         private void StoryCarryMetrics(RectTransform panel)
         {
@@ -165,6 +166,7 @@ namespace PatchWorkSecure.CompanyOps
             Portrait(screen,"StoryPortrait",1310,610,250,290,"pose_fists");StorySpeech("ここまで来られたのは本物だよ。\n次は山場に備えて、もう一回！",920,676,380,88);
             StoryButton("BackHome","タイトルへ",80,780,326,StoryTitleOrFactor);
             StoryButton("StoryRecord","因子を選んで次の挑戦へ",422,780,458,OpenStoryFactors,true);
+            QueueCompanionScene("year_fail","StorySpeechText",true);
         }
         private void StoryFailureRow(Transform parent,string id,string title,string value,float y,Color bg,Color fg)
         {

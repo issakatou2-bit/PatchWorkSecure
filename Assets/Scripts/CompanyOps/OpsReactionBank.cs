@@ -10,6 +10,8 @@ namespace PatchWorkSecure.CompanyOps
     [Serializable] public sealed class OpsReactionLine
     {
         public string id, caption;
+        // 空欄は従来のひなた。仲間の音声も同じ再生経路を使う。
+        public string speaker;
         public OpsReaction reaction;
         public AudioClip clip;
         public string faceId, poseId;

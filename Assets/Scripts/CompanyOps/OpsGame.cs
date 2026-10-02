@@ -103,6 +103,7 @@ namespace PatchWorkSecure.CompanyOps
             ActionStatParticles(origin);
             SpeakRankUp();
             // 調査は結果確定まで非同期。開始時でなく、反映後にガイドを進める。
+            if(action=="proposal"&&State.SecretaryProposalBonus>0)QueueCompanionScene("budget");
             TutorialAction("Action_"+action);
             if(action=="rest"&&pendingVoice==null)foreach(var identity in screen.GetComponentsInChildren<OpsPortraitIdentity>())if(identity.name=="NavigatorPortrait")
             {identity.GetComponent<OpsPortraitAnimator>().ChangePose("pose_coffee");}

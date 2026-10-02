@@ -15,7 +15,8 @@ namespace PatchWorkSecure.CompanyOps
         private readonly float[] portraitSamples=new float[64];
         private int portraitSampleFrame=-1;
         private float portraitLevel;
-        public bool PortraitVoicePlaying => voiceAudio!=null && voiceAudio.isPlaying && !muted && VoiceEnabled && voiceVolume>0;
+        public bool VoicePlaying => voiceAudio!=null && voiceAudio.isPlaying && !muted && VoiceEnabled && voiceVolume>0;
+        public bool PortraitVoicePlaying => VoicePlaying && string.IsNullOrEmpty(CurrentSpeaker);
         public float PortraitVoiceLevel
         {
             get
@@ -32,6 +33,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         public string LastReactionId { get; private set; } = "";
         public string LastReactionCaption { get; private set; } = "";
+        public string CurrentSpeaker { get; private set; } = "";
         public bool UseLocalTestVoices {get;set;}=true;
         private OpsReactionBank localVoiceBank;
         private bool localVoiceChecked;
@@ -73,13 +75,14 @@ namespace PatchWorkSecure.CompanyOps
         public bool SpeakSceneLine(string id,float delay=.2f,string target="NavigatorSpeech")
         {
             // 全文は同じ場面が再発したら読み直す。掛け声の連続防止はDirector側で行う。
-            var line=ReactionBank?.Find(id);if(line==null)return false;
+            var line=FindVoiceLine(id);if(line==null)return false;
             StopVoice();BeginVoice(line,delay,5,target);return true;
         }
         private void BeginVoice(OpsReactionLine line,float delay,int priority,string target)
         {
+            CurrentSpeaker=line.speaker??"";
             LastReactionId=line.id;LastReactionCaption=line.caption;voiceCaptionTarget=homeVisible&&target=="NavigatorSpeech"?"TitleCaption":target;speakingPriority=priority;
-            ApplyVoiceCaption();ApplyReactionFace(line.reaction,line);
+            ApplyVoiceCaption();if(CurrentSpeaker=="")ApplyReactionFace(line.reaction,line);
             pendingVoice=line;voiceStartAt=Time.unscaledTime+Mathf.Max(0,delay);
             // 音声なしでも字幕を読める。操作や次の画面への進行は待たせない。
             voiceBusyUntil=voiceStartAt+(line.clip!=null&&VoiceEnabled&&!muted&&voiceVolume>0?line.clip.length:2.5f);
@@ -87,13 +90,20 @@ namespace PatchWorkSecure.CompanyOps
         private void ApplyVoiceCaption()
         {
             if(screen==null||LastReactionId=="")return;
+            if(CurrentSpeaker!="")
+            {
+                EnsureCompanionCaption();
+                foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.StopSpeaking();
+            }
             foreach(var label in screen.GetComponentsInChildren<TextMeshProUGUI>())if(label.name==voiceCaptionTarget)
             {
-                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"||label.name=="DiaryVoiceCaption"?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
+                label.enabled=true;label.text=CaptionsEnabled?(label.name=="VoicePreviewCaption"?LastReactionCaption:label.name=="TitleCaption"||label.name=="StoryEndingVoiceCaption"||label.name=="DiaryVoiceCaption"||label.name=="CompanionCaption"||CurrentSpeaker!=""?LastReactionCaption.Replace("\r","").Replace("\n"," "):SpeechLines(LastReactionCaption)):label.name=="VoicePreviewCaption"?"字幕はOFF":"";
                 if(label.name=="ResolutionReaction")label.fontSizeMin=12;
+                if(CurrentSpeaker!="")label.maxVisibleCharacters=int.MaxValue;
                 // 字幕に数値通知を重ねない。成果の数値はHUD・月報・発動内訳に残る。
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);
-                PortraitSpeech(label);
+                UpdateSpeakerBadge(label);
+                if(CurrentSpeaker=="")PortraitSpeech(label);
             }
         }
         private void TickVoice()
@@ -106,9 +116,9 @@ namespace PatchWorkSecure.CompanyOps
                     if(voiceAudio==null)voiceAudio=NewAudioSource();voiceAudio.Stop();voiceAudio.clip=line.clip;voiceAudio.volume=voiceVolume;voiceAudio.Play();
                 }
             }
-            if(pendingVoice==null&&!PortraitVoicePlaying&&Time.unscaledTime>=voiceBusyUntil&&followingVoice.Count>0)
+            if(pendingVoice==null&&!VoicePlaying&&Time.unscaledTime>=voiceBusyUntil&&followingVoice.Count>0)
             {
-                var line=ReactionBank?.Find(followingVoice.Dequeue());if(line!=null)BeginVoice(line,.18f,5,ResolutionActive?"ResolutionReaction":"NavigatorSpeech");
+                var line=FindVoiceLine(followingVoice.Dequeue());if(line!=null)BeginVoice(line,.3f,5,voiceCaptionTarget);
             }
             TryNextRankVoice();
         }
@@ -130,10 +140,18 @@ namespace PatchWorkSecure.CompanyOps
             if(!Application.isPlaying||State==null||ResolutionActive)return;
             string key=State.seed+":"+State.month+":"+State.phase;
             if(key==voiceScreenKey)return;voiceScreenKey=key;
-            if(State.phase==OpsPhase.Planning)SpeakSceneLine((State.HasPeakGoal?"peak_goal_":"season_")+(((State.month+3)%12)+1).ToString("00"),1.65f);
+            if(State.phase==OpsPhase.Planning)
+            {
+                string id=(State.HasPeakGoal?"peak_goal_":"season_")+(((State.month+3)%12)+1).ToString("00");
+                if(carryCompanionVoice){voiceCaptionTarget="NavigatorSpeech";ApplyVoiceCaption();followingVoice.Enqueue(id);}
+                else SpeakSceneLine(id,1.65f);
+                // 通常の定例会議。事件の正体や抽選には結び付けない。
+                if(RunYear==3&&State.month==1)QueueCompanionScene("meeting");
+            }
             else if(State.phase==OpsPhase.Incident)
             {
                 SpeakSceneLine("incident_start",.9f);followingVoice.Enqueue("incident_unconfirmed");
+                if(State.CurrentBoss!=null)QueueCompanionScene(State.CurrentProfile?.id=="bec"?"rival_bec":"rival");
             }
             else if(State.phase==OpsPhase.Review)
             {
@@ -182,7 +200,7 @@ namespace PatchWorkSecure.CompanyOps
 
         private void ApplyReactionFace(OpsReaction reaction,OpsReactionLine line)
         {
-            if (Navigator == null || screen == null) return;
+            if (Navigator == null || screen == null || line==null || !string.IsNullOrEmpty(line.speaker)) return;
             // 本編では道具を持った姿を維持。結果では台本のポーズへ戻す。
             string pose=Minigame?.Phase==OpsMinigamePhase.Playing?
                 Minigame is OpsMailMinigame?"pose_magnifier":Minigame is OpsMfaMinigame?"pose_laptop":line.poseId:line.poseId;

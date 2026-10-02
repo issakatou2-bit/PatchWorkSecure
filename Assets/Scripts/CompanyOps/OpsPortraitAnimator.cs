@@ -56,6 +56,11 @@ namespace PatchWorkSecure.CompanyOps
             speech=label;externalSpeech=observeOnly;speechAt=Time.unscaledTime;speech.ForceMeshUpdate();characters=speech.textInfo.characterCount;
             if(!externalSpeech)speech.maxVisibleCharacters=Owner!=null&&Owner.ReducedMotion?int.MaxValue:0;
         }
+        public void StopSpeaking()
+        {
+            if(speech!=null&&!externalSpeech)speech.maxVisibleCharacters=int.MaxValue;
+            speech=null;characters=0;IsSpeaking=false;mouthOpen=false;
+        }
         private void ScheduleBlink(){blinkAt=Time.unscaledTime+3+(float)random.NextDouble()*2;}
         public void Blink(){if(Frames?.EyesClosed==null)return;blinkStarted=Time.unscaledTime;doubleBlink=!followUpBlink&&random.NextDouble()<.2;followUpBlink=false;BlinkCount++;}
         private void FitOverlay(RectTransform mask,Image overlay,Rect region)

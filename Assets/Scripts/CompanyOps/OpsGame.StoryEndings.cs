@@ -13,6 +13,7 @@ namespace PatchWorkSecure.CompanyOps
             if(special)StorySpecialEnding();else StoryClearEnding();
             // 台本の短い喜びを再利用。三年の文を一年用の全文で上書きしない。
             SpeakSceneLine("clear_04",.9f,"StoryEndingVoiceCaption");
+            if(special)QueueCompanionScene("ending","StoryEndingVoiceCaption");
         }
         private void StorySpecialEnding()
         {

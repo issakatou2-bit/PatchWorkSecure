@@ -102,7 +102,7 @@ namespace PatchWorkSecure.CompanyOps
             PhasePresentationRunning=false;
             if(homeVisible||State==null||State.phase!=OpsPhase.Ended){AnnualPresentationCanSkip=false;AnnualPresentationSkipped=false;}
             var departures=BeginPortraitScreen()?PortraitDepartures():new Action[0];
-            if (Application.isPlaying) {if(!carryResolutionVoice)StopVoice();StopAllCoroutines();StopPresentationSounds();}
+            if (Application.isPlaying) {if(!carryResolutionVoice&&!carryCompanionVoice)StopVoice();StopAllCoroutines();StopPresentationSounds();}
             if(outgoingScreen!=null)Destroy(outgoingScreen.gameObject);
             outgoingScreen=null;
             if(Application.isPlaying&&PortraitEntering&&screen!=null)
@@ -191,8 +191,8 @@ namespace PatchWorkSecure.CompanyOps
         private void Update()
         {
             TickMusic();
-            if(YearOpeningActive){TickYearOpening(Time.unscaledDeltaTime);return;}
             TickVoice();
+            if(YearOpeningActive){TickYearOpening(Time.unscaledDeltaTime);return;}
             if(FactorRevealActive&&!FactorRevealPaused)TickFactorReveal(Time.unscaledDeltaTime);
             AlignDialogFooter(); RefreshTutorial();
             if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)

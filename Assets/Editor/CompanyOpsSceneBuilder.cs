@@ -144,6 +144,12 @@ namespace PatchWorkSecure.EditorTools
             CompanyOpsTypography.CopyLicenses("Builds/CompanyYear");
             const string musicRecord = "Docs/CompanyYear-Music-2026-09-28.md";
             if (File.Exists(musicRecord)) File.Copy(musicRecord, "Builds/CompanyYear/BGM制作記録.md", true);
+            const string voiceNotices="Docs/Voice/Licenses";
+            if(Directory.Exists(voiceNotices))
+            {
+                string target="Builds/CompanyYear/Licenses/CompanionVoices";Directory.CreateDirectory(target);
+                foreach(string file in Directory.GetFiles(voiceNotices))File.Copy(file,Path.Combine(target,Path.GetFileName(file)),true);
+            }
             Debug.Log("[CompanyOps] Windows試遊版のビルド成功");
         }
         public static void BuildRelease() { BuildScene(); BuildPlayer(); }

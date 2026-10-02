@@ -56,13 +56,13 @@ namespace PatchWorkSecure.CompanyOps
         public void SkipYearOpening(){if(YearOpeningActive)PreviewYearOpening(4,false);}
         private void TickYearOpening(float dt)
         {
-            if(!YearOpeningPaused){openingElapsed+=dt;if(openingElapsed>=OpsCatalog.YearOpeningSeconds[YearOpeningStage]){AdvanceYearOpening();return;}}
+            if(!YearOpeningPaused){openingElapsed+=dt;if(openingElapsed>=OpsCatalog.YearOpeningSeconds[YearOpeningStage]){carryCompanionVoice=true;try{AdvanceYearOpening();}finally{carryCompanionVoice=false;}return;}}
             var bar=screen.Find("OpeningProgress") as RectTransform;if(bar!=null)bar.sizeDelta=new Vector2(1600*(YearOpeningStage+(YearOpeningPaused?1:Mathf.Clamp01(openingElapsed/OpsCatalog.YearOpeningSeconds[YearOpeningStage])))/5,5);
             var k=UnityEngine.InputSystem.Keyboard.current;if(k!=null&&(k.spaceKey.wasPressedThisFrame||k.enterKey.wasPressedThisFrame))AdvanceYearOpening();else if(k!=null&&k.escapeKey.wasPressedThisFrame)SkipYearOpening();
         }
         private void OpeningScreen()
         {
-            buildingYearOpening=true;NewScreen();buildingYearOpening=false;YearOpeningActive=true;PhasePresentationRunning=false;StopVoice();
+            buildingYearOpening=true;NewScreen();buildingYearOpening=false;YearOpeningActive=true;PhasePresentationRunning=false;if(!carryCompanionVoice)StopVoice();
             string[] stages={"growth","unlock","rivals","allies","title"};string kind=stages[YearOpeningStage];
             OpeningShape(screen,"OpeningBackground",kind=="title"?"rounded":kind,0,0,1600,900,PlanInk,0);
             PButton(screen,"OpeningAdvance","",0,0,1600,900,AdvanceYearOpening,Color.clear,Color.clear);
@@ -75,6 +75,8 @@ namespace PatchWorkSecure.CompanyOps
             skip.GetComponent<Image>().color=new Color(1,1,1,openingRepeated?.32f:.18f);
             for(int i=0;i<2;i++)IncidentShape(skip.transform,"SkipTriangle"+i,"play",107+i*10,18,8,11,Color.white);
             PImage(screen,"OpeningProgress",null,0,895,1600*(YearOpeningStage+1)/5,5,PlanPink);
+            if(YearOpeningStage==3)QueueCompanionScene("opening");
+            else if(carryCompanionVoice&&CurrentSpeaker!=""){voiceCaptionTarget="CompanionCaption";ApplyVoiceCaption();}
         }
         private void OpeningGrowth()
         {

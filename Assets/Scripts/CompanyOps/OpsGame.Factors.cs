@@ -43,7 +43,7 @@ namespace PatchWorkSecure.CompanyOps
                 StoryText(card,"FactorRecommendation"+i,speakers[i]+"の推薦："+OpsCatalog.FactorRecommendation(c.id),20,520,320,34,14,new Color(1,1,1,.9f),false,true);
                 var foil=PImage(card,"FactorFoil"+i,PlanningArt.shine,-200,0,160,560,new Color(1,1,.85f,.35f));Motion(foil,"shine",3.6f,i*.12f);
                 // 絵の上の透明な操作面。カードはマスクで角丸に切り抜き、別のボタンを重ねる。
-                var hit=PButton(screen,"ChooseFactor"+i,"",x,y,360,560,()=>{selectedFactor=index;FactorScreen();},Color.clear,Color.clear);
+                var hit=PButton(screen,"ChooseFactor"+i,"",x,y,360,560,()=>{selectedFactor=index;FactorScreen();if(index!=1)QueueCompanionScene(index==0?"factor_engineer":"factor_kanon");},Color.clear,Color.clear);
                 // 操作面と絵を同じ根へまとめ、既存のホバー／押下の手応えを絵にも伝える。
                 var edge=screen.Find("FactorCardEdge"+i) as RectTransform;var selection=screen.Find("FactorSelection"+i) as RectTransform;
                 foreach(var child in new[]{shadow,selection,edge,card})if(child!=null){child.SetParent(hit.transform,false);child.anchoredPosition-=new Vector2(x,-y);}

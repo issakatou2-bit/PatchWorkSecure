@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f034de8926ce87f40ade2cd87870fdf5, type: 3}
+  m_Name: CompanionVoices
+  m_EditorClassIdentifier: PatchWorkSecure::PatchWorkSecure.CompanyOps.OpsReactionBank
+  lines:
+  - id: kanon_opening
+    caption: "\u6570\u5B57\u306F\u308F\u305F\u3057\u304C\u4F5C\u308B\u308F\u3002\u3042\u306A\u305F\u305F\u3061\u306F\u3001\u5B88\u308B\u3053\u3068\u306B\u96C6\u4E2D\u3057\u3066\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 9a46500632bc8d74cb14d3c7de62ff8b, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u958B\u5E55\u6F14\u51FA\u306E\u4EF2\u9593\u306E\u5834\u9762"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_peak_budget
+    caption: "\u5C71\u5834\u306E\u6708\u306D\u3002\u81E8\u6642\u4E88\u7B97\u3001\u308F\u305F\u3057\u304B\u3089\u793E\u9577\u306B\u901A\u3057\u3066\u304A\u304F\u308F\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 7c9535b237ab20946b2d45144fbef186, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u5C71\u5834\u306E\u6708\u306E\u81E8\u6642\u4E88\u7B97"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_rival
+    caption: "\u6025\u304E\u306E\u4F9D\u983C\u307B\u3069\u3001\u3044\u3064\u3082\u306E\u7A93\u53E3\u3067\u78BA\u304B\u3081\u306A\u3055\u3044\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 0e36bbdf41ea9b74e9b2534522939933, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u5F37\u6575\u306E\u672D\uFF08BEC\u30FB\u306A\u308A\u3059\u307E\u3057\uFF09"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_factor
+    caption: "\u76F8\u8AC7\u304C\u96C6\u307E\u308B\u4F1A\u793E\u306F\u5F37\u3044\u308F\u3002\u3053\u308C\u3092\u6301\u3063\u3066\u3044\u304D\u306A\u3055\u3044\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: c6f7b2ada13b5214a868eb29800ada29, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u56E0\u5B50\u306E\u30AB\u30FC\u30C9\u306E\u63A8\u85A6"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_year_clear
+    caption: "\u4E0A\u51FA\u6765\u3088\u3002\u2026\u2026\u6765\u5E74\u3082\u3001\u671F\u5F85\u3057\u3066\u308B\u308F\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: f3d08e3d60be61d4c8ba70d9b0a2d969, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u5E74\u5EA6\u306E\u76EE\u6A19\u306B\u5C4A\u3044\u305F"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_year_fail
+    caption: "\u3053\u3053\u3067\u7D42\u308F\u308A\u3058\u3083\u306A\u3044\u308F\u3002\u6B21\u306F\u3001\u6570\u5B57\u3067\u52DD\u3061\u307E\u3057\u3087\u3046\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: eee5b073c3106b54eb3717330683bbf3, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u6311\u6226\u306E\u7D42\u308F\u308A"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_ending_ss
+    caption: "\u306A\u306B\u3054\u3068\u3082\u306A\u3044\u4E00\u5E74\u3002\u2026\u2026\u305D\u308C\u304C\u3001\u3044\u3061\u3070\u3093\u96E3\u3057\u3044\u306E\u3088\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 1a494c2b431ada14393f63ba6b4da06d, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u7279\u5225\u306A\u30A8\u30F3\u30C7\u30A3\u30F3\u30B0"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_tease
+    caption: "\u3075\u3075\u3063\u3001\u9854\u306B\u300C\u52A9\u3051\u3066\u300D\u3063\u3066\u66F8\u3044\u3066\u3042\u308B\u308F\u3088\uFF1F"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: a64c8db8df884ae4ebeccf19c4b81ea8, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u304B\u3089\u304B\u3046"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_meeting
+    caption: "\u307B\u3089\u3001\u4F1A\u8B70\u3088\u3002\u4E94\u5206\u524D\u3002\u2026\u2026\u307E\u305F\u5FD8\u308C\u3066\u305F\u3067\u3057\u3087\u3046\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 7b9f47594eb2cfe43b2bd1354ce13d43, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u30A8\u30F3\u30B8\u30CB\u30A2\u3092\u4F1A\u8B70\u306B\u547C\u3076"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_react_ok
+    caption: "\u3048\u3048\u3001\u4EFB\u305B\u3066\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 5327b88f46f7ad94da585e0ccefa9a16, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u4E86\u627F"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_react_hmm
+    caption: "\u3042\u3089\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 3414e18e1402cc7409cd586a56d1d64b, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u610F\u5916"
+    fullSpeech: 1
+    extra: 0
+  - id: kanon_react_laugh
+    caption: "\u3075\u3075\u3063\u3002"
+    speaker: "\u304B\u306E\u3093"
+    reaction: 0
+    clip: {fileID: 8300000, guid: d611a1c552a4182438720293ab83eccb, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u7B11\u3044"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_opening
+    caption: "\u4ECA\u65E5\u304B\u3089\u3001\u60C5\u30B7\u30B9\u3002\u2026\u2026\u5E2D\u3001\u3069\u3053\uFF1F"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 9f8d6b036f5c4ea4b9a4f8418eb81779, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u958B\u5E55\u6F14\u51FA\u306E\u4EF2\u9593\u306E\u5834\u9762"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_investigate
+    caption: "\u8ABF\u67FB\u3001\u5F15\u304D\u53D7\u3051\u305F\u3002\u2026\u2026\u4E00\u6642\u9593\u3067\u623B\u308B\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 9a15e151706e8684485cc53d9e23253b, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u8ABF\u67FB\u3092\u983C\u3080"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_found
+    caption: "\u898B\u3064\u3051\u305F\u3002\u5165\u53E3\u306F\u3001\u3053\u3053\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: f467f18bf1575f745bea876de65529b9, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u8ABF\u67FB\u306E\u7D50\u679C"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_rival_reveal
+    caption: "\u6B63\u4F53\u3001\u5206\u304B\u3063\u305F\u3002\u2026\u2026\u601D\u3063\u305F\u3088\u308A\u3001\u5730\u5473\u306A\u624B\u53E3\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 7afbfa4450b58de419c59e3cc47c34ab, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u5F37\u6575\u306E\u6B63\u4F53\u304C\u5206\u304B\u3063\u305F"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_factor
+    caption: "\u3053\u308C\u304C\u3042\u308C\u3070\u3001\u6B21\u306F\u6B62\u3081\u3089\u308C\u308B\u3002\u2026\u2026\u305F\u3076\u3093\u3002\u3044\u3084\u3001\u6B62\u3081\u3089\u308C\u308B\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 17fc979dd2b58c24e9f521b0ea5f185a, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u56E0\u5B50\u306E\u30AB\u30FC\u30C9\u306E\u63A8\u85A6"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_year_clear
+    caption: "\u304A\u3064\u304B\u308C\u3002\u2026\u2026\u4ECA\u5E74\u3082\u3001\u5E73\u548C\u3060\u3063\u305F\u306D\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: c6233d4a746f63749aec9efc9f122d9d, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u5E74\u5EA6\u306E\u76EE\u6A19\u306B\u5C4A\u3044\u305F"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_year_fail
+    caption: "\u30ED\u30B0\u306F\u6B8B\u3063\u3066\u308B\u3002\u6B21\u306F\u3001\u3082\u3063\u3068\u65E9\u304F\u6C17\u3065\u3051\u308B\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 3f3f8068ee137cd41b7c6b76984a01d7, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u6311\u6226\u306E\u7D42\u308F\u308A"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_ending_ss
+    caption: "\u4F55\u3082\u8D77\u304D\u306A\u3044\u306E\u304C\u3001\u4E00\u756A\u3044\u3044\u4ED5\u4E8B\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 6192277e2a3225444907226039cb44c9, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u7279\u5225\u306A\u30A8\u30F3\u30C7\u30A3\u30F3\u30B0"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_forgot
+    caption: "\u2026\u2026\u3042\u3002\u4F1A\u8B70\u3001\u4ECA\u65E5\u3060\u3063\u305F\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: fdeac4b288c6a4f4384071bb9c5a5d72, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u629C\u3051\u3066\u3044\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_react_ok
+    caption: "\u4E86\u89E3\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: eba00ab1663f5ba44a173b88d903be85, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u4E86\u627F"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_react_hmm
+    caption: "\u2026\u2026\u3093\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: a42d3bc351caf1047b07d1ad82c6f878, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u8003\u3048\u308B"
+    fullSpeech: 1
+    extra: 0
+  - id: eng_react_yawn
+    caption: "\u3075\u3041\u2026\u2026\u3002"
+    speaker: "\u30A8\u30F3\u30B8\u30CB\u30A2"
+    reaction: 0
+    clip: {fileID: 8300000, guid: 12f6334dded39ab4e8788d55b35cdde3, type: 3}
+    faceId: 
+    poseId: 
+    scene: "\u77ED\u3044\u53CD\u5FDC\u30FB\u3042\u304F\u3073"
+    fullSpeech: 1
+    extra: 0

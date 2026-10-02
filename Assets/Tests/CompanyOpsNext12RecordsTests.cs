@@ -33,6 +33,17 @@ namespace PatchWorkSecure.Tests
             c.diary.Add(new OpsDiaryRecord{key=38,content=38,rank="SS",recap="実記録",thought="一言",minigame=""});Assert.IsTrue(c.RecordDiaryTitle());Assert.IsFalse(c.RecordDiaryTitle());Assert.IsTrue(c.HasTitle("diary-all"));Assert.IsTrue(c.Valid());
             c.titles.Add("不明");Assert.IsFalse(c.Valid());
         }
+        [Test] public void Next12Balance_採用した式と総合ランク境界と十年称号を維持する()
+        {
+            Assert.AreEqual(30,OpsCatalog.EndlessPressure(4));Assert.AreEqual(40,OpsCatalog.EndlessPressure(5));Assert.AreEqual(150,OpsCatalog.EndlessPressure(10));
+            Assert.AreEqual(2,OpsCatalog.EndlessMonthlyIncomePerYear);
+            long[] thresholds={7116,8032,11707,12329};string[] previous={"C","B","A","S"},ranks={"B","A","S","SS"};
+            for(int i=0;i<thresholds.Length;i++){Assert.AreEqual(previous[i],OpsCatalog.EndlessRank(thresholds[i]-1));Assert.AreEqual(ranks[i],OpsCatalog.EndlessRank(thresholds[i]));}
+            CollectionAssert.AreEqual(new[]{3,5,10},OpsCatalog.EndlessGuardYears);
+            var e=OpsEndless.Begin(14,null);var career=new OpsCareer{endlessUnlocked=true};
+            for(int y=1;y<=10;y++){FinishEndlessTestYear(e.state);Assert.IsTrue(e.RecordYear());career.RecordEndless(e);Assert.AreEqual(y>=10,career.HasTitle("guard-10"));if(y<10)Assert.IsTrue(e.AdvanceYear());}
+            // 強い入力で条件だけを検査。人間の上手なプレイで10年へ届くという証拠にはしない。
+        }
         [UnityTest] public IEnumerator Next12RecordsUI_未獲得と獲得の記録画面を既存部品で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.OpenRecords();yield return new WaitForSecondsRealtime(1);Capture("next12-records-empty");

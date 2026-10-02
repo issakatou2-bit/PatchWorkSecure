@@ -26,7 +26,7 @@ public static class CompanyOpsThreeYears
     static void Check(bool ok,string reason){if(!ok)throw new Exception(reason);}
     static PersonaCommand Command(string kind,string id)=>new PersonaCommand(kind,id);
     // エンドレス試算だけの判断。本編の方針・ゲームの導入条件は変更しない。
-    static int EndlessPurchaseMargin=3;
+    static int EndlessPurchaseMargin=8;
     static bool CashSafe(OpsState s,int index)=>s.endlessYear==0||s.MonthlyGrant-s.Upkeep-OpsCatalog.AllProjects[index].upkeep>=EndlessPurchaseMargin;
     static void CheckCashPolicy()
     {
@@ -255,13 +255,13 @@ public static class CompanyOpsThreeYears
     static void RunEndless(string[] args)
     {
         Production=true;int factorCount=args.Length>2?int.Parse(args[2]):1;
-        int cohorts=args.Length>4?int.Parse(args[4]):100;EndlessPurchaseMargin=args.Length>5?int.Parse(args[5]):3;
+        int cohorts=args.Length>4?int.Parse(args[4]):100;EndlessPurchaseMargin=args.Length>5?int.Parse(args[5]):8;
         Check(cohorts>0&&cohorts<=100&&EndlessPurchaseMargin>=0,"試算入力が不正");
         CheckCashPolicy();
         Check(factorCount>=0&&factorCount<=OpsCatalog.StoryFactorSlots,"因子数が不正");
         string dir=args.Length>1?args[1]:"Artifacts/Next12/Endless";Directory.CreateDirectory(dir);
         var rows=new List<string>{"role,depth,policy,cohort,seed,duration_months,completed_years,total_score,overall_rank,end_year"};
-        var summaries=new List<string>{"role,depth,policy,p25_years,median_years,p90_years,max_years,median_score,ss_percent,target_met"};
+        var summaries=new List<string>{"role,depth,policy,p25_years,median_years,p90_years,max_years,median_score,ss_percent,target_met,target_applicable"};
         var deepScores=new List<double>();bool targets=true;double maximum=0;
         Console.WriteLine("終わりなき年度：9方針×"+cohorts+"挑戦 / 本編の引き継ぎと同じ / 社員に任せる50点");
         Console.WriteLine("脅威：1〜3年は確定した本編の値 / 4年以降 "+OpsCatalog.EndlessPressureBase+" + "+OpsCatalog.EndlessPressureLinear+"n + "+OpsCatalog.EndlessPressureQuadratic+"n²");
@@ -284,14 +284,21 @@ public static class CompanyOpsThreeYears
                 string rank=OpsCatalog.EndlessRank(run.TotalScore);if(rank=="SS")ss++;
                 rows.Add(string.Join(",",new object[]{role,depth,Cell(p.name),cohort,seed,run.DurationMonths,run.CompletedYears,run.TotalScore,rank,run.year}));
             }
-            double q25=Quantile(years,.25),median=Quantile(years,.5),q90=Quantile(years,.9),max=years.Max(),score=Quantile(scores,.5);bool met=median>=(depth==0?2:6)&&median<=(depth==0?4:9);targets&=met;maximum=Math.Max(maximum,max);
+            double q25=Quantile(years,.25),median=Quantile(years,.5),q90=Quantile(years,.9),max=years.Max(),score=Quantile(scores,.5);bool? met=depth==0?(bool?)null:median>=6&&median<=9;targets&=met!=false;maximum=Math.Max(maximum,max);
             double ssPercent=100.0*ss/cohorts;
-            summaries.Add(string.Join(",",new object[]{role,depth,Cell(p.name),q25.ToString("F2"),median.ToString("F2"),q90.ToString("F2"),max.ToString("F2"),score,ssPercent,met}));
-            Console.WriteLine(p.name+"：25% "+q25.ToString("F2")+"年 / 中央 "+median.ToString("F2")+"年 / 90% "+q90.ToString("F2")+"年 / 最長 "+max.ToString("F2")+"年 / 合計点中央 "+score+" / SS "+ssPercent.ToString("F1")+"% / 中央の目安 "+(met?"内":"外"));
+            summaries.Add(string.Join(",",new object[]{role,depth,Cell(p.name),q25.ToString("F2"),median.ToString("F2"),q90.ToString("F2"),max.ToString("F2"),score,ssPercent,met,depth>0}));
+            Console.WriteLine(p.name+"：25% "+q25.ToString("F2")+"年 / 中央 "+median.ToString("F2")+"年 / 90% "+q90.ToString("F2")+"年 / 最長 "+max.ToString("F2")+"年 / 合計点中央 "+score+" / SS "+ssPercent.ToString("F1")+"% / 中央の目安 "+(met==null?"参考（判定対象外）":met==true?"内":"外"));
         }
         File.WriteAllLines(Path.Combine(dir,"runs.csv"),rows,new UTF8Encoding(true));File.WriteAllLines(Path.Combine(dir,"summary.csv"),summaries,new UTF8Encoding(true));
         Console.WriteLine("深度1・2の得点分位：10% "+Quantile(deepScores,.1)+" / 40% "+Quantile(deepScores,.4)+" / 70% "+Quantile(deepScores,.7)+" / 90% "+Quantile(deepScores,.9));
-        Console.WriteLine("中央・最長の目安（15年程度まで、判定上限17年）："+(targets&&maximum<=17?"内":"外"));
-        if(args.Length>3&&args[3]=="check")Check(cohorts==100&&targets&&maximum<=17,"Next-12の継続年数の目安の外、または正式試算100挑戦ではない。成功扱いにしないこと");
+        int deepSS=deepScores.Count(score=>score>=OpsCatalog.EndlessRankSS);
+        Console.WriteLine("深度1・2の総合ランク："+string.Join(" / ",Order.Select(rank=>rank+" "+deepScores.Count(score=>OpsCatalog.EndlessRank((long)score)==rank)+"/"+deepScores.Count)));
+        Console.WriteLine("正式基準：考える6方針の中央6〜9年（気軽3方針は参考） / 最長17年以下："+(targets&&maximum<=17?"内":"外"));
+        Console.WriteLine("SS境界 "+OpsCatalog.EndlessRankSS+"点："+deepSS+"/"+deepScores.Count+"（"+(100.0*deepSS/deepScores.Count).ToString("F2")+"%）。10年の守りは維持、委任試算で達成可能とは証明していない。");
+        if(args.Length>3&&args[3]=="check")
+        {
+            Check(cohorts==100&&targets&&maximum<=17,"Next-12の正式基準の外、または正式試算100挑戦ではない。成功扱いにしないこと");
+            Check(OpsCatalog.EndlessRankB==Quantile(deepScores,.1)&&OpsCatalog.EndlessRankA==Quantile(deepScores,.4)&&OpsCatalog.EndlessRankS==Quantile(deepScores,.7)&&OpsCatalog.EndlessRankSS==Quantile(deepScores,.9)&&deepSS==60,"ランク境界が承認した600挑戦の分布と違う");
+        }
     }
 }

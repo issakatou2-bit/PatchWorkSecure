@@ -1,4 +1,4 @@
-﻿param([int]$Base = -1, [int]$Linear = -1, [int]$Quadratic = -1, [int]$Income = -1, [int]$Factors = 1, [int]$Cohorts = 100, [int]$Margin = 3, [string]$Id = 'final', [switch]$CheckTargets)
+﻿param([int]$Base = -1, [int]$Linear = -1, [int]$Quadratic = -1, [int]$Income = -1, [int]$Factors = 1, [int]$Cohorts = 100, [int]$Margin = 8, [string]$Id = 'final', [switch]$CheckTargets)
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path -Parent $PSScriptRoot)
 $endlessMono = 'C:/Program Files/Unity/Hub/Editor/6000.5.6f1/Editor/Data/MonoBleedingEdge'

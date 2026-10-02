@@ -6,7 +6,7 @@ namespace PatchWorkSecure.CompanyOps
 {
     public static partial class OpsCatalog
     {
-        public const int EndlessPressureBase=24,EndlessPressureLinear=16,EndlessPressureQuadratic=2;
+        public const int EndlessPressureBase=24,EndlessPressureLinear=4,EndlessPressureQuadratic=2;
         public const int EndlessMonthlyIncomePerYear=2;
         public const int EndlessFailureScoreDivisor=2,EndlessMonthsPerYear=12;
         public static int EndlessIncome(int year)=>year<=StoryYears?0:checked((year-StoryYears)*EndlessMonthlyIncomePerYear);

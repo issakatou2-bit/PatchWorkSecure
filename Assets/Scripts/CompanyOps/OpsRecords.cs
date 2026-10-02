@@ -6,8 +6,8 @@ namespace PatchWorkSecure.CompanyOps
 {
     public static partial class OpsCatalog
     {
-        // ⑤の900挑戦の分布で確定する。年間ランクの数値とは独立。
-        public const long EndlessRankB=1500,EndlessRankA=3000,EndlessRankS=4500,EndlessRankSS=6000;
+        // ⑤の考える6方針×100挑戦の10/40/70/90%点。年間ランクとは独立。
+        public const long EndlessRankB=7116,EndlessRankA=8032,EndlessRankS=11707,EndlessRankSS=12329;
         public const int EndlessRetireTitleYears=5;
         public static readonly int[] EndlessGuardYears={3,5,10};
         public static readonly string[] TitleIds={"guard-3","guard-5","guard-10","no-loss","peaks","bosses","overall-ss","retire-5","diary-all"};

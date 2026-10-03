@@ -77,6 +77,11 @@ namespace PatchWorkSecure.Tests
                 yield return PadTo(game,input,"SingleYear");yield return new WaitForSecondsRealtime(.2f);Next17Shots("title-selected");
                 yield return input.Tap(input.Pad.startButton);yield return new WaitForSecondsRealtime(.4f);
                 Assert.IsNotNull(Find<Button>("CloseDialog"));yield return PadTo(game,input,"MusicVolume");
+                var musicRim=Find<Slider>("MusicVolume").handleRect.GetComponent<Outline>();
+                Assert.AreEqual(new Color(.44f,.71f,1f,.85f),musicRim.effectColor,"既存のつまみの枠で選択先を示す");
+                yield return PadTo(game,input,"SoundVolume");
+                Assert.AreNotEqual(new Color(.44f,.71f,1f,.85f),musicRim.effectColor,"選択を離れたつまみの枠は元に戻る");
+                yield return PadTo(game,input,"MusicVolume");
                 float before=Find<Slider>("MusicVolume").value;yield return input.Tap(input.Pad.dpad.left);Assert.Less(Find<Slider>("MusicVolume").value,before);
                 Next17Shots("settings-selected");yield return input.Tap(input.Pad.buttonEast);yield return new WaitForSecondsRealtime(.4f);
                 yield return PadClick(game,input,"HomeDiary");yield return new WaitForSecondsRealtime(.5f);Assert.IsTrue(game.DiaryActive);
@@ -98,7 +103,12 @@ namespace PatchWorkSecure.Tests
                 SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);var game=Object.FindAnyObjectByType<OpsGame>();
                 yield return input.Stick(Vector2.down);Assert.IsNotNull(EventSystem.current.currentSelectedGameObject);
                 yield return PadTo(game,input,"SingleYear");
-                var keyboard=InputSystem.AddDevice<Keyboard>();yield return input.Tap(keyboard.enterKey);yield return new WaitForSecondsRealtime(.5f);
+                var keyboard=InputSystem.AddDevice<Keyboard>();
+                // 仮想デバイスの追加後にUIアクションの接続を1フレーム進める。
+                yield return null;
+                while(game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))yield return null;
+                Assert.AreEqual("SingleYear",EventSystem.current.currentSelectedGameObject.name);
+                yield return input.Tap(keyboard.enterKey);yield return new WaitForSecondsRealtime(.5f);
                 Assert.IsNotNull(game.State,"キーボードへの持ち替えでも決定できる");Assert.AreEqual(14,game.State.seed);
                 while(game.PhasePresentationRunning)yield return null;yield return new WaitForSecondsRealtime(.4f);Canvas.ForceUpdateCanvases();CheckPointer("Menu");
                 var mouse=InputSystem.AddDevice<Mouse>();var menu=Find<Button>("Menu").GetComponent<RectTransform>();

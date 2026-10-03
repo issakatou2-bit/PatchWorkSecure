@@ -21,6 +21,8 @@ namespace PatchWorkSecure.CompanyOps
         private Action padDiaryClose;
         private bool padDiaryArchive;
         private int padBlockTask=-1;
+        private Outline padSliderRim;
+        private Color padSliderRimColor;
 
         // UIモジュールのゲームパッド処理と二重決定しない。元アセットは変更しない。
         private void ConfigureGamepadUI()
@@ -47,6 +49,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ReleaseGamepadUI()
         {
+            padInUse=false;RefreshGamepadSliderFocus();
             if(padModule!=null&&padOriginalActions!=null)padModule.actionsAsset=padOriginalActions;
             if(padUiActions!=null)Destroy(padUiActions);
         }
@@ -75,6 +78,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             EventSystem.current.SetSelectedGameObject(next.gameObject);
             padSelectionName=next.name;
+            RefreshGamepadSliderFocus();
             // 一覧の画面外にある項目も、選択に合わせて既存のスクロールを動かす。
             var scroll=next.GetComponentInParent<ScrollRect>();
             if(scroll==null||scroll.content==null||scroll.viewport==null)return;
@@ -102,6 +106,18 @@ namespace PatchWorkSecure.CompanyOps
                 if(distance<score){score=distance;best=candidate;}
             }
             if(best!=null)SelectGamepad(best);
+        }
+        private void RefreshGamepadSliderFocus()
+        {
+            var current=EventSystem.current!=null?EventSystem.current.currentSelectedGameObject:null;
+            var slider=padInUse&&current!=null?current.GetComponent<Slider>():null;
+            var rim=slider!=null&&slider.handleRect!=null?slider.handleRect.GetComponent<Outline>():null;
+            if(padSliderRim==rim)return;
+            if(padSliderRim!=null)padSliderRim.effectColor=padSliderRimColor;
+            padSliderRim=rim;
+            if(rim==null)return;
+            // 既存のつまみの輪郭だけを、ボタンと同じ共通選択色へ。部品は増やさない。
+            padSliderRimColor=rim.effectColor;rim.effectColor=new Color(.44f,.71f,1f,.85f);
         }
         private void GamepadBack()
         {
@@ -135,6 +151,7 @@ namespace PatchWorkSecure.CompanyOps
             bool active=direction.sqrMagnitude>.3f||pad.buttonSouth.wasPressedThisFrame||pad.buttonEast.wasPressedThisFrame||pad.buttonWest.wasPressedThisFrame||pad.startButton.wasPressedThisFrame||pad.leftShoulder.wasPressedThisFrame||pad.rightShoulder.wasPressedThisFrame;
             if(Mouse.current?.delta.ReadValue().sqrMagnitude>1||Mouse.current?.leftButton.wasPressedThisFrame==true)padInUse=false;
             if(active)padInUse=true;
+            RefreshGamepadSliderFocus();
             if(!padInUse&&!active)return;
             if(pad.startButton.wasPressedThisFrame){StopVoice();if(modal!=null&&modal.Find("SettingsWindow")!=null)CloseDialog();else Menu();return;}
             if(pad.buttonEast.wasPressedThisFrame){GamepadBack();return;}

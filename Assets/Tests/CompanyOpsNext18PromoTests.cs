@@ -34,8 +34,10 @@ namespace PatchWorkSecure.Tests
             private readonly MethodInfo assetPath;
             private Canvas canvas;private RenderMode oldMode;private Camera oldCamera;private float oldDistance;
             private PromoSoundList list;private string folder;public int Frame;
-            public PromoRecorder()
+            private readonly string outputRoot;
+            public PromoRecorder(string outputRoot="Artifacts/Promo/shots")
             {
+                this.outputRoot=outputRoot;
                 cameraObject=new GameObject("素材撮影カメラ",typeof(Camera));camera=cameraObject.GetComponent<Camera>();camera.enabled=false;
                 camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=Color.black;target=new RenderTexture(1920,1080,24);camera.targetTexture=target;
                 texture=new Texture2D(1920,1080,TextureFormat.RGB24,false);
@@ -45,7 +47,7 @@ namespace PatchWorkSecure.Tests
             }
             public void Begin(string shot,int frames,OpsGame game)
             {
-                Frame=1;folder=Path.Combine(Application.dataPath,"../Artifacts/Promo/shots",shot);Directory.CreateDirectory(folder);
+                Frame=1;folder=Path.Combine(Application.dataPath,"..",outputRoot,shot);Directory.CreateDirectory(folder);
                 // 再撮影時は前の素材を消さず退避し、短くなった連番を混ぜない。
                 var previous=Directory.GetFiles(folder,"frame_*.png").Concat(Directory.GetFiles(folder,"sounds.json")).ToArray();
                 if(previous.Length>0){string backup=Path.Combine(folder,"previous-"+DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));Directory.CreateDirectory(backup);foreach(string path in previous)File.Move(path,Path.Combine(backup,Path.GetFileName(path)));}

@@ -66,7 +66,11 @@ namespace PatchWorkSecure.Tests
         public IEnumerator Next23_遊び中の成功表示は次の入力を演出スキップへ渡さない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
-            var game=Object.FindAnyObjectByType<OpsGame>();AuditDefaults(game);game.StartYear(9);
+            var game=Object.FindAnyObjectByType<OpsGame>();AuditDefaults(game);game.StartYear(9);game.SkipTutorial();yield return null;
+            var portrait=game.Surface.GetComponentsInChildren<OpsPortraitAnimator>().First();
+            portrait.ChangePose("pose_magnifier");portrait.ChangePose("pose_laptop");
+            yield return new WaitForSecondsRealtime(2);
+            Assert.IsFalse(game.PresentationWaiting,"上書きされたポーズの待ちを残さない");
             Assert.IsTrue(game.BeginDailyPractice("C",20261003));game.StartMinigame();yield return null;
             AuditSuccess(game);yield return null;
             Assert.AreEqual(OpsMinigamePhase.Playing,game.Minigame.Phase);

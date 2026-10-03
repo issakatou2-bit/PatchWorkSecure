@@ -33,12 +33,17 @@ namespace PatchWorkSecure.CompanyOps
         public float Elapsed {get;private set;}
         public bool Skipped {get;private set;}
         internal bool ManualCompletion;
+        internal int CreationFrame=-1;
         private bool finished;
         public bool Done=>finished||!ManualCompletion&&Elapsed>=Duration;
         public OpsPresentationWait(string kind,float duration,bool canSkip)
         {Kind=kind;Duration=Math.Max(0,duration);CanSkip=canSkip;}
         public void Advance(float delta,bool fast)
-        {Elapsed=Math.Min(Duration,Elapsed+Math.Max(0,delta)*(fast?OpsPresentationTiming.FastRate:1));}
+        {
+            // 作られたフレームのdeltaは、作られる前の読み込み時間も含むため数えない。
+            if(CreationFrame>=0&&CreationFrame==Time.frameCount)return;
+            Elapsed=Math.Min(Duration,Elapsed+Math.Max(0,delta)*(fast?OpsPresentationTiming.FastRate:1));
+        }
         public bool Skip()
         {if(!CanSkip||Done)return false;Skipped=true;Elapsed=Duration;finished=true;return true;}
         internal void Finish(){Elapsed=Duration;finished=true;}
@@ -58,7 +63,7 @@ namespace PatchWorkSecure.CompanyOps
             // 遊びの最中の成功表示などは入力を奪わない。設定窓の待ちは別に扱う。
             if(Minigame?.Phase==OpsMinigamePhase.Playing&&modal==null)return new OpsPresentationWait(kind,seconds,false);
             timingVisits.TryGetValue(kind,out int visits);timingVisits[kind]=visits+1;
-            var wait=new OpsPresentationWait(kind,seconds,repeat??visits>0);presentationWaits.Add(wait);if(root==null)root=screen;if(root!=null)presentationRoots[wait]=root;return wait;
+            var wait=new OpsPresentationWait(kind,seconds,repeat??visits>0){CreationFrame=Time.frameCount};presentationWaits.Add(wait);if(root==null)root=screen;if(root!=null)presentationRoots[wait]=root;return wait;
         }
         private void ClearPresentationWaits()
         {foreach(var w in presentationWaits)w.Finish();presentationWaits.Clear();presentationRoots.Clear();annualTiming=reportTiming=diaryTiming=null;}

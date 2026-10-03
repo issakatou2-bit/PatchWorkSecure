@@ -83,11 +83,22 @@ namespace PatchWorkSecure.Tests
         private static Vector2 PadCenter(Selectable s)=>((RectTransform)s.transform).TransformPoint(((RectTransform)s.transform).rect.center);
         private static IEnumerator PadClick(OpsGame game,PadFixture input,string name,Func<bool> stillApplicable=null)
         {
-            while(game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))
-            {if(stillApplicable!=null&&!stillApplicable())yield break;yield return null;}
+            float waitDeadline=Time.realtimeSinceStartup+20;
+            while(game.PresentationWaiting||game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))
+            {if(stillApplicable!=null&&!stillApplicable())yield break;Assert.Less(Time.realtimeSinceStartup,waitDeadline,"決定前の待ちが終わらない: "+name+PadWaitDescription(game));yield return null;}
             yield return PadTo(game,input,name,stillApplicable);
+            // 選択中に窓のStart/Updateが始まる場合も、初回の入場を飛ばさず待つ。
+            if(game.Minigame?.Phase!=OpsMinigamePhase.Playing)yield return null;
+            waitDeadline=Time.realtimeSinceStartup+20;
+            while(game.PresentationWaiting||game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))
+            {if(stillApplicable!=null&&!stillApplicable())yield break;Assert.Less(Time.realtimeSinceStartup,waitDeadline,"選択後の待ちが終わらない: "+name+PadWaitDescription(game));yield return null;}
             if(stillApplicable!=null&&!stillApplicable())yield break;
             yield return input.Tap(input.Pad.buttonSouth);
+        }
+        private static string PadWaitDescription(OpsGame game)
+        {
+            var waits=(List<OpsPresentationWait>)typeof(OpsGame).GetField("presentationWaits",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game);
+            return " / 月="+game.State?.month+" / 遷移="+game.PhasePresentationRunning+" / "+string.Join(";",waits.Where(w=>!w.Done).Select(w=>w.Kind+":"+w.Elapsed+"/"+w.Duration));
         }
         private static void Next17Shots(string name)
         {foreach(var size in new[]{new Vector2Int(1280,800),new Vector2Int(1920,1080)})Next15Shot(name,size.x,size.y,"Next17");}
@@ -133,13 +144,14 @@ namespace PatchWorkSecure.Tests
                 var keyboard=InputSystem.AddDevice<Keyboard>();
                 // 仮想デバイスの追加後にUIアクションの接続を1フレーム進める。
                 yield return null;
-                while(game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))yield return null;
+                while(game.PresentationWaiting||game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))yield return null;
                 Assert.AreEqual("SingleYear",EventSystem.current.currentSelectedGameObject.name);
                 yield return input.Tap(keyboard.enterKey);yield return new WaitForSecondsRealtime(.5f);
                 Assert.IsNotNull(game.State,"キーボードへの持ち替えでも決定できる");Assert.AreEqual(14,game.State.seed);
                 while(game.PhasePresentationRunning)yield return null;yield return new WaitForSecondsRealtime(.4f);Canvas.ForceUpdateCanvases();CheckPointer("Menu");
                 var mouse=InputSystem.AddDevice<Mouse>();var menu=Find<Button>("Menu").GetComponent<RectTransform>();
                 input.Set(mouse.position,RectTransformUtility.WorldToScreenPoint(null,menu.TransformPoint(menu.rect.center)),queueEventOnly:true);yield return null;
+                while(game.PresentationWaiting)yield return null;
                 yield return input.Tap(mouse.leftButton);Assert.IsTrue(PadButtonExists("CloseDialog"),"マウスへの持ち替えも維持");
                 yield return PadClick(game,input,"ReplayTutorial");Assert.IsTrue(game.TutorialActive);
                 yield return PadClick(game,input,"Stat_0");yield return PadClick(game,input,"CloseDialog");

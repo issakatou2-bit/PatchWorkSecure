@@ -21,7 +21,7 @@ namespace PatchWorkSecure.CompanyOps
         public Vector2 LayoutPosition => started?origin:((RectTransform)transform).anchoredPosition;
         private bool Reduced => Owner!=null&&Owner.ReducedMotion;
         private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;animator=GetComponent<OpsPortraitAnimator>();time=Enter?0:OpsPresentationTiming.PortraitEnter;if(Enter&&Owner!=null&&!Gameplay)entryTiming=Owner.BeginFeedback(name+"_enter",OpsPresentationTiming.PortraitEnter,transform);started=true;ReactToPose(animator?.PoseId);}
-        public void SwitchPose(Action apply,string id){swap=apply;queuedPose=id;swapTime=0;swapTiming=Owner!=null&&!Gameplay?Owner.BeginFeedback(name+"_pose",OpsPresentationTiming.PortraitSwap,transform):null;if(Reduced){swap();swap=null;swapTime=-1;swapTiming?.Finish();ReactToPose(id);}}
+        public void SwitchPose(Action apply,string id){swapTiming?.Finish();swap=apply;queuedPose=id;swapTime=0;swapTiming=Owner!=null&&!Gameplay?Owner.BeginFeedback(name+"_pose",OpsPresentationTiming.PortraitSwap,transform):null;if(Reduced){swap();swap=null;swapTime=-1;swapTiming?.Finish();ReactToPose(id);}}
         public void ReactToPose(string id)
         {
             act=id=="pose_jump"||id=="pose_peace"||id=="pose_salute"?"joy":id=="pose_startled"||id=="pose_run"?"startle":id=="pose_exhausted"||id=="pose_bow"?"sad":id=="pose_think"||id=="pose_armscross"?"think":"";

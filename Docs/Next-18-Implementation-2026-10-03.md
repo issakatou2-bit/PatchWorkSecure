@@ -47,4 +47,22 @@ UnityのcaptureFramerateは非スケール時間を固定しないため、PNG�
 
 ## 検証
 
-撮影専用テストと3アセンブリのコンパイルは成功。最終全件2回・Verify・CSV照合・設定とフォントの復帰確認は進行中。完了後にこの欄へ確定値を記録する。
+撮影専用テスト1/1、3アセンブリのコンパイルは成功。撮影後のPlayerPrefs15キーの存在/型/値とフォント8ファイルのSHA256が開始時と一致、一時シーン0。`Artifacts/next-18-capture-resume-tests.json`、`Artifacts/Next17/preservation-next18-capture.json`に記録。
+
+最終Verifyは`Artifacts/Next18/verify-summary.json`。Core/CompanyOps/Personas/ThreeYears/EndlessYearsは成功。Depthsだけは既知の最適化完走率58%→85%（+27pt）で未達のまま。±5ptの基準を緩めず、成功扱いにしない。
+
+- 本編：2,160挑戦、初回225/540=41.67%、4回目まで365/540=67.59%で従来どおり。
+- 終わりなき年度：900挑戦、考える6方針の中央6.50〜7.75年、最長8.33年。SS60/600=10%。受入済みNext-12のruns.csv/summary.csvとSHA256一致。
+- 1年だけの遊び：900年度・10,779月のCSVがNext-8前とSHA256一致。
+  - years.csv：`44EE642013CE5D216A40C75AFA8F8D718EB650E9EFF98087861613D7CCB7FA58`
+  - turns.csv：`830D58BB7C57A016EB67DCCA407B68B5A0E9465CE4776211C90DF86CEFDF2C63`
+
+全件1回目は294/294成功（`Artifacts/next-18-all-1-tests.json`）。Next-17全件とテスト名/件数が完全一致し、撮影テストは0件。1回目後も設定15キー・8フォントのSHA256一致、一時シーン0（`Artifacts/Next17/preservation-next18-all-1.json`）。テスト定義を含まない本体ソースも別コンパイル成功（Windows版の再ビルドではない）。
+
+2回目では、Next17の仮想パッド六本試遊で`MfaDeny`の対象が無いという1件の失敗が出た。残り時間が回答選択の途中で尽きると、正常に結果へ切り替わって回答ボタンが消える。テスト用の選択/決定へ適用条件を追加し、終了済みなら古い回答を探したり結果のボタンを押したりしない。通常のメニュー検査は従来どおり対象の存在を厳密に検査する。六本試遊の同じテスト内で、終了直後の古い拒否要求を明示的に再現し、結果を進めないことも検査する。時間延長・採点変更・S判定の緩和は無い。
+
+失敗した2回目は中断し、成功には数えない。中断後のPlayerPrefs15キーと8フォントを復帰/照合、一時シーン0。修正後の六本パッド試遊（境目の回帰も同じテスト内で検査）は1/1成功、3アセンブリのコンパイル成功、設定/フォント/一時シーンも一致。`Artifacts/next-18-pad-boundary-tests.json`、`Artifacts/Next17/preservation-next18-pad-boundary.json`。
+
+修正後の全件は**294/294を2回連続成功**（`Artifacts/next-18-all-1-clean-tests.json`、`Artifacts/next-18-all-2-clean-tests.json`）。両回とも設定15キー・8フォントは元どおり、一時シーン0（`Artifacts/Next17/preservation-next18-all-1-clean.json`、`preservation-next18-all-2-clean.json`）。終了後に9場面1,380枚と音一覧を再点検し、確認一覧を更新。文字のはみ出し/デバッグ表示なし、B/C/Eの最終コマでS判子、二人絵3枚、タイトルの最初のコマも切替済みの画面であることを確認。
+
+Unityは編集状態で`Assets/Scenes/CompanyYear.unity`、版0.16.0・背景false・resizable true・FullScreenWindowを維持。Windows版は再ビルドしていない。Next-18の完了報告後、追加指示のNext-19（テストの組分けと実行回数の最適化）だけを続ける。

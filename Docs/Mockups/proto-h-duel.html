@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試作H 脅威の子と対戦</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 試作H（強敵との対決）：10大脅威の子が技を予告する。技の「攻撃の糸口」に合う備えで受け止める（旧版のパリィの考え方）。
+   糸口と対策の基本はIPA「情報セキュリティ10大脅威 2026」解説書［組織編］の表1.2、技はOpsThreatCatalog（Next-20）のまま */
+:root{--pink:#ff6f91;--pinkd:#d94a70;--navy:#1d2a44;--blue:#3fa9f5;--red:#e0405f;--green:#2bb673;--gray:#6b7894;--gold:#ffc02e;--rc:#D7263D;--rct:#fff;--rcd:#8a1626}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--navy);background:#1d2a44;min-height:100vh;overflow:hidden}
+.r{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800}
+#app{width:1280px;height:760px;position:absolute;left:0;top:0;transform-origin:0 0;background:radial-gradient(ellipse at 78% 38%,color-mix(in srgb,var(--rc) 38%,transparent),transparent 60%),linear-gradient(160deg,#1d2a44,#26324f);overflow:hidden}
+#app::before{content:'';position:absolute;inset:-50%;background:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 46px),repeating-linear-gradient(-45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 46px);animation:grid 40s linear infinite;pointer-events:none}
+@keyframes grid{to{transform:translate(65px,0)}}
+.scr{position:absolute;inset:0;display:none}.scr.on{display:block}
+.panel{background:rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 3px #fff,0 12px 30px rgba(0,0,0,.3)}
+.top{position:absolute;left:16px;right:16px;top:12px;height:68px;display:flex;align-items:center;gap:14px;padding:0 18px}
+.badge{background:var(--rc);color:var(--rct);border-radius:16px;padding:6px 16px;font-size:22px;box-shadow:0 5px 0 var(--rcd);white-space:nowrap}
+.badge.pk{background:linear-gradient(180deg,#ff8fab,var(--pink));color:#fff;box-shadow:0 5px 0 var(--pinkd)}
+.sub{font-size:13px;color:var(--gray)}
+.btn{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;border:0;border-radius:18px;cursor:pointer;font-size:19px;padding:12px 18px;color:#fff;background:linear-gradient(180deg,#5fd39b,var(--green));box-shadow:0 5px 0 #1d8a55;white-space:nowrap}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #1d8a55}
+.btn.bl{background:linear-gradient(180deg,#7fc4ff,var(--blue));box-shadow:0 5px 0 #1f7fc4}
+.btn.gr{background:linear-gradient(180deg,#a9b4c8,#7d89a3);box-shadow:0 5px 0 #5b6680}
+.btn.pk{background:linear-gradient(180deg,#ff8fab,var(--pink));box-shadow:0 5px 0 var(--pinkd)}
+.btn:disabled{filter:grayscale(1);opacity:.45;cursor:default}
+.vchip{display:inline-flex;align-items:center;gap:5px;background:var(--v);color:#fff;border-radius:10px;padding:3px 10px 3px 6px;font-size:14px;white-space:nowrap;vertical-align:middle}
+.vchip.q{background:#6b7894;padding:3px 10px}
+.wchip{display:inline-block;background:#f1f4f9;border:2px solid #dfe5ef;border-radius:10px;padding:2px 9px;font-size:13px;margin:2px 3px 2px 0}
+.say{position:relative;background:#fff;border-radius:16px;padding:10px 14px;font-size:15px;font-weight:700;line-height:1.55;box-shadow:0 0 0 3px #ffd3de}
+.say .who{position:absolute;left:12px;top:-12px;background:var(--pink);color:#fff;border-radius:8px;padding:0 8px;font-size:12px}
+.hin{position:absolute;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));pointer-events:none}
+.mark{filter:drop-shadow(0 0 2.5px var(--mc))}
+
+/* 相手を選ぶ */
+#grid{position:absolute;left:16px;top:96px;width:1248px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.rcard{position:relative;height:292px;border-radius:20px;background:#fff;cursor:pointer;overflow:hidden;box-shadow:0 0 0 3px #fff,0 6px 0 color-mix(in srgb,var(--c) 70%,#000),0 12px 22px rgba(0,0,0,.3);transition:transform .15s}
+.rcard:hover{transform:translateY(-4px)}
+.rcard::before{content:'';position:absolute;left:0;right:0;top:0;height:196px;background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--c) 40%,#fff),color-mix(in srgb,var(--c) 12%,#fff) 70%)}
+.rcard .mini{position:absolute;left:50%;top:6px;width:160px;height:192px;transform:translateX(-50%)}
+.rcard .mini svg{width:100%;height:100%}
+.rcard .nm{position:absolute;left:0;right:0;top:200px;text-align:center;font-size:21px}
+.rcard .nm small{font-size:12px;color:var(--gray)}
+.rcard .ipa{position:absolute;left:10px;right:10px;top:232px;text-align:center;font-size:12px;line-height:1.4;color:var(--gray)}
+.rcard .best{position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:12px;background:var(--pink);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 var(--pinkd)}
+.rcard .stripe{position:absolute;left:0;right:0;top:192px;height:5px;background:var(--c)}
+.selfoot{position:absolute;left:16px;right:16px;top:704px;height:44px;display:flex;align-items:center;gap:14px;color:#cfd8ea;font-size:13px}
+
+/* 準備 */
+.pleft{position:absolute;left:16px;top:92px;width:396px;height:652px;overflow:hidden}
+.pleft::before{content:'';position:absolute;left:0;right:0;top:0;height:380px;background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--rc) 45%,#fff),color-mix(in srgb,var(--rc) 10%,#fff) 72%);border-radius:22px 22px 0 0}
+.pport{position:absolute;left:48px;top:10px;width:300px;height:360px}
+.pport svg{width:100%;height:100%}
+.pname{position:absolute;left:0;right:0;top:384px;text-align:center;font-size:30px}
+.pname small{font-size:14px;color:var(--gray)}
+.pipa{position:absolute;left:18px;right:18px;top:426px;text-align:center;font-size:14px;color:var(--gray)}
+.pintro{position:absolute;left:18px;right:18px;top:470px;box-shadow:0 0 0 3px color-mix(in srgb,var(--rc) 45%,#fff)}
+.pintro .who{background:var(--rc);color:var(--rct)}
+.pmotif{position:absolute;left:18px;right:18px;bottom:14px;font-size:12px;color:var(--gray);line-height:1.5}
+.pright{position:absolute;left:428px;top:92px;width:836px;height:652px;padding:16px 20px}
+.pright h3{margin:0 0 6px;font-size:17px;display:flex;align-items:center;gap:8px}
+.pright h3 .sub{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:500}
+.trow{display:grid;grid-template-columns:232px 236px 1fr;gap:10px;align-items:center;padding:5px 8px;border-radius:10px;background:#f6f8fc;margin-bottom:4px}
+.trow .tn{font-size:15px}.trow .ts{font-size:12px;color:var(--gray);line-height:1.45}
+.note{font-size:12px;color:#8a5a00;background:#fff4d6;border-radius:10px;padding:5px 10px;margin:6px 0;line-height:1.5}
+.opts{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.opt{position:relative;border-radius:14px;border:3px solid #e3e8f1;background:#fff;padding:7px 8px 18px;cursor:pointer;min-height:96px;transition:transform .1s}
+.opt:hover{transform:translateY(-2px)}
+.opt .oi{width:30px;height:30px;border-radius:9px;background:var(--v);display:flex;align-items:center;justify-content:center}
+.opt .on{font-size:13px;margin-top:4px;line-height:1.3}
+.opt .ob{font-size:11px;color:var(--gray);line-height:1.35;margin-top:2px}
+.opt.sel{border-color:var(--pink);background:#fff0f4;box-shadow:0 0 0 2px var(--pink)}
+.opt.sel::after{content:'持っていく';position:absolute;right:6px;top:6px;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:11px;background:var(--pink);color:#fff;border-radius:6px;padding:0 6px}
+.opt .wk{position:absolute;right:6px;bottom:6px;font-size:10px;background:var(--rc);color:var(--rct);border-radius:6px;padding:0 5px}
+.pbar{position:absolute;left:20px;right:20px;bottom:16px;display:flex;align-items:center;gap:10px}
+.seg{display:flex;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px #dfe5ef}
+.seg button{border:0;background:#fff;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:14px;padding:8px 12px;cursor:pointer;color:var(--gray)}
+.seg button.on{background:var(--navy);color:#fff}
+.tog{font-size:14px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+
+/* 対戦 */
+.pips{display:flex;gap:6px;align-items:center}
+.pips i{width:30px;height:12px;border-radius:6px;background:#e3e8f1;display:block;position:relative}
+.pips i.ok{background:var(--green)}.pips i.ng{background:var(--red)}.pips i.now{background:var(--gold);box-shadow:0 0 0 2px #fff,0 0 8px var(--gold)}
+.pips i.fin::after{content:'本気';position:absolute;top:13px;left:0;right:0;text-align:center;font-family:'M PLUS Rounded 1c';font-weight:800;font-size:10px;color:var(--red)}
+.mode{font-size:14px;background:#eef3ff;color:#2a5bb8;border-radius:10px;padding:3px 10px;white-space:nowrap}
+.dleft{position:absolute;left:16px;top:92px;width:316px;height:652px;padding:16px}
+.gauge{margin-bottom:12px}
+.gauge .gl{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}
+.gauge .gl b{font-size:22px}
+.gauge .gb{height:18px;border-radius:9px;background:#e9edf5;overflow:hidden;position:relative;margin-top:3px;box-shadow:inset 0 2px 3px rgba(0,0,0,.1)}
+.gauge .gb i{display:block;height:100%;border-radius:9px;transition:width .6s cubic-bezier(.3,1.4,.5,1)}
+.gauge .gb::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 2px),rgba(255,255,255,.9) calc(20% - 2px) 20%)}
+.gauge.dmg .gb i{background:linear-gradient(90deg,#ff9a6b,#e0405f)}
+.gauge.stop .gb i{background:linear-gradient(90deg,#b58cff,#6a4bd1)}
+.gauge.pulse .gb{animation:gp .5s 2}
+@keyframes gp{50%{box-shadow:0 0 0 3px var(--red)}}
+.layers h4{margin:6px 0 4px;font-size:14px}
+.layers .ly{display:flex;align-items:center;gap:6px;font-size:13px;background:#f3f6fb;border-radius:9px;padding:4px 8px;margin-bottom:4px}
+.layers .ly.none{color:var(--gray)}
+.dleft .say{position:absolute;left:14px;right:14px;top:296px;min-height:76px;font-size:14px}
+.dleft .hin{left:52px;bottom:0;height:240px}
+.stage{position:absolute;left:348px;top:92px;width:916px;height:404px}
+.port{position:absolute;right:6px;top:-6px;width:330px;height:396px;transition:transform .2s}
+.port svg{width:100%;height:100%}
+.port.hurt{animation:hurt .5s}
+@keyframes hurt{20%{transform:translateX(14px) rotate(3deg)}45%{transform:translateX(-10px) rotate(-2deg)}70%{transform:translateX(5px)}}
+.port.gloat{animation:gloat .6s}
+@keyframes gloat{30%{transform:translateY(-16px) scale(1.04)}60%{transform:translateY(0)}80%{transform:translateY(-6px)}}
+.port .float{animation:fl 3.2s ease-in-out infinite;width:100%;height:100%}
+@keyframes fl{50%{transform:translateY(-8px)}}
+.rname{position:absolute;right:30px;top:368px;background:var(--rc);color:var(--rct);border-radius:12px;padding:3px 14px;font-size:18px;box-shadow:0 4px 0 var(--rcd)}
+.ann{position:absolute;left:0;top:14px;width:560px;padding:18px 20px 16px;border-radius:22px;background:#fff;box-shadow:0 0 0 4px var(--rc),0 14px 30px rgba(0,0,0,.35)}
+.ann .lab{position:absolute;left:18px;top:-15px;background:var(--rc);color:var(--rct);border-radius:9px;padding:1px 12px;font-size:14px}
+.ann .lab.fin{background:var(--red);color:#fff;animation:fpulse .8s infinite}
+@keyframes fpulse{50%{box-shadow:0 0 12px var(--red)}}
+.ann .tline{font-size:17px;font-weight:700;line-height:1.6;min-height:56px}
+.ann .tname{font-size:27px;margin:8px 0 6px;line-height:1.25}
+.ann .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ann .row .sub{font-size:12px}
+.ann .ts{font-size:13px;color:var(--gray);line-height:1.55;margin-top:8px;background:#f6f8fc;border-radius:10px;padding:6px 10px;display:none}
+.ann .ts.on{display:block}
+.ann .more{border:0;background:none;color:#2a5bb8;font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0}
+.ann.pop{animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
+.tbar{height:8px;border-radius:4px;background:#e9edf5;overflow:hidden;margin-top:10px}.tbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));transition:width .1s linear}
+.banner{position:absolute;left:40px;top:250px;width:520px;text-align:center;font-size:44px;color:#fff;-webkit-text-stroke:2px rgba(0,0,0,.15);text-shadow:0 4px 0 rgba(0,0,0,.25);pointer-events:none;opacity:0}
+.banner.ok{color:#fff;animation:ban 1.3s ease-out forwards}.banner.ok span{background:linear-gradient(180deg,#5fd39b,var(--green));border-radius:18px;padding:4px 22px;box-shadow:0 6px 0 #1d8a55}
+.banner.ng{animation:ban 1.3s ease-out forwards}.banner.ng span{background:linear-gradient(180deg,#ff8a9e,var(--red));border-radius:18px;padding:4px 22px;box-shadow:0 6px 0 #a3243d}
+.banner small{display:block;font-size:16px;margin-top:12px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.5);-webkit-text-stroke:0}
+.banner.stay{animation:none;opacity:1}
+@keyframes ban{0%{opacity:0;transform:scale(1.6)}15%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.shield{position:absolute;left:300px;top:250px;width:10px;height:10px;border-radius:50%;border:6px solid #5fd39b;transform:translate(-50%,-50%);pointer-events:none;animation:sh .6s ease-out forwards}
+@keyframes sh{0%{width:20px;height:20px;opacity:1}100%{width:420px;height:420px;opacity:0;border-width:2px}}
+.flash{position:absolute;inset:0;background:radial-gradient(circle,transparent 40%,rgba(224,64,95,.5));pointer-events:none;animation:fla .6s ease-out forwards;z-index:20}
+@keyframes fla{0%{opacity:1}100%{opacity:0}}
+.shake{animation:shk .4s}
+@keyframes shk{20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,3px)}80%{transform:translate(3px,-2px)}}
+.rsay{position:absolute;right:300px;top:300px;max-width:260px;background:#fff;border-radius:14px;padding:6px 12px;font-size:15px;font-weight:700;box-shadow:0 0 0 3px var(--rc);opacity:0;pointer-events:none}
+.rsay.on{animation:rs 1.4s ease-out forwards}.rsay.stay{opacity:1;animation:none}
+@keyframes rs{0%{opacity:0;transform:translateY(8px)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+.hand{position:absolute;left:348px;top:508px;width:916px;height:236px;padding:12px 16px;display:flex;gap:12px;align-items:stretch}
+.card{position:relative;flex:0 0 206px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;border:0;border-radius:18px;background:#fff;cursor:pointer;text-align:left;padding:12px 14px;font-family:inherit;color:var(--navy);box-shadow:0 0 0 3px var(--v),0 7px 0 color-mix(in srgb,var(--v) 65%,#000);transition:transform .12s}
+.card:hover{transform:translateY(-6px)}
+.card:disabled{cursor:default;transform:none}
+.card .key{position:absolute;right:10px;top:8px;width:22px;height:22px;border-radius:6px;background:#eef1f6;color:var(--gray);font-size:13px;display:flex;align-items:center;justify-content:center}
+.card .ic{width:50px;height:50px;border-radius:14px;background:var(--v);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 color-mix(in srgb,var(--v) 65%,#000)}
+.card .cn{display:block;font-size:17px;margin-top:10px;line-height:1.3}
+.card .cb{display:block;font-size:12px;color:var(--gray);margin-top:6px;line-height:1.45}
+.card .cv{display:block;font-size:12px;margin-top:4px;color:var(--v);font-weight:700}
+.card .wk{position:absolute;right:10px;bottom:10px;font-size:11px;background:var(--rc);color:var(--rct);border-radius:6px;padding:0 6px}
+.card.used{animation:use .5s ease-out}
+@keyframes use{40%{transform:translateY(-30px) scale(1.06)}}
+.card.right{box-shadow:0 0 0 4px var(--green),0 0 18px var(--green),0 7px 0 #1d8a55}
+.hside{flex:1;display:flex;flex-direction:column;gap:10px;justify-content:flex-end}
+.hside .btn{font-size:16px;padding:10px 12px}
+.hside .left{font-size:12px;color:#cfd8ea;text-align:center}
+.hand .empty{color:#cfd8ea;font-size:14px;align-self:center}
+
+/* 結果 */
+.modal{position:absolute;inset:0;background:rgba(10,15,30,.6);display:none;align-items:center;justify-content:center;z-index:30}
+.modal.on{display:flex}.modal .box{width:920px;max-height:740px;overflow:auto;padding:16px 24px}
+.res{display:flex;align-items:center;gap:16px}
+.res .rk{width:64px;height:64px;border-radius:20px;background:var(--pink);color:#fff;font-size:46px;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 0 var(--pinkd)}
+.res .rk.lose{background:#7d89a3;box-shadow:0 5px 0 #5b6680;font-size:22px;line-height:1.1;text-align:center}
+.res h2{margin:0;font-size:28px}
+.rline{display:flex;align-items:center;gap:12px;margin:6px 0}
+.rline .mini{width:62px;height:74px;flex:0 0 62px}.rline .mini svg{width:100%;height:100%}
+.rline .say{flex:1;box-shadow:0 0 0 3px var(--rc)}.rline .say .who{background:var(--rc);color:var(--rct)}
+.rtab{width:100%;border-collapse:collapse;font-size:12.5px;margin:4px 0}
+.rtab .vchip{font-size:12px;padding:1px 8px 1px 5px}
+.rtab th{white-space:nowrap;text-align:left;color:var(--gray);font-weight:700;border-bottom:2px solid #e6ebf3;padding:4px}
+.rtab td{padding:3px 4px;line-height:1.35;border-bottom:1px solid #eef1f6;vertical-align:middle}
+.rtab tr.ng td{background:#fff3f5}
+.ok-t{color:var(--green)}.ng-t{color:var(--red)}
+.foot{font-size:11px;color:var(--gray);line-height:1.5;margin-top:4px}
+.maxim{font-size:17px;color:var(--pinkd);background:#fff0f4;border-radius:14px;padding:5px 14px;margin:6px 0;text-align:center}
+.modal .wchip{font-size:12px;padding:1px 8px}
+.modal .btn{font-size:17px;padding:10px 16px}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 相手を選ぶ -->
+  <div class="scr" id="scrSelect">
+    <div class="top panel"><div class="badge pk r">対戦（試作）</div><div style="flex:1;font-size:15px;line-height:1.5">脅威の子が技を予告する。技の<b>攻撃の糸口</b>に合う<b>備え</b>で受け止めよう。<span class="sub">名前はすべて仮。「情報セキュリティ10大脅威 2026」［組織編］を元にした</span></div><button class="btn bl" id="dailyBtn">今日の一問</button></div>
+    <div id="grid"></div>
+    <div class="selfoot"><span>相手を押すと、技と弱点を確かめて、持っていく備えを選ぶ画面へ。右上の文字はその子に勝ったときの最高の評価（このブラウザだけに保存）。</span></div>
+  </div>
+  <!-- 準備 -->
+  <div class="scr" id="scrPrep">
+    <div class="top panel"><div class="badge r" id="pBadge">対戦の準備</div><div style="flex:1;font-size:15px" id="pHead"></div><button class="btn gr" id="backBtn">相手を選ぶ</button></div>
+    <div class="pleft panel"><div class="pport" id="pPort"></div><div class="pname r" id="pName"></div><div class="pipa" id="pIpa"></div><div class="say pintro" id="pIntro"></div><div class="pmotif" id="pMotif"></div></div>
+    <div class="pright panel">
+      <h3 class="r">この子の技 <span class="sub" id="techSub"></span></h3><div id="techList"></div><div id="pNote"></div>
+      <h3 class="r" style="margin-top:8px">持っていく備え <span class="sub" id="loadSub"></span></h3><div class="opts" id="opts"></div>
+      <div class="pbar"><div class="seg" id="modeSeg"><button data-m="easy">はじめて（糸口を見せる）</button><button data-m="hard">腕だめし（糸口を隠す）</button></div><label class="tog"><input type="checkbox" id="pTimer">制限時間</label><div style="flex:1"></div><button class="btn" id="goBtn">対戦する</button></div>
+    </div>
+  </div>
+  <!-- 対戦 -->
+  <div class="scr" id="scrDuel">
+    <div class="top panel"><div class="badge r" id="dBadge"></div><div class="sub" id="dIpa" style="flex:1"></div><div class="mode r" id="dMode"></div><div class="pips" id="pips"></div></div>
+    <div class="dleft panel">
+      <div class="gauge dmg" id="gDmg"><div class="gl"><span class="r">被害（情報・お金）</span><b class="r" id="vDmg">0</b></div><div class="gb"><i id="bDmg" style="width:0"></i></div></div>
+      <div class="gauge stop" id="gStop"><div class="gl"><span class="r">停止（業務）</span><b class="r" id="vStop">0</b></div><div class="gb"><i id="bStop" style="width:0"></i></div></div>
+      <div class="layers"><h4 class="r">重ねた備え（この子の弱点）</h4><div id="lyList"></div></div>
+      <div class="say" id="say"><span class="who r">ひなた</span><span id="sayT">…</span></div>
+      <img class="hin" id="hin" src="../../ArtSource/Hinata/gen-20260929/cut/pose_shield.png" alt="ひなた">
+    </div>
+    <div class="stage" id="stage">
+      <div class="port" id="dPort"></div><div class="rname r" id="dName"></div>
+      <div class="ann" id="ann"></div>
+      <div class="rsay" id="rsay"></div>
+      <div class="banner r" id="banner"></div>
+    </div>
+    <div class="hand" id="hand"></div>
+  </div>
+  <div class="modal" id="modal"><div class="box panel" id="modalBox"></div></div>
+</div>
+<script>
+// ===== 攻撃の糸口と対策の基本（解説書p.8 表1.2）。設備idはOpsThreatCatalog.Vectorsと同じ対応（IPAによる製品推薦ではない）
+const VEC={
+ Vulnerability:{name:'ソフトウェアの脆弱性',basic:'ソフトウェアの更新',eq:'patch',col:'#e67e22'},
+ Malware:{name:'マルウェアの利用',basic:'セキュリティソフトの利用',eq:'edr',col:'#d6455d'},
+ PasswordTheft:{name:'パスワード窃取',basic:'パスワードの管理・認証の強化',eq:'mfa',col:'#2f8fe0'},
+ Misconfiguration:{name:'設定不備',basic:'設定の見直し',eq:'inventory',col:'#7d62c4'},
+ DataEncryption:{name:'データの暗号化',basic:'バックアップの取得',eq:'backup',col:'#1fa88a'},
+ SocialEngineering:{name:'ソーシャルエンジニアリング（罠にはめる）',short:'ソーシャルエンジニアリング',basic:'脅威・手口を知る',eq:'education',col:'#e2557f'}
+};
+// 設備の名前と説明はゲーム本編（OpsCatalog・OpsYearEquipment・OpsYearContent）の文のまま
+const EQ={
+ patch:{name:'更新と検証の運用',vec:'Vulnerability',text:'影響を確かめ、戻し方を用意して更新する。'},
+ edr:{name:'端末の検知と対応（EDR）',vec:'Malware',text:'怪しい動きを端末で見つけて、その場で切り離せる。'},
+ mfa:{name:'多要素認証の展開',vec:'PasswordTheft',text:'パスワードだけに頼らない入口を用意する。'},
+ inventory:{name:'資産と業務の台帳',vec:'Misconfiguration',text:'誰の、どの仕事が、このシステムに依存するか。'},
+ backup:{name:'分離バックアップ',vec:'DataEncryption',text:'本番環境とは分けて、戻せるデータを残す。'},
+ education:{name:'相談できる教育',vec:'SocialEngineering',text:'間違いを責めず、報告してくれたことを歓迎する。'},
+ segment:{name:'ネットワーク分離',text:'一つの侵入で、全部が巻き込まれないように。'},
+ drill:{name:'復元・連絡の訓練',text:'バックアップの復元手順と緊急連絡先を検証する。'},
+ zeroTrust:{name:'ゼロトラスト接続',text:'場所で信じず、毎回確かめる。'},
+ monitor:{name:'監視と通知の整理',text:'監視対象と異常通知の条件を設定する。'},
+ threatSharing:{name:'脅威情報の共有',text:'業界の仲間と手口や兆候を共有する。'},
+ csirt:{name:'事件対応の体制（CSIRT）',text:'事件の連絡と判断の役割を決めておく。'},
+ redundancy:{name:'代替経路と冗長化',text:'一つ止まっても、仕事まで全部止めない。'},
+ runbook:{name:'引継ぎと対応手順',text:'担当者がいない日にも、次の一手が分かる。'}
+};
+const BASICS=['patch','edr','mfa','inventory','backup','education'];
+// ===== 10人。技の名前・糸口・説明・弱点はOpsThreatCatalogのまま。名前はすべて仮。
+// 台詞（名乗り・予告・勝ち・負け・ひとこと）は設定書（Rivals-Characters）の喋り方に合わせた仮の文で、点検待ち。予告には技の言葉を必ず1回入れる
+const RIVALS=[
+ {id:'crypta',name:'クリプタ',ipa:'ランサム攻撃による被害',color:'#D7263D',pupil:'keyhole',pupilName:'鍵穴',motif:'crown',motifName:'暗号の女王',
+  intro:'あたしはクリプタ。暗号のクリプタ！　あなたたちの情報、ぜーんぶ鍵をかけて、いただいちゃうんだから！',
+  win:'ふふーん、ぜーんぶ鍵の中なんだから！　くやしかったら、備えてからいらっしゃい！',
+  lose:'うそっ、バックアップから戻したの！？　ずるーい！　覚えてなさいよー！',ouch:'むーっ！',laugh:'やったー！',
+  weak:['backup','edr','segment','patch','drill'],
+  tech:[{n:'ランサムウェア',v:'DataEncryption',s:'データを暗号化し、復元の見返りとして金銭を要求するマルウェア。',line:'ランサムウェアで、ぜーんぶ暗号化しちゃうんだから！'},
+   {n:'二重脅迫',v:'DataEncryption',s:'データの暗号化に加え、盗んだ情報の公開をちらつかせて金銭を要求する。',line:'二重脅迫よ。払わないと、ばらまいちゃうんだから！'},
+   {n:'ノーウェアランサム',v:'SocialEngineering',s:'データを暗号化せず、盗んだ情報を公開すると脅して金銭を要求する。',line:'ノーウェアランサム……鍵なんてかけなくても、脅せるんだから。'},
+   {n:'VPN機器の脆弱性からの侵入',v:'Vulnerability',s:'外部に接続されたVPN機器などの脆弱性を悪用し、社内への侵入に利用する。',line:'VPN機器の脆弱性から、こっそり入っちゃおっと！'}]},
+ {id:'supra',name:'サプラ',ipa:'サプライチェーンや委託先を狙った攻撃',color:'#14A098',pupil:'door',pupilName:'半開きのドア',motif:'trojan',motifName:'トロイの木馬・贈り物の運び屋',
+  intro:'どーもっす、サプラっす！　取引先の、そのまた取引先から来たっす。鎖の一番弱い輪から、こんにちは〜',
+  win:'信頼の輪っか、ぜんぶつながってたっす〜。通らせてもらったっす！',
+  lose:'えっ、つながってる先まで、ぜんぶ確かめてるっすか！？　ウチの居場所、ないっす〜',ouch:'あちゃーっす',laugh:'おじゃましまっす！',
+  weak:['zeroTrust','inventory','mfa','patch'],
+  tech:[{n:'委託先を経由した侵入',v:'PasswordTheft',s:'関連会社や委託先などの弱点を足掛かりに、標的組織の情報を狙う。',line:'委託先を経由した侵入っす。保守のIDで、おじゃまするっす！'},
+   {n:'ソフトウェアサプライチェーン攻撃',v:'Malware',s:'開発元のソフトウェアにマルウェアを仕込み、導入や更新を通じて利用者の機器を感染させる。',line:'更新ファイルにまぎれこむっす。ソフトウェアサプライチェーン攻撃っす！'},
+   {n:'MSPの管理ソフトの悪用',v:'Misconfiguration',s:'MSPが使う資産管理ソフトウェアなどにマルウェアを仕込み、顧客の機器を感染させる。',line:'MSPさんの管理ソフト、ちょっと借りるっす。'}]},
+ {id:'halsi',name:'ハルシ',ipa:'AIの利用をめぐるサイバーリスク',color:'#8E44AD',pupil:'pixel',pupilName:'四角い画素',motif:'fox',motifName:'狐（化かす・狐火の幻）',
+  intro:'ごきげんよう、わたくしはハルシ。どなたにでも化けられますの。……あなたの上司にも、ね？',
+  win:'おほほ、すっかり信じてくださって。わたくしの名演技、いかがでした？',
+  lose:'別の経路で確かめるなんて……わたくしの名演技が、台無しですわ！',ouch:'あら……',laugh:'おほほほ！',
+  weak:['education','runbook'],
+  note:'シャドーAI・ハルシネーションは、攻撃そのものではなくAIの使い方のリスク（OpsThreatCatalogの整理のまま技の欄に置いている）。AIそのものを悪者にしない。',
+  tech:[{n:'シャドーAI',v:'Misconfiguration',s:'職場で許可されていないAIを業務に使い、持ち出し禁止の情報の入力などで漏えいにつながるおそれがある。',line:'許可のないAIに、秘密を打ち込んでくださいな。シャドーAIですわ。'},
+   {n:'ハルシネーション',v:'SocialEngineering',s:'対話型AIが架空の情報を事実のように提示し、鵜呑みにした利用者の判断を誤らせるおそれがある。',line:'もっともらしい嘘も混ぜておきますの。ハルシネーション、お気づきになって？'},
+   {n:'間接プロンプトインジェクション',v:'SocialEngineering',s:'AIが参照する外部データに指示を埋め込み、本来の指示から外れた動作を誘導する。',line:'この文書、AIに読ませてくださる？　間接プロンプトインジェクションの仕込みつきですの。'},
+   {n:'ディープフェイクによるなりすまし',v:'SocialEngineering',s:'生成した偽の声や映像などで本人を装い、相手に不正な依頼を信じ込ませる。',line:'声も顔も、ディープフェイクで本物そっくりですわ。'}]},
+ {id:'valnera',name:'ヴァルネラ',nick:'ネラ',ipa:'システムの脆弱性を悪用した攻撃',color:'#8BC34A',pupil:'crack',pupilName:'ひび割れ',motif:'crack',motifName:'ひびの入った陶器の人形',
+  intro:'ボクはヴァルネラ！　ネラって呼んで！　パッチが出る前が、ボクの出番さ！',
+  win:'ひび、まだ空いてたじゃん！　ボクの勝ち〜！',
+  lose:'うわっ、もう塞がってる！？　アップデート早すぎ〜！',ouch:'ちぇっ！',laugh:'へへーん！',
+  weak:['patch','inventory','monitor','segment'],
+  tech:[{n:'ゼロデイ攻撃',v:'Vulnerability',s:'開発元などが脆弱性対策情報を公表する前に、その脆弱性を悪用する。',line:'ゼロデイ攻撃！　まだ誰も知らないすき間だよ！'},
+   {n:'Nデイ攻撃',v:'Vulnerability',s:'修正や回避策が公開されていても、利用者が対策するまでの間に脆弱性を悪用する。',line:'Nデイ攻撃！　パッチが出ても、当ててなきゃ同じじゃん！'},
+   {n:'攻撃ツール・攻撃サービスの悪用',v:'Vulnerability',s:'公開された攻撃ツールや提供される攻撃サービスを利用し、未対策の脆弱性を狙う。',line:'攻撃ツールも攻撃サービスも、すぐ使っちゃうもんね！'}]},
+ {id:'spear',name:'スピア',ipa:'機密情報を狙った標的型攻撃',color:'#29B6F6',pupil:'cross',pupilName:'照準（十字）',motif:'spider',motifName:'蜘蛛の狩人',
+  intro:'私はスピア。狙った獲物は、何か月でも待ちます。',
+  win:'静かに、深く。……気づいたときには、もう遅いのですよ。',
+  lose:'……報告が早すぎますね。潜む時間が、ありませんでした。',ouch:'……想定外ですね',laugh:'かかりましたね',
+  weak:['education','edr','monitor','segment','threatSharing'],
+  tech:[{n:'標的型攻撃メール',v:'SocialEngineering',s:'標的が信じそうなメールを送り、添付ファイルの実行やリンクのクリックで感染などを狙う。',line:'あなただけに宛てた手紙です。標的型攻撃メール、開いてくださいますね？'},
+   {n:'水飲み場型攻撃',v:'Malware',s:'標的がよく訪れるWebサイトを改ざんし、訪問した機器をマルウェアに感染させる。',line:'いつものサイトに、罠を置いておきました。水飲み場型攻撃です。'},
+   {n:'ネットワーク貫通型攻撃',v:'Vulnerability',s:'ネットワーク境界の機器の脆弱性を悪用し、侵入や情報窃取、攻撃の中継に利用する。',line:'境界の機器から、静かに入ります。ネットワーク貫通型攻撃ですね。'}]},
+ {id:'cogni',name:'コグニ',ipa:'地政学的リスクに起因するサイバー攻撃（情報戦を含む）',color:'#F4511E',pupil:'bubble',pupilName:'吹き出し',motif:'witch',motifName:'魔女・水晶玉',
+  intro:'ねえねえ、聞いた？　わたしはコグニ。うわさは、本当より速いんだよ？',
+  win:'ねえねえ、聞いた？　うわさのほうが、先に広まっちゃったって話だよ？',
+  lose:'出どころを確かめた！？　うわさが、しぼんじゃう……',ouch:'えー、うそー',laugh:'ほらね、広まった！',
+  weak:['education','threatSharing','backup','csirt'],
+  tech:[{n:'偽情報の流布',v:'SocialEngineering',s:'偽情報やディープフェイクを広め、自国などに有利な状況を作る影響工作を行う。',line:'偽情報の流布、はじめちゃお！　みんな信じるって話だよ？'},
+   {n:'ランサム攻撃を偽装した攻撃',v:'DataEncryption',s:'業務停止や機密情報の窃取などを狙いながら、金銭要求で通常のランサム攻撃を装う。',line:'ランサム攻撃を偽装して、ほんとの狙いは隠しちゃうんだよ？'},
+   {n:'スピアフィッシングによる情報窃取',v:'SocialEngineering',s:'特定の個人を狙ったメールなどで添付ファイルやリンクへ誘導し、認証情報や機密情報を盗む。',line:'あなた宛てのメール、届いてない？　スピアフィッシングで、情報もらっちゃう。'}]},
+ {id:'privy',name:'プリヴィ',ipa:'内部不正による情報漏えい等',color:'#C2185B',pupil:'cat',pupilName:'縦長の猫の瞳孔に小さな鍵',motif:'cat',motifName:'すき間の猫・鍵番',
+  intro:'プリヴィはね、すき間が大好きにゃ。……辞めた人のアカウント、まだ開いてるにゃ？',
+  win:'すき間だらけで、居心地よかったにゃ〜。',
+  lose:'権限、閉じられちゃったにゃ……ログも残ってるにゃ……',ouch:'にゃっ！？',laugh:'にゃふふ',
+  weak:['inventory','monitor','runbook','education'],
+  note:'プリヴィは人ではなく、権限のすき間という「機会」の化身。社員を悪者にしない。倒し方は仕組み（権限の見直し・記録）。',
+  tech:[{n:'アクセス権限の悪用',v:'Misconfiguration',s:'正当に付与された権限を悪用し、秘密情報を盗んだり不正に操作したりする。',line:'権限、ちょっと多めにもらっとくにゃ。アクセス権限の悪用にゃ。'},
+   {n:'在職中に割り当てられたアカウントの悪用',v:'PasswordTheft',s:'離職後も残されたアカウントや権限で外部から不正アクセスし、情報窃取や不正操作を行う。',line:'在職中に割り当てられたアカウント、辞めたあとも使えるにゃ？'},
+   {n:'内部情報の不正な持ち出し',v:'Misconfiguration',s:'記録媒体やメール、クラウド、紙などを通じ、組織の情報を外部へ不正に持ち出す。',line:'内部情報の不正な持ち出し……だれも見てないにゃ？'}]},
+ {id:'vipi',name:'ヴィピ',ipa:'リモートワーク等の環境や仕組みを狙った攻撃',color:'#455A64',pupil:'radio',pupilName:'電波（扇の形）',motif:'vampire',motifName:'吸血鬼（招かれて入る）',
+  intro:'招いてくれたら、どこへでも入れるよぉ。ヴィピも、おじゃましまーす♪',
+  win:'おうちも会社も、ぜんぶつながってて、あったかかったよぉ♪',
+  lose:'多要素認証……ヴィピ、入れないよぉ……',ouch:'入れないよぉ',laugh:'おじゃましまーす♪',
+  weak:['patch','mfa','zeroTrust','edr'],
+  tech:[{n:'リモートワーク用製品の脆弱性の悪用',v:'Vulnerability',s:'VPNなどリモートワーク用製品の脆弱性を悪用して社内ネットワークへの侵入を狙う。',line:'リモートワーク用製品の脆弱性、知ってるよぉ。細いトンネルから、おじゃましまーす♪'},
+   {n:'アカウント情報の不正利用',v:'PasswordTheft',s:'不正に得たアカウント情報を使い、リモートワーク環境へ不正アクセスする。',line:'アカウント情報の不正利用だよぉ。正しいIDなら、招かれたのと同じだもん♪'},
+   {n:'リモートワーク用端末への攻撃',v:'Malware',s:'マルウェア対策などが不十分なリモートワーク用端末を攻撃し、感染などを引き起こす。',line:'おうちのパソコン、借りるね。リモートワーク用端末への攻撃だよぉ。'}]},
+ {id:'fludda',name:'フラッダ',ipa:'DDoS攻撃（分散型サービス妨害攻撃）',color:'#1E63D6',pupil:'arrow',pupilName:'矢印',motif:'drops',motifName:'水の精・雨粒の群れ',allStop:true,
+  intro:'フラッダだよっ！　フラッダだよっ！　フラッダだよっ！　……みんなで押しかけたら、つながらないでしょ？',
+  win:'せーのっ！　つながらなかったでしょ？　フラッダたちの勝ちだよっ！',
+  lose:'えーっ、ぜんぶ受け流された！？　フラッダたち、解散〜！',ouch:'せーのっ……あれっ？',laugh:'どばーっ！',
+  weak:['redundancy','monitor','runbook'],
+  note:'フラッド攻撃・リフレクション攻撃・DNS水責め攻撃は6つの糸口に完全には収まらず、近い分類（設定不備）に置いている（OpsThreatCatalogの整理）。防御側の設定不備が攻撃の必須条件という意味ではない。',
+  tech:[{n:'ボットネットを利用したDDoS攻撃',v:'Malware',s:'乗っ取った多数の機器に命令し、標的のWebサイトやDNSなどへ大量のアクセスを集中させる。',line:'ボットネットのみんな、集合ー！　せーのっ！'},
+   {n:'フラッド攻撃',v:'Misconfiguration',s:'大量の通信パケットをサーバーなどへ送り、高い負荷をかける。',line:'フラッド攻撃！　どばーっと押し寄せるよっ！'},
+   {n:'リフレクション攻撃',v:'Misconfiguration',s:'送信元を標的のIPアドレスに偽装し、多数のサーバーの応答を標的へ集中させる。',line:'リフレクション攻撃！　よそのサーバーに跳ね返してもらうのっ！'},
+   {n:'ランダムサブドメイン攻撃（DNS水責め攻撃）',v:'Misconfiguration',s:'標的のドメインにランダムなサブドメインを付けて問い合わせ、DNSサーバーに高い負荷をかける。',line:'DNS水責め攻撃！　でたらめな名前で、問い合わせまくるよっ！'}]},
+ {id:'spoofy',name:'スプーフィ',ipa:'ビジネスメール詐欺',color:'#F5A623',pupil:'envelope',pupilName:'封筒',motif:'chameleon',motifName:'カメレオン（周りに化ける）',
+  intro:'いつもお世話になっております。スプーフィと申します。……恐れ入りますが、お振込先の変更を、至急お願いできますか？',
+  win:'お振込、確かに承りました。今後とも、よろしくお願いいたします。',
+  lose:'いつもの番号にお電話を……？　……失礼いたしました。',ouch:'……おや',laugh:'承りました',
+  weak:['education','runbook','mfa'],
+  tech:[{n:'取引先へのなりすまし',v:'SocialEngineering',s:'取引先を装って偽の請求書などを送り、攻撃者の口座への振り込みを促す。',line:'振込先が変わりました。……取引先へのなりすまし、お気づきになりませんよね？'},
+   {n:'経営者等へのなりすまし',v:'SocialEngineering',s:'経営者などを装った業務指示のメールを送り、不正な送金に従わせる。',line:'社長です。他の方には内密に、至急。……経営者等へのなりすましでございます。'},
+   {n:'BECの準備としての情報窃取',v:'PasswordTheft',s:'なりすましや感染、不正ログインなどで個人情報や取引のやり取りを盗み、詐欺の準備に使う。',line:'まずは、やりとりをこっそり読ませていただきます。BECの準備としての情報窃取でございます。'}]}
+];
+// ===== 決まり（ゲーム用の数値。現実の被害の大きさではない）
+const TURNS=5,SLOTS=3,HIT=40,FINAL=60,LAYER=15,LAYER_MAX=30,MINHIT=10,LIMIT=100,TIME={easy:15,hard:10};
+const COMBO=['いいね！','その調子！','すごい！','やるぅ！','てんさいっ！','さいきょー！','パーフェクト！'];
+const HIN='../../ArtSource/Hinata/gen-20260929/cut/';
+let P={r:0,mode:'easy',timer:true,load:[],daily:false},G=null,rng=Math.random,tid=null,ac,SHOT=false,NOSAVE=/#shot=/.test(location.hash),uid=0;
+const $=id=>document.getElementById(id);
+function seeded(n){return function(){n|=0;n=n+0x6D2B79F5|0;let t=Math.imul(n^n>>>15,1|n);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function ri(a,b){return a+Math.floor(rng()*(b-a+1))}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function dayNum(){return +new Date().toISOString().slice(0,10).replace(/-/g,'')}
+function shade(hex,k){const n=parseInt(hex.slice(1),16),f=c=>Math.max(0,Math.min(255,Math.round(k<0?c*(1+k):c+(255-c)*k)));return '#'+[n>>16,n>>8&255,n&255].map(c=>f(c).toString(16).padStart(2,'0')).join('')}
+function light(hex){const n=parseInt(hex.slice(1),16);return (0.299*(n>>16)+0.587*(n>>8&255)+0.114*(n&255))>165}
+
+// ===== 図形（絵がまだ確定していないので、色・瞳の形・頬の紋・題材の印で表す）
+const PUPIL={
+ keyhole:'<circle cy="-3.5" r="4.6"/><path d="M-2.6-1h5.2l2.4 10h-10z"/>',
+ door:'<rect x="-7" y="-10" width="14" height="20" rx="1.5" fill="none" stroke="P" stroke-width="2"/><path d="M-7-10l9 3v17l-9 0z"/>',
+ pixel:'<rect x="-8" y="-8" width="7" height="7"/><rect x="1" y="1" width="7" height="7"/><rect x="1" y="-8" width="7" height="7" opacity=".45"/><rect x="-8" y="1" width="7" height="7" opacity=".45"/>',
+ crack:'<path d="M1-11l-5 7 5 3-6 6 4 6" fill="none" stroke="P" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ cross:'<circle r="8" fill="none" stroke="P" stroke-width="2"/><path d="M0-12v8M0 4v8M-12 0h8M4 0h8" stroke="P" stroke-width="2"/><circle r="1.8"/>',
+ bubble:'<path d="M-9-8h18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 5v-5h-4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/>',
+ cat:'<ellipse rx="3.4" ry="11"/><circle cy="-2.5" r="1.7" fill="#fff"/><path d="M0-1.5v5" stroke="#fff" stroke-width="1.3"/>',
+ radio:'<circle cy="7" r="2.4"/><path d="M-5 2a7 7 0 0 1 10 0M-9-2a12 12 0 0 1 18 0M-12.5-6a17 17 0 0 1 25 0" fill="none" stroke="P" stroke-width="2.2" stroke-linecap="round"/>',
+ arrow:'<path d="M-10-3h10v-6l10 9-10 9v-6h-10z"/>',
+ envelope:'<rect x="-10" y="-7" width="20" height="14" rx="1.5"/><path d="M-10-6l10 7 10-7" fill="none" stroke="#fff" stroke-width="1.6"/>'
+};
+// 脅威の紋：菱形の中に回路の線3本と点1つ（全員同じ形、その子の色で光る）
+function crest(x,y,c,s){return `<g class="mark" style="--mc:${c}" transform="translate(${x} ${y}) scale(${s||1})"><path d="M0-9L9 0 0 9-9 0z" fill="${c}" fill-opacity=".22" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/><path d="M-5-2h3l2-2h3M-5 1h7M-4 4h3l1-1h2" fill="none" stroke="${c}" stroke-width="1.1" stroke-linecap="round"/><circle cx="4" cy="2.5" r="1.1" fill="${c}"/></g>`}
+function drop(x,y,s,f,c){return `<path transform="translate(${x} ${y}) scale(${s})" d="M0-10C6-2 8 3 0 8-8 3-6-2 0-10z" fill="${f}" stroke="${c}" stroke-width="1.5"/>`}
+function motif(r,h,c,hl){switch(r.motif){
+ case 'crown':return {top:`<path d="M72 52L78 30 90 44 100 24 110 44 122 30 128 52z" fill="#f4c542" stroke="#b8860b" stroke-width="2" stroke-linejoin="round"/><path d="M100 34l5 6-5 6-5-6z" fill="${c}"/>`};
+ case 'trojan':return {back:`<path d="M54 70L46 26 78 50zM146 70L154 26 122 50z" fill="#c8a26a" stroke="#8a6a3a" stroke-width="2" stroke-linejoin="round"/>`,top:`<path d="M134 52l-13-9v18zM134 52l13-9v18z" fill="#ff6f91" stroke="#d94a70" stroke-width="1.5"/><circle cx="134" cy="52" r="4" fill="#d94a70"/>`};
+ case 'fox':return {back:`<path d="M52 72L44 20 82 50zM148 72L156 20 118 50z" fill="${h}"/><path d="M56 62L51 34 72 52zM144 62L149 34 128 52z" fill="#fff" opacity=".75"/>`};
+ case 'crack':return {face:`<path d="M58 88l9 10-4 8 9 9" fill="none" stroke="#9aa3b5" stroke-width="1.6" stroke-linecap="round"/><path d="M148 128l-7 6 3 7-6 5" fill="none" stroke="#9aa3b5" stroke-width="1.6" stroke-linecap="round"/>`};
+ case 'spider':return {top:`<g transform="translate(150 64)" stroke="#1d2a44" stroke-width="1.8" stroke-linecap="round"><path d="M-12-8L-4-2M-13 0H-4M-12 8L-4 2M12-8L4-2M13 0H4M12 8L4 2"/><ellipse rx="5" ry="6.5" fill="#1d2a44"/><circle cy="-7" r="3" fill="#1d2a44"/><path d="M0-10V-40" stroke-width="1" opacity=".6"/></g>`};
+ case 'witch':return {top:`<path d="M60 54Q100 62 140 54L106 4Q97-3 93 9z" fill="#3a3f55"/><ellipse cx="100" cy="56" rx="58" ry="9" fill="#3a3f55"/><path d="M70 51Q100 58 130 51" stroke="${c}" stroke-width="5" fill="none"/><circle cx="168" cy="200" r="15" fill="${hl}" stroke="#fff" stroke-width="2" opacity=".9"/><path d="M162 194a8 8 0 0 1 8-3" stroke="#fff" stroke-width="2" fill="none"/>`};
+ case 'cat':return {back:`<path d="M50 74L52 28 84 52zM150 74L148 28 116 52z" fill="${h}"/><path d="M57 63L57 40 75 54zM143 63L143 40 125 54z" fill="#ffc6d6"/>`};
+ case 'vampire':return {body:`<path d="M62 198L48 156 86 186zM138 198L152 156 114 186z" fill="#cfd8dc" stroke="${h}" stroke-width="2" stroke-linejoin="round"/>`,mouth:`<path d="M95 157l2 5 2-5zM101 157l2 5 2-5z" fill="#fff" stroke="#c0566e" stroke-width=".7"/>`};
+ case 'drops':return {top:drop(34,70,1.1,hl,c)+drop(168,82,.9,hl,c)+drop(176,150,1.2,hl,c)+drop(24,148,.8,hl,c)};
+ case 'chameleon':return {back:`<path d="M152 76q24-6 24 15 0 15-13 13-9-1-7-9 2-5 7-3" fill="none" stroke="${h}" stroke-width="6" stroke-linecap="round"/>`,top:`<path d="M58 70Q100 52 142 70" stroke="${hl}" stroke-width="3" fill="none" stroke-dasharray="2 5" stroke-linecap="round"/>`};
+ }return {}}
+function portrait(r,face){const c=r.color,h=shade(c,-.45),hl=shade(c,.4),pc='#1d2a44',m=motif(r,h,c,hl),g='ir'+(++uid);
+ const eye=x=>`<g transform="translate(${x} 122)"><ellipse rx="15" ry="18" fill="#fff" stroke="${h}" stroke-width="1.5"/><circle r="12.5" fill="url(#${g})"/><g transform="scale(.8)" fill="${pc}">${PUPIL[r.pupil].replace(/P/g,pc)}</g><circle cx="-5" cy="-8" r="3" fill="#fff" opacity=".9"/></g>`;
+ const mouth=face==='smug'?'<path d="M91 154Q100 165 109 154z" fill="#c0566e"/>':face==='hurt'?'<path d="M93 160Q100 153 107 160" fill="none" stroke="#c0566e" stroke-width="2.4" stroke-linecap="round"/>':'<path d="M93 155Q100 162 107 155" fill="none" stroke="#c0566e" stroke-width="2.4" stroke-linecap="round"/>';
+ return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="${g}"><stop offset="0" stop-color="${hl}"/><stop offset="1" stop-color="${c}"/></radialGradient></defs>
+ <circle cx="100" cy="114" r="94" fill="${c}" opacity=".14"/>${m.back||''}
+ <path d="M38 120C30 50 70 28 100 28S170 50 162 120L166 200Q150 212 140 196L136 150H64L60 196Q50 212 34 200z" fill="${h}"/>
+ <rect x="90" y="158" width="20" height="28" rx="6" fill="#f6d6c8"/>
+ <path d="M58 196Q100 178 142 196L160 240H40z" fill="${c}"/><path d="M84 188L100 205 116 188" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>${m.body||''}
+ <path d="M100 209l8 9-8 9-8-9z" fill="${hl}" stroke="#fff" stroke-width="2"/>
+ <ellipse cx="100" cy="116" rx="54" ry="56" fill="#ffeadf"/>${m.face||''}
+ <path d="M44 112C40 60 70 40 100 40S160 60 156 112C150 96 140 84 128 80L122 96 110 78 98 94 86 78 76 96 70 82C58 88 48 98 44 112z" fill="${h}"/>
+ ${eye(78)}${eye(122)}
+ <ellipse cx="70" cy="146" rx="9" ry="5" fill="#ff8fab" opacity=".35"/>
+ ${crest(126,151,c,1.05)}${mouth}${m.mouth||''}${m.top||''}</svg>`}
+const VICON={
+ Vulnerability:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 7l-2 4 3 2-2 4"/>',
+ Malware:'<ellipse cx="12" cy="14" rx="5" ry="6"/><path d="M12 8V6M9 4.5L10.5 7M15 4.5L13.5 7M7 12H4M7 16H4M17 12h3M17 16h3M12 10v10"/>',
+ PasswordTheft:'<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/>',
+ Misconfiguration:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="7" cy="17" r="2" fill="currentColor"/>',
+ DataEncryption:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3M12 15v2"/>',
+ SocialEngineering:'<path d="M15 3v10a5 5 0 0 1-10 0v-2l3 2"/><circle cx="15" cy="3" r="1.4"/>',
+ layer:'<path d="M12 4l9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 16l9 4 9-4"/>'
+};
+function vicon(v,s,c){c=c||'#fff';return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:${c}">${VICON[v]}</svg>`}
+function vname(v){return VEC[v].short||VEC[v].name}
+function vchip(v){return `<span class="vchip r" style="--v:${VEC[v].col}">${vicon(v,16)}${vname(v)}</span>`}
+function eqcol(id){return EQ[id].vec?VEC[EQ[id].vec].col:'#6b7894'}
+
+// ===== 画面
+function show(id){document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id===id))}
+function setRival(r){const a=$('app').style;a.setProperty('--rc',r.color);a.setProperty('--rct',light(r.color)?'#1d2a44':'#fff');a.setProperty('--rcd',shade(r.color,-.4))}
+function loadBest(){if(SHOT)return {crypta:'S',spear:'A',spoofy:'B'};try{return JSON.parse(localStorage.getItem('protoH-best')||'{}')}catch(e){return {}}}
+function saveBest(id,rk){if(NOSAVE)return;const order='SABC';try{const b=loadBest();if(!b[id]||order.indexOf(rk)<order.indexOf(b[id])){b[id]=rk;localStorage.setItem('protoH-best',JSON.stringify(b))}}catch(e){}}
+function showSelect(){stopTimer();closeModal();setRival({color:'#ff6f91'});show('scrSelect');const best=loadBest();
+ $('grid').innerHTML=RIVALS.map((r,i)=>`<div class="rcard" style="--c:${r.color}" data-i="${i}"><div class="mini">${portrait(r)}</div><div class="stripe"></div><div class="nm r">${r.name}<small>（仮）</small></div><div class="ipa">${r.ipa}</div>${best[r.id]?`<div class="best r">${best[r.id]}</div>`:''}</div>`).join('');
+ $('grid').querySelectorAll('.rcard').forEach(e=>e.onclick=()=>{beep(620);showPrep(+e.dataset.i,false)})}
+function showPrep(i,daily){stopTimer();closeModal();P.r=i;P.daily=!!daily;if(daily)P.mode='hard';P.load=[];G=null;setRival(RIVALS[i]);show('scrPrep');renderPrep()}
+function renderPrep(){const r=RIVALS[P.r],hard=P.mode==='hard';
+ $('pBadge').textContent=P.daily?'今日の一問':'対戦の準備';
+ $('pHead').innerHTML=hard?'技の説明から<b>攻撃の糸口</b>を読み取って、受け止められる備えを3つ選ぼう。':'予告される技の<b>攻撃の糸口</b>を見て、受け止められる備えを3つ選ぼう。';
+ $('pPort').innerHTML=portrait(r);$('pName').innerHTML=r.name+'<small>（仮）'+(r.nick?'　呼び名 '+r.nick:'')+'</small>';$('pIpa').textContent='10大脅威：'+r.ipa;
+ $('pIntro').innerHTML='<span class="who r">'+r.name+'</span>'+r.intro;
+ $('pMotif').innerHTML='図形は絵の代わり：色 '+r.color+'／瞳の形「'+r.pupilName+'」／左の目の下に脅威の紋／胸に菱形の宝石／題材の印「'+r.motifName+'」（仮）';
+ $('techSub').textContent=hard?'糸口は隠れている（説明から考えよう）':'右の色が攻撃の糸口';
+ $('techList').innerHTML=r.tech.map(t=>`<div class="trow"><div class="tn r">${t.n}</div><div>${hard?'<span class="vchip q r">糸口は？</span>':vchip(t.v)}</div><div class="ts">${t.s}</div></div>`).join('');
+ $('pNote').innerHTML=(r.note?`<div class="note">${r.note}</div>`:'')+(hard?'':`<div style="font-size:13px;margin:4px 0 0">弱点（効く備え）：${r.weak.map(id=>`<span class="wchip">${EQ[id].name}</span>`).join('')}</div>`);
+ const ids=BASICS.concat(r.weak.filter(id=>!BASICS.includes(id)));
+ $('loadSub').textContent=P.load.length+' / '+SLOTS+'　'+(hard?'':'「弱点」の印は、持っているだけで外れたときの被害を抑える');
+ $('opts').innerHTML=ids.map(id=>{const e=EQ[id],v=e.vec;return `<div class="opt${P.load.includes(id)?' sel':''}" data-id="${id}" style="--v:${eqcol(id)}"><div class="oi">${vicon(v||'layer',20)}</div><div class="on r">${e.name}</div><div class="ob">${v?'糸口：'+vname(v):'重ねる備え'}</div>${!hard&&r.weak.includes(id)?'<span class="wk r">弱点</span>':''}</div>`}).join('');
+ $('opts').querySelectorAll('.opt').forEach(o=>o.onclick=()=>{const id=o.dataset.id,k=P.load.indexOf(id);if(k>=0)P.load.splice(k,1);else if(P.load.length<SLOTS)P.load.push(id);else{beep(220,0,'square');return}beep(k>=0?440:700);renderPrep()});
+ $('modeSeg').querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.m===P.mode);b.onclick=()=>{P.mode=b.dataset.m;renderPrep()}});
+ $('pTimer').checked=P.timer;$('pTimer').onchange=e=>P.timer=e.target.checked;
+ $('goBtn').disabled=P.load.length!==SLOTS;$('goBtn').textContent=P.load.length===SLOTS?'対戦する':'あと'+(SLOTS-P.load.length)+'つ選ぶ'}
+
+// ===== 対戦
+function start(){const r=RIVALS[P.r];rng=P.daily?seeded(dayNum()+11):(SHOT?seeded(20261003):Math.random);
+ // 並び：すべての技を一度ずつ＋足りない分をくり返し。最後のターンは本気の技（外れたときの被害が大きい）
+ let seq=shuffle(r.tech.map((_,i)=>i));while(seq.length<TURNS)seq.push(ri(0,r.tech.length-1));seq=shuffle(seq.slice(0,TURNS));
+ G={r,seq,turn:0,dmg:0,stop:0,hist:[],consult:1,combo:0,over:false,lock:true,mode:P.mode,timer:P.timer,load:P.load.slice(),daily:P.daily,revealed:false,t:0};rng=Math.random;
+ show('scrDuel');$('dBadge').textContent=r.name+'（仮）';$('dIpa').textContent='10大脅威：'+r.ipa;$('dMode').textContent=(G.daily?'今日の一問　':'')+(G.mode==='hard'?'腕だめし':'はじめて');
+ $('dPort').innerHTML='<div class="float">'+portrait(r)+'</div>';$('dName').textContent=r.name;
+ renderSide();renderHand();say('相手が技を予告したら、その糸口に合う備えで受け止めて！','pose_shield');
+ if(!SHOT)setTimeout(nextTurn,700);else nextTurn()}
+function cur(){return G.r.tech[G.seq[G.turn]]}
+function need(t){return VEC[t.v].eq}
+function gaugeOf(t){return (G.r.allStop||t.v==='Malware'||t.v==='DataEncryption')?'stop':'dmg'}
+function reduction(){return Math.min(LAYER_MAX,G.load.filter(id=>G.r.weak.includes(id)).length*LAYER)}
+function nextTurn(){G.revealed=G.mode==='easy';G.lock=false;const t=cur(),fin=G.turn===TURNS-1;renderAnn(t,fin,true);renderHand();renderPips();
+ if(fin)say('次は本気の技！　外れたときの被害が大きいよ。落ち着いて！','pose_point');
+ startTimer()}
+function renderAnn(t,fin,anim){const showV=G.revealed;const a=$('ann');
+ a.innerHTML=`<span class="lab r${fin?' fin':''}">${fin?'本気の技の予告':'技の予告　ターン '+(G.turn+1)+' / '+TURNS}</span><div class="tline">「${t.line}」</div><div class="tname r">${t.n}</div>
+ <div class="row">${showV?vchip(t.v):'<span class="vchip q r">糸口は？</span>'}<span class="sub">外れると ${gaugeOf(t)==='stop'?'停止':'被害'} が増える</span><span style="flex:1"></span><button class="more" id="moreBtn">技の説明</button></div>
+ <div class="ts" id="tsum">${t.s}</div>${G.timer&&!G.lock?'<div class="tbar"><i id="tbar" style="width:100%"></i></div>':''}`;
+ $('moreBtn').onclick=()=>$('tsum').classList.toggle('on');
+ if(anim){a.classList.remove('pop');void a.offsetWidth;a.classList.add('pop');beep(330,0,'triangle');beep(260,.1,'triangle')}}
+function renderHand(){const h=$('hand');const cards=G.load.filter(id=>EQ[id].vec);
+ h.innerHTML=(cards.length?cards.map((id,i)=>{const e=EQ[id],v=e.vec;return `<button class="card" data-id="${id}" style="--v:${VEC[v].col}"><span class="key r">${i+1}</span><span class="ic">${vicon(v,30)}</span><span class="cn r">${e.name}</span><span class="cv">糸口：${vname(v)}</span><span class="cb">対策の基本：${VEC[v].basic}</span>${G.r.weak.includes(id)&&G.mode==='easy'?'<span class="wk r">弱点</span>':''}</button>`}).join(''):'<div class="empty">受け止める備え（糸口の印つき）を持ってきていない。重ねた備えで被害を抑えよう。</div>')+
+ `<div class="hside"><div class="left">相談：あと ${G.consult} 回（減点なし）</div><button class="btn pk" id="consultBtn" ${G.consult&&!G.lock?'':'disabled'}>ひなたに相談</button><button class="btn gr" id="passBtn" ${G.lock?'disabled':''}>受けずに見送る</button></div>`;
+ h.querySelectorAll('.card').forEach(c=>{c.disabled=G.lock;c.onclick=()=>play(c.dataset.id,c)});
+ $('consultBtn').onclick=consult;$('passBtn').onclick=()=>play(null)}
+function renderSide(){$('vDmg').textContent=G.dmg;$('vStop').textContent=G.stop;$('bDmg').style.width=Math.min(100,G.dmg)+'%';$('bStop').style.width=Math.min(100,G.stop)+'%';
+ const ly=G.load.filter(id=>G.r.weak.includes(id));
+ $('lyList').innerHTML=(ly.length?ly.map(id=>`<div class="ly">${vicon(EQ[id].vec||'layer',18,eqcol(id))}${EQ[id].name}</div>`).join('')+`<div class="sub">外れたときの増え方 −${reduction()}（最低${MINHIT}）</div>`:'<div class="ly none">まだない（弱点の備えを持っていくと、外れたときの被害を抑えられる）</div>')}
+function renderPips(){$('pips').innerHTML=Array.from({length:TURNS},(_,i)=>{const h=G.hist[i];return `<i class="${h?(h.ok?'ok':'ng'):i===G.turn&&!G.over?'now':''}${i===TURNS-1?' fin':''}"></i>`}).join('')}
+function consult(){if(!G||G.lock||G.consult<=0)return;G.consult--;const t=cur(),eq=need(t),has=G.load.includes(eq);G.revealed=true;G.t=Math.min(G.t+5,TIME[G.mode]);
+ renderAnn(t,G.turn===TURNS-1,false);renderHand();beep(880);beep(1100,.08);
+ say(`糸口は「${vname(t.v)}」、対策の基本は「${VEC[t.v].basic}」。`+(has?`「${EQ[eq].name}」で受けよう！`:'今回は持ってきてないから、重ねた備えで抑えよう！'),'pose_point')}
+// 受ける。合う備えなら受け止める。外れたら被害か停止が増える（弱点の備えを持っていれば増え方が減る）
+function resolve(id,timeout){const t=cur(),eq=need(t),fin=G.turn===TURNS-1,ok=id===eq;let amt=0,g=gaugeOf(t);
+ if(ok)G.combo++;else{G.combo=0;amt=Math.max(MINHIT,(fin?FINAL:HIT)-reduction());G[g]+=amt}
+ const h={t,id,ok,amt,g,fin,timeout:!!timeout,consulted:G.revealed&&G.mode==='hard'};G.hist.push(h);return h}
+function play(id,el,timeout){if(!G||G.lock||G.over)return;G.lock=true;stopTimer();const h=resolve(id,timeout);G.revealed=true;
+ renderAnn(h.t,h.fin,false);renderHand();renderSide();renderPips();
+ const c=id&&document.querySelector(`.card[data-id="${id}"]`);if(c){c.classList.add('used')}
+ const right=document.querySelector(`.card[data-id="${need(h.t)}"]`);
+ const b=$('banner');b.className='banner r';void b.offsetWidth;
+ if(h.ok){b.innerHTML=`<span>受け止めた！</span><small>糸口「${vname(h.t.v)}」に「${EQ[id].name}」</small>`;b.classList.add('ok');
+  const s=document.createElement('div');s.className='shield';$('stage').appendChild(s);setTimeout(()=>s.remove(),650);
+  port('hurt');rsay(G.r.ouch);beep(660);beep(990,.07);if(G.combo>=3)beep(1320,.14);
+  say(COMBO[Math.min(G.combo,COMBO.length)-1],G.combo>=3?'pose_jump':'pose_fists')}
+ else{b.innerHTML=`<span>${h.g==='stop'?'停止':'被害'} +${h.amt}</span><small>${timeout?'時間切れ。':id?'糸口に合わなかった。':'見送った。'}受け止められたのは「${EQ[need(h.t)].name}」</small>`;b.classList.add('ng');
+  if(right)right.classList.add('right');
+  const f=document.createElement('div');f.className='flash';$('app').appendChild(f);setTimeout(()=>f.remove(),650);
+  const st=$('scrDuel');st.classList.remove('shake');void st.offsetWidth;st.classList.add('shake');
+  const gg=$(h.g==='stop'?'gStop':'gDmg');gg.classList.remove('pulse');void gg.offsetWidth;gg.classList.add('pulse');
+  port('gloat');rsay(G.r.laugh);beep(180,0,'sawtooth');beep(140,.12,'sawtooth');
+  const has=G.load.includes(need(h.t));
+  say(`大丈夫！　この技の糸口は「${vname(h.t.v)}」。`+(has?`次は「${EQ[need(h.t)].name}」で受けよう！`:`「${EQ[need(h.t)].name}」があれば受け止められたよ。`),'pose_startled')}
+ if(SHOT){b.classList.add('stay');$('rsay').classList.add('stay');return}
+ setTimeout(advance,1500)}
+function advance(){if(G.dmg>=LIMIT||G.stop>=LIMIT)return finish(false);G.turn++;if(G.turn>=TURNS)return finish(true);port('');nextTurn()}
+function port(cls){const p=$('dPort');p.classList.remove('hurt','gloat');void p.offsetWidth;if(cls)p.classList.add(cls);p.innerHTML='<div class="float">'+portrait(G.r,cls==='hurt'?'hurt':cls==='gloat'?'smug':'')+'</div>'}
+function rsay(t){const e=$('rsay');e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on')}
+function startTimer(){stopTimer();if(!G.timer||SHOT)return;G.t=TIME[G.mode];tid=setInterval(()=>{if(G.lock)return;G.t=Math.max(0,G.t-.1);const b=$('tbar');if(b)b.style.width=(G.t/TIME[G.mode]*100)+'%';if(G.t<=0)play(null,null,true)},100)}
+function stopTimer(){clearInterval(tid);tid=null}
+function finish(win){G.over=true;G.lock=true;stopTimer();renderPips();const r=G.r,blocks=G.hist.filter(h=>h.ok).length;
+ const rank=win?(blocks>=5?'S':blocks>=4?'A':blocks>=2?'B':'C'):null;if(rank)saveBest(r.id,rank);
+ const used=[...new Set(G.hist.filter(h=>h.ok).map(h=>h.id))],layers=G.load.filter(id=>r.weak.includes(id));
+ const missing=[...new Set(G.hist.filter(h=>!h.ok).map(h=>need(h.t)))].filter(id=>!G.load.includes(id));
+ if(win){beep(523);beep(659,.08);beep(784,.16);beep(1046,.24)}else{beep(392,0,'triangle');beep(330,.15,'triangle')}
+ say(win?r.name+'の手口、ちゃんと受け止められたね！':'大丈夫。どの備えなら受け止められたか、一緒に見てみよう！',win?'pose_jump':'pose_please');
+ const rows=G.hist.map((h,i)=>`<tr class="${h.ok?'':'ng'}"><td>${i+1}${h.fin?'<br><span class="ng-t r" style="font-size:11px">本気</span>':''}</td><td><b>${h.t.n}</b></td><td>${vchip(h.t.v)}</td><td>${h.id?EQ[h.id].name:h.timeout?'時間切れ':'見送り'}</td><td class="r ${h.ok?'ok-t':'ng-t'}" style="white-space:nowrap">${h.ok?'受け止めた':(h.g==='stop'?'停止':'被害')+' +'+h.amt}</td><td>${EQ[need(h.t)].name}<span class="sub">（${VEC[h.t.v].basic}）</span></td></tr>`).join('');
+ const chips=a=>a.map(id=>`<span class="wchip">${EQ[id].name}</span>`).join('');
+ modal(`<div class="res">${win?`<div class="rk r">${rank}</div>`:'<div class="rk lose r">また<br>挑戦</div>'}<div><h2 class="r">${win?r.name+'に勝った！':r.name+'に押し切られた'}</h2><div class="sub">受け止めた ${blocks} / ${TURNS}　被害 ${G.dmg}　停止 ${G.stop}（どちらかが${LIMIT}になると負け）${G.daily?'　今日の一問':''}</div></div></div>
+ <div class="rline"><div class="mini">${portrait(r,win?'hurt':'smug')}</div><div class="say"><span class="who r">${r.name}</span>${win?r.lose:r.win}</div></div>
+ ${win?`<div style="font-size:14px">効いた備え：${used.length?chips(used):'<span class="sub">（受け止めた技はなし）</span>'}${layers.length?'　重ねた弱点：'+chips(layers):''}</div>`:`<div style="font-size:14px">${missing.length?'次は、これを持っていこう：'+chips(missing):'持っていた備えで受け止められた技もあったよ。糸口をもう一度見てみよう。'}${layers.length?'　重ねた弱点：'+chips(layers):''}</div>`}
+ <table class="rtab"><tr><th>ターン</th><th>技</th><th>攻撃の糸口</th><th>選んだ備え</th><th>結果</th><th>受け止められた備え（対策の基本）</th></tr>${rows}</table>
+ <div style="font-size:13px">${r.name}の弱点（効く備え）：${chips(r.weak)}</div>
+ <div class="maxim r">${win?'手口を知って、合う備えを選ぶ。それが一番の近道だよ！':'押し切られても、だいじょうぶ。どこで受け止められたかが分かれば、次は強くなれる！'}</div>
+ <div class="foot">「受け止めた」はゲーム上の整理。現実では一つの備えで必ず防げるわけではなく、いくつも重ねて被害を抑える。攻撃の糸口と対策の基本はIPA「情報セキュリティ10大脅威 2026」解説書［組織編］の表1.2、技の説明は同解説書の要約（OpsThreatCatalog、確認日2026-10-03）。糸口への割り当てと設備との対応はゲーム用の整理。数値は実測ではない。</div>
+ <div style="display:flex;gap:10px;margin-top:10px"><button class="btn" id="againBtn">もう一度（同じ備え）</button><button class="btn bl" id="prepBtn">備えを選び直す</button><button class="btn gr" id="selBtn">相手を選ぶ</button></div>`);
+ $('againBtn').onclick=()=>{closeModal();P.load=G.load.slice();start()};$('prepBtn').onclick=()=>{const keep=G.load.slice();showPrep(P.r,P.daily);P.load=keep;renderPrep()};$('selBtn').onclick=showSelect}
+function daily(){const rr=seeded(dayNum()+11);showPrep(Math.floor(rr()*RIVALS.length),true)}
+function say(t,pose){$('sayT').textContent=t;if(pose)$('hin').src=HIN+pose+'.png'}
+function modal(h){$('modalBox').innerHTML=h;$('modal').classList.add('on')}
+function closeModal(){$('modal').classList.remove('on')}
+function beep(f,t=0,type='sine'){if(SHOT)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.12,s);g.gain.exponentialRampToValueAtTime(.001,s+.2);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+.21)}catch(e){}}
+function fit(){const a=$('app'),s=Math.min(innerWidth/1300,innerHeight/780);a.style.transform='scale('+s+')';a.style.left=Math.max(0,(innerWidth-1280*s)/2)+'px';a.style.top=Math.max(0,(innerHeight-760*s)/2)+'px'}
+addEventListener('resize',fit);fit();
+addEventListener('keydown',e=>{if(!G||G.lock||!$('scrDuel').classList.contains('on'))return;const cards=G.load.filter(id=>EQ[id].vec);const n=+e.key;if(n>=1&&n<=cards.length)play(cards[n-1]);else if(e.key==='c'||e.key==='C')consult();else if(e.key==='x'||e.key==='X')play(null)});
+$('dailyBtn').onclick=daily;$('backBtn').onclick=showSelect;$('goBtn').onclick=()=>{if(P.load.length===SLOTS)start()};
+showSelect();
+// 撮影用（#shot=select / prep / prep-hard / duel / hidden / block / hit / win / lose。末尾に -2 などを付けると、その順の相手）。URLに付けたときだけ動く。普段の遊びには影響しない
+(function(){const m=location.hash.match(/^#shot=([a-z]+(?:-hard)?)(?:-(\d+))?/);if(!m)return;SHOT=true;const st=m[1],i=Math.max(0,Math.min(9,(+m[2]||1)-1)),r=RIVALS[i];
+ // 撮影では、受け止められる備え（糸口ごとに1つ）を先に入れ、空きに弱点の重ねる備えを入れる
+ const right=[...new Set(r.tech.map(t=>VEC[t.v].eq))],extra=r.weak.filter(id=>!right.includes(id));const best=right.concat(extra).slice(0,SLOTS);
+ if(st==='select'){showSelect();return}
+ P.mode=(st==='prep-hard'||st==='hidden')?'hard':'easy';showPrep(i,false);P.mode=(st==='prep-hard'||st==='hidden')?'hard':'easy';
+ if(st==='prep'||st==='prep-hard'){P.load=st==='prep'?best.slice(0,2):[];renderPrep();return}
+ P.load=best;start();
+ if(st==='duel'||st==='hidden'){if(G.timer){const b=$('ann').querySelector('.tbar');if(b)b.firstChild.style.width='72%'}return}
+ if(st==='block'){play(need(cur()));return}
+ if(st==='hit'){const wrong=G.load.find(id=>EQ[id].vec&&id!==need(cur()));if(wrong)play(wrong);else play(null);return}
+ // 勝ち：4回受け止めて1回外す。負け：備えが合わないまま押し切られる
+ SHOT=false;const fakeBeep=beep;beep=()=>{};
+ if(st==='win'){for(let k=0;k<TURNS;k++){G.lock=false;resolve(k===2?null:need(cur()));G.turn++}G.turn=TURNS-1;renderSide();finish(true)}
+ if(st==='lose'){const by={stop:[],dmg:[]};r.tech.forEach((t,k)=>by[gaugeOf(t)].push(k));const pick=by.stop.length>=by.dmg.length?by.stop:by.dmg;
+  G.seq=Array.from({length:TURNS},(_,k)=>pick[k%pick.length]);G.load=BASICS.filter(id=>!right.includes(id)&&!r.weak.includes(id)).slice(0,SLOTS);renderHand();
+  while(G.dmg<LIMIT&&G.stop<LIMIT&&G.turn<TURNS){resolve(G.load[0]||null);if(G.dmg>=LIMIT||G.stop>=LIMIT)break;G.turn++}renderSide();finish(false)}
+ beep=fakeBeep;SHOT=true})();
+</script>
+</body>
+</html>

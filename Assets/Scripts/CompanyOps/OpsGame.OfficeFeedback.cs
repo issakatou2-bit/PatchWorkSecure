@@ -110,11 +110,12 @@ namespace PatchWorkSecure.CompanyOps
 
         private IEnumerator InstallationPulse(RectTransform pin)
         {
-            float elapsed = 0;
-            while (pin != null && elapsed < .7f)
+            var wait=BeginPresentation("installation_pulse",OpsPresentationTiming.InstallationPulse,null,pin);
+            while (pin != null && !wait.Done)
             {
-                pin.localScale = Vector3.one * (ReducedMotion ? 1 : 1 + .06f * Mathf.Sin(elapsed / .7f * Mathf.PI));
-                elapsed += Time.unscaledDeltaTime; yield return null;
+                wait.Advance(Time.unscaledDeltaTime,FastPresentation);
+                pin.localScale = Vector3.one * (ReducedMotion ? 1 : 1 + .06f * Mathf.Sin(wait.Elapsed / OpsPresentationTiming.InstallationPulse * Mathf.PI));
+                yield return null;
             }
             if (pin != null) pin.localScale = Vector3.one;
         }
@@ -122,12 +123,12 @@ namespace PatchWorkSecure.CompanyOps
         private IEnumerator FadeOfficeNotice(RectTransform notice)
         {
             var group = notice.GetComponent<CanvasGroup>();
-            yield return new WaitForSecondsRealtime(1.1f);
-            float elapsed = 0;
-            while (notice != null && elapsed < .35f)
+            var wait=BeginPresentation("installation_notice",OpsPresentationTiming.NoticeHold+OpsPresentationTiming.NoticeFade,null,notice);
+            while (notice != null && !wait.Done)
             {
-                group.alpha = 1 - elapsed / .35f;
-                elapsed += Time.unscaledDeltaTime; yield return null;
+                wait.Advance(Time.unscaledDeltaTime,FastPresentation);
+                group.alpha = 1-Mathf.Clamp01((wait.Elapsed-OpsPresentationTiming.NoticeHold)/OpsPresentationTiming.NoticeFade);
+                yield return null;
             }
             if (notice != null) Destroy(notice.gameObject);
         }
@@ -152,20 +153,20 @@ namespace PatchWorkSecure.CompanyOps
     }
     public sealed class OpsRoomHelperMotion : MonoBehaviour
     {
-        public OpsGame Owner;public string TargetRoom;private float elapsed;
-        private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(elapsed/.45f));
+        public OpsGame Owner;public string TargetRoom;private float elapsed;private OpsPresentationWait timing;
+        private void Update(){if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.StaffTravel,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(elapsed/OpsPresentationTiming.StaffTravel));
             ((RectTransform)transform).anchoredPosition=new Vector2(Owner.ReducedMotion?290:Mathf.Lerp(20,290,t),-70+(Owner.ReducedMotion?0:22*Mathf.Sin(t*Mathf.PI)));if(t>=1)enabled=false;}
     }
     public sealed class OpsStatSpark : MonoBehaviour
     {
-        public OpsGame Owner;public Vector2 From,To;public float Delay;public int Stat;private float elapsed;
-        private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01((elapsed-Delay)/.6f);var rect=(RectTransform)transform;
+        public OpsGame Owner;public Vector2 From,To;public float Delay;public int Stat;private float elapsed;private OpsPresentationWait timing;
+        private void Update(){if(timing==null)timing=Owner.BeginFeedback(name,Delay+OpsPresentationTiming.StatSpark,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;float t=Mathf.Clamp01((elapsed-Delay)/OpsPresentationTiming.StatSpark);var rect=(RectTransform)transform;
             rect.anchoredPosition=Owner.ReducedMotion?To:Vector2.Lerp(From,To,Mathf.SmoothStep(0,1,t))+Vector2.up*120*Mathf.Sin(t*Mathf.PI);
             GetComponent<Image>().color=new Color(GetComponent<Image>().color.r,GetComponent<Image>().color.g,GetComponent<Image>().color.b,elapsed<Delay?0:1-t*.7f);if(t>=1)Destroy(gameObject);}
     }
     public sealed class OpsStatGaugeGrow : MonoBehaviour
     {
-        public OpsGame Owner;public float From,To;private float elapsed;
-        private void Update(){elapsed+=Time.unscaledDeltaTime;((RectTransform)transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,Owner.ReducedMotion?To:Mathf.Lerp(From,To,Mathf.SmoothStep(0,1,elapsed/.45f)));if(elapsed>=.45f)Destroy(this);}
+        public OpsGame Owner;public float From,To;private float elapsed;private OpsPresentationWait timing;
+        private void Update(){if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.GaugeGrow,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;((RectTransform)transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,Owner.ReducedMotion?To:Mathf.Lerp(From,To,Mathf.SmoothStep(0,1,elapsed/OpsPresentationTiming.GaugeGrow)));if(timing.Done)Destroy(this);}
     }
 }

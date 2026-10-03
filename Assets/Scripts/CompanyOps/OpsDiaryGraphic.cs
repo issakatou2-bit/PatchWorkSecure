@@ -79,11 +79,15 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsDiaryMotion:MonoBehaviour
     {
         public string Kind;public OpsGame Owner;public float Delay,Angle;private float time;private RectTransform rect;private Vector2 origin;
+        private OpsPresentationWait timing;
         private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;}
         private void Update()
         {
             if(Kind=="wave"){time+=Time.unscaledDeltaTime;rect.localScale=new Vector3(1,Owner!=null&&Owner.ReducedMotion?1:.7f+.3f*Mathf.Cos((time-Delay)*Mathf.PI*2),1);return;}
-            time+=Time.unscaledDeltaTime;float t=Owner!=null&&Owner.ReducedMotion?1:Mathf.Clamp01((time-Delay)/(Kind=="open"?.7f:.6f));float ease=1-Mathf.Pow(1-t,3);
+            float duration=Kind=="open"?OpsPresentationTiming.DiaryOpen:OpsPresentationTiming.DiarySticker;
+            if(timing==null&&Owner!=null)timing=Owner.BeginDiaryMotion(name,duration+Delay,transform);
+            if(timing!=null){timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);time=timing.Elapsed;}else time+=Time.unscaledDeltaTime;
+            float t=Owner!=null&&Owner.ReducedMotion?1:Mathf.Clamp01((time-Delay)/duration);float ease=1-Mathf.Pow(1-t,3);
             rect.localScale=Vector3.one*(Kind=="open"?Mathf.Lerp(.96f,1,ease):t<.7f?Mathf.Lerp(1.8f,.94f,t/.7f):Mathf.Lerp(.94f,1,(t-.7f)/.3f));
             if(Kind=="open")rect.anchoredPosition=origin+new Vector2(0,Mathf.Lerp(-30,0,ease));else rect.localEulerAngles=new Vector3(0,0,Mathf.Lerp(-30,Angle,ease));
             if(t>=1)enabled=false;

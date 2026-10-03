@@ -26,7 +26,7 @@ namespace PatchWorkSecure.CompanyOps
         private IEnumerator FinishCountSound()
         {
             if(countAudio==null||!countAudio.isPlaying)yield break;float played=lastCount,volume=countAudio.volume;
-            for(float t=0;t<.06f;t+=Time.unscaledDeltaTime){if(lastCount!=played)yield break;countAudio.volume=volume*(1-t/.06f);yield return null;}
+            for(float t=0;t<OpsPresentationTiming.CountFade;t+=Time.unscaledDeltaTime*PresentationRate){if(lastCount!=played)yield break;countAudio.volume=volume*(1-t/OpsPresentationTiming.CountFade);yield return null;}
             if(lastCount==played)countAudio.Stop();
         }
         private float RepeatDuration(string key,float first,float later)
@@ -64,24 +64,25 @@ namespace PatchWorkSecure.CompanyOps
         private IEnumerator PortraitExit(RectTransform r)
         {
             var origin=r.anchoredPosition;float direction=origin.x<800?-1:1;var image=r.GetComponent<Image>();
-            for(float t=0;t<.2f&&r!=null;t+=Time.unscaledDeltaTime)
-            {if(!ReducedMotion)r.anchoredPosition=origin+Vector2.right*direction*1800*(t/.2f);image.color=new Color(1,1,1,1-t/.2f);yield return null;}
+            var wait=BeginPresentation("portrait_exit",OpsPresentationTiming.PortraitExit,null,r);
+            while(!wait.Done&&r!=null)
+            {wait.Advance(Time.unscaledDeltaTime,FastPresentation);float t=wait.Elapsed/OpsPresentationTiming.PortraitExit;if(!ReducedMotion)r.anchoredPosition=origin+Vector2.right*direction*1800*t;image.color=new Color(1,1,1,1-t);yield return null;}
             if(r!=null)Destroy(r.gameObject);
         }
     }
     public sealed class OpsLossTrail : MonoBehaviour
     {
-        public OpsGame Owner;public float TargetWidth;private float elapsed,startWidth;
+        public OpsGame Owner;public float TargetWidth;private float elapsed,startWidth;private OpsPresentationWait timing;
         private void Start(){startWidth=((RectTransform)transform).rect.width;}
-        private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01((elapsed-.2f)/.4f);var rect=(RectTransform)transform;
+        private void Update(){if(Owner!=null){if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.LossHold+OpsPresentationTiming.LossFade,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;}else elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01((elapsed-OpsPresentationTiming.LossHold)/OpsPresentationTiming.LossFade);var rect=(RectTransform)transform;
             if(Owner==null||!Owner.ReducedMotion)rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,Mathf.Lerp(startWidth,TargetWidth,t));
             GetComponent<Image>().color=new Color(1,1,1,1-t);if(t>=1)Destroy(gameObject);}
     }
     public sealed class OpsRoomZoom : MonoBehaviour
     {
-        public OpsGame Owner;private Vector2 position,size;private float elapsed;
+        public OpsGame Owner;private Vector2 position,size;private float elapsed;private OpsPresentationWait timing;
         private void Start(){var r=(RectTransform)transform;position=r.anchoredPosition;size=r.sizeDelta;}
-        private void Update(){elapsed+=Time.unscaledDeltaTime;float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(elapsed/.4f));var r=(RectTransform)transform;
+        private void Update(){if(Owner!=null){if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.RoomZoom,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;}else elapsed+=Time.unscaledDeltaTime;float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(elapsed/OpsPresentationTiming.RoomZoom));var r=(RectTransform)transform;
             if(Owner!=null&&!Owner.ReducedMotion){r.anchoredPosition=Vector2.Lerp(new Vector2(0,-85),position,t);r.sizeDelta=Vector2.Lerp(new Vector2(600,600),size,t);}
             if(t>=1){r.anchoredPosition=position;r.sizeDelta=size;enabled=false;}}
     }

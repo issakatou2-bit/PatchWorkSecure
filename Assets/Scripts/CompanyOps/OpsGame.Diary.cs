@@ -26,6 +26,7 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform DiaryPaper()
         {
             homeVisible=false;NewScreen();DiaryActive=true;
+            diaryTiming=BeginPresentation("diary_book",OpsPresentationTiming.DiaryOpen);
             var desk=Rect(screen,"DiaryDesk",0,0,1600,900);desk.gameObject.AddComponent<OpsDiaryGraphic>().Kind="desk";
             var book=Rect(screen,"DiaryNotebook",110,60,1380,780);
             PImage(book,"DiaryBookShadow",PlanningArt.shadow,-32,-2,1444,840,new Color(.2f,.1f,.05f,.65f),true);
@@ -115,6 +116,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             padDiaryPage=r;padDiaryClose=close;padDiaryArchive=archive;
             if(r==null)return;var e=OpsDiaryCatalog.Entries[r.content];var book=DiaryPaper();bool annual=r.yearEnd;
+            diaryTiming?.Finish();diaryTiming=BeginPresentation("diary_page",collapsed?OpsPresentationTiming.DiaryOpen:OpsPresentationTiming.DiaryWrite);
             if(annual)DiaryTape(book,230,-12,170,false,-3);
             else if(r.mood==2)DiaryTape(book,230,-12,150,true,3);
             else {DiaryTape(book,250,-12,150,false,-4);DiaryTape(book,1190,-10,130,true,5);}
@@ -174,7 +176,8 @@ namespace PatchWorkSecure.CompanyOps
             text.ForceMeshUpdate();int first=text.textInfo.lineCount>0?text.textInfo.lineInfo[0].lastCharacterIndex+1:0;
             // 冒頭だけ書き出す。残りの本文や閉じる操作を待たせない。
             text.maxVisibleCharacters=0;float elapsed=0;
-            while(text!=null&&elapsed<2.4f){elapsed+=Time.unscaledDeltaTime;text.maxVisibleCharacters=Mathf.CeilToInt(first*elapsed/2.4f);yield return null;}
+            var wait=diaryTiming;
+            while(text!=null&&!wait.Done){elapsed=wait.Elapsed;text.maxVisibleCharacters=Mathf.CeilToInt(first*elapsed/OpsPresentationTiming.DiaryWrite);yield return null;}
             if(text!=null)text.maxVisibleCharacters=int.MaxValue;
         }
         private void DiaryPhoto(Transform p,float x,float y,float w,float h,string pose,string label,float angle,bool quiet=false)

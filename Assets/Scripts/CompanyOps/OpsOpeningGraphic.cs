@@ -90,10 +90,12 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsOpeningMotion : MonoBehaviour
     {
         public OpsGame Owner;public string Kind;public float Duration=.6f,Delay,Angle;private float elapsed;private Vector2 start;private CanvasGroup group;
+        private OpsPresentationWait timing;
         private void Awake(){start=((RectTransform)transform).anchoredPosition;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;}
         private void Update()
         {
-            elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01((elapsed-Delay)/Duration),e=1-Mathf.Pow(1-t,3);var r=(RectTransform)transform;
+            if(timing==null)timing=Owner.BeginOpeningMotion(name,Duration+Delay,transform);
+            timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;float t=Mathf.Clamp01((elapsed-Delay)/Duration),e=1-Mathf.Pow(1-t,3);var r=(RectTransform)transform;
             if(Owner.ReducedMotion){group.alpha=Kind=="flash"?0:1;return;}
             group.alpha=Kind=="flash"?1-t:Mathf.Clamp01(t*4);
             if(Kind=="rise")r.anchoredPosition=start+Vector2.down*26*(1-e);

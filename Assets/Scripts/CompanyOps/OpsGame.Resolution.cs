@@ -14,9 +14,10 @@ namespace PatchWorkSecure.CompanyOps
         private int resolutionCount;
         private OpsEstimate resolutionEstimate;
         private string resolutionLevelUp;
+        private Coroutine resolutionRoutine;
         public bool ResolutionActive => resolutionActive && State != null && State.phase == OpsPhase.Review;
         public bool CanSkipResolution => ResolutionActive && resolutionCount > 1;
-        public void SkipResolution() {if(CanSkipResolution){StopVoice();FinishResolution();}}
+        public void SkipResolution() {if(CanSkipResolution){resolutionTiming?.Skip();StopVoice();if(resolutionRoutine!=null)StopCoroutine(resolutionRoutine);FinishResolution();}}
         private sealed class ResolutionStep { public string name,detail,member; public Color color; public bool equipment,staff,missing,peak; }
         private static string EffectLine(OpsInvestmentEffect effect) =>
             (effect.avoidedLoss>0?"被害 −"+effect.avoidedLoss+"万円":"")+
@@ -44,6 +45,8 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void ResolutionScreen()
         {
+            float show=resolutionCount>1?(ShortenInterruptions?OpsPresentationTiming.ResolutionShort:OpsPresentationTiming.ResolutionRepeat):OpsPresentationTiming.ResolutionFirst;
+            resolutionTiming=BeginPresentation("resolution",show+OpsPresentationTiming.ResolutionNeedle+OpsPresentationTiming.ResolutionResult,resolutionCount>1);
             IncidentBackdrop(true);var r=State.Latest;var steps=ResolutionSteps(r);
             var rays=IncidentShape(screen,"ResolutionRays","rays",0,-550,1400,1400,new Color(1,1,1,.005f));
             rays.pivot=new Vector2(.5f,.5f);rays.anchoredPosition=new Vector2(700,-150);Motion(rays,"rotate",30);
@@ -88,7 +91,7 @@ namespace PatchWorkSecure.CompanyOps
             PText(speech,"ResolutionReaction",good?"やった、\n守れたよ！":r.benign?"正常な操作だったね。":"対応できたね。\n次の備えを考えよう！",16,10,198,65,20,Hex("d94a70"));
             if(CanSkipResolution)PButton(screen,"SkipResolution","演出をスキップ",1320,822,256,48,SkipResolution,Color.white,PlanInk,16);
             PText(screen,"ResolutionComparisonNote","各設備を一つ外した場合との比較。連携があるため、削減値は足し合わせません。",560,798,1016,25,14,Color.white,false);
-            if(Application.isPlaying)StartCoroutine(ResolutionRoutine(steps,flow,cutin,lossNeedle,stopNeedle,hinata,good,r));
+            if(Application.isPlaying)resolutionRoutine=StartCoroutine(ResolutionRoutine(steps,flow,cutin,lossNeedle,stopNeedle,hinata,good,r));
         }
         private RectTransform ResolutionMeter(Transform parent,string id,string title,int actual,int scale,float y,Color color,string unit)
         {
@@ -127,7 +130,7 @@ namespace PatchWorkSecure.CompanyOps
         private IEnumerator ResolutionRoutine(List<ResolutionStep> steps,RectTransform flow,RectTransform cutin,RectTransform loss,RectTransform stop,RectTransform hinata,bool good,OpsOutcome outcome)
         {
             bool equipmentSpoken=false;
-            float stepDuration=(resolutionCount>1?(ShortenInterruptions?1.15f:2.3f):3.2f)/steps.Count;
+            float stepDuration=(resolutionTiming.Duration-OpsPresentationTiming.ResolutionNeedle-OpsPresentationTiming.ResolutionResult)/steps.Count;
             for(int index=0;index<steps.Count;index++)
             {
                 var step=steps[index];ResolutionFlow(flow,steps,index);
@@ -152,7 +155,8 @@ namespace PatchWorkSecure.CompanyOps
                 float elapsed=0;bool impact=false;
                 while(elapsed<stepDuration)
                 {
-                    elapsed+=PresentationDeltaTime;
+                    if(resolutionTiming.Skipped){FinishResolution();yield break;}
+                    elapsed+=PresentationDeltaTime*PresentationRate;resolutionTiming.Advance(PresentationDeltaTime,FastPresentation);
                     float progress=elapsed/stepDuration;
                     float slide=progress<.2f?Mathf.Lerp(-1500,0,progress/.2f):progress>.8f?Mathf.Lerp(0,1700,(progress-.8f)/.2f):0;
                     cutin.anchoredPosition=new Vector2(380+(ReducedMotion?0:slide), -300);
@@ -163,9 +167,10 @@ namespace PatchWorkSecure.CompanyOps
             }
             cutin.gameObject.SetActive(false);
             var lossFinal=loss.anchoredPosition;var stopFinal=stop.anchoredPosition;
-            for(float elapsed=0;elapsed<1.05f;elapsed+=Time.unscaledDeltaTime)
+            for(float elapsed=0;elapsed<OpsPresentationTiming.ResolutionNeedle;elapsed+=Time.unscaledDeltaTime*PresentationRate)
             {
-                float t=Mathf.Clamp01(elapsed/.85f);
+                if(resolutionTiming.Skipped){FinishResolution();yield break;}
+                resolutionTiming.Advance(Time.unscaledDeltaTime,FastPresentation);float t=Mathf.Clamp01(elapsed/OpsPresentationTiming.NeedleSweep);
                 // 演出の針だけが動く。値は再抽選せず最初から確定している。
                 float sweep=ReducedMotion?0:Mathf.Sin(t*Mathf.PI*5)*(1-t)*180;
                 loss.anchoredPosition=new Vector2(Mathf.Clamp(lossFinal.x+sweep,-3,677),lossFinal.y);
@@ -175,7 +180,7 @@ namespace PatchWorkSecure.CompanyOps
             loss.anchoredPosition=lossFinal;stop.anchoredPosition=stopFinal;
             Feedback(good?OpsCue.Success:outcome.loss>0?OpsCue.Damage:OpsCue.Action);
             if(good)hinata.GetComponentInChildren<OpsPortraitMotion>()?.Celebrate();
-            yield return new WaitForSecondsRealtime(.75f);
+            while(!resolutionTiming.Done){if(resolutionTiming.Skipped){FinishResolution();yield break;}resolutionTiming.Advance(Time.unscaledDeltaTime,FastPresentation);yield return null;}
             FinishResolution();
         }
         private void FinishResolution()

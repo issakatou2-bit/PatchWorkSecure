@@ -58,8 +58,8 @@ namespace PatchWorkSecure.CompanyOps
         private void Reveal(RectTransform rect, float delay = 0, bool stamp = false)
         {
             if (!Application.isPlaying) return;
-            var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay/PresentationRate; reveal.Stamp = stamp;
-            reveal.Duration=RepeatDuration("reveal_"+rect.name,.45f,.27f)/PresentationRate;
+            var reveal = rect.gameObject.AddComponent<OpsUIReveal>(); reveal.Owner = this; reveal.Delay = delay; reveal.Stamp = stamp;
+            reveal.Duration=RepeatDuration("reveal_"+rect.name,OpsPresentationTiming.Reveal,OpsPresentationTiming.RepeatReveal);
         }
         public void StampImpact()
         {
@@ -128,7 +128,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             var group = old.GetComponent<CanvasGroup>(); if(group == null) group=old.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
             foreach (var child in old.GetComponentsInChildren<Transform>()) child.name += "Closing";
-            for (float t = 0; t < .2f && old != null; t += Time.unscaledDeltaTime) { group.alpha = 1 - t / .2f; yield return null; }
+            var close=BeginPresentation("close_window",OpsPresentationTiming.Close,null,old);
+            while(!close.Done&&old!=null){close.Advance(Time.unscaledDeltaTime,FastPresentation);group.alpha=1-close.Elapsed/close.Duration;yield return null;}
             if (old != null) Destroy(old.gameObject);
         }
         private IEnumerator ScreenWipe(RectTransform target)
@@ -137,22 +138,24 @@ namespace PatchWorkSecure.CompanyOps
             yield return null;
             if (target == null) {PhasePresentationRunning=false;yield break;}
             string kind=homeVisible||State==null||recordsActive||DailyPracticeActive?"screen":State.phase==OpsPhase.Planning?"month":State.phase==OpsPhase.Incident?"incident":"screen";
-            bool skipAllowed=presentationVisits.ContainsKey("transition_"+kind);
+            phaseTiming=BeginPresentation("transition_"+kind,kind=="screen"?OpsPresentationTiming.Wipe:kind=="month"?OpsPresentationTiming.Month:State.CurrentBoss!=null?OpsPresentationTiming.Boss:OpsPresentationTiming.Incident);
+            bool skipAllowed=phaseTiming.CanSkip;
             RepeatDuration("transition_"+kind,1,1);
-            phasePresentationSkipped=false;PhasePresentationCanSkip=skipAllowed;
+            PhasePresentationCanSkip=skipAllowed;
             PlayPresentationCue(OpsCue.Transition);
             // 月替わり・事件は専用の入口だけを使い、通常の帯を重ねて待たせない。
             if(kind=="screen")
             {
                 var cover = IncidentShape(Surface, "ScreenWipe", "cutin", -1900, 0, 1900, 900, PlanPink);
                 var group = cover.gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false;
-                for (float t = 0; t < .3f; t += Time.unscaledDeltaTime*PresentationRate)
+                for (float t = 0; !phaseTiming.Done; t=phaseTiming.Elapsed)
                 {
-                    if (ReducedMotion) group.alpha = Mathf.Sin(t / .3f * Mathf.PI) * .25f;
-                    else cover.anchoredPosition = new Vector2(Mathf.Lerp(-1900, 1700, t / .3f), 0);
-                    if(t>=.15f&&outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
-                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+.35f;
-                    if(t>=.15f&&skipAllowed&&(phasePresentationSkipped||PresentationPressed()))break;
+                    phaseTiming.Advance(Time.unscaledDeltaTime,FastPresentation);
+                    if (ReducedMotion) group.alpha = Mathf.Sin(t / OpsPresentationTiming.Wipe * Mathf.PI) * .25f;
+                    else cover.anchoredPosition = new Vector2(Mathf.Lerp(-1900, 1700, t / OpsPresentationTiming.Wipe), 0);
+                    if(t>=OpsPresentationTiming.WipeMid&&outgoingScreen!=null){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
+                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+OpsPresentationTiming.InputGuard;
+                    if(skipAllowed&&phaseTiming.Skipped)break;
                     yield return null;
                 }
                 if (cover != null) Destroy(cover.gameObject);
@@ -181,15 +184,16 @@ namespace PatchWorkSecure.CompanyOps
                     PText(overlay,"IncidentEntryTitle","緊急",0,360,1600,160,110,Color.white,true,true);
                     PlayPresentationCue(OpsCue.Alert);
                 }
-                float duration=kind=="month"?1.5f:boss!=null?OpsCatalog.BossAppearSeconds:.8f;
-                for(float t=0;t<duration&&!phasePresentationSkipped;t+=Time.unscaledDeltaTime*PresentationRate)
+                float duration=phaseTiming.Duration;
+                for(float t=0;!phaseTiming.Done;t=phaseTiming.Elapsed)
                 {
-                    alpha.alpha=Mathf.Min(t/(kind=="month"?.5f:.12f),(duration-t)/.18f,1);
-                    if(outgoingScreen!=null&&t>=(kind=="month"?.5f:.12f)){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
-                    if(pageAlpha!=null)pageAlpha.alpha=Mathf.Clamp01((t-.5f)/.12f);
-                    if(page!=null&&!ReducedMotion)page.localRotation=Quaternion.Euler(Mathf.Lerp(65,0,Mathf.Clamp01((t-.5f)/.2f)),0,0);
-                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+.35f;
-                    if(skipAllowed&&PresentationPressed())break;
+                    phaseTiming.Advance(Time.unscaledDeltaTime,FastPresentation);
+                    alpha.alpha=Mathf.Min(t/(kind=="month"?OpsPresentationTiming.CalendarCover:OpsPresentationTiming.FadeIn),(duration-t)/OpsPresentationTiming.FadeOut,1);
+                    if(outgoingScreen!=null&&t>=(kind=="month"?OpsPresentationTiming.CalendarCover:OpsPresentationTiming.FadeIn)){Destroy(outgoingScreen.gameObject);outgoingScreen=null;}
+                    if(pageAlpha!=null)pageAlpha.alpha=Mathf.Clamp01((t-OpsPresentationTiming.CalendarCover)/OpsPresentationTiming.FadeIn);
+                    if(page!=null&&!ReducedMotion)page.localRotation=Quaternion.Euler(Mathf.Lerp(65,0,Mathf.Clamp01((t-OpsPresentationTiming.CalendarCover)/OpsPresentationTiming.CalendarTurn)),0,0);
+                    if(PresentationPressed())presentationInputGuardUntil=Time.unscaledTime+OpsPresentationTiming.InputGuard;
+                    if(skipAllowed&&phaseTiming.Skipped)break;
                     yield return null;
                 }
                 if(overlay!=null)Destroy(overlay.gameObject);
@@ -199,20 +203,22 @@ namespace PatchWorkSecure.CompanyOps
             PhasePresentationRunning=false;
         }
         private RectTransform outgoingScreen;
-        private bool phasePresentationSkipped;
         public bool PhasePresentationCanSkip {get;private set;}
         public bool PhasePresentationRunning {get;private set;}
         private float presentationInputGuardUntil;
         private bool ConsumePresentationClick()
         {
             bool actualInput=UnityEngine.InputSystem.Mouse.current?.leftButton.wasReleasedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.spaceKey.wasPressedThisFrame==true;
-            if(!actualInput||!PhasePresentationRunning&&Time.unscaledTime>=presentationInputGuardUntil)return false;
-            SkipPhasePresentation();return true;
+            if(!actualInput)return false;
+            if(Minigame?.Phase==OpsMinigamePhase.Playing&&modal==null)return false;
+            if(PresentationInputConsumed||Time.unscaledTime<presentationInputGuardUntil)return true;
+            if(PhasePresentationRunning&&!PresentationWaiting)return true;
+            return TrySkipPresentation();
         }
-        public void SkipPhasePresentation(){if(PhasePresentationCanSkip)phasePresentationSkipped=true;}
+        public void SkipPhasePresentation(){if(phaseTiming?.Skip()==true)StopVoice();}
         public bool AnnualPresentationCanSkip {get;private set;}
         public bool AnnualPresentationSkipped {get;private set;}
-        public void SkipAnnualPresentation(){if(AnnualPresentationCanSkip)AnnualPresentationSkipped=true;}
-        private static bool PresentationPressed()=>UnityEngine.InputSystem.Mouse.current?.leftButton.wasPressedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.spaceKey.wasPressedThisFrame==true;
+        public void SkipAnnualPresentation(){if(AnnualPresentationCanSkip){AnnualPresentationSkipped=true;TrySkipPresentation();StopVoice();}}
+        private static bool PresentationPressed()=>UnityEngine.InputSystem.Mouse.current?.leftButton.wasPressedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.spaceKey.wasPressedThisFrame==true||UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame==true||UnityEngine.InputSystem.Gamepad.current?.buttonSouth.wasPressedThisFrame==true;
     }
 }

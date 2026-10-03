@@ -16,6 +16,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             // 選択画面のカードを使い回す。めくる間は選択・因子の取得を行わない。
             FactorScreen();FactorRevealActive=true;FactorRevealPaused=false;factorRevealTime=0;
+            factorTiming=BeginPresentation("factor",OpsPresentationTiming.Factor);
             screen.Find("FactorCategory").GetComponent<TextMeshProUGUI>().text="FACTOR";
             screen.Find("EndingTitle").GetComponent<TextMeshProUGUI>().text=Story.year+"年目まで届いた挑戦の因子";
             screen.Find("FactorHint").GetComponent<TextMeshProUGUI>().text="カードを1枚ずつめくる。★が多いほど、光が強い";
@@ -53,14 +54,14 @@ namespace PatchWorkSecure.CompanyOps
         public void TickFactorReveal(float delta)
         {
             if(!FactorRevealActive)return;
-            factorRevealTime+=Mathf.Max(0,delta);SetFactorRevealPose();
-            if(factorRevealTime>=3.25f)SkipFactorReveal();
+            factorTiming.Advance(delta,FastPresentation);factorRevealTime=factorTiming.Elapsed;SetFactorRevealPose();
+            if(factorTiming.Done)SkipFactorReveal();
         }
         private void SetFactorRevealPose()
         {
             for(int i=0;i<factorFlips.Length;i++)
             {
-                float elapsed=factorRevealTime-(.2f+i*.8f),t=Mathf.Clamp01(elapsed/.9f);
+                float elapsed=factorRevealTime-(OpsPresentationTiming.FactorStart+i*OpsPresentationTiming.FactorStep),t=Mathf.Clamp01(elapsed/OpsPresentationTiming.FactorFlip);
                 float angle=t<.55f?Mathf.Lerp(180,80,FactorEase(t/.55f)):Mathf.Lerp(80,0,FactorEase((t-.55f)/.45f));
                 float scale=t<.55f?Mathf.Lerp(.92f,1.04f,FactorEase(t/.55f)):Mathf.Lerp(1.04f,1,FactorEase((t-.55f)/.45f));
                 bool front=angle<=90;
@@ -68,7 +69,7 @@ namespace PatchWorkSecure.CompanyOps
                 factorFlips[i].localEulerAngles=new Vector3(0,ReducedMotion?0:front?-angle:180-angle,0);
                 factorFlips[i].localScale=Vector3.one*(ReducedMotion?1:scale);
                 foreach(var projection in factorFlips[i].GetComponentsInChildren<OpsFactorPerspective>())projection.Refresh();
-                float light=(factorRevealTime-(.55f+i*.8f))/1.1f;
+                float light=(factorRevealTime-(.55f+i*OpsPresentationTiming.FactorStep))/OpsPresentationTiming.FactorLight;
                 var burst=factorBursts[i];burst.Progress=light;burst.gameObject.SetActive(!ReducedMotion&&light>0&&light<1);burst.rectTransform.localScale=Vector3.one*Mathf.Lerp(.2f,1.15f,Mathf.Clamp01(light));burst.SetVerticesDirty();
                 if(elapsed>=.35f&&!factorFlipSound[i]){factorFlipSound[i]=true;PlayPresentationCue(OpsCue.Growth);}
             }

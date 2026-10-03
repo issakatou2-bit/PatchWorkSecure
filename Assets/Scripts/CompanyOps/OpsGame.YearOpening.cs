@@ -17,7 +17,7 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform OpeningShape(Transform p,string id,string kind,float x,float y,float w,float h,Color? color=null,float radius=30,int shape=0)
         {var r=Rect(p,id,x,y,w,h);var g=r.gameObject.AddComponent<OpsOpeningGraphic>();g.Kind=kind;g.color=color??Color.white;g.Radius=radius;g.Shape=shape;g.raycastTarget=false;return r;}
         private void OpeningMotion(RectTransform r,string kind,float seconds=.6f,float delay=0)
-        {if(!Application.isPlaying)return;var m=r.gameObject.AddComponent<OpsOpeningMotion>();m.Owner=this;m.Kind=kind;m.Duration=seconds/PresentationRate;m.Delay=delay/PresentationRate;}
+        {if(!Application.isPlaying)return;var m=r.gameObject.AddComponent<OpsOpeningMotion>();m.Owner=this;m.Kind=kind;m.Duration=seconds;m.Delay=delay;}
         private void OpeningHeader(string en,string title,Color tone,bool dark=false)
         {var e=StoryText(screen,"OpeningCategory",en,0,54,1600,23,15,tone,true);e.characterSpacing=32;StoryText(screen,"OpeningHeading",title,0,81,1600,68,46,dark?Color.white:PlanInk,true);}
         private RectTransform OpeningCard(Transform p,string id,float x,float y,float w,float h,Color background,Color? border=null,float radius=26)
@@ -56,13 +56,15 @@ namespace PatchWorkSecure.CompanyOps
         public void SkipYearOpening(){if(YearOpeningActive)PreviewYearOpening(4,false);}
         private void TickYearOpening(float dt)
         {
-            if(!YearOpeningPaused){openingElapsed+=dt*PresentationRate;if(openingElapsed>=OpsCatalog.YearOpeningSeconds[YearOpeningStage]){carryCompanionVoice=true;try{AdvanceYearOpening();}finally{carryCompanionVoice=false;}return;}}
+            if(openingTiming?.Skipped==true){StopVoice();YearOpeningStage=4;AdvanceYearOpening();return;}
+            if(!YearOpeningPaused){openingTiming?.Advance(dt,FastPresentation);openingElapsed=openingTiming?.Elapsed??openingElapsed+dt*PresentationRate;if(openingElapsed>=OpsPresentationTiming.Opening[YearOpeningStage]){carryCompanionVoice=true;try{AdvanceYearOpening();}finally{carryCompanionVoice=false;}return;}}
             var bar=screen.Find("OpeningProgress") as RectTransform;if(bar!=null)bar.sizeDelta=new Vector2(1600*(YearOpeningStage+(YearOpeningPaused?1:Mathf.Clamp01(openingElapsed/OpsCatalog.YearOpeningSeconds[YearOpeningStage])))/5,5);
-            var k=UnityEngine.InputSystem.Keyboard.current;if(k!=null&&(k.spaceKey.wasPressedThisFrame||k.enterKey.wasPressedThisFrame))AdvanceYearOpening();else if(k!=null&&k.escapeKey.wasPressedThisFrame)SkipYearOpening();
+            var k=UnityEngine.InputSystem.Keyboard.current;if(k!=null&&k.escapeKey.wasPressedThisFrame)TrySkipPresentation();
         }
         private void OpeningScreen()
         {
             buildingYearOpening=true;NewScreen();buildingYearOpening=false;YearOpeningActive=true;PhasePresentationRunning=false;if(!carryCompanionVoice)StopVoice();
+            openingTiming=BeginPresentation("year_opening_"+YearOpeningStage,OpsPresentationTiming.Opening[YearOpeningStage]);
             string[] stages={"growth","unlock","rivals","allies","title"};string kind=stages[YearOpeningStage];
             OpeningShape(screen,"OpeningBackground",kind=="title"?"rounded":kind,0,0,1600,900,PlanInk,0);
             PButton(screen,"OpeningAdvance","",0,0,1600,900,AdvanceYearOpening,Color.clear,Color.clear);
@@ -131,6 +133,7 @@ namespace PatchWorkSecure.CompanyOps
         private void EndlessShortOpening()
         {
             buildingYearOpening=true;NewScreen();buildingYearOpening=false;YearOpeningActive=true;PhasePresentationRunning=false;StopVoice();
+            openingTiming=BeginPresentation("endless_opening",OpsPresentationTiming.Opening[4]);
             OpeningShape(screen,"OpeningBackground","rivals",0,0,1600,900,PlanInk,0);OpeningShape(screen,"OpeningScan","scan",0,0,1600,900);
             OpeningHeader("NEXT YEAR",RunYear+"年目",PlanPink,true);
             OpeningShape(screen,"RivalSilhouette","rival",600,170,400,450,null,0,OpeningYear.rivals[2].shape);

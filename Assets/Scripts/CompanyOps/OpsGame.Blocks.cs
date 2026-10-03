@@ -199,7 +199,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsBlockMinigame;if(game==null||!game.Finish())return;
             draggedBlock=-1;if(blockGhost!=null)Destroy(blockGhost.gameObject);blockGhost=null;
-            minigameResultAt=Time.unscaledTime+1.1f;ShowMinigameFinish();
+            ShowMinigameFinish();
         }
     }
     public sealed class OpsBlockPointer:MonoBehaviour,IPointerDownHandler,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler

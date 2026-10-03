@@ -40,21 +40,23 @@ namespace PatchWorkSecure.CompanyOps
         }
         private IEnumerator ReportCount(TextMeshProUGUI label,int value,string unit)
         {
-            float started=Time.realtimeSinceStartup,duration=.6f/PresentationRate;reportCounts[label]=value.ToString("N0")+unit;
+            var wait=BeginPresentation("report_count_"+label.name,OpsPresentationTiming.ReportCount,annualTiming?.CanSkip??reportTiming?.CanSkip);
+            float duration=wait.Duration;reportCounts[label]=value.ToString("N0")+unit;
             yield return null;
             if(label==null)yield break;
-            if(value!=0&&reportCounts.ContainsKey(label)&&Time.realtimeSinceStartup-started<duration)PlayPresentationCue(OpsCue.Count);
-            while(reportCounts.ContainsKey(label)&&Time.realtimeSinceStartup-started<duration)
+            if(value!=0&&reportCounts.ContainsKey(label)&&!wait.Done)PlayPresentationCue(OpsCue.Count);
+            while(reportCounts.ContainsKey(label)&&!wait.Done)
             {
                 if(label==null)yield break;
-                float t=Time.realtimeSinceStartup-started;
+                wait.Advance(Time.unscaledDeltaTime,FastPresentation);float t=wait.Elapsed;
                 label.text=Mathf.RoundToInt(value*Mathf.SmoothStep(0,1,t/duration)).ToString("N0")+unit;yield return null;
             }
             if(label==null)yield break;label.text=value.ToString("N0")+unit;
             if(!reportCounts.Remove(label))yield break;
             StartCoroutine(FinishCountSound());
-            for(float t=0;t<.18f;t+=Time.unscaledDeltaTime*PresentationRate)
-            {if(label==null)yield break;label.transform.localScale=Vector3.one*(ReducedMotion?1:1+.1f*Mathf.Sin(t/.18f*Mathf.PI));yield return null;}
+            wait.Finish();
+            for(float t=0;!wait.Skipped&&t<OpsPresentationTiming.ReportBounce;t+=Time.unscaledDeltaTime*PresentationRate)
+            {if(label==null)yield break;label.transform.localScale=Vector3.one*(ReducedMotion?1:1+.1f*Mathf.Sin(t/OpsPresentationTiming.ReportBounce*Mathf.PI));yield return null;}
             if(label!=null)label.transform.localScale=Vector3.one;
         }
         private void ReportGauge(Transform p,string id,float x,float y,float w,float ratio,Color color)
@@ -71,6 +73,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void MonthlyScreen()
         {
+            reportTiming=BeginPresentation("monthly_report",OpsPresentationTiming.ReportCount+OpsPresentationTiming.ReportBounce);
             var r=State.Latest;var previous=PreviousReport(r);ReportBackground(false);
             PImage(screen,"MonthlyLogoIcon",PlanningArt.logoIcon,40,30,80,80);
             var medal=PCard(screen,"MonthMedal",136,30,120,80,PlanPink,24);KitGradient(medal.GetComponent<Image>(),Hex("ff94ae"),Hex("f45a80"));

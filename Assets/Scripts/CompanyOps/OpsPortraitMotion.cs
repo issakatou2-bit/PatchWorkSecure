@@ -16,10 +16,12 @@ namespace PatchWorkSecure.CompanyOps
         private string act="",queuedPose;
         private Action swap;
         private bool landed,started;
+        private OpsPresentationWait entryTiming,swapTiming;
+        private bool Gameplay=>Owner?.Minigame?.Phase==OpsMinigamePhase.Playing;
         public Vector2 LayoutPosition => started?origin:((RectTransform)transform).anchoredPosition;
         private bool Reduced => Owner!=null&&Owner.ReducedMotion;
-        private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;animator=GetComponent<OpsPortraitAnimator>();time=Enter?0:.35f;started=true;ReactToPose(animator?.PoseId);}
-        public void SwitchPose(Action apply,string id){swap=apply;queuedPose=id;swapTime=0;if(Reduced){swap();swap=null;swapTime=-1;ReactToPose(id);}}
+        private void Start(){rect=(RectTransform)transform;origin=rect.anchoredPosition;animator=GetComponent<OpsPortraitAnimator>();time=Enter?0:OpsPresentationTiming.PortraitEnter;if(Enter&&Owner!=null&&!Gameplay)entryTiming=Owner.BeginFeedback(name+"_enter",OpsPresentationTiming.PortraitEnter,transform);started=true;ReactToPose(animator?.PoseId);}
+        public void SwitchPose(Action apply,string id){swap=apply;queuedPose=id;swapTime=0;swapTiming=Owner!=null&&!Gameplay?Owner.BeginFeedback(name+"_pose",OpsPresentationTiming.PortraitSwap,transform):null;if(Reduced){swap();swap=null;swapTime=-1;swapTiming?.Finish();ReactToPose(id);}}
         public void ReactToPose(string id)
         {
             act=id=="pose_jump"||id=="pose_peace"||id=="pose_salute"?"joy":id=="pose_startled"||id=="pose_run"?"startle":id=="pose_exhausted"||id=="pose_bow"?"sad":id=="pose_think"||id=="pose_armscross"?"think":"";
@@ -32,18 +34,21 @@ namespace PatchWorkSecure.CompanyOps
         private void Update()
         {
             if(!started)return;float delta=Owner!=null?Owner.PresentationDeltaTime:Time.unscaledDeltaTime;time+=delta;
+            entryTiming?.Advance(delta,Owner.FastPresentation);
             if(swapTime>=0)
             {
-                swapTime+=delta;if(swap!=null&&swapTime>=.06f){swap();swap=null;ReactToPose(queuedPose);}
-                if(swapTime>=.24f)swapTime=-1;
+                if(swapTiming!=null){swapTiming.Advance(delta,Owner.FastPresentation);swapTime=swapTiming.Elapsed;}else swapTime+=delta;
+                if(swap!=null&&swapTime>=.06f){swap();swap=null;ReactToPose(queuedPose);if(swapTiming?.Skipped==true)actTime=OpsPresentationTiming.PortraitAct;}
+                if(swapTime>=OpsPresentationTiming.PortraitSwap)swapTime=-1;
             }
-            if(actTime>=0)actTime+=delta;
+            if(actTime>=0)actTime+=delta*(Owner!=null&&!Gameplay?Owner.PresentationRate:1);
             if(Reduced){if(swap!=null){swap();swap=null;swapTime=-1;}rect.anchoredPosition=origin;rect.localScale=Vector3.one;rect.localRotation=Quaternion.identity;return;}
             float speaking=animator!=null&&animator.IsSpeaking?1.5f:1;
             Vector2 offset=Vector2.up*(3-3*Mathf.Cos(time*Mathf.PI*2/3.2f*(speaking>1?2:1)))*speaking*(act=="sad"?.5f:1);
             Vector2 scale=new Vector2(1,1+.0075f-.0075f*Mathf.Cos(time*Mathf.PI*2/2.8f));float angle=0;
             // 1800pxの入場距離に対して、行き過ぎが約12pxになるイーズアウトバック。
-            if(time<.35f){float t=time/.35f;const float s=.4571699f;float back=1+(s+1)*Mathf.Pow(t-1,3)+s*Mathf.Pow(t-1,2);offset.x+=(origin.x>700?1800:-1800)*(1-back);}
+            float entry=entryTiming?.Elapsed??time;
+            if(entry<OpsPresentationTiming.PortraitEnter){float t=entry/OpsPresentationTiming.PortraitEnter;const float s=.4571699f;float back=1+(s+1)*Mathf.Pow(t-1,3)+s*Mathf.Pow(t-1,2);offset.x+=(origin.x>700?1800:-1800)*(1-back);}
             if(swapTime>=0){float t=swapTime;float s=t<.06f?Mathf.Lerp(1,.9f,t/.06f):t<.14f?Mathf.Lerp(.9f,1.06f,(t-.06f)/.08f):Mathf.Lerp(1.06f,1,(t-.14f)/.1f);scale*=s;}
             if(act=="joy"&&actTime<.4f)
             {

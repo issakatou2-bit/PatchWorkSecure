@@ -1,5 +1,7 @@
 # ひなたの声をゲームに組み込む — 実装指示（2026-09-29）
 
+**Next-21（2026-10-03）の現行方式は`README.md`の「Next-21の差し替え方式」を優先**。公開用Irodori H09の同じidを優先し、無い行だけ私的ElevenLabsへ戻す。以下は初回組込み時の記録で、ElevenLabs有料版への作り直しは現行の指示ではない。
+
 声は「Hinata V9-2」（ElevenLabs、`Docs/Voice/README.md`）。台本は`Docs/Voice/hinata-script-v2.csv`、音声は105本生成済み。
 
 ## 素材

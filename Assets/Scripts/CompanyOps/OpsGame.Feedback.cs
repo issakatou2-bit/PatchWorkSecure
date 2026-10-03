@@ -199,6 +199,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             ReleaseGamepadUI();
             ReleaseTestFonts();
+            if(mergedVoiceBank!=null)Destroy(mergedVoiceBank);
             foreach (var clip in generatedSounds.Values) if (clip != null) Destroy(clip);
             foreach (var clip in minigameTones.Values) if (clip != null) Destroy(clip);
         }

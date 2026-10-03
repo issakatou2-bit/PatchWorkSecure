@@ -23,10 +23,15 @@ namespace PatchWorkSecure.CompanyOps
     [CreateAssetMenu(menuName = "PatchWorkSecure/情シスの一年/キャラの短い反応")]
     public sealed class OpsReactionBank : ScriptableObject
     {
-        public const string ProductionVoice = "ElevenLabs / Hinata V9-2";
+        public const string ProductionVoice = "Irodori / H09";
         public OpsReactionLine[] lines = Array.Empty<OpsReactionLine>();
         public bool HasAudio => lines != null && lines.Any(l => l != null && l.clip != null);
         public OpsReactionLine Find(string id) => lines?.FirstOrDefault(l => l!=null && l.id==id);
+        public static OpsReactionLine WithFallback(OpsReactionLine current,OpsReactionLine fallback)=>new OpsReactionLine {
+            id=current.id,caption=current.caption,speaker=current.speaker,reaction=current.reaction,
+            clip=current.clip!=null?current.clip:fallback?.clip,faceId=current.faceId,poseId=current.poseId,
+            scene=current.scene,fullSpeech=current.fullSpeech,extra=current.extra
+        };
         public static OpsReactionLine[] Defaults() => ScriptV2().Where(IsGeneralReaction).ToArray();
         public static bool IsGeneralReaction(OpsReactionLine line)=>line!=null&&!line.fullSpeech&&!line.extra&&!(line.id??"").StartsWith("mg_")&&!(line.id??"").StartsWith("combo_")&&!(line.id??"").StartsWith("maxim_");
         // 台本v2の字幕・表情・ポーズ。音声が無い取得直後の環境でも同じ内容を使う。

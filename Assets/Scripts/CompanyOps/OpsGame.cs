@@ -518,7 +518,8 @@ namespace PatchWorkSecure.CompanyOps
                 () => { VoiceEnabled = !VoiceEnabled; if (!VoiceEnabled) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
             Button(d, "DiagnosticVoiceVolume", "ボイス " + Mathf.RoundToInt(voiceVolume * 100) + "% / 変更", 410, 338, 350, 48,
                 () => { voiceVolume = voiceVolume >= .99f ? 0 : Mathf.Min(1, voiceVolume + .1f); if (voiceAudio != null) voiceAudio.volume = voiceVolume; if (voiceVolume <= 0) StopVoice(); StoreFeedbackSettings(); DiagnosticMenu(); });
-            Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ? "Hinata V9-2 / ローカル試遊用・配布と公開は不可" :
+            Text(d, "VoiceStatus", ReactionBank != null && ReactionBank.HasAudio ?
+                (Navigator?.Reactions?.HasAudio==true?"Irodori H09優先 / 私的試遊音声の混在に注意":"Hinata V9-2 / ローカル試遊用・配布と公開は不可") :
                 "ひなたの声は音源未投入 / 台本v2の字幕で進行", 32, 402, 748, 32, 18, Ink);
             int musicCount = Sounds == null ? 0 : new[] { Sounds.titleMusic, Sounds.planningMusic, Sounds.incidentMusic, Sounds.reviewMusic }.Where(c => c != null).Distinct().Count();
             Text(d, "AudioStatus", musicCount > 0 ? "BGM " + musicCount + "曲 / 場面に応じて切り替え" : "効果音は試作の合成音。BGM素材は未設定です。", 32, 446, 748, 38, 18, Ink);

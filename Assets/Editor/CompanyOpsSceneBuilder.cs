@@ -87,6 +87,7 @@ namespace PatchWorkSecure.EditorTools
             if(bank==null){bank=ScriptableObject.CreateInstance<OpsReactionBank>();AssetDatabase.CreateAsset(bank,metadata);}
             // 配布するアセットには非公開MP3への参照を保存しない。
             bank.lines=ReadHinataScript();EditorUtility.SetDirty(bank);
+            foreach(var line in bank.lines)line.clip=HinataVoiceImporter.PublicClip(line.id);
             const string source="Assets/Audio/CompanyYear/VoiceTest/Hinata";
             if(Directory.Exists(source))
             {
@@ -136,7 +137,9 @@ namespace PatchWorkSecure.EditorTools
         {
             ConfigureSteamDisplaySettings();
             Directory.CreateDirectory("Builds/CompanyYear");
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+            UnityEditor.Build.Reporting.BuildReport report;
+            using(CompanyOpsVoiceBuildGuard.PrivateTrial())
+            report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
                 scenes = new[] { ScenePath }, locationPathName = "Builds/CompanyYear/PatchWorkSecure-Year.exe",
                 target = BuildTarget.StandaloneWindows64, options = BuildOptions.None
             });

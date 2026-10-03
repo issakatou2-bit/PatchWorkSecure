@@ -37,6 +37,8 @@ namespace PatchWorkSecure.CompanyOps
         public bool UseLocalTestVoices {get;set;}=true;
         private OpsReactionBank localVoiceBank;
         private bool localVoiceChecked;
+        private OpsReactionBank mergedVoiceBank;
+        private OpsReactionLine[] mergedMetadataLines,mergedLocalLines;
         private OpsReactionLine pendingVoice;
         private float voiceStartAt,voiceBusyUntil;
         private string voiceScreenKey="",lastTutorialVoice="",voiceCaptionTarget="NavigatorSpeech";
@@ -69,9 +71,17 @@ namespace PatchWorkSecure.CompanyOps
             get
             {
                 var metadata=Navigator==null?null:Navigator.Reactions;
-                if(!UseLocalTestVoices||metadata==null||metadata.HasAudio||metadata.name!="HinataReactions")return metadata;
+                if(!UseLocalTestVoices||metadata==null||metadata.name!="HinataReactions")return metadata;
                 if(!localVoiceChecked){localVoiceChecked=true;localVoiceBank=Resources.Load<OpsReactionBank>("HinataVoiceTest");}
-                return localVoiceBank!=null?localVoiceBank:metadata;
+                if(localVoiceBank==null)return metadata;
+                // 一部だけ差し替えても他の行の私的試遊音声を失わない。字幕は常に最新台本。
+                if(mergedVoiceBank==null){mergedVoiceBank=ScriptableObject.CreateInstance<OpsReactionBank>();mergedVoiceBank.hideFlags=HideFlags.HideAndDontSave;}
+                if(mergedMetadataLines!=metadata.lines||mergedLocalLines!=localVoiceBank.lines)
+                {
+                    mergedMetadataLines=metadata.lines;mergedLocalLines=localVoiceBank.lines;
+                    mergedVoiceBank.lines=metadata.lines.Where(l=>l!=null).Select(l=>OpsReactionBank.WithFallback(l,localVoiceBank.Find(l.id))).ToArray();
+                }
+                return mergedVoiceBank;
             }
         }
 

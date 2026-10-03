@@ -55,7 +55,7 @@ namespace PatchWorkSecure.CompanyOps
                 bool isMail=session is OpsMailMinigame;
                 KitGradient(screen.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
                 KitGradient(minigameCanvas.GetComponent<Image>(),Hex(isMail?"cfe9ff":"1d2a44"),Hex(isMail?"ffe3ec":"3b2a4a"));
-                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else if(session is OpsBlockMinigame)DrawBlockPresentation();else if(session is OpsRestoreMinigame)DrawRestorePresentation();else DrawMfaPresentation();MinigameBrief();ShortenMinigameBrief();return true;
+                if(isMail)DrawMailPresentation();else if(session is OpsLogMinigame)DrawLogPresentation();else if(session is OpsBlockMinigame)DrawBlockPresentation();else if(session is OpsRestoreMinigame)DrawRestorePresentation();else DrawMfaPresentation();MinigameBrief();ShortenMinigameBrief();AddGamepadInstructions();return true;
             }
             IncidentShape(minigameCanvas,"MinigameHazard","tape",0,0,1280,14,Hex("ffc02e"));
             var top=PCard(minigameCanvas,"MinigameTop",0,24,1280,70,Color.white,20);
@@ -78,7 +78,20 @@ namespace PatchWorkSecure.CompanyOps
             var outline=speech.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ffd3de");outline.effectDistance=new Vector2(2,-2);
             PText(speech,"NavigatorSpeech",CaptionsEnabled?"備えと判断を活かして対応しよう。":"",12,8,304,70,15,null,false);
             Portrait(side,"NavigatorPortrait",156,344,198,210,"pose_startled");
-            MinigameBrief();ShortenMinigameBrief();return true;
+            MinigameBrief();ShortenMinigameBrief();AddGamepadInstructions();return true;
+        }
+        private void AddGamepadInstructions()
+        {
+            var text=FindMinigameText("MinigameInstructions");
+            string controls=Minigame is OpsBlockMinigame?"パッド：十字キーで作業とマスを選択／Aで置く／Xで回転／Bで作業に戻る":
+                Minigame is OpsMailMinigame?"パッド：十字キーで選ぶ／Aで決定／リンクを選ぶと行き先を確認":
+                Minigame is OpsMfaMinigame?"パッド：十字キーで許可・拒否を選ぶ／Aで決定":
+                Minigame is OpsLogMinigame?"パッド：十字キーで記録を選ぶ／Aでおかしな行を指摘":
+                Minigame is OpsRestoreMinigame?"パッド：十字キーで仕組みを選ぶ／Aで復旧を開始":
+                "パッド：十字キーで端末・部屋・道具を選ぶ／Aで操作";
+            text.text+="\n"+controls;
+            // 枠と配置は手本のまま。既存の文字サイズ範囲で説明を収める。
+            text.enableAutoSizing=true;text.fontSizeMax=text.fontSize;text.fontSizeMin=12;
         }
         private void ShortenMinigameBrief()
         {

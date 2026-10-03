@@ -15,6 +15,8 @@ namespace PatchWorkSecure.CompanyOps
         public Button ChoicePrefab;
         public RectTransform Surface;
         public static bool TestMode;
+        public static int? TestRunSeed;
+        private static int FreshRunSeed=>TestMode&&TestRunSeed.HasValue?TestRunSeed.Value:Environment.TickCount;
         public OpsState State { get; private set; }
         public string SaveWarning { get; private set; } = "";
         private OpsState saved;

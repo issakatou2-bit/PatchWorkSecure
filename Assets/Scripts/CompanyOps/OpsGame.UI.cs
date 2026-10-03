@@ -195,7 +195,7 @@ namespace PatchWorkSecure.CompanyOps
             TickGamepad();
             TickMusic();
             TickVoice();
-            if(YearOpeningActive){TickYearOpening(Time.unscaledDeltaTime);return;}
+            if(YearOpeningActive){if(modal==null)TickYearOpening(Time.unscaledDeltaTime);return;}
             if(FactorRevealActive&&!FactorRevealPaused)TickFactorReveal(Time.unscaledDeltaTime);
             AlignDialogFooter(); RefreshTutorial();
             if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)

@@ -20,6 +20,7 @@ namespace PatchWorkSecure.CompanyOps
         private OpsDiaryRecord padDiaryPage;
         private Action padDiaryClose;
         private bool padDiaryArchive;
+        private int padBlockTask=-1;
 
         // UIモジュールのゲームパッド処理と二重決定しない。元アセットは変更しない。
         private void ConfigureGamepadUI()
@@ -105,7 +106,14 @@ namespace PatchWorkSecure.CompanyOps
         private void GamepadBack()
         {
             StopVoice();
+            if(modal!=null&&modal.Find("PlanningDetails")!=null){OpenTab(0);return;}
             if(modal!=null){CloseDialog();return;}
+            if(Minigame is OpsBlockMinigame blocks&&blocks.Phase==OpsMinigamePhase.Playing&&(blocks.Selected>=0||padBlockTask>=0))
+            {
+                int id=blocks.Selected>=0?blocks.Selected:padBlockTask;
+                var task=GamepadChoices().FirstOrDefault(s=>s.name=="BlockTask_"+id);
+                if(task!=null)SelectGamepad(task);return;
+            }
             if(FactorRevealActive){SkipFactorReveal();return;}
             if(YearOpeningActive){SkipYearOpening();return;}
             if(DiaryActive){var close=GamepadChoices().FirstOrDefault(s=>s.name=="DiaryClose") as Button;close?.onClick.Invoke();return;}
@@ -124,20 +132,27 @@ namespace PatchWorkSecure.CompanyOps
         {
             ConfigureGamepadUI();var pad=Gamepad.current;if(pad==null)return;
             var direction=pad.dpad.ReadValue();if(direction.sqrMagnitude<.3f)direction=pad.leftStick.ReadValue();
-            bool active=direction.sqrMagnitude>.3f||pad.buttonSouth.wasPressedThisFrame||pad.buttonEast.wasPressedThisFrame||pad.startButton.wasPressedThisFrame||pad.leftShoulder.wasPressedThisFrame||pad.rightShoulder.wasPressedThisFrame;
+            bool active=direction.sqrMagnitude>.3f||pad.buttonSouth.wasPressedThisFrame||pad.buttonEast.wasPressedThisFrame||pad.buttonWest.wasPressedThisFrame||pad.startButton.wasPressedThisFrame||pad.leftShoulder.wasPressedThisFrame||pad.rightShoulder.wasPressedThisFrame;
             if(Mouse.current?.delta.ReadValue().sqrMagnitude>1||Mouse.current?.leftButton.wasPressedThisFrame==true)padInUse=false;
             if(active)padInUse=true;
             if(!padInUse&&!active)return;
             if(pad.startButton.wasPressedThisFrame){StopVoice();if(modal!=null&&modal.Find("SettingsWindow")!=null)CloseDialog();else Menu();return;}
             if(pad.buttonEast.wasPressedThisFrame){GamepadBack();return;}
-            if(YearOpeningActive)
+            if(YearOpeningActive&&modal==null)
             {if(pad.buttonSouth.wasPressedThisFrame)AdvanceYearOpening();return;}
-            if(pad.buttonSouth.wasPressedThisFrame&&(PhasePresentationRunning||Time.unscaledTime<presentationInputGuardUntil))
+            if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&CanSkipResolution){SkipResolution();return;}
+            if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&(PhasePresentationRunning||Time.unscaledTime<presentationInputGuardUntil))
             {SkipPhasePresentation();return;}
-            if(pad.buttonSouth.wasPressedThisFrame&&AnnualPresentationCanSkip&&!AnnualPresentationSkipped)
+            if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&AnnualPresentationCanSkip&&!AnnualPresentationSkipped)
             {FinishReportCounts();SkipAnnualPresentation();return;}
             if(DiaryActive){if(pad.leftShoulder.wasPressedThisFrame)GamepadDiaryTurn(-1);if(pad.rightShoulder.wasPressedThisFrame)GamepadDiaryTurn(1);}
             EnsureGamepadSelection();
+            if(modal==null&&Minigame is OpsBlockMinigame block&&block.Phase==OpsMinigamePhase.Playing&&pad.buttonWest.wasPressedThisFrame&&block.Selected>=0)
+            {
+                var selected=EventSystem.current.currentSelectedGameObject?.name;
+                RotateBlock(block.Selected);
+                var same=GamepadChoices().FirstOrDefault(s=>s.name==selected);if(same!=null)SelectGamepad(same);
+            }
             if(direction.sqrMagnitude>.3f)
             {
                 direction=Mathf.Abs(direction.x)>Mathf.Abs(direction.y)?new Vector2(Mathf.Sign(direction.x),0):new Vector2(0,Mathf.Sign(direction.y));

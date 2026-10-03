@@ -21,6 +21,11 @@ namespace PatchWorkSecure.CompanyOps
         private void Awake()
         {
             button = GetComponent<UnityEngine.UI.Button>();
+        }
+        private void Start()
+        {
+            // 共通の枠をグラデーション・警告枠の後に描く。色を暗く乗算せず、
+            // 感染/部屋の枠からも独立させる。ホバーと選択は同じ枠のまま。
             focus = gameObject.AddComponent<UnityEngine.UI.Outline>();
             focus.effectDistance = new Vector2(2, -2); focus.useGraphicAlpha = false;
             focus.effectColor = new Color(.44f, .71f, 1f, .85f); focus.enabled = false;

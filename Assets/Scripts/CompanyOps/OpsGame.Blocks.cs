@@ -13,6 +13,7 @@ namespace PatchWorkSecure.CompanyOps
         private readonly string[] blockDays={"月","火","水","木","金","土"};
         private void DrawBlockPresentation()
         {
+            padBlockTask=-1;
             blockRevision=-1;draggedBlock=-1;minigameHeartbeatAt=-1;var game=(OpsBlockMinigame)Minigame;
             KitGradient(screen.GetComponent<Image>(),Hex("dfe4ff"),Hex("ffe3ec"));KitGradient(minigameCanvas.GetComponent<Image>(),Hex("dfe4ff"),Hex("ffe3ec"));
             DrawDecisionMinigameTop("作業のはめ込み",238,670,"配置","",Hex("6c63ff"));
@@ -76,6 +77,9 @@ namespace PatchWorkSecure.CompanyOps
                     int id=task.Id;
                     var tile=PCard(blockTray,"BlockTask_"+id,16+id%4*147,94+id/4*132,139,124,Hex("f3f6fb"),16,false);
                     var pointer=tile.gameObject.AddComponent<OpsBlockPointer>();pointer.Owner=this;pointer.Task=id;tile.GetComponent<Image>().raycastTarget=true;
+                    var padButton=tile.gameObject.AddComponent<Button>();padButton.targetGraphic=tile.GetComponent<Image>();
+                    tile.gameObject.AddComponent<OpsButtonFeedback>().Owner=this;
+                    padButton.onClick.AddListener(()=>SelectBlockForPad(id));
                     if(game.Selected==id){var outline=tile.gameObject.AddComponent<Outline>();outline.effectColor=Hex("ffc02e");outline.effectDistance=new Vector2(3,-3);}
                     var group=tile.gameObject.AddComponent<CanvasGroup>();group.alpha=task.Placed==null?1:.3f;
                     PText(tile,"BlockTaskName",task.Name+(task.Auto?" / 自動":""),10,8,119,46,13,null,false);
@@ -106,6 +110,19 @@ namespace PatchWorkSecure.CompanyOps
             }
         }
         public void SelectBlock(int id){var game=Minigame as OpsBlockMinigame;if(game!=null&&game.Select(id))RefreshBlockPresentation();}
+        private void SelectBlockForPad(int id)
+        {
+            var game=Minigame as OpsBlockMinigame;if(game==null)return;
+            bool pad=Gamepad.current?.buttonSouth.wasPressedThisFrame==true;
+            if(pad&&game.Tasks.First(t=>t.Id==id).Placed!=null)game.Lift(id);
+            SelectBlock(id);
+            if(pad)
+            {
+                padBlockTask=id;
+                var first=blockBoard.GetComponentsInChildren<Button>().FirstOrDefault(b=>b.name.StartsWith("BlockCell_")&&b.IsInteractable());
+                if(first!=null)SelectGamepad(first);
+            }
+        }
         public void RotateBlock(int id)
         {
             var game=Minigame as OpsBlockMinigame;if(game==null||!game.Rotate(id))return;MinigameTone(760,"triangle");RefreshBlockPresentation();if(draggedBlock>=0)MoveBlockDrag(blockPointer);
@@ -189,7 +206,7 @@ namespace PatchWorkSecure.CompanyOps
     {
         public OpsGame Owner;public int Task=-1,Row=-1,Column=-1;public bool Placed;
         public void OnPointerDown(PointerEventData e){if(e.button==PointerEventData.InputButton.Right)Owner.RightClickBlock(Task);}
-        public void OnPointerClick(PointerEventData e){if(Task>=0&&e.button==PointerEventData.InputButton.Left)Owner.SelectBlock(Task);}
+        public void OnPointerClick(PointerEventData e){if(Task>=0&&e.button==PointerEventData.InputButton.Left&&GetComponent<Button>()==null)Owner.SelectBlock(Task);}
         public void OnBeginDrag(PointerEventData e){if(Task>=0)Owner.BeginBlockDrag(Task,Placed,e.position);}
         public void OnDrag(PointerEventData e){if(Task>=0)Owner.MoveBlockDrag(e.position);}
         public void OnEndDrag(PointerEventData e){if(Task>=0)Owner.EndBlockDrag(e.position);}

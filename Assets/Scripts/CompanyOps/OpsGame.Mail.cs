@@ -171,12 +171,14 @@ namespace PatchWorkSecure.CompanyOps
         }
     }
     // スワイプはカードだけ。リンクはタッチ長押しで照会し、実際のURLは開かない。
-    public sealed class OpsMailPointer:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPointerDownHandler,IPointerUpHandler,IBeginDragHandler,IDragHandler,IEndDragHandler
+    public sealed class OpsMailPointer:MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPointerDownHandler,IPointerUpHandler,IBeginDragHandler,IDragHandler,IEndDragHandler,ISelectHandler,IDeselectHandler
     {
         public OpsGame Owner;public string Url="";public bool Swipe;
         private Vector2 down;private float pressedAt;private bool pressed;
         public void OnPointerEnter(PointerEventData e){if(!Swipe&&e.pointerId<0)Owner.ShowMailLink(Url);}
         public void OnPointerExit(PointerEventData e){if(!Swipe)Owner.ShowMailLink("");pressed=false;}
+        public void OnSelect(BaseEventData e){if(!Swipe)Owner.ShowMailLink(Url);}
+        public void OnDeselect(BaseEventData e){if(!Swipe)Owner.ShowMailLink("");}
         public void OnPointerDown(PointerEventData e){down=e.position;pressedAt=Time.unscaledTime;pressed=true;}
         public void OnPointerUp(PointerEventData e){pressed=false;}
         public void OnBeginDrag(PointerEventData e){down=e.pressPosition;}

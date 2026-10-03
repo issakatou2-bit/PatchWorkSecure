@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -22,8 +23,24 @@ namespace PatchWorkSecure.Tests
         {
             public Gamepad Pad;
             private readonly int? priorSeed=OpsGame.TestRunSeed;
-            public PadFixture(){Setup();Pad=InputSystem.AddDevice<Gamepad>();OpsGame.TestRunSeed=14;}
-            public void Dispose(){OpsGame.TestRunSeed=priorSeed;TearDown();}
+            public PadFixture(){DisconnectInputUI();Setup();Pad=InputSystem.AddDevice<Gamepad>();OpsGame.TestRunSeed=14;}
+            public void Dispose(){DisconnectInputUI();OpsGame.TestRunSeed=priorSeed;TearDown();}
+            private static void DisconnectInputUI()
+            {
+                // InputTestFixtureの別InputSystemへ、前の場面のデバイス参照を持ち込まない。
+                // 復帰前にもUIを破棄し、仮想デバイスの参照が次のテストへ残らないようにする。
+                var assets=new HashSet<InputActionAsset>();
+                var modules=Object.FindObjectsByType<InputSystemUIInputModule>(FindObjectsInactive.Include);
+                foreach(var module in modules){if(module.actionsAsset!=null)assets.Add(module.actionsAsset);module.enabled=false;}
+                foreach(var game in Object.FindObjectsByType<OpsGame>(FindObjectsInactive.Include))
+                {
+                    foreach(string field in new[]{"padOriginalActions","padUiActions"})
+                    {var asset=(InputActionAsset)typeof(OpsGame).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game);if(asset!=null)assets.Add(asset);}
+                    Object.DestroyImmediate(game.gameObject);
+                }
+                foreach(var asset in assets)if(asset!=null)foreach(var map in asset.actionMaps)map.Dispose();
+                foreach(var module in modules)if(module!=null)Object.DestroyImmediate(module.gameObject);
+            }
             public IEnumerator Tap(ButtonControl button)
             {Press(button,queueEventOnly:true);yield return null;Release(button,queueEventOnly:true);yield return null;}
             public IEnumerator Stick(Vector2 value)
@@ -98,6 +115,8 @@ namespace PatchWorkSecure.Tests
         }
         [UnityTest] public IEnumerator Next17Details_左スティックと日記送りと回転置き直しと持ち替えを確認する()
         {
+            // 実デバイスでUIが既に動いた場面からも、仮想入力へ安全に移行できる。
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
             using(var input=new PadFixture())
             {
                 SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -137,6 +156,12 @@ namespace PatchWorkSecure.Tests
                 yield return input.Tap(input.Pad.buttonEast);Assert.IsTrue(PadButtonExists("DiaryPage_0"));
                 Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
             }
+            // 同じPlayMode実行の中で実入力へ戻り、次の場面も参照が混ざらず動く。
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
+            var nativeModule=EventSystem.current.GetComponent<InputSystemUIInputModule>();
+            Assert.IsTrue(nativeModule.enabled);Assert.IsTrue(nativeModule.actionsAsset.FindAction("UI/Submit").enabled);
+            Click("HomeSettings");yield return new WaitForSecondsRealtime(.3f);CheckPointer("CloseDialog");Click("CloseDialog");
+            Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
     }
 }

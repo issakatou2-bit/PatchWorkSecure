@@ -15,7 +15,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next4Voice_追加十二行の字幕ポーズと素材なしの進行と年度一回を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
-            var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartYear(14);
             Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);
             foreach(var line in OpsReactionBank.ScriptV2().Skip(105).Take(12))
             {

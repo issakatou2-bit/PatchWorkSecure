@@ -192,7 +192,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
             var game=Object.FindAnyObjectByType<OpsGame>();Assert.IsNotNull(game.GetComponent<OpsMinigameHost>());
-            game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
+            WithoutPublishedVoices(game);game.StartYear(14);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
             string before=JsonUtility.ToJson(game.State);OpsMinigame received=null;
             Assert.IsTrue(game.OpenMinigame(new OpsMinigame("感染の封じ込め",game.State),"scope",s=>received=s));
             yield return new WaitForSecondsRealtime(.3f);CheckPointer("MinigameStart");CheckPointer("MinigameDelegate");

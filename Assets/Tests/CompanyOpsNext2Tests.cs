@@ -17,7 +17,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next3Title_承認済み一枚絵と縮尺と字幕と低減設定を確認する()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             var kv=Find<Image>("TitleKeyVisual");Assert.AreSame(game.PlanningArt.titleKeyVisual,kv.sprite);Assert.AreEqual(new Vector2(1672,941),kv.sprite.rect.size);Assert.AreEqual(new Vector2(0,1),kv.rectTransform.pivot);
             Assert.IsNull(kv.GetComponent<OpsPlanningMotion>());Assert.AreEqual(Vector3.one,kv.rectTransform.localScale);Assert.AreEqual(1,Find<RectTransform>("TitleBrand").localScale.x);
             Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="HomePortrait"||t.name=="HomeGreeting"));CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");Capture("134-title-kv");
@@ -106,7 +106,8 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator VoiceV2_届いた音源の全IDと全文再生を確認し素材なしでも成功する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
-            var bank=game.ActiveVoiceBank;var expected=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,bank.lines.Length);Assert.IsFalse(game.Navigator.Reactions.HasAudio);
+            var bank=game.ActiveVoiceBank;var expected=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,bank.lines.Length);
+            Assert.IsFalse(game.Navigator.Reactions.lines.Any(l=>l.clip!=null&&((string)VoiceEditorType("UnityEditor.AssetDatabase").GetMethod("GetAssetPath",new[]{typeof(Object)}).Invoke(null,new object[]{l.clip})).Contains("/VoiceTest/")),"公開バンクに私的参照を含めない");
             foreach(var row in expected)
             {
                 var line=bank.Find(row.id);Assert.AreEqual(row.caption,line.caption);Assert.AreEqual(row.faceId,line.faceId);Assert.AreEqual(row.poseId,line.poseId);
@@ -132,7 +133,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator VoiceV2_素材なしでも全文字幕と台本のポーズで進み操作が予約を取り消す()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartYear(14);
             Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,game.ActiveVoiceBank.lines.Length);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);Assert.AreEqual("season_04",game.LastReactionId);yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(OpsGame.SpeechLines(game.ActiveVoiceBank.Find("season_04").caption),Find<TextMeshProUGUI>("NavigatorSpeech").text);Assert.AreEqual("pose_wave",Find<OpsPortraitAnimator>("NavigatorPortrait").PoseId);Assert.IsFalse(game.PortraitVoicePlaying);
             game.StartYear(14);Assert.IsTrue(game.VoicePending,"新年度を始め直したら同じ季節でも読み直す");yield return new WaitForSecondsRealtime(2);
@@ -143,7 +144,7 @@ namespace PatchWorkSecure.Tests
         }
         [UnityTest] public IEnumerator VoiceV2_全文再生とBGM減衰と設定と操作キャンセルがゲーム数値に触れない()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartYear(14);yield return new WaitForSecondsRealtime(2);
             var original=game.Navigator;var persona=Object.Instantiate(original);var bank=ScriptableObject.CreateInstance<OpsReactionBank>();bank.lines=OpsReactionBank.ScriptV2();var clip=AudioClip.Create("全文再生の検証用無音",144000,1,24000,false);bank.Find("rankup").clip=clip;bank.Find("tutorial_1").clip=clip;persona.Reactions=bank;game.Navigator=persona;
             try
             {
@@ -161,7 +162,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator VoiceV2_依頼と事件と発動と月報は実際の場面に連動し音声なしで完走する()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartYear(14);yield return new WaitForSecondsRealtime(2);
             game.Buy(OpsCatalog.Index("backup"));ChooseDelegatedWork(game,"audit");ChooseDelegatedWork(game,"map");Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.4f);Click("AcceptMission");Assert.AreEqual(OpsGame.MissionVoiceId(game.State),game.LastReactionId);
             game.BeginIncident();Assert.AreEqual("incident_start",game.LastReactionId);yield return new WaitForSecondsRealtime(3.7f);Assert.AreEqual("incident_unconfirmed",game.LastReactionId);yield return new WaitForSecondsRealtime(1.4f);Capture("128-voice-unconfirmed");
             game.Resolve("recover");float limit=Time.realtimeSinceStartup+4;while(game.LastReactionId!="incident_activate"&&Time.realtimeSinceStartup<limit)yield return null;

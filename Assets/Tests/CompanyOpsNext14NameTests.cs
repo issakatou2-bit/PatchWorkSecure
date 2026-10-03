@@ -37,7 +37,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next14NamesUI_顔札と日記字幕と旧保存の画面を確かめる()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();
-            game.UseLocalTestVoices=true;Assert.IsTrue(game.RestoreProgress(new OpsProgress{story=AlliesStory(2)}));
+            WithoutPublishedVoices(game);Assert.IsTrue(game.RestoreProgress(new OpsProgress{story=AlliesStory(2)}));
             game.PreviewYearOpening(3);yield return new WaitForSecondsRealtime(2);
             Assert.Contains("りりぃ",Object.FindObjectsByType<TextMeshProUGUI>().Where(t=>t.name=="AllyName").Select(t=>t.text).ToArray());Capture("next14-names-allies");
             game.SkipYearOpening();game.AdvanceYearOpening();game.SpeakSceneLine("eng_investigate",0);yield return new WaitForSecondsRealtime(.5f);

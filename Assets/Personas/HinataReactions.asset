@@ -17,7 +17,7 @@ MonoBehaviour:
     caption: "\u3046\u301C\u3093\u2026\u2026"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8109db5117ad9c54a9c5079489878258, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u8003\u3048\u308B"
@@ -27,7 +27,7 @@ MonoBehaviour:
     caption: "\u306A\u308B\u307B\u3069\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b343a36a0e0546648b7b5700460c4a70, type: 3}
     faceId: face_sparkle
     poseId: pose_point
     scene: "\u8003\u3048\u308B"
@@ -37,7 +37,7 @@ MonoBehaviour:
     caption: "\u305D\u3063\u304B\u301C\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ec0de0e3320aac0478885b2ebb507a77, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u8003\u3048\u308B"
@@ -47,7 +47,7 @@ MonoBehaviour:
     caption: "\u3061\u3087\u3063\u3068\u8003\u3048\u3088\u3063\u304B\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 604eb33c408d7924299da8b0895585c4, type: 3}
     faceId: face_determined
     poseId: pose_think
     scene: "\u8003\u3048\u308B"
@@ -57,7 +57,7 @@ MonoBehaviour:
     caption: "\u3069\u308C\u306B\u3057\u3088\u3063\u304B\u306A\u301C\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 874ae5e67ac35444fb23be349d13816f, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u8003\u3048\u308B"
@@ -67,7 +67,7 @@ MonoBehaviour:
     caption: "\u3075\u3080\u3075\u3080\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2433396a23256fd449432bf1ec585504, type: 3}
     faceId: face_normal
     poseId: pose_magnifier
     scene: "\u8003\u3048\u308B"
@@ -77,7 +77,7 @@ MonoBehaviour:
     caption: "\u3088\u3057\u3063\u3001\u6E96\u5099\u30AA\u30C3\u30B1\u30FC\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d8448f0bfa390704c94b82d5ea6b489f, type: 3}
     faceId: face_proud
     poseId: pose_fists
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -87,7 +87,7 @@ MonoBehaviour:
     caption: "\u3053\u308C\u3067\u4E00\u5B89\u5FC3\u3060\u306D\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 19f27fd579f49a843be830047896e55c, type: 3}
     faceId: face_relieved
     poseId: pose_laptop
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -97,7 +97,7 @@ MonoBehaviour:
     caption: "\u3044\u3044\u8CB7\u3044\u7269\u3057\u3061\u3083\u3063\u305F\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b20a287a898fcf34585fea2d9cee2c4a, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -107,7 +107,7 @@ MonoBehaviour:
     caption: "\u983C\u308A\u306B\u306A\u308B\u305E\u301C\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 821e6ef97e9774c4993aefede770b226, type: 3}
     faceId: face_proud
     poseId: pose_fists
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -117,7 +117,7 @@ MonoBehaviour:
     caption: "\u3055\u3063\u305D\u304F\u8A2D\u5B9A\u3059\u308B\u306D\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 01af7103eabbafa44a6574d02a4a9d11, type: 3}
     faceId: face_determined
     poseId: pose_typing
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -127,7 +127,7 @@ MonoBehaviour:
     caption: "\u3075\u3075\u30FC\u3093\u3001\u3069\u3046\u3088\uFF01"
     speaker: 
     reaction: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2589ca6c304fa52498d8cca322ce935e, type: 3}
     faceId: face_doya
     poseId: pose_armscross
     scene: "\u8A2D\u5099\u306E\u5C0E\u5165"
@@ -137,7 +137,7 @@ MonoBehaviour:
     caption: "\u3084\u3063\u305F\u301C\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: da48a76221b72e449b153c5fc066134f, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -147,7 +147,7 @@ MonoBehaviour:
     caption: "\u3044\u3044\u611F\u3058\u3058\u3083\u3093\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4687c1970f51ff84b943b0e34c80a335, type: 3}
     faceId: face_proud
     poseId: pose_peace
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -157,7 +157,7 @@ MonoBehaviour:
     caption: "\u4F1A\u793E\u3001\u5F37\u304F\u306A\u3063\u3066\u308B\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4a3923a92b89fcb499883d7f28d6eef5, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -167,7 +167,7 @@ MonoBehaviour:
     caption: "\u3044\u3048\u30FC\u3044\u3063\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d14858e9c6275474a92fa4da0a5bb9e2, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -177,7 +177,7 @@ MonoBehaviour:
     caption: "\u306D\u3001\u8A00\u3063\u305F\u3067\u3057\u3087\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 9de8327c8f5ef8f41bc7a654548e6fc8, type: 3}
     faceId: face_doya
     poseId: pose_point
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -187,7 +187,7 @@ MonoBehaviour:
     caption: "\u3059\u3054\u3044\u3059\u3054\u3044\uFF01"
     speaker: 
     reaction: 2
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8f1f21bb0cf21cd41a478f36f56bc12b, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u6210\u9577\u30FB\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -197,7 +197,7 @@ MonoBehaviour:
     caption: "\u3048\u3047\u3063\uFF01\uFF1F"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f475270b270bbf4429ac6fd478f9660b, type: 3}
     faceId: face_alert
     poseId: pose_startled
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -207,7 +207,7 @@ MonoBehaviour:
     caption: "\u3042\u308C\u3063\uFF1F"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2a170adefc9b0644c80ecc5fdf21873f, type: 3}
     faceId: face_worried
     poseId: pose_think
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -217,7 +217,7 @@ MonoBehaviour:
     caption: "\u308F\u308F\u3063\u3001\u3061\u3087\u3063\u3068\u5F85\u3063\u3066\uFF01"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 54ec562677813274585eb29c80bb92c3, type: 3}
     faceId: face_panic
     poseId: pose_startled
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -227,7 +227,7 @@ MonoBehaviour:
     caption: "\u3093\uFF1F\u3000\u306A\u3093\u304B\u5909\u3058\u3083\u306A\u3044\uFF1F"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 44bf22ee680cc6249868d47252f0ef4a, type: 3}
     faceId: face_worried
     poseId: pose_magnifier
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -237,7 +237,7 @@ MonoBehaviour:
     caption: "\u843D\u3061\u7740\u3044\u3066\u3001\u78BA\u8A8D\u3057\u3088\uFF01"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6efd77f093477fe4882f0cfcb26046d9, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -247,7 +247,7 @@ MonoBehaviour:
     caption: "\u3046\u305D\u3046\u305D\uFF01\uFF1F"
     speaker: 
     reaction: 3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 7257f290351f3c9489d1951b44cf2cf9, type: 3}
     faceId: face_alert
     poseId: pose_startled
     scene: "\u8B66\u6212\u30FB\u4E8B\u4EF6\u306E\u5146\u5019"
@@ -257,7 +257,7 @@ MonoBehaviour:
     caption: "\u30BB\u30FC\u30D5\uFF01"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c509e1c0b7b96ae4a94be40a7845d53a, type: 3}
     faceId: face_relieved
     poseId: pose_peace
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -267,7 +267,7 @@ MonoBehaviour:
     caption: "\u3088\u304B\u3063\u305F\u301C\uFF01"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 22aac68e67cc0a940853901aea05ffa4, type: 3}
     faceId: face_relieved
     poseId: pose_fists
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -277,7 +277,7 @@ MonoBehaviour:
     caption: "\u3070\u3063\u3061\u308A\u3060\u306D\uFF01"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 799e272724e5ef3439b1948ece43855a, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -287,7 +287,7 @@ MonoBehaviour:
     caption: "\u3075\u3045\u301C\u3001\u3072\u3068\u5B89\u5FC3\u3002"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 867653c15c153c44090fa1f0640c00d0, type: 3}
     faceId: face_relieved
     poseId: pose_coffee
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -297,7 +297,7 @@ MonoBehaviour:
     caption: "\u3048\u3078\u3078\u3063\u3001\u3084\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 48ca84c412cb80148b7cb6867c138182, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -307,7 +307,7 @@ MonoBehaviour:
     caption: "\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
     speaker: 
     reaction: 4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: eed506adbe81c3b49b765b230b03cb0c, type: 3}
     faceId: face_normal
     poseId: pose_wave
     scene: "\u3046\u307E\u304F\u3044\u3063\u305F"
@@ -317,7 +317,7 @@ MonoBehaviour:
     caption: "\u3088\u3057\u3001\u7ACB\u3066\u76F4\u305D\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 80fc4c7d2e53f5e4d9ea9d26574e5d69, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -327,7 +327,7 @@ MonoBehaviour:
     caption: "\u3053\u3053\u304B\u3089\u3060\u3088\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6739b064ecd118e418f9f4c28356d41f, type: 3}
     faceId: face_determined
     poseId: pose_salute
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -337,7 +337,7 @@ MonoBehaviour:
     caption: "\u5927\u4E08\u592B\u3001\u307E\u304B\u305B\u3066\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ed71436f9cce79e449a1399df95a9371, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -347,7 +347,7 @@ MonoBehaviour:
     caption: "\u6B21\u306F\u8CA0\u3051\u306A\u3044\u3082\u3093\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 34d4e36121d2b4d439612ff3ea33d7dd, type: 3}
     faceId: face_pout
     poseId: pose_fists
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -357,7 +357,7 @@ MonoBehaviour:
     caption: "\u4E00\u7DD2\u306B\u8003\u3048\u3088\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2771686713363ed4081611c41d4a50c9, type: 3}
     faceId: face_normal
     poseId: pose_please
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -367,7 +367,7 @@ MonoBehaviour:
     caption: "\u307E\u3060\u307E\u3060\u3044\u3051\u308B\uFF01"
     speaker: 
     reaction: 5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: edeed241e40f49046a7c9272b3d6b2ed, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u88AB\u5BB3\u304B\u3089\u7ACB\u3066\u76F4\u3059"
@@ -377,7 +377,7 @@ MonoBehaviour:
     caption: "\u304A\u306F\u3088\u301C\uFF01"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 38ed61f9daeae0d48811192bad35bd91, type: 3}
     faceId: face_normal
     poseId: pose_wave
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -387,7 +387,7 @@ MonoBehaviour:
     caption: "\u4ECA\u6708\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 99da70f477128b94e9a6890537cbe933, type: 3}
     faceId: face_normal
     poseId: pose_wave
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -397,7 +397,7 @@ MonoBehaviour:
     caption: "\u3055\u3001\u59CB\u3081\u3088\u3063\u304B\uFF01"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 44af00768b256e84b8683599c31180cd, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -407,7 +407,7 @@ MonoBehaviour:
     caption: "\u4ECA\u6708\u306F\u4F55\u3057\u3088\u3063\u304B\u306A\u301C\u3002"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5def2fcbf20bd8f49be5450fce010b8e, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -417,7 +417,7 @@ MonoBehaviour:
     caption: "\u304C\u3093\u3070\u308D\u301C\u3063\uFF01"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e098cad1b89ee854d82d470f30750ba3, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -427,7 +427,7 @@ MonoBehaviour:
     caption: "\u65B0\u3057\u3044\u6708\u3001\u30B9\u30BF\u30FC\u30C8\uFF01"
     speaker: 
     reaction: 6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d84ebd70eb54bf44aa3907b17e1af0cc, type: 3}
     faceId: face_sparkle
     poseId: pose_salute
     scene: "\u6708\u306E\u59CB\u307E\u308A"
@@ -437,7 +437,7 @@ MonoBehaviour:
     caption: "\u4E00\u5E74\u3001\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a5b41a90ec38d3b498d489a3da2a3e85, type: 3}
     faceId: face_relieved
     poseId: pose_wave
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -447,7 +447,7 @@ MonoBehaviour:
     caption: "\u5B88\u308A\u304D\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 47b008e849629164eb4884670d2becb3, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -457,7 +457,7 @@ MonoBehaviour:
     caption: "\u307F\u3093\u306A\u306E\u304A\u304B\u3052\u3060\u3088\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3d171cfc2156d3b40a5ae7ea553ded8d, type: 3}
     faceId: face_crying
     poseId: pose_jump
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -467,7 +467,7 @@ MonoBehaviour:
     caption: "\u3084\u3063\u305F\u301C\u3063\u3001\u3044\u3048\u30FC\u3044\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a3680ccc07a29614b9f5abba94ab7c22, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -477,7 +477,7 @@ MonoBehaviour:
     caption: "\u6700\u9AD8\u306E\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: cbcc890281cb7e04dbe885a754ff0906, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -487,7 +487,7 @@ MonoBehaviour:
     caption: "\u6765\u5E74\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
     speaker: 
     reaction: 7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e38ddaabbfae5884e83b4e7fa77af7d3, type: 3}
     faceId: face_normal
     poseId: pose_wave
     scene: "\u5E74\u5EA6\u30AF\u30EA\u30A2"
@@ -497,7 +497,7 @@ MonoBehaviour:
     caption: "\u3046\u3045\u2026\u2026\u304F\u3084\u3057\u3044\uFF01"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6b11f3d36e2287d489428fe01ecb389a, type: 3}
     faceId: face_sad
     poseId: pose_exhausted
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -507,7 +507,7 @@ MonoBehaviour:
     caption: "\u30AC\u30FC\u30F3\u2026\u2026\u3002"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 67a1e00e6a8e54140853870637dd4667, type: 3}
     faceId: face_shocked
     poseId: pose_exhausted
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -517,7 +517,7 @@ MonoBehaviour:
     caption: "\u6B21\u3001\u304C\u3093\u3070\u308D\uFF01"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: dc4cc721ba0d2d04f92fbbcc7e1268b5, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -527,7 +527,7 @@ MonoBehaviour:
     caption: "\u632F\u308A\u8FD4\u3063\u3066\u307F\u3088\u3063\u304B\u3002"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4e70fa76f258d7048a21d7fb07b5fb1f, type: 3}
     faceId: face_worried
     poseId: pose_think
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -537,7 +537,7 @@ MonoBehaviour:
     caption: "\u3082\u301C\u3001\u3064\u3044\u3066\u306A\u3044\u306A\u3041\uFF01"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 01ddc2b9f4d673847aa303daa0d1c1a4, type: 3}
     faceId: face_pout
     poseId: pose_armscross
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -547,7 +547,7 @@ MonoBehaviour:
     caption: "\u5927\u4E08\u592B\u3001\u3053\u3053\u304B\u3089\uFF01"
     speaker: 
     reaction: 8
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0543b084337736d42a7a53cfdf9d1bda, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u7D50\u679C\u304C\u60AA\u304B\u3063\u305F"
@@ -557,7 +557,7 @@ MonoBehaviour:
     caption: "\u3075\u3075\u30FC\u3093\u3001\u3069\u3046\u3088\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5d0bec93a78822848b362bfeca32e06a, type: 3}
     faceId: face_doya
     poseId: pose_armscross
     scene: "\u5099\u3048\u304C\u52B9\u3044\u305F\u30FB\u5F97\u610F"
@@ -567,7 +567,7 @@ MonoBehaviour:
     caption: "\u2026\u2026\u306F\u3041\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 31d95d3d75b165f45b5c16436460c2e9, type: 3}
     faceId: face_akire
     poseId: pose_armscross
     scene: "\u653E\u7F6E\u30FB\u540C\u3058\u5931\u6557"
@@ -577,7 +577,7 @@ MonoBehaviour:
     caption: "\u3082\u301C\u3001\u3057\u3087\u3046\u304C\u306A\u3044\u306A\u3041\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e0b53b477d896634c835b1dc35722e5d, type: 3}
     faceId: face_akire_niyake
     poseId: pose_armscross
     scene: "\u3061\u3087\u3063\u3068\u629C\u3051\u305F\u9078\u629E"
@@ -587,7 +587,7 @@ MonoBehaviour:
     caption: "\u3080\u3045\u301C\u2026\u2026\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 41efdf38937fdfe4b9d7efb3a78e4f6b, type: 3}
     faceId: face_pout
     poseId: pose_armscross
     scene: "\u4E88\u7B97\u3092\u524A\u3089\u308C\u305F"
@@ -597,7 +597,7 @@ MonoBehaviour:
     caption: "\u3048\u3063\u3001\u305D\u3001\u305D\u3046\u304B\u306A\uFF1F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: cc76f89a921a23744ad2f67db1f7cd1f, type: 3}
     faceId: face_embarrassed
     poseId: pose_please
     scene: "\u307B\u3081\u3089\u308C\u305F"
@@ -607,7 +607,7 @@ MonoBehaviour:
     caption: "\u308F\u308F\u308F\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 12aed082acaf507499fd17c17df4ef02, type: 3}
     faceId: face_panic
     poseId: pose_startled
     scene: "\u5927\u304D\u306A\u4E8B\u4EF6\u306E\u767A\u751F"
@@ -617,7 +617,7 @@ MonoBehaviour:
     caption: "\u3046\u308F\u301C\u3093\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 75412967dfadb7747b55c4efba6f5d4f, type: 3}
     faceId: face_crying
     poseId: pose_exhausted
     scene: "\u5927\u304D\u306A\u88AB\u5BB3"
@@ -627,7 +627,7 @@ MonoBehaviour:
     caption: "\u3079\u30FC\u3063\u3060\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b910ffb14c993da4a8d05d849cc2cd2a, type: 3}
     faceId: face_tease
     poseId: pose_peace
     scene: "\u5197\u8AC7"
@@ -637,7 +637,7 @@ MonoBehaviour:
     caption: "\u3072\u3083\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3f29b30b97f0d194c88f880e93f917ad, type: 3}
     faceId: face_shocked
     poseId: pose_startled
     scene: "\u60F3\u5B9A\u5916\u306E\u88AB\u5BB3"
@@ -647,7 +647,7 @@ MonoBehaviour:
     caption: "\u3075\u3041\u2026\u2026\u306D\u3080\u2026\u2026\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: de1e0b5d2c38bad41885e0147fb2e35a, type: 3}
     faceId: face_sleepy
     poseId: pose_exhausted
     scene: "\u75B2\u52B4\u304C\u9AD8\u3044"
@@ -657,7 +657,7 @@ MonoBehaviour:
     caption: "\u3088\u3057\u3001\u3084\u308B\u3088\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8c2b124edca7dac40a8b6d5f32b4ca76, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A"
@@ -677,7 +677,7 @@ MonoBehaviour:
     caption: "\u307E\u305A\u306F\u300C\u8ABF\u3079\u308B\u300D\u3092\u62BC\u3057\u3066\u307F\u3066\uFF01\u3000\u4F1A\u793E\u306E\u4ECA\u306E\u72B6\u614B\u304C\u3001\u3071\u3063\u3068\u5206\u304B\u308B\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 14bd9defcf5f7de47a5cf9b4fd395ee8, type: 3}
     faceId: face_normal
     poseId: pose_point
     scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB2"
@@ -687,7 +687,7 @@ MonoBehaviour:
     caption: "\u793E\u9577\u304B\u3089\u76F8\u8AC7\u304C\u6765\u3066\u308B\uFF01\u3000\u300C\u8A71\u3092\u805E\u304F\u300D\u3067\u3001\u4F9D\u983C\u3092\u30C1\u30A7\u30C3\u30AF\u3057\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 703dc9a8cc43ce340af21484e36b6235, type: 3}
     faceId: face_normal
     poseId: pose_point
     scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB3"
@@ -697,7 +697,7 @@ MonoBehaviour:
     caption: "\u300C\u8A2D\u5099\u3092\u5C0E\u5165\u300D\u304B\u3089\u3001\u3072\u3068\u3064\u5165\u308C\u3066\u307F\u3088\u3063\u304B\u3002\u5099\u3048\u306F\u3001\u4E8B\u4EF6\u306E\u3068\u304D\u306B\u52B9\u3044\u3066\u304F\u308B\u3093\u3060\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 55d6804fa274e6040bbc95c55f1119a8, type: 3}
     faceId: face_proud
     poseId: pose_laptop
     scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB4"
@@ -707,7 +707,7 @@ MonoBehaviour:
     caption: "\u6E96\u5099\u3067\u304D\u305F\u3089\u300C\u6708\u3092\u9032\u3081\u308B\u300D\uFF01\u3000\u2026\u2026\u3055\u3042\u3001\u3069\u3046\u306A\u308B\u304B\u306A\uFF1F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 333e0e3480a6d8e4faba241f75226940, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB5"
@@ -717,7 +717,7 @@ MonoBehaviour:
     caption: "\u4E8B\u4EF6\u304C\u8D77\u304D\u305F\u3089\u3001\u65B9\u91DD\u3092\u9078\u3076\u3088\u3002\u5165\u308C\u3066\u304A\u3044\u305F\u5099\u3048\u304C\u3001\u3053\u3053\u3067\u50CD\u304F\u306E\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a12dcd10826262444862b9667b853e5d, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB6"
@@ -727,7 +727,7 @@ MonoBehaviour:
     caption: "\u7D0D\u54C1\u30C7\u30FC\u30BF\u3092\u623B\u3059\u624B\u6BB5\u3001\u4E00\u7DD2\u306B\u793A\u305D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0ce64a71beeed4e489db1ce2a999fcda, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -737,7 +737,7 @@ MonoBehaviour:
     caption: "\u65B0\u4EBA\u3055\u3093\u306E\u30ED\u30B0\u30A4\u30F3\u3001\u3057\u3063\u304B\u308A\u5B88\u3063\u3066\u3042\u3052\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 73ea3ac1ef86a7d42ba5a65b5932ea6c, type: 3}
     faceId: face_normal
     poseId: pose_point
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -747,7 +747,7 @@ MonoBehaviour:
     caption: "\u6025\u304E\u306E\u4F9D\u983C\u3067\u3082\u3001\u5B89\u5168\u306B\u5224\u65AD\u3067\u304D\u308B\u3088\u3046\u306B\u3057\u305F\u3044\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 98373083549d8804e98f0434d4adc350, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -757,7 +757,7 @@ MonoBehaviour:
     caption: "\u53D7\u6CE8\u3092\u6B62\u3081\u306A\u3044\u4F53\u5236\u3001\u4F5C\u3063\u3061\u3083\u304A\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 826a5c2f95fdcfe4b86d435498b7c68c, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -767,7 +767,7 @@ MonoBehaviour:
     caption: "\u62C5\u5F53\u3055\u3093\u304C\u4F11\u3081\u308B\u3088\u3046\u306B\u3001\u4ED5\u7D44\u307F\u3092\u6574\u3048\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6f6e3b1fe3a62ba49ad515918e5ba97d, type: 3}
     faceId: face_relieved
     poseId: pose_laptop
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -777,7 +777,7 @@ MonoBehaviour:
     caption: "\u66F4\u65B0\u3059\u308B\u5BFE\u8C61\u3001\u307E\u305A\u306F\u7D5E\u308A\u8FBC\u3082\u3063\u304B\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3ad57e733bcf26c4dbf910dec94a627a, type: 3}
     faceId: face_normal
     poseId: pose_magnifier
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -787,7 +787,7 @@ MonoBehaviour:
     caption: "\u53D6\u5F15\u5148\u304B\u3089\u306E\u5F71\u97FF\u3001\u5E83\u304C\u3089\u306A\u3044\u3088\u3046\u306B\u3057\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 65f10d037311dfe4eabbd5569931d309, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -797,7 +797,7 @@ MonoBehaviour:
     caption: "\u3069\u3053\u307E\u3067\u5171\u6709\u3057\u3066\u3044\u3044\u304B\u3001\u5224\u65AD\u306E\u76EE\u5B89\u3092\u4F5C\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d589583edf461e748982d100870d2238, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -807,7 +807,7 @@ MonoBehaviour:
     caption: "\u5FD9\u3057\u3044\u3068\u304D\u3067\u3082\u3001\u3061\u3083\u3093\u3068\u5831\u544A\u3067\u304D\u308B\u8077\u5834\u306B\u3057\u305F\u3044\u306A\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e14d356f444d57643a22bdb6676f5688, type: 3}
     faceId: face_normal
     poseId: pose_please
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -817,7 +817,7 @@ MonoBehaviour:
     caption: "\u672C\u5F53\u306B\u623B\u305B\u308B\u304B\u3001\u78BA\u304B\u3081\u3066\u304A\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8a6a5ab1ca9a8db4d8b042a4c9fd0136, type: 3}
     faceId: face_determined
     poseId: pose_magnifier
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -827,7 +827,7 @@ MonoBehaviour:
     caption: "\u3042\u3084\u3057\u3044\u30ED\u30B0\u30A4\u30F3\u3001\u898B\u5206\u3051\u3089\u308C\u308B\u3088\u3046\u306B\u3057\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6817f78f380b6ad4d91ff4dcee173b9c, type: 3}
     faceId: face_determined
     poseId: pose_magnifier
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -837,7 +837,7 @@ MonoBehaviour:
     caption: "\u5E74\u5EA6\u672B\u306E\u7D0D\u54C1\u3001\u307F\u3093\u306A\u3067\u5B88\u308A\u304D\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 1bc0b30232b57d942b9498fbc3607624, type: 3}
     faceId: face_determined
     poseId: pose_salute
     scene: "\u4F9D\u983C\u3092\u5F15\u304D\u53D7\u3051\u308B"
@@ -847,7 +847,7 @@ MonoBehaviour:
     caption: "\u4F9D\u983C\u3001\u9054\u6210\u301C\u3063\uFF01\u3000\u793E\u9577\u3082\u559C\u3093\u3067\u304F\u308C\u308B\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8f9de4e3c78a63b42bd4f4b80cb6c417, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u4F9D\u983C\u306E\u9054\u6210\uFF08\u6708\u5831\uFF09"
@@ -857,7 +857,7 @@ MonoBehaviour:
     caption: "\u4ECA\u6708\u306F\u5C4A\u304B\u306A\u304B\u3063\u305F\u304B\u301C\u3002\u6765\u6708\u3001\u53D6\u308A\u8FD4\u305D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 522dd8f3c0af85c4d8eda17f4ff5132c, type: 3}
     faceId: face_worried
     poseId: pose_think
     scene: "\u4F9D\u983C\u306E\u672A\u9054\u6210\uFF08\u6708\u5831\uFF09"
@@ -867,7 +867,7 @@ MonoBehaviour:
     caption: "\u305F\u3044\u3078\u3093\u3001\u4F55\u304B\u8D77\u304D\u3066\u308B\uFF01\u3000\u307E\u305A\u306F\u6B62\u3081\u308B\u7BC4\u56F2\u3092\u6C7A\u3081\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b05654de7ed1af04ab7a67ab292ecff9, type: 3}
     faceId: face_alert
     poseId: pose_startled
     scene: "\u4E8B\u4EF6\u306E\u767A\u751F"
@@ -877,7 +877,7 @@ MonoBehaviour:
     caption: "\u307E\u3060\u78BA\u8A8D\u4E2D\u3060\u3088\u3002\u666E\u901A\u306E\u64CD\u4F5C\u304B\u3082\u3057\u308C\u306A\u3044\u304B\u3089\u3001\u843D\u3061\u7740\u3044\u3066\u306D\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: bd83b9ad4f0b55744827b51cb349c688, type: 3}
     faceId: face_worried
     poseId: pose_magnifier
     scene: "\u4E8B\u4EF6\u306E\u767A\u751F\uFF08\u672A\u78BA\u8A8D\uFF09"
@@ -887,7 +887,7 @@ MonoBehaviour:
     caption: "\u5099\u3048\u304C\u52B9\u3044\u305F\uFF01\u3000\u5165\u308C\u3068\u3044\u3066\u3001\u307B\u3093\u3063\u3068\u3088\u304B\u3063\u305F\u301C\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e54121fa11996154a9d7e081a663c969, type: 3}
     faceId: face_doya
     poseId: pose_shield
     scene: "\u5099\u3048\u306E\u767A\u52D5"
@@ -897,7 +897,7 @@ MonoBehaviour:
     caption: "\u3042\u308C\u304C\u3042\u3063\u305F\u3089\u3001\u3082\u3063\u3068\u65E9\u304F\u623B\u305B\u305F\u304B\u3082\u2026\u2026\u3002\u6B21\u306F\u5165\u308C\u3068\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 1de53b0b7af0a2c40a4ff7f8d209af15, type: 3}
     faceId: face_worried
     poseId: pose_think
     scene: "\u672A\u5C0E\u5165\u306E\u5099\u3048"
@@ -907,7 +907,7 @@ MonoBehaviour:
     caption: "\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7\uFF01\u3000\u4F1A\u793E\u304C\u3001\u307E\u305F\u3072\u3068\u3064\u5F37\u304F\u306A\u3063\u305F\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b67d6088146613b4a9bc25e0636f49c9, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30E9\u30F3\u30AF\u30A2\u30C3\u30D7"
@@ -917,7 +917,7 @@ MonoBehaviour:
     caption: "\u904B\u7528\u30E9\u30F3\u30AFA\uFF01\u3000\u6700\u521D\u3088\u308A\u3001\u305A\u3063\u3068\u305A\u3063\u3068\u5F37\u3044\u4F1A\u793E\u306B\u306A\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ab30478336e929245a91f47ba342c8f7, type: 3}
     faceId: face_crying
     poseId: pose_jump
     scene: "\u5E74\u9593\u8A55\u4FA1A"
@@ -927,7 +927,7 @@ MonoBehaviour:
     caption: "\u904B\u7528\u30E9\u30F3\u30AFB\uFF01\u3000\u3057\u3063\u304B\u308A\u5B88\u308C\u305F\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3d76281f3e1d96047b77d8dd032d98db, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u5E74\u9593\u8A55\u4FA1B"
@@ -937,7 +937,7 @@ MonoBehaviour:
     caption: "\u904B\u7528\u30E9\u30F3\u30AFC\u3002\u2026\u2026\u5927\u5909\u306A\u4E00\u5E74\u3060\u3063\u305F\u3051\u3069\u3001\u6B21\u306F\u3082\u3063\u3068\u3046\u307E\u304F\u3084\u308C\u308B\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e5b222c3e68cb1145970d8ca1d51ed7a, type: 3}
     faceId: face_normal
     poseId: pose_please
     scene: "\u5E74\u9593\u8A55\u4FA1C"
@@ -947,7 +947,7 @@ MonoBehaviour:
     caption: "\u65B0\u5E74\u5EA6\u3060\u306D\uFF01\u3000\u685C\u3082\u304D\u308C\u3044\u3060\u3057\u3001\u304C\u3093\u3070\u308D\u301C\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 56f0c4c2e411e1d4eb6caf62e56e6340, type: 3}
     faceId: face_sparkle
     poseId: pose_wave
     scene: "4\u6708"
@@ -957,7 +957,7 @@ MonoBehaviour:
     caption: "\u65B0\u7DD1\u306E\u5B63\u7BC0\uFF01\u3000\u65B0\u4EBA\u3055\u3093\u3082\u3001\u305D\u308D\u305D\u308D\u6163\u308C\u3066\u304D\u305F\u304B\u306A\uFF1F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 1e10eedea761f4b4980a18ec89cc6695, type: 3}
     faceId: face_normal
     poseId: pose_wave
     scene: "5\u6708"
@@ -967,7 +967,7 @@ MonoBehaviour:
     caption: "\u6885\u96E8\u5165\u308A\u3060\u306D\u3002\u4ECA\u6708\u306F\u5C71\u5834\u3060\u304B\u3089\u3001\u6C17\u3092\u5F15\u304D\u3057\u3081\u3066\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2c3abacbdfee3f94e8947a15e476a0c2, type: 3}
     faceId: face_determined
     poseId: pose_salute
     scene: "6\u6708"
@@ -977,7 +977,7 @@ MonoBehaviour:
     caption: "\u590F\u304C\u6765\u305F\u301C\uFF01\u3000\u6691\u3044\u3051\u3069\u3001\u3072\u3068\u4F11\u307F\u3082\u5927\u4E8B\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 99213b1d2235a954b93b2e9f7a504616, type: 3}
     faceId: face_normal
     poseId: pose_coffee
     scene: "7\u6708"
@@ -987,7 +987,7 @@ MonoBehaviour:
     caption: "\u304A\u76C6\u4F11\u307F\u306E\u5B63\u7BC0\u3002\u4EBA\u304C\u5C11\u306A\u3044\u6642\u671F\u306F\u3001\u8981\u6CE8\u610F\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e1e1691b78780624bad436be496566e0, type: 3}
     faceId: face_worried
     poseId: pose_think
     scene: "8\u6708"
@@ -997,7 +997,7 @@ MonoBehaviour:
     caption: "\u4E0A\u671F\u306E\u7DE0\u3081\u3060\u3088\uFF01\u3000\u3053\u3053\u3001\u4E57\u308A\u5207\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 84f3ca55bd670c043845af70c4f65955, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "9\u6708"
@@ -1007,7 +1007,7 @@ MonoBehaviour:
     caption: "\u79CB\u3060\u306D\u301C\u3002\u5F8C\u534A\u6226\u3001\u30B9\u30BF\u30FC\u30C8\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ba71a7e04dbf34042a2a1e772bc40c9e, type: 3}
     faceId: face_normal
     poseId: pose_salute
     scene: "10\u6708"
@@ -1017,7 +1017,7 @@ MonoBehaviour:
     caption: "\u671D\u6669\u3001\u51B7\u3048\u3066\u304D\u305F\u306D\u3002\u5E74\u672B\u306B\u5411\u3051\u3066\u6E96\u5099\u3057\u3068\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0051223d1e5508046ad45ac0e4ab6f20, type: 3}
     faceId: face_normal
     poseId: pose_laptop
     scene: "11\u6708"
@@ -1027,7 +1027,7 @@ MonoBehaviour:
     caption: "\u5E74\u672B\u3060\u301C\uFF01\u3000\u5927\u6383\u9664\u306E\u524D\u306B\u3001\u4F1A\u793E\u306E\u5B88\u308A\u3082\u898B\u76F4\u305D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2b8acecca80cd4b40a873dd9884a8123, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "12\u6708"
@@ -1037,7 +1037,7 @@ MonoBehaviour:
     caption: "\u3042\u3051\u307E\u3057\u3066\u3001\u304A\u3081\u3067\u3068\u301C\uFF01\u3000\u4ECA\u5E74\u3082\u3088\u308D\u3057\u304F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8684b11bc4fa8c643b2834379ff19e07, type: 3}
     faceId: face_sparkle
     poseId: pose_wave
     scene: "1\u6708"
@@ -1047,7 +1047,7 @@ MonoBehaviour:
     caption: "\u5E74\u5EA6\u672B\u307E\u3067\u3001\u3042\u3068\u5C11\u3057\uFF01\u3000\u4E88\u7B97\u306E\u4F7F\u3044\u65B9\u3001\u614E\u91CD\u306B\u306D\u3002"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 15a20ec0bdcb75347bafaf481274cad0, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "2\u6708"
@@ -1057,7 +1057,7 @@ MonoBehaviour:
     caption: "\u4E00\u5E74\u306E\u96C6\u5927\u6210\u3060\u3088\uFF01\u3000\u6700\u5F8C\u307E\u3067\u3001\u4E00\u7DD2\u306B\u5B88\u308A\u304D\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5d50b14a26064ab4a9eddeb414a5e78f, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "3\u6708"
@@ -1067,7 +1067,7 @@ MonoBehaviour:
     caption: "\u4ECA\u6708\u306F\u6700\u521D\u306E\u5C71\u5834\u3060\u3088\uFF01\u3000\u76EE\u6A19\u3001\u3061\u3083\u3093\u3068\u898B\u3066\u304A\u3044\u3066\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: bd440771e9329534c989737647a76873, type: 3}
     faceId: face_determined
     poseId: pose_point
     scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF086\u6708\uFF09"
@@ -1077,7 +1077,7 @@ MonoBehaviour:
     caption: "\u4E0A\u671F\u306E\u3057\u3081\u304F\u304F\u308A\u3001\u4E8C\u3064\u76EE\u306E\u5C71\u5834\uFF01\u3000\u3053\u3053\u306F\u843D\u3068\u305B\u306A\u3044\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d37dd99ae477ec04fbde3429e238fc97, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF089\u6708\uFF09"
@@ -1087,7 +1087,7 @@ MonoBehaviour:
     caption: "\u5E74\u672B\u306E\u5C71\u5834\uFF01\u3000\u307F\u3093\u306A\u5FD9\u3057\u3044\u6642\u671F\u3060\u304B\u3089\u3001\u6C17\u3092\u5F15\u304D\u3057\u3081\u3066\u3044\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f4e5384700639cd429519e58a7101ab3, type: 3}
     faceId: face_alert
     poseId: pose_salute
     scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF0812\u6708\uFF09"
@@ -1097,7 +1097,7 @@ MonoBehaviour:
     caption: "\u3044\u3088\u3044\u3088\u6C7A\u7B97\u306E\u5C71\u5834\uFF01\u3000\u4E00\u5E74\u306E\u96C6\u5927\u6210\u3001\u898B\u305B\u3061\u3083\u304A\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 06b3478f66bd165439d6932b85f6e5d0, type: 3}
     faceId: face_determined
     poseId: pose_shield
     scene: "\u5C71\u5834\u306E\u6708\u306E\u59CB\u307E\u308A\uFF083\u6708\u30FB\u6C7A\u7B97\uFF09"
@@ -1107,7 +1107,7 @@ MonoBehaviour:
     caption: "\u5C71\u5834\u3001\u7A81\u7834\u301C\u3063\uFF01\u3000\u307F\u3093\u306A\u3067\u5B88\u308A\u304D\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 48f82c25cf4a5f04690fcded18d6b6bc, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u5C71\u5834\u306E\u76EE\u6A19\u3092\u9054\u6210"
@@ -1117,7 +1117,7 @@ MonoBehaviour:
     caption: "\u3088\u3057\u3063\u3001\u76EE\u6A19\u30AF\u30EA\u30A2\uFF01\u3000\u5099\u3048\u3066\u304D\u305F\u304B\u3044\u304C\u3042\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d1d33476e83df2b4a86dc2d39a5d1a54, type: 3}
     faceId: face_proud
     poseId: pose_peace
     scene: "\u5C71\u5834\u306E\u76EE\u6A19\u3092\u9054\u6210"
@@ -1127,7 +1127,7 @@ MonoBehaviour:
     caption: "\u6C7A\u7B97\u306E\u5C71\u5834\u3001\u7A81\u7834\uFF01\u3000\u3053\u306E\u4E00\u5E74\u3001\u307B\u3093\u3068\u306B\u304A\u3064\u304B\u308C\u3055\u307E\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ad7989db03492ec489374736ba878be9, type: 3}
     faceId: face_crying
     poseId: pose_jump
     scene: "\u6C7A\u7B97\u306E\u5C71\u5834\u3092\u9054\u6210"
@@ -1137,7 +1137,7 @@ MonoBehaviour:
     caption: "\u3046\u301C\u3093\u3001\u4ECA\u56DE\u306F\u5C4A\u304B\u306A\u304B\u3063\u305F\u304B\u2026\u2026\u3002\u3067\u3082\u3001\u6B21\u306E\u5C71\u5834\u3067\u53D6\u308A\u8FD4\u305D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4e9dd1feeacd5de40a09bbb1c73384da, type: 3}
     faceId: face_worried
     poseId: pose_please
     scene: "\u5C71\u5834\u306E\u76EE\u6A19\u306B\u5C4A\u304B\u305A"
@@ -1147,7 +1147,7 @@ MonoBehaviour:
     caption: "\u60DC\u3057\u304B\u3063\u305F\u301C\uFF01\u3000\u4F55\u304C\u3042\u308C\u3070\u5C4A\u3044\u305F\u304B\u3001\u6708\u5831\u3067\u4E00\u7DD2\u306B\u898B\u3066\u307F\u3088\uFF1F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: efd26e6c3e97e3c4181c9e93f41fcb6c, type: 3}
     faceId: face_sad
     poseId: pose_think
     scene: "\u5C71\u5834\u306E\u76EE\u6A19\u306B\u5C4A\u304B\u305A"
@@ -1157,7 +1157,7 @@ MonoBehaviour:
     caption: "\u6B21\u306E\u30E9\u30F3\u30AF\u307E\u3067\u3001\u3042\u3068\u3061\u3087\u3063\u3068\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6a28484318026fa4b9d55a3f84b27243, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u6B21\u306E\u30E9\u30F3\u30AF\u304C\u8FD1\u3044"
@@ -1167,7 +1167,7 @@ MonoBehaviour:
     caption: "\u904B\u7528\u30E9\u30F3\u30AFSS\uFF01\u3000\u2026\u2026\u3046\u305D\u3001\u307B\u3093\u3068\u306B\uFF1F\u3000\u6700\u9AD8\u306E\u4E00\u5E74\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5b6bd0ffea5bc5140ae063a11575e678, type: 3}
     faceId: face_crying
     poseId: pose_jump
     scene: "\u5E74\u9593\u8A55\u4FA1SS"
@@ -1177,7 +1177,7 @@ MonoBehaviour:
     caption: "\u904B\u7528\u30E9\u30F3\u30AFS\uFF01\u3000\u80F8\u3092\u5F35\u3063\u3066\u3044\u3044\u4E00\u5E74\u3060\u3063\u305F\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2ecb5cf93554cd246a1eebe7a7ee3b35, type: 3}
     faceId: face_proud
     poseId: pose_jump
     scene: "\u5E74\u9593\u8A55\u4FA1S"
@@ -1187,7 +1187,7 @@ MonoBehaviour:
     caption: "\u3088\u30FC\u3057\u3001\u3044\u304F\u3088\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: cd6d0e6c339d119478ae0735d3910e17, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u306E\u59CB\u307E\u308A"
@@ -1197,7 +1197,7 @@ MonoBehaviour:
     caption: "\u3055\u3042\u3001\u8155\u306E\u898B\u305B\u3069\u3053\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5f6d9a0f22d03084c93ce38930268f10, type: 3}
     faceId: face_doya
     poseId: pose_point
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u306E\u59CB\u307E\u308A"
@@ -1207,7 +1207,7 @@ MonoBehaviour:
     caption: "\u305D\u306E\u8ABF\u5B50\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0630b0fec93fef34b885141bdb1434fb, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u3067\u9023\u7D9A\u6210\u529F"
@@ -1217,7 +1217,7 @@ MonoBehaviour:
     caption: "\u3059\u3054\u3044\u3059\u3054\u3044\u3001\u6B62\u307E\u3089\u306A\u3044\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8f406ebd7bf79dc4b91abfccdb8cfba3, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u3067\u9023\u7D9A\u6210\u529F"
@@ -1227,7 +1227,7 @@ MonoBehaviour:
     caption: "\u3042\u3063\u3001\u4ECA\u306E\u306F\u60DC\u3057\u3044\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b168b6b8d2a5b2a4aa016b62fa13b76b, type: 3}
     faceId: face_worried
     poseId: pose_startled
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u3067\u5931\u6557"
@@ -1237,7 +1237,7 @@ MonoBehaviour:
     caption: "\u5927\u4E08\u592B\u3001\u6B21\u3044\u3053\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 540f43deea7388345bd548cc6a26e312, type: 3}
     faceId: face_normal
     poseId: pose_please
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u3067\u5931\u6557"
@@ -1247,7 +1247,7 @@ MonoBehaviour:
     caption: "\u5B8C\u74A7\u301C\u3063\uFF01\u3000\u30D7\u30ED\u306E\u4ED5\u4E8B\u3060\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d1c2db618e9576d41b515996bbbfb4f2, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u306E\u9AD8\u8A55\u4FA1"
@@ -1257,7 +1257,7 @@ MonoBehaviour:
     caption: "\u3046\u3093\u3001\u3057\u3063\u304B\u308A\u5B88\u308C\u305F\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f0c7e152a0fdab84793cc980c4515ff7, type: 3}
     faceId: face_proud
     poseId: pose_peace
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u306E\u666E\u901A\u306E\u8A55\u4FA1"
@@ -1267,7 +1267,7 @@ MonoBehaviour:
     caption: "\u3046\u301C\u3093\u3001\u6B21\u306F\u3082\u3063\u3068\u3046\u307E\u304F\u3084\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 2c2c37938bc88074a879d9da75843d23, type: 3}
     faceId: face_sad
     poseId: pose_think
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u306E\u4F4E\u8A55\u4FA1"
@@ -1277,7 +1277,7 @@ MonoBehaviour:
     caption: "\u3058\u3083\u3042\u3001\u3053\u3053\u306F\u307F\u3093\u306A\u306B\u4EFB\u305B\u3061\u3083\u304A\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a6d95ec664db45243a893393be639f09, type: 3}
     faceId: face_tease
     poseId: pose_wave
     scene: "\u793E\u54E1\u306B\u4EFB\u305B\u305F"
@@ -1287,7 +1287,7 @@ MonoBehaviour:
     caption: "\u30CA\u30A4\u30B9\u906E\u65AD\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 589b0fd7c8fb8684898ab883eb00c49d, type: 3}
     faceId: face_doya
     poseId: pose_shield
     scene: "\u5C01\u3058\u8FBC\u3081\u3067\u611F\u67D3\u3092\u5207\u308A\u96E2\u3059"
@@ -1297,7 +1297,7 @@ MonoBehaviour:
     caption: "\u305D\u308C\u3001\u6B63\u5E38\u306A\u7AEF\u672B\u3060\u3088\u301C\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a51c016cf1838744c93bbbb66975adf4, type: 3}
     faceId: face_akire
     poseId: pose_startled
     scene: "\u5C01\u3058\u8FBC\u3081\u3067\u6B63\u5E38\u306A\u7AEF\u672B\u3092\u6B62\u3081\u305F"
@@ -1307,7 +1307,7 @@ MonoBehaviour:
     caption: "\u898B\u7834\u3063\u305F\uFF01\u3000\u305D\u308C\u3001\u602A\u3057\u3044\u30E1\u30FC\u30EB\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: fc204ad9bf678e04d90f732e8542b77d, type: 3}
     faceId: face_doya
     poseId: pose_magnifier
     scene: "\u30E1\u30FC\u30EB\u306E\u4ED5\u5206\u3051\u3067\u898B\u7834\u308B"
@@ -1317,7 +1317,7 @@ MonoBehaviour:
     caption: "\u3042\u3063\u3001\u305D\u308C\u958B\u3044\u3061\u3083\u3060\u3081\u306A\u3084\u3064\u2026\u2026\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: eebb28278436aaa4999e1ee856e53a34, type: 3}
     faceId: face_panic
     poseId: pose_startled
     scene: "\u30E1\u30FC\u30EB\u306E\u4ED5\u5206\u3051\u3067\u898B\u9003\u3059"
@@ -1327,7 +1327,7 @@ MonoBehaviour:
     caption: "\u5F3E\u3044\u305F\uFF01\u3000\u672C\u4EBA\u3058\u3083\u306A\u3044\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 068c227f5d216604090712d49e06533a, type: 3}
     faceId: face_doya
     poseId: pose_armscross
     scene: "\u591A\u8981\u7D20\u8A8D\u8A3C\u3067\u507D\u306E\u4F9D\u983C\u3092\u5F3E\u304F"
@@ -1337,7 +1337,7 @@ MonoBehaviour:
     caption: "\u305D\u306E\u4EBA\u3001\u4ECA\u30ED\u30B0\u30A4\u30F3\u3057\u3066\u306A\u3044\u3088\u301C\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ca4ce797945a4744c8b577c84f555fc1, type: 3}
     faceId: face_shocked
     poseId: pose_startled
     scene: "\u591A\u8981\u7D20\u8A8D\u8A3C\u3067\u8A31\u53EF\u3057\u3066\u3057\u307E\u3046"
@@ -1347,7 +1347,7 @@ MonoBehaviour:
     caption: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306F\u3001\u623B\u305B\u3066\u3053\u305D\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3001\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 04323a6e4e8e719459a6db5f4cd2f172, type: 3}
     faceId: face_doya
     poseId: pose_point
     scene: "\u623B\u305B\u308B\u3053\u3068\u3092\u78BA\u304B\u3081\u308B"
@@ -1357,7 +1357,7 @@ MonoBehaviour:
     caption: "\u300C\u6025\u3044\u3067\u300D\u300C\u5185\u5BC6\u306B\u300D\u306F\u3001\u8A50\u6B3A\u306B\u3088\u304F\u3042\u308B\u5408\u56F3\uFF01\u3000\u3044\u3064\u3082\u306E\u9023\u7D61\u5148\u3067\u78BA\u304B\u3081\u3088\u3046\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 575c102f3249ed841b583a98edff4c16, type: 3}
     faceId: face_alert
     poseId: pose_point
     scene: "\u78BA\u304B\u3081\u3066\u304B\u3089\u4FE1\u3058\u308B"
@@ -1367,7 +1367,7 @@ MonoBehaviour:
     caption: "\u540D\u524D\u3088\u308A\u4E2D\u8EAB\uFF01\u3000\u5DEE\u51FA\u4EBA\u306F\u3001\u78BA\u304B\u3081\u308B\u3082\u306E\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 7d2d4bfe217354c4882562bbc1e82973, type: 3}
     faceId: face_determined
     poseId: pose_magnifier
     scene: "\u78BA\u304B\u3081\u3066\u304B\u3089\u4FE1\u3058\u308B"
@@ -1377,7 +1377,7 @@ MonoBehaviour:
     caption: "\u30EA\u30F3\u30AF\u306F\u62BC\u3059\u524D\u306B\u3001\u884C\u304D\u5148\u3092\u78BA\u304B\u3081\u3088\u3046\uFF01\u3000\u4F3C\u305F\u540D\u524D\u306B\u3082\u6C17\u3092\u3064\u3051\u3066\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d0e2cb0a469eb3d4f958742c83ea359a, type: 3}
     faceId: face_normal
     poseId: pose_point
     scene: "\u78BA\u304B\u3081\u3066\u304B\u3089\u4FE1\u3058\u308B"
@@ -1387,7 +1387,7 @@ MonoBehaviour:
     caption: "\u53E3\u5EA7\u306E\u5909\u66F4\u306F\u3001\u3044\u3064\u3082\u306E\u9023\u7D61\u5148\u3067\u78BA\u304B\u3081\u308B\u3002\u3053\u308C\u9244\u5247\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0e8a13a2de626c140889ecc9b05e9cb2, type: 3}
     faceId: face_determined
     poseId: pose_armscross
     scene: "\u78BA\u304B\u3081\u3066\u304B\u3089\u4FE1\u3058\u308B"
@@ -1397,7 +1397,7 @@ MonoBehaviour:
     caption: "\u5FC3\u5F53\u305F\u308A\u306E\u306A\u3044\u627F\u8A8D\u306F\u3001\u305C\u3063\u305F\u3044\u62D2\u5426\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 496a189c6473baf46bd45c0e724d88de, type: 3}
     faceId: face_alert
     poseId: pose_shield
     scene: "\u78BA\u304B\u3081\u3066\u304B\u3089\u4FE1\u3058\u308B"
@@ -1407,7 +1407,7 @@ MonoBehaviour:
     caption: "\u6A29\u9650\u306F\u3001\u5FC5\u8981\u306A\u4EBA\u306B\u3001\u5FC5\u8981\u306A\u5206\u3060\u3051\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: baa886ee248293d47b24d245298a822c, type: 3}
     faceId: face_tease
     poseId: pose_point
     scene: "\u6700\u5C0F\u6A29\u9650"
@@ -1417,7 +1417,7 @@ MonoBehaviour:
     caption: "\u58C1\u306F\u4E00\u679A\u3088\u308A\u3001\u4F55\u679A\u3082\u91CD\u306D\u308B\u306E\u304C\u5F37\u3044\u3093\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: cab8a8c5a6845494fb975f01d0b0db1c, type: 3}
     faceId: face_proud
     poseId: pose_shield
     scene: "\u591A\u5C64\u9632\u5FA1"
@@ -1427,7 +1427,7 @@ MonoBehaviour:
     caption: "\u533A\u5207\u3063\u3066\u304A\u3051\u3070\u3001\u5E83\u304C\u308A\u3092\u6291\u3048\u3089\u308C\u308B\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6be63a781732fd947a6f4fee5b746339, type: 3}
     faceId: face_doya
     poseId: pose_armscross
     scene: "\u5206\u96E2"
@@ -1437,7 +1437,7 @@ MonoBehaviour:
     caption: "\u5B88\u308B\u306E\u3068\u540C\u3058\u304F\u3089\u3044\u3001\u4ED5\u4E8B\u3092\u6B62\u3081\u306A\u3044\u306E\u3082\u5927\u4E8B\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: dbfbf1a3ccf14a341b9ec9dc8f5ffa36, type: 3}
     faceId: face_normal
     poseId: pose_please
     scene: "\u6B62\u3081\u3059\u304E\u306A\u3044"
@@ -1447,7 +1447,7 @@ MonoBehaviour:
     caption: "\u300C\u3044\u3064\u3082\u3068\u9055\u3046\u300D\u304C\u3001\u3044\u3061\u3070\u3093\u306E\u30B5\u30A4\u30F3\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c71b86573e2cdaf47ad386d9dd88102d, type: 3}
     faceId: face_determined
     poseId: pose_magnifier
     scene: "\u666E\u6BB5\u3092\u77E5\u308B"
@@ -1457,7 +1457,7 @@ MonoBehaviour:
     caption: "\u30ED\u30B0\u306F\u3001\u6B8B\u3057\u3066\u304A\u3044\u3066\u3053\u305D\u5F79\u306B\u7ACB\u3064\u3093\u3060\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ac6518c090603b64fa22fb152fa027ec, type: 3}
     faceId: face_normal
     poseId: pose_laptop
     scene: "\u666E\u6BB5\u3092\u77E5\u308B"
@@ -1467,7 +1467,7 @@ MonoBehaviour:
     caption: "\u66F4\u65B0\u306F\u3001\u5371\u306A\u3044\u3082\u306E\u304B\u3089\u9806\u756A\u306B\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 820158ed058ad224a9d4750917be9fef, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u512A\u5148\u9806\u4F4D"
@@ -1477,7 +1477,7 @@ MonoBehaviour:
     caption: "\u6B62\u307E\u3063\u305F\u3068\u304D\u306F\u3001\u652F\u3048\u3066\u308B\u4ED5\u7D44\u307F\u304B\u3089\u623B\u3059\u306E\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 9f32dab8813f2fb4189e0f11597d60f3, type: 3}
     faceId: face_normal
     poseId: pose_typing
     scene: "\u4F9D\u5B58\u95A2\u4FC2\u3068\u696D\u52D9\u5F71\u97FF"
@@ -1487,7 +1487,7 @@ MonoBehaviour:
     caption: "\u624B\u9806\u66F8\u306F\u3001\u672A\u6765\u306E\u81EA\u5206\u3078\u306E\u624B\u7D19\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 341753c5ed5a1fb4e86f797baa627397, type: 3}
     faceId: face_sparkle
     poseId: pose_peace
     scene: "\u624B\u9806\u3092\u6B8B\u3059"
@@ -1497,7 +1497,7 @@ MonoBehaviour:
     caption: "\u4EBA\u306F\u9593\u9055\u3048\u308B\u3082\u306E\u3002\u3060\u304B\u3089\u3001\u4ED5\u7D44\u307F\u3067\u5B88\u308D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e5a78cd7e7a293e4b9cb0dcb651db87b, type: 3}
     faceId: face_relieved
     poseId: pose_please
     scene: "\u6027\u5F31\u8AAC"
@@ -1507,7 +1507,7 @@ MonoBehaviour:
     caption: "\u8FF7\u3063\u305F\u3089\u76F8\u8AC7\uFF01\u3000\u65E9\u3044\u5831\u544A\u307B\u3069\u3001\u6253\u3066\u308B\u624B\u304C\u5897\u3048\u308B\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 748b2c995435e5e409efbf97c2f44584, type: 3}
     faceId: face_sparkle
     poseId: pose_wave
     scene: "\u76F8\u8AC7\u6587\u5316"
@@ -1517,7 +1517,7 @@ MonoBehaviour:
     caption: "\u30D1\u30B9\u30EF\u30FC\u30C9\u306E\u4F7F\u3044\u56DE\u3057\u306F\u3001\u305C\u3063\u305F\u3044\u30C0\u30E1\u3060\u3088\u301C\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3fc8aa1b23ec14e43b3acca5029953c4, type: 3}
     faceId: face_pout
     poseId: pose_armscross
     scene: "\u57FA\u672C"
@@ -1527,7 +1527,7 @@ MonoBehaviour:
     caption: "\u77E5\u3089\u306A\u3044USB\u306F\u3001\u633F\u3055\u306A\u3044\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 074cfdc237060884f8fa9eb5b49bb51f, type: 3}
     faceId: face_akire
     poseId: pose_point
     scene: "\u57FA\u672C"
@@ -1537,7 +1537,7 @@ MonoBehaviour:
     caption: "\u898B\u7A4D\u3082\u308A\u306F\u76EE\u5B89\u3002\u78BA\u7387\u3058\u3083\u306A\u304F\u3066\u3001\u5E45\u3067\u8003\u3048\u308B\u3093\u3060\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 290f80b6031137f4384ee45bd084a98e, type: 3}
     faceId: face_normal
     poseId: pose_think
     scene: "\u898B\u7A4D\u3082\u308A\u306E\u8AAD\u307F\u65B9"
@@ -1547,7 +1547,7 @@ MonoBehaviour:
     caption: "\u3053\u3063\u305D\u308A\u5FA9\u5143\u3092\u8A66\u3057\u305F\u3089\u3001\u672C\u756A\u306B\u4E0A\u66F8\u304D\u3057\u304B\u3051\u305F\u2026\u2026"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 9c056d60de67d7e4b9b41eeb4024487b, type: 3}
     faceId: face_embarrassed
     poseId: pose_think
     scene: "\u65E5\u8A18 1\u5E74\u76EE4\u6708"
@@ -1557,7 +1557,7 @@ MonoBehaviour:
     caption: "\u65B0\u4EBA\u3055\u3093\u306EPC\u300120\u53F0\u30BB\u30C3\u30C8\u30A2\u30C3\u30D7\u3057\u305F\uFF01\u2026\u2026\u4ED8\u7B8B\u3001\u898B\u3064\u3051\u3061\u3083\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ae1676a4914f5134298f5872687c317e, type: 3}
     faceId: face_worried
     poseId: pose_laptop
     scene: "\u65E5\u8A18 1\u5E74\u76EE5\u6708"
@@ -1567,7 +1567,7 @@ MonoBehaviour:
     caption: "\u793E\u9577\u79D8\u66F8\u306E\u304B\u306E\u3093\u3055\u3093\u306B\u3001\u4E88\u7B97\u306E\u66F8\u304D\u65B9\u3092\u6559\u308F\u3063\u305F\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: fff86e161798fb24eb0e290863edf3c5, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u65E5\u8A18 1\u5E74\u76EE6\u6708"
@@ -1577,7 +1577,7 @@ MonoBehaviour:
     caption: "\u30CD\u30C3\u30C8\u304C\u9045\u3044\u539F\u56E0\u3001\u4F1A\u8B70\u5BA4\u306E\u30B1\u30FC\u30D6\u30EB\u304C\u8F2A\u3063\u304B\u306B\u306A\u3063\u3066\u305F\u306E"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5d50158071dea43468eaf6467f735eb1, type: 3}
     faceId: face_doya
     poseId: pose_point
     scene: "\u65E5\u8A18 1\u5E74\u76EE7\u6708"
@@ -1587,7 +1587,7 @@ MonoBehaviour:
     caption: "\u4F11\u307F\u4E2D\u306B\u3001\u8A3C\u660E\u66F8\u306E\u671F\u9650\u304C\u5207\u308C\u3061\u3083\u3063\u3066\u305F\u2026\u2026"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 89214a4b2b1b4f245b1508478e7bc38e, type: 3}
     faceId: face_sad
     poseId: pose_exhausted
     scene: "\u65E5\u8A18 1\u5E74\u76EE8\u6708"
@@ -1597,7 +1597,7 @@ MonoBehaviour:
     caption: "\u8A66\u9A13\u306E\u52C9\u5F37\u3001\u306F\u3058\u3081\u307E\u3057\u305F\uFF01\u3000\u904E\u53BB\u554F\u3001\u3080\u305A\u304B\u3057\u3044\u2026\u2026"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 910f5f61b1bcb48468adeeea28911974, type: 3}
     faceId: face_determined
     poseId: pose_magnifier
     scene: "\u65E5\u8A18 1\u5E74\u76EE9\u6708"
@@ -1607,7 +1607,7 @@ MonoBehaviour:
     caption: "\u958B\u767A\u90E8\u306E\u308A\u308A\u3043\u3055\u3093\u3001\u3059\u3054\u304B\u3063\u305F\u3002\u30DD\u30C6\u30C8\u98DF\u3079\u3066\u305F\u3051\u3069"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 74552cdaa9bc7ef45b84fe39bf9f9cee, type: 3}
     faceId: face_sparkle
     poseId: pose_point
     scene: "\u65E5\u8A18 1\u5E74\u76EE10\u6708"
@@ -1617,7 +1617,7 @@ MonoBehaviour:
     caption: "\u6A29\u9650\u306E\u68DA\u5378\u3057\u3067\u3001\u5909\u306A\u8A2D\u5B9A\u3092\u898B\u3064\u3051\u305F\u3002\u2026\u2026\u8A2D\u5B9A\u3057\u305F\u306E\u3001\u308F\u305F\u3057\u3060\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 35968d09c3e468b4296105fa40854b2c, type: 3}
     faceId: face_embarrassed
     poseId: pose_think
     scene: "\u65E5\u8A18 1\u5E74\u76EE11\u6708"
@@ -1627,7 +1627,7 @@ MonoBehaviour:
     caption: "\u30B5\u30FC\u30D0\u30FC\u5BA4\u306E\u30B1\u30FC\u30D6\u30EB\u306B\u3001\u305C\u3093\u3076\u30E9\u30D9\u30EB\u8CBC\u3063\u305F\u3088\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 90b1a948f43e8484396d9b21a421d040, type: 3}
     faceId: face_proud
     poseId: pose_peace
     scene: "\u65E5\u8A18 1\u5E74\u76EE12\u6708"
@@ -1637,7 +1637,7 @@ MonoBehaviour:
     caption: "\u2026\u2026\u8A66\u9A13\u3001\u3060\u3081\u3060\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6c0a7fdb1142927499e8f1ce43458251, type: 3}
     faceId: face_crying
     poseId: pose_exhausted
     scene: "\u65E5\u8A18 1\u5E74\u76EE1\u6708"
@@ -1647,7 +1647,7 @@ MonoBehaviour:
     caption: "\u6BCE\u66695\u5206\u3001\u30ED\u30B0\u3092\u8AAD\u3080\u3053\u3068\u306B\u3057\u305F\u3088\u3002\u7D9A\u3051\u3089\u308C\u308B\u304B\u306A"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: b4ff0f9488daecd49901f007b767435b, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u65E5\u8A18 1\u5E74\u76EE2\u6708"
@@ -1657,7 +1657,7 @@ MonoBehaviour:
     caption: "\u624B\u9806\u66F8\u3001\u3067\u304D\u305F\uFF01\u2026\u2026\u4ED8\u7B8B\u3060\u3089\u3051\u3067\u623B\u3063\u3066\u304D\u305F\u3051\u3069"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e480b0610f0d25445bab16794b3253d5, type: 3}
     faceId: face_relieved
     poseId: pose_peace
     scene: "\u65E5\u8A18 1\u5E74\u76EE3\u6708"
@@ -1667,7 +1667,7 @@ MonoBehaviour:
     caption: "\u53D7\u304B\u3063\u3066\u305F\u30FC\u3063\uFF01\u2026\u2026\u62E0\u70B9\u306E\u30EB\u30FC\u30BF\u30FC\u3001\u30D1\u30B9\u30EF\u30FC\u30C9\u304C\u521D\u671F\u306E\u307E\u307E\u3060\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 59476413961037b448e555fcf42bd440, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u65E5\u8A18 2\u5E74\u76EE4\u6708"
@@ -1677,7 +1677,7 @@ MonoBehaviour:
     caption: "VPN\u304C\u3064\u306A\u304C\u3089\u306A\u3044\u554F\u3044\u5408\u308F\u305B\u3001\u534A\u5206\u306F\u5BB6\u306EWi-Fi\u3060\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e7278115190b19b46acfcc4c83f2e4f5, type: 3}
     faceId: face_akire
     poseId: pose_think
     scene: "\u65E5\u8A18 2\u5E74\u76EE5\u6708"
@@ -1687,7 +1687,7 @@ MonoBehaviour:
     caption: "\u304B\u306E\u3093\u3055\u3093\u3068\u3001AI\u306E\u30EB\u30FC\u30EB\u3092\u8003\u3048\u305F\u3088"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c5367f94520613a47b5ed1f80cbb95ed, type: 3}
     faceId: face_normal
     poseId: pose_point
     scene: "\u65E5\u8A18 2\u5E74\u76EE6\u6708"
@@ -1697,7 +1697,7 @@ MonoBehaviour:
     caption: "DNS\u306E\u5207\u308A\u66FF\u3048\u3001\u524D\u306E\u65E5\u306BTTL\u3092\u77ED\u304F\u3057\u3066\u304A\u304F\u306E\u3001\u899A\u3048\u305F\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: af8b090d563df124a8dcd6726e36e1c3, type: 3}
     faceId: face_doya
     poseId: pose_laptop
     scene: "\u65E5\u8A18 2\u5E74\u76EE7\u6708"
@@ -1707,7 +1707,7 @@ MonoBehaviour:
     caption: "\u8B1B\u7FD2\u4F1A\u3001\u8CEA\u554F\u306B\u3061\u3083\u3093\u3068\u7B54\u3048\u3089\u308C\u306A\u304B\u3063\u305F\u3002\u6094\u3057\u3044"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 9b977ba180695a248b0588c4d4149ddd, type: 3}
     faceId: face_pout
     poseId: pose_think
     scene: "\u65E5\u8A18 2\u5E74\u76EE8\u6708"
@@ -1717,7 +1717,7 @@ MonoBehaviour:
     caption: "\u6BCE\u6669\u306E\u30ED\u30B0\u8AAD\u307F\u3001\u5F79\u306B\u7ACB\u3063\u3066\u308B\u6C17\u304C\u3059\u308B\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4a834051733f365489c61d775ff16614, type: 3}
     faceId: face_sparkle
     poseId: pose_magnifier
     scene: "\u65E5\u8A18 2\u5E74\u76EE9\u6708"
@@ -1727,7 +1727,7 @@ MonoBehaviour:
     caption: "\u4F11\u3093\u3058\u3083\u3063\u305F\u3002\u3067\u3082\u3001\u4F1A\u793E\u306F\u3061\u3083\u3093\u3068\u56DE\u3063\u3066\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 40c00f53e78a5ab46a47cfb02461012e, type: 3}
     faceId: face_relieved
     poseId: pose_coffee
     scene: "\u65E5\u8A18 2\u5E74\u76EE10\u6708"
@@ -1737,7 +1737,7 @@ MonoBehaviour:
     caption: "\u8A66\u9A13\u3001\u7D42\u308F\u3063\u305F\u2026\u2026\u3002\u534A\u5206\u304F\u3089\u3044\u3001\u3067\u304D\u305F\u304B\u306A"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0b12fc0ccba464a44b0d0001f41522ea, type: 3}
     faceId: face_worried
     poseId: pose_typing
     scene: "\u65E5\u8A18 2\u5E74\u76EE11\u6708"
@@ -1747,7 +1747,7 @@ MonoBehaviour:
     caption: "\u6765\u5E74\u3001\u5F8C\u8F29\u304C\u3067\u304D\u308B\u3093\u3060\u3063\u3066\u3002\u3069\u3046\u3057\u3088\u3046\u3001\u7DCA\u5F35\u3059\u308B"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e564b7b1305e04d40bfe4d7786655405, type: 3}
     faceId: face_worried
     poseId: pose_please
     scene: "\u65E5\u8A18 2\u5E74\u76EE12\u6708"
@@ -1757,7 +1757,7 @@ MonoBehaviour:
     caption: "\u5408\u683C\u3057\u3066\u305F\uFF01\u3000\u304B\u306E\u3093\u3055\u3093\u304C\u30B1\u30FC\u30AD\u8CB7\u3063\u3066\u304D\u3066\u304F\u308C\u305F\u306E"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 99384e69363d5e048bad87d1f65e00dc, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u65E5\u8A18 2\u5E74\u76EE1\u6708"
@@ -1767,7 +1767,7 @@ MonoBehaviour:
     caption: "\u624B\u9806\u66F8\u3001\u5206\u304B\u308A\u306B\u304F\u3044\u3063\u3066\u8A00\u308F\u308C\u3061\u3083\u3063\u305F\u3002\u66F8\u304D\u76F4\u3057\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 238bc0a55ddcfb241b3d3a7b56bf9b7f, type: 3}
     faceId: face_determined
     poseId: pose_typing
     scene: "\u65E5\u8A18 2\u5E74\u76EE2\u6708"
@@ -1777,7 +1777,7 @@ MonoBehaviour:
     caption: "\u6765\u5E74\u306F\u3001\u308F\u305F\u3057\u304C\u6559\u3048\u308B\u756A\u306A\u3093\u3060\u306D"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3a6211934280cc246a5403fb0fe207c4, type: 3}
     faceId: face_relieved
     poseId: pose_wave
     scene: "\u65E5\u8A18 2\u5E74\u76EE3\u6708"
@@ -1787,7 +1787,7 @@ MonoBehaviour:
     caption: "\u5F8C\u8F29\u3061\u3083\u3093\u304C\u6765\u305F\u3088\u3002\u308F\u305F\u3057\u3001\u5148\u8F29\u306B\u306A\u3063\u3061\u3083\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4f44cc7716f277b4da66b4e2b749ab15, type: 3}
     faceId: face_embarrassed
     poseId: pose_wave
     scene: "\u65E5\u8A18 3\u5E74\u76EE4\u6708"
@@ -1797,7 +1797,7 @@ MonoBehaviour:
     caption: "\u5F8C\u8F29\u3061\u3083\u3093\u3001\u3059\u3050\u5831\u544A\u3057\u3066\u304F\u308C\u305F\u3002\u3061\u3083\u3093\u3068\u3001\u3042\u308A\u304C\u3068\u3046\u3063\u3066\u8A00\u3048\u305F\u3088"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 089f53ecede25074ebc52569ff691cb9, type: 3}
     faceId: face_relieved
     poseId: pose_peace
     scene: "\u65E5\u8A18 3\u5E74\u76EE5\u6708"
@@ -1807,7 +1807,7 @@ MonoBehaviour:
     caption: "\u308A\u308A\u3043\u3055\u3093\u306B\u3001\u5224\u65AD\u304C\u65E9\u304F\u306A\u3063\u305F\u3063\u3066\u8A00\u308F\u308C\u305F\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6cd98e777220f784e8ce82c835247bce, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u65E5\u8A18 3\u5E74\u76EE6\u6708"
@@ -1817,7 +1817,7 @@ MonoBehaviour:
     caption: "\u652F\u63F4\u58EB\u306E\u79D1\u76EEB\u3001\u9577\u3044\u2026\u2026\u591C\u304C\u8DB3\u308A\u306A\u3044"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3a10451deabdb68419555fa25766878f, type: 3}
     faceId: face_sleepy
     poseId: pose_coffee
     scene: "\u65E5\u8A18 3\u5E74\u76EE7\u6708"
@@ -1827,7 +1827,7 @@ MonoBehaviour:
     caption: "\u4ECA\u65E5\u306F3\u4EBA\u3067\u304A\u796D\u308A\u3002\u4ED5\u4E8B\u306E\u8A71\u3001\u4E00\u56DE\u3082\u3057\u306A\u304B\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c875fa814a7fc05449a1cc2208c288f2, type: 3}
     faceId: face_normal
     poseId: pose_peace
     scene: "\u65E5\u8A18 3\u5E74\u76EE8\u6708"
@@ -1837,7 +1837,7 @@ MonoBehaviour:
     caption: "\u76E3\u67FB\u306E\u8CEA\u554F\u3001\u5168\u90E8\u7B54\u3048\u3089\u308C\u305F\u306E\u30023\u5E74\u524D\u306E\u308F\u305F\u3057\u306B\u898B\u305B\u305F\u3044"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5ac0e6804c3e66e42923274971b60316, type: 3}
     faceId: face_proud
     poseId: pose_shield
     scene: "\u65E5\u8A18 3\u5E74\u76EE9\u6708"
@@ -1847,7 +1847,7 @@ MonoBehaviour:
     caption: "\u5F8C\u8F29\u3061\u3083\u3093\u304C\u3001\u3072\u3068\u308A\u3067\u76F4\u305B\u305F\u306E\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f5aa79d7b957fa947948b577bf8c24e6, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u65E5\u8A18 3\u5E74\u76EE10\u6708"
@@ -1857,7 +1857,7 @@ MonoBehaviour:
     caption: "\u8A66\u9A13\u3001\u7D42\u308F\u3063\u305F\u3002\u3061\u3087\u3063\u3068\u3060\u3051\u3001\u6CE3\u3044\u3061\u3083\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 879d4380aab2e2643a652b4c6c086664, type: 3}
     faceId: face_crying
     poseId: pose_bow
     scene: "\u65E5\u8A18 3\u5E74\u76EE11\u6708"
@@ -1867,7 +1867,7 @@ MonoBehaviour:
     caption: "\u6700\u521D\u306E\u65E5\u8A18\u3001\u8AAD\u307F\u8FD4\u3057\u305F\u3089\u3001\u5B57\u304C\u3050\u3061\u3083\u3050\u3061\u3083\u3060\u3063\u305F"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: eb9f2a97efea02646830646112c6f679, type: 3}
     faceId: face_embarrassed
     poseId: pose_think
     scene: "\u65E5\u8A18 3\u5E74\u76EE12\u6708"
@@ -1877,7 +1877,7 @@ MonoBehaviour:
     caption: "\u5408\u683C\u3060\u3063\u3066\u3002\u6700\u521D\u306B\u3001\u5148\u8F29\u306B\u8A00\u3044\u305F\u304B\u3063\u305F\u306E"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 7e209acfbc7a5c9468af1c77288d159a, type: 3}
     faceId: face_sparkle
     poseId: pose_please
     scene: "\u65E5\u8A18 3\u5E74\u76EE1\u6708"
@@ -1887,7 +1887,7 @@ MonoBehaviour:
     caption: "\u5148\u8F29\u3002\u3044\u3064\u3082\u3042\u308A\u304C\u3068\u3046\u3001\u3063\u3066\u3001\u3053\u3053\u306B\u66F8\u3044\u3066\u304A\u304F\u306D"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: be0f7bb1a249d534891cdcec042fc4b2, type: 3}
     faceId: face_relieved
     poseId: pose_bow
     scene: "\u65E5\u8A18 3\u5E74\u76EE2\u6708"
@@ -1897,7 +1897,7 @@ MonoBehaviour:
     caption: "\u306A\u306B\u3054\u3068\u3082\u306A\u3044\u671D\u3063\u3066\u3001\u3053\u3093\u306A\u306B\u5B09\u3057\u3044\u3093\u3060\u306D"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a78cd1df1496b3c419646429e8d58fc2, type: 3}
     faceId: face_relieved
     poseId: pose_peace
     scene: "\u65E5\u8A18 3\u5E74\u76EE3\u6708\uFF08\u7D50\u672B\uFF09"
@@ -1907,7 +1907,7 @@ MonoBehaviour:
     caption: "3\u5E74\u9593\u3001\u5B88\u308A\u629C\u3044\u305F\u3088\u3002\u6B21\u306F\u3001\u4F55\u3092\u76EE\u6307\u305D\u3046\u304B\u306A"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d94c23a7e6481824cb1033bbe4825e59, type: 3}
     faceId: face_proud
     poseId: pose_salute
     scene: "\u65E5\u8A18 3\u5E74\u76EE3\u6708\uFF08\u7D50\u672B\uFF09"
@@ -1917,7 +1917,7 @@ MonoBehaviour:
     caption: "\u3053\u3053\u3067\u7D42\u308F\u308A\u3058\u3083\u306A\u3044\u3088\u3002\u660E\u65E5\u3082\u3001\u4F1A\u793E\u306F\u7D9A\u304F\u304B\u3089"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 06d56d81a278c394c9795250fa5a6acf, type: 3}
     faceId: face_determined
     poseId: pose_fists
     scene: "\u65E5\u8A18 3\u5E74\u76EE3\u6708\uFF08\u7D50\u672B\uFF09"
@@ -1927,7 +1927,7 @@ MonoBehaviour:
     caption: "\u3044\u3044\u306D\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 01e1d2c6f9fc0174891de2aa9041cde9, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30671\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1937,7 +1937,7 @@ MonoBehaviour:
     caption: "\u305D\u306E\u8ABF\u5B50\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 7e3684b14b5f2074bb5f8fc5c511f870, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30672\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1947,7 +1947,7 @@ MonoBehaviour:
     caption: "\u3059\u3054\u3044\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 15cd6c265ae596c46ac74a16b297b45a, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30673\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1957,7 +1957,7 @@ MonoBehaviour:
     caption: "\u3084\u308B\u3045\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 15b3660894675fc47b5adac79a4d6788, type: 3}
     faceId: face_sparkle
     poseId: pose_fists
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30674\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1967,7 +1967,7 @@ MonoBehaviour:
     caption: "\u3066\u3093\u3055\u3044\u3063\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 9632dae01a4060e4f9b2d6f957b58ebe, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30675\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1977,7 +1977,7 @@ MonoBehaviour:
     caption: "\u3055\u3044\u304D\u3087\u30FC\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: abcddd0a56d08e34f9c9924ace79d1a9, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30676\u56DE\u7D9A\u3051\u3066\u6210\u529F"
@@ -1987,7 +1987,7 @@ MonoBehaviour:
     caption: "\u30D1\u30FC\u30D5\u30A7\u30AF\u30C8\uFF01"
     speaker: 
     reaction: 0
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6c1771051d8e1df4e8d68ab471d985ab, type: 3}
     faceId: face_sparkle
     poseId: pose_jump
     scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30677\u56DE\u4EE5\u4E0A\u7D9A\u3051\u3066\u6210\u529F"

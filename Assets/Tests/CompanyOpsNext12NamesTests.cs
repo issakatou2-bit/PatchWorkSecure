@@ -28,7 +28,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next12NamesUI_日記と開幕と因子の表示を撮影する()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartStory(14);
             for(int m=0;m<3;m++){DiaryTestMonth(game.State);if(m<2)game.State.NextMonth();}
             game.OpenTab(0);game.OpenMonthlyDiary();yield return new WaitForSecondsRealtime(2);
             StringAssert.Contains("かのん",Find<TextMeshProUGUI>("DiaryBody").text);Assert.AreEqual("diary_y1_06_kanon",game.LastReactionId);Assert.IsFalse(game.PortraitVoicePlaying);Capture("next12-names-diary");

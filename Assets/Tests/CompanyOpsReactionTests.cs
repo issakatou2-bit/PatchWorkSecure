@@ -69,7 +69,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);
             var game = Object.FindAnyObjectByType<OpsGame>(); Assert.IsNotNull(game.Navigator.Reactions);
-            game.UseLocalTestVoices=false;
+            WithoutPublishedVoices(game);
             Assert.IsFalse(game.Navigator.Reactions.HasAudio, "リポジトリの台本には非公開音声を参照させない");
             Click("HomeSettings"); yield return null;
             Click("AdvancedSettings");yield return null;

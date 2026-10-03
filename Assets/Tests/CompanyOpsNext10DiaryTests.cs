@@ -21,7 +21,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next10DiaryUI_四つの見開きと字幕なし音声なしと再読を撮影する()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             game.StartStory(14);FinishStoryTestYear(game.State);Assert.IsTrue(game.NextStoryYear());
             for(int i=0;i<game.State.levels.Length;i++)game.State.levels[i]=game.State.EquipmentAvailable(i)?2:0;game.State.budget=400;
             for(int m=0;m<3;m++){DiaryTestMonth(game.State);if(game.State.QuarterRewardPending)game.State.ClaimQuarterReward("budget");game.State.NextMonth();}

@@ -25,7 +25,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next15FactUI_旧IDの呼び出しでも新しい字幕だけを使う()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=true;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             game.StartYear(14);yield return new WaitForSecondsRealtime(2);game.StopVoice();string before=JsonUtility.ToJson(game.State);
             // 旧台本文を同じ画面で再現する。旧バイナリの撮影と偽らず、音源も差し戻さない。
             var line=game.ActiveVoiceBank.Find("maxim_segment_v2");Assert.IsNotNull(line);string revised=line.caption;

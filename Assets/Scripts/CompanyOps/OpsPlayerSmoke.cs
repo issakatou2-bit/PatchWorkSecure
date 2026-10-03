@@ -76,6 +76,11 @@ namespace PatchWorkSecure.CompanyOps
                 CheckMusic(game, game.Sounds == null ? null : game.Sounds.reviewMusic);
                 Debug.Log("[CompanyOps Player] BGM二曲の再生確認 " + (failed ? "FAILED" : "PASSED"));
                 game.StartYear(14); yield return null;
+                if(Environment.GetCommandLineArgs().Contains("-ops-voice-smoke-test"))
+                {
+                    yield return CheckPublishedHinata(game);
+                    game.StartYear(14);yield return null;
+                }
             }
             for (int month = 0; month < 12 && game.State.phase != OpsPhase.Ended; month++)
             {
@@ -87,6 +92,39 @@ namespace PatchWorkSecure.CompanyOps
             Debug.Log("[CompanyOps Player] 年間通し検証 " + (failed ? "FAILED" : "PASSED") + " / " + game.State.history.Count + "か月");
             Application.logMessageReceived -= Observe;
             Application.Quit(failed ? 1 : 0);
+        }
+        // 明示的な音声検証だけで使用。通常プレイの挙動・保存・時計には接続しない。
+        private IEnumerator CheckPublishedHinata(OpsGame game)
+        {
+            var bank=game.Navigator.Reactions;
+            if(bank==null||bank.lines.Count(l=>l.clip!=null)!=197||bank.Find("tutorial_1")?.clip!=null){failed=true;yield break;}
+            bool local=game.UseLocalTestVoices;
+            try
+            {
+                game.UseLocalTestVoices=false;game.SkipTutorial();game.StopVoice();
+                foreach(string id in new[]{"think_01","rankup","mission_done","mg_start_01"})
+                {
+                    var clip=bank.Find(id)?.clip;if(clip==null){failed=true;continue;}
+                    game.SpeakSceneLine(id,0);yield return new WaitForSecondsRealtime(.2f);
+                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip==s.clip)).ToArray();
+                    if(playing.Length!=1||playing[0].clip!=clip||playing[0].timeSamples<=0||game.LastReactionId!=id)failed=true;
+                    game.StopVoice();
+                }
+                Debug.Log("[CompanyOps Player] H09公開音声197本の接続と四行の再生確認 "+(failed?"FAILED":"PASSED"));
+                game.OpenMailTraining();game.StartMinigame();var mail=game.Minigame as OpsMailMinigame;
+                for(int n=1;n<=9;n++)
+                {
+                    float limit=Time.realtimeSinceStartup+5;
+                    while(mail!=null&&!mail.CanAnswer&&mail.Phase==OpsMinigamePhase.Playing&&Time.realtimeSinceStartup<limit)yield return null;
+                    if(mail==null||!mail.CanAnswer){failed=true;break;}
+                    game.AnswerMail(mail.Current.Suspicious);yield return new WaitForSecondsRealtime(.1f);
+                    string id="combo_"+Math.Min(n,7);var clip=bank.Find(id)?.clip;
+                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip==s.clip)).ToArray();
+                    if(game.LastReactionId!=id||clip==null||playing.Length!=1||playing[0].clip!=clip||playing[0].timeSamples<=0)failed=true;
+                }
+                Debug.Log("[CompanyOps Player] H09ミニゲーム連鎖七段階と七以上の重ならない再生確認 "+(failed?"FAILED":"PASSED"));
+            }
+            finally{game.StopVoice();game.UseLocalTestVoices=local;}
         }
         private bool Advance(OpsGame game)
         {

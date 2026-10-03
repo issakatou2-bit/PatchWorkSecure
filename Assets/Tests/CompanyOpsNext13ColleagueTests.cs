@@ -24,7 +24,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next13ColleagueUI_開幕と日記の新しい文を表示する()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             foreach(int year in new[]{2,3})
             {
                 var story=AlliesStory(year);Assert.IsTrue(game.RestoreProgress(new OpsProgress{story=story}));string snapshot=JsonUtility.ToJson(story.state);

@@ -93,6 +93,12 @@ Use case: identity-preserve. Asset type: ONE transparent full-body chibi navigat
 - 10/3：`kanon_opening`を「数字のことは、わたしに任せて。あなたたちは、守ることに集中して。」に作り直し（情報の点検FC15-02。同じid・同じファイル名、同じ声・説明・見本。種20261002は「数字」の高低が不自然だったので、加藤さんの試聴で自然だった2つのうち、加藤さんが選んだ種20261004（新3）を採用）。
 - ElevenLabsの無料枠の音声（ひなた）と違い、gitで追跡してよく、配布できる（上の条件を守る）。
 
+## 2026-10-04 ひなたの公開音声H09（Next-24）
+
+- 加藤さん承認のIrodori H09。Claudeが選んだ`Docs/Voice/hinata-h09-picks.csv`の197本（`Artifacts/VoiceAudition/`のv16a・v16b等のテイク）を`Assets/Audio/CompanyYear/Voice/Hinata/`へそのまま複製。音量調整・切り詰め・再生成をせず、197本すべて元WAVとSHA256一致。対応とハッシュの記録は`Artifacts/Next24/imported-hashes.csv`。
+- 作り方・声の選定は`Docs/Voice/Irodori-Direction-Rules.md`。実在の人の声を参照せず、道具で作ったH09を使用。大型量子化モデルのGemma利用規約と禁止用途の決まり・配布時の写しと注意書きは、上のIrodori制作記録の条件を引き継ぐ。今回は生成や条件の再解釈をしない。
+- 公開音声だけはgitで追跡。`tutorial_1`は高低の選定中のため除外。私的VoiceTestの除外と公開ビルド検査を維持し、現在のWindows版は依然として私的試遊限定、配布・公開・動画投稿禁止。
+
 ## 2026-10-02 承認済みの二人絵（Next-14）
 
 - 加藤さん承認の3枚：`hinata-kanon-1.png`、`hinata-engineer-3.png`、`kanon-engineer-2.png`。原画と制作経緯は `ArtSource/Characters/pairs-20261002/README.md`。加藤さんのChatGPTで生成したオリジナルのキャラ絵。新たな画像生成や第三者の絵の流用はしていない。

@@ -27,7 +27,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next6CommonUI_音声なし消音字幕設定格言と研修の進行を守る()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             game.StartYear(14);yield return null;game.StopVoice();string before=JsonUtility.ToJson(game.State);
             game.OpenMailTraining();yield return new WaitForSecondsRealtime(.3f);Capture("next6-c-training-start");Click("MinigameStart");yield return new WaitForSecondsRealtime(.1f);var mail=(OpsMailMinigame)game.Minigame;
             while(mail.Phase==OpsMinigamePhase.Playing)

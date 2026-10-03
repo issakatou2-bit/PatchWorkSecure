@@ -20,7 +20,7 @@ namespace PatchWorkSecure.Tests
     {
         private readonly List<string> glyphWarnings = new List<string>();
         [SetUp] public void Setup() { OpsGame.TestMode = true; glyphWarnings.Clear(); Application.logMessageReceived += Observe; }
-        [TearDown] public void Teardown() { OpsGame.TestMode = false; Application.logMessageReceived -= Observe; }
+        [TearDown] public void Teardown() { foreach(var cleanup in noVoiceFixtureCleanup)cleanup();noVoiceFixtureCleanup.Clear();OpsGame.TestMode = false; Application.logMessageReceived -= Observe; }
         private void Observe(string message, string stack, LogType type) { if (message.Contains("Unicode value")) glyphWarnings.Add(message); }
 
         [Test] public void 工数と前提条件と二重操作を守る()

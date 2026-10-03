@@ -38,7 +38,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next16FactUI_旧IDでも新版の字幕だけを使い年度の数値を変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);
-            var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);game.StopVoice();string state=JsonUtility.ToJson(game.State);
+            var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);game.StartYear(14);yield return new WaitForSecondsRealtime(2);game.StopVoice();string state=JsonUtility.ToJson(game.State);
             foreach(bool local in new[]{false,true})
             {
                 game.UseLocalTestVoices=local;

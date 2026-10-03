@@ -47,7 +47,7 @@ namespace PatchWorkSecure.Tests
         [Category("Capture")]
         [UnityTest] public IEnumerator Next13FactUI_格言は新しい字幕を表示し古い音声を再生しない()
         {
-            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();WithoutPublishedVoices(game);
             foreach(string id in new[]{"maxim_hurry","maxim_link"})
             {
                 Assert.IsTrue(game.BeginDailyPractice("C",20261002));game.StartMinigame();var mail=(OpsMailMinigame)game.Minigame;FinishDailyForTest(mail);

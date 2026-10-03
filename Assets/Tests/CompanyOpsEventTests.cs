@@ -99,6 +99,7 @@ namespace PatchWorkSecure.Tests
             var old=new OpsState(14); Assert.AreEqual(0,old.eventRules); Assert.IsTrue(old.Valid()); Assert.AreEqual(OpsCatalog.Months[0].title,old.Current.title);
             Assert.IsNull(old.Ticket); Assert.IsFalse(old.ResolveTicket(false)); old.BeginIncident(); old.Resolve("scope"); Assert.IsTrue(old.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 四十種の相談と対応を表示しチケットを社員へ任せられる()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

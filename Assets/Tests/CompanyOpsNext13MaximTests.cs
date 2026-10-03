@@ -23,6 +23,7 @@ namespace PatchWorkSecure.Tests
             foreach(string id in OpsMaxims.Ids)copy.HeardMaxim(id,false);Assert.AreEqual(20,copy.heardMaxims.Count);Assert.IsTrue(copy.Valid());
             copy.yearMaxims.Add("unknown");Assert.IsFalse(copy.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13MaximUI_同年度の字幕と声を共有し再開でも重複させない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
@@ -44,6 +45,7 @@ namespace PatchWorkSecure.Tests
             game.OpenTab(0);yield return new WaitForSecondsRealtime(6);Assert.Contains("maxim_human",game.Career.yearMaxims);game.SpeakSceneLine("maxim_human");Assert.AreEqual("think_01",game.LastReactionId);
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13MaximUI_聞こえず見えない声と未再生予約は未読で練習は本編を消費しない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);

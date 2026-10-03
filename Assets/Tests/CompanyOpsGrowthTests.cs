@@ -124,6 +124,7 @@ namespace PatchWorkSecure.Tests
             noChoice.NextMonth(); Assert.AreEqual(cash + grant - upkeep + OpsGrowthCatalog.QuarterBudget, noChoice.budget);
             Assert.IsTrue(noChoice.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 育成と社員支援と四半期報酬を操作して年度末まで確認する()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

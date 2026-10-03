@@ -20,6 +20,7 @@ namespace PatchWorkSecure.Tests
         [TestCase(80,"A")][TestCase(94,"A")][TestCase(95,"S")][TestCase(100,"S")]
         public void 計画画面のランク境界は承認仕様どおり(int value,string rank) => Assert.AreEqual(rank,OpsGame.PlanningRank(value));
 
+        [Category("Capture")]
         [UnityTest] public IEnumerator 承認モックの配置と実数値と詳細導線を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -69,6 +70,7 @@ namespace PatchWorkSecure.Tests
             {Assert.AreEqual(positions[i],((RectTransform)motions[i].transform).anchoredPosition);Assert.AreEqual(Vector3.one,motions[i].transform.localScale);}
             Assert.IsEmpty(glyphWarnings,string.Join("\n",glyphWarnings));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 相談見出しの改行と工数コマを一年分確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -101,6 +103,7 @@ namespace PatchWorkSecure.Tests
             float left=token.anchoredPosition.x-token.pivot.x*token.rect.width;
             Assert.GreaterOrEqual(left-right,12,"工数ラベルとコマが重ならない");
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 自然な社員成長後の支援対象と画面を照合する()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);

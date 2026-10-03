@@ -33,6 +33,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);Object.FindAnyObjectByType<OpsGame>().UseLocalTestVoices=false;
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_20_未確認札は紺の十四ピクセル太字とモックの高さになる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
@@ -42,6 +43,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(Mathf.Ceil(label.GetPreferredValues(label.text).x)+24,badge.rect.width);Assert.AreEqual(1,label.textInfo.lineCount);Assert.IsFalse(label.isTextOverflowing);
             CheckPointer("IncidentEvidence");PolishCapture(20);Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_18_備えの札は白緑青を区別し左から一列に詰まる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
@@ -66,6 +68,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_16_四つのタイトルボタンは六ピクセルの厚みがある()
         {
             yield return PolishTitle();
@@ -77,12 +80,14 @@ namespace PatchWorkSecure.Tests
             }
             CheckPointer("NewYear");CheckPointer("HomeGuide");CheckPointer("HomeSettings");PolishCapture(16);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_15_承認済みタイトルは文字の代用をせずロゴ画像を使う()
         {
             yield return PolishTitle();var game=Object.FindAnyObjectByType<OpsGame>();var logo=Find<Image>("TitleLogoWordmark");
             Assert.AreSame(game.PlanningArt.logoWordmark,logo.sprite);Assert.AreEqual(new Vector2(640,246),logo.rectTransform.sizeDelta);Assert.IsFalse(logo.raycastTarget);
             Assert.IsFalse(Object.FindObjectsByType<TextMeshProUGUI>().Any(t=>t.name=="TitleWhiteShadow"||t.name=="TitlePinkShadow"));PolishCapture(15);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_14_承認済み三年タイトルは旧副題帯を出さず三つのモードを並べる()
         {
             yield return PolishTitle();Assert.IsFalse(Object.FindObjectsByType<Transform>().Any(t=>t.name=="TitleRibbon"||t.name=="TitleSubtitle"));
@@ -90,12 +95,14 @@ namespace PatchWorkSecure.Tests
             for(int i=0;i<3;i++){var button=Find<Button>(names[i]);Assert.AreEqual(new Vector2(90,-y[i]),button.GetComponent<RectTransform>().anchoredPosition);Assert.AreEqual(470,button.GetComponent<RectTransform>().rect.width);Assert.IsNotNull(Find<TextMeshProUGUI>(names[i]+"Description"));}
             PolishCapture(14);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_13_承認済み三年タイトルのロゴは水平でアイコンだけ傾く()
         {
             yield return PolishTitle();var brand=Find<RectTransform>("TitleBrand");Assert.AreEqual(0,Mathf.DeltaAngle(0,brand.localEulerAngles.z),.01f);
             Assert.AreEqual(new Vector2(0,1),brand.pivot);Assert.AreEqual(1,brand.localScale.x);Assert.AreEqual(new Vector2(700,250),brand.sizeDelta);Assert.AreEqual(8,Mathf.DeltaAngle(0,Find<RectTransform>("TitleLogoIcon").localEulerAngles.z),.01f);Assert.IsFalse(Find<OpsUIReveal>("TitleLogoWordmark").enabled);
             PolishCapture(13);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_12_把握と時間帯は左上の赤枠外にまとまる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
@@ -111,6 +118,7 @@ namespace PatchWorkSecure.Tests
             LogAssert.NoUnexpectedReceived();
         }
         private static Rect PolishBounds(RectTransform r)=>new Rect(r.anchoredPosition.x,-r.anchoredPosition.y,r.rect.width,r.rect.height);
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_19_把握ゲージは横長で上げ方が一行に収まり赤枠と離れる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
@@ -126,6 +134,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_11_備えなしの二行だけ消しカードの高さを保つ()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
@@ -135,6 +144,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name.StartsWith("WorkingHeading_")));
             Assert.IsFalse(game.Surface.GetComponentsInChildren<TextMeshProUGUI>().Any(t=>t.name.StartsWith("WorkingNone_")));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_10_数字と小さい単位は同じ行で隙間なくつながる()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
@@ -152,6 +162,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_09_備えは未導入点線と導入済み緑と社員支援青を区別する()
         {
             yield return PolishIncident();var game=Object.FindAnyObjectByType<OpsGame>();
@@ -163,12 +174,14 @@ namespace PatchWorkSecure.Tests
             foreach(var tag in installed){ColorUtility.TryParseHtmlString("#2ec4a0",out var green);Assert.AreEqual(green,tag.color);Assert.AreEqual(Color.white,tag.GetComponentInChildren<TextMeshProUGUI>().color);}
             Assert.IsNotNull(Find<Image>("SupportFace"));PolishCapture(9,"equipped");LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_08_未確認札は黄色地に紺文字で表示する()
         {
             yield return PolishIncident();var button=Find<Button>("IncidentEvidence");var text=button.GetComponentInChildren<TextMeshProUGUI>();
             ColorUtility.TryParseHtmlString("#1d2a44",out var ink);Assert.AreEqual(ink,text.color);Assert.IsFalse(button.transform.Find("KitTopLight").gameObject.activeSelf);
             var gradient=button.GetComponent<OpsKitGradient>();Assert.AreEqual(gradient.Top,gradient.Bottom);CheckPointer("IncidentEvidence");PolishCapture(8);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_07_攻撃種別は題名の直後のピンク札になる()
         {
             yield return PolishIncident();var topic=Find<RectTransform>("IncidentTopic");var title=Find<TextMeshProUGUI>("IncidentTitle");
@@ -176,6 +189,7 @@ namespace PatchWorkSecure.Tests
             var gradient=topic.GetComponent<OpsKitGradient>();Assert.AreEqual(gradient.Top,gradient.Bottom);Assert.AreEqual(ColorUtility.TryParseHtmlString("#ffe3ec",out var pink)?pink:Color.clear,gradient.Top);
             CheckPointer("IncidentTopic");PolishCapture(7);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_06_工具マークはひなたの名札より上に離れる()
         {
             yield return PolishPlanning();Canvas.ForceUpdateCanvases();var pin=Find<RectTransform>("Pin_change");var tag=(RectTransform)Find<TextMeshProUGUI>("NavigatorName").transform.parent;
@@ -183,6 +197,7 @@ namespace PatchWorkSecure.Tests
             var surface=Object.FindAnyObjectByType<OpsGame>().Surface;Assert.Greater(surface.InverseTransformPoint(a[0]).y,surface.InverseTransformPoint(b[1]).y+10);
             CheckPointer("Pin_change");PolishCapture(6);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_05_時間帯は困りごとと同じ高さでマップ内に収まる()
         {
             yield return PolishPlanning();var time=Find<RectTransform>("PlanningTimeBadge");var counter=Find<RectTransform>("BubbleCounter");
@@ -190,6 +205,7 @@ namespace PatchWorkSecure.Tests
             Assert.Greater(time.anchoredPosition.x,counter.anchoredPosition.x+counter.rect.width);Assert.GreaterOrEqual(-time.anchoredPosition.y,0);
             Assert.Less(time.anchoredPosition.x+time.rect.width,Find<RectTransform>("OfficeStage").rect.width);PolishCapture(5);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_04_未導入枠は一ピクセル半透明で部屋の隅に収まる()
         {
             yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();game.OpenTab(1);yield return new WaitForSecondsRealtime(.3f);
@@ -203,6 +219,7 @@ namespace PatchWorkSecure.Tests
             }
             PolishCapture(4);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_17_未導入の置き場所は導入を開いた間だけ表示する()
         {
             yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();string before=JsonUtility.ToJson(game.State);
@@ -214,6 +231,7 @@ namespace PatchWorkSecure.Tests
             Click("Room_office");yield return null;Assert.IsNotNull(Find<RectTransform>("RoomDevice_inventory").Find("UninstalledFrame"));Click("ClosePlanner");yield return null;
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_03_ランプはサーバー室の名札の下に収まる()
         {
             yield return PolishPlanning();var room=Find<RectTransform>("Room_server");var label=room.Find("RoomLabel").GetComponent<RectTransform>();
@@ -224,6 +242,7 @@ namespace PatchWorkSecure.Tests
             }
             PolishCapture(3);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_02_泡は半秒で弾み三秒二で漂い省演出では静止する()
         {
             Assert.AreEqual(0,OpsBubbleMotion.EntranceScale(0));Assert.AreEqual(1.12f,OpsBubbleMotion.EntranceScale(.35f),.001f);Assert.AreEqual(1,OpsBubbleMotion.EntranceScale(.5f));
@@ -233,6 +252,7 @@ namespace PatchWorkSecure.Tests
             var rect=Find<RectTransform>("OfficeBubble0");var position=rect.anchoredPosition;yield return new WaitForSecondsRealtime(.3f);
             Assert.AreEqual(position,rect.anchoredPosition);Assert.AreEqual(Vector3.one,rect.localScale);Assert.AreEqual(before,JsonUtility.ToJson(game.State));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Polish4_01_泡は透過素材と輪を重ね操作範囲を保つ()
         {
             yield return PolishPlanning();var game=Object.FindAnyObjectByType<OpsGame>();

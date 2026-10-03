@@ -126,6 +126,7 @@ namespace PatchWorkSecure.Tests
             var c=ContainmentFixture(false,0,true,true).CreateContainment();c.Start();c.SelectRoom(1);Assert.AreEqual(5,c.StopRoom());Assert.AreEqual(0,c.StopRoom());Assert.AreEqual(5,c.StoppedCount);
             var noGame=new OpsState(14);Assert.IsNull(noGame.CreateContainment());noGame.month=3;noGame.BeginIncident();Assert.IsNull(noGame.CreateContainment());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next5ContainmentUI_開始本編結果任せる正常事件と演出を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -163,6 +164,7 @@ namespace PatchWorkSecure.Tests
             game.TickMinigame(10);yield return new WaitForSecondsRealtime(2.3f);Assert.AreEqual(Vector3.one*(900f/760f),Find<RectTransform>("MinigameCanvas").localScale,"揺れた後も画面の拡大率を保つ");Assert.AreEqual(96,session.Score);Assert.AreEqual(0,session.TotalInfected);StringAssert.Contains("感染ではありません",Find<TextMeshProUGUI>("MinigameResultDetail").text);Capture("154-minigame-benign-result");
             Click("MinigameContinue");yield return WaitForResolution(game);Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next5Access_消音字幕なし省演出でも操作と結果を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

@@ -13,6 +13,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator 購入と疲労回復と社員の助力を確定値で演出する()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

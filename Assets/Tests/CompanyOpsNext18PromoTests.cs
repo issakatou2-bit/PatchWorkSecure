@@ -121,6 +121,7 @@ namespace PatchWorkSecure.Tests
             if(game.Minigame is OpsLogMinigame logs){var row=logs.Visible.FirstOrDefault(r=>r.Suspicious&&!r.Hit);if(row!=null)Click("LogRow_"+row.Id);}
         }
         [UnityTest,Explicit("宣伝素材撮影は名前指定時だけ実行。全件の件数と結果を変えない")]
+        [Category("Capture")]
         public IEnumerator Next18Promo_九場面の30Hz連番と実再生の音を保存する()
         {
             int captureBefore=UnityEngine.Time.captureFramerate;OpsPromoClock.Begin();

@@ -11,6 +11,7 @@ namespace PatchWorkSecure.Tests
     public partial class CompanyOpsTests
     {
         [UnityTest, Explicit("変更前の撮影は実装前に一度だけ行う")]
+        [Category("Capture")]
         public IEnumerator Next17Before_既存画面とマウスの選択を保存()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(2);

@@ -104,6 +104,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.AreEqual(Enum.GetValues(typeof(OpsCue)).Length, fingerprints.Count);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator ステータス詳細と月次事情と操作演出を実画面で検証する()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

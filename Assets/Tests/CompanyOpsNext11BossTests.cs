@@ -58,6 +58,7 @@ namespace PatchWorkSecure.Tests
             restored.defeatedBosses.Add(restored.defeatedBosses[0]);Assert.IsFalse(restored.Valid());
             var april=AlliesStory(2).state;Assert.IsNull(april.CurrentBoss);Assert.IsFalse(career.RecordBoss(april,record));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11BossUI_強敵の札と図鑑と再読み込みを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

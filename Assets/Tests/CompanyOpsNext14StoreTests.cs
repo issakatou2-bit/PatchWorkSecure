@@ -38,6 +38,7 @@ namespace PatchWorkSecure.Tests
             string path=Path.Combine(folder,name+".png");File.Copy(Path.Combine(Application.dataPath,"../Artifacts/CompanyOps/store-"+name+".png"),path,true);
             var png=File.ReadAllBytes(path);Assert.AreEqual(1920,(png[16]<<24)|(png[17]<<16)|(png[18]<<8)|png[19]);Assert.AreEqual(1080,(png[20]<<24)|(png[21]<<16)|(png[22]<<8)|png[23]);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next14StoreUI_本編と二人絵と強敵と続行を実寸撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(4);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -61,6 +62,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.RestoreProgress(new OpsProgress{endless=endless,career=new OpsCareer{endlessUnlocked=true}}));yield return new WaitForSecondsRealtime(4);
             Assert.IsNotNull(Find<UnityEngine.UI.Button>("NextEndlessYear"));StoreShot("15-endless-continue");Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next14StoreUI_六本のミニゲームの本編を実寸撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

@@ -25,6 +25,7 @@ namespace PatchWorkSecure.Tests
                     return path+"|"+t.text+"|"+t.rectTransform.sizeDelta+"|"+t.rectTransform.anchoredPosition+"|"+t.color+"|"+t.fontSize+"|"+t.fontStyle;
                 }).OrderBy(s=>s,StringComparer.Ordinal));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11LegacyUI_旧十一設備の実ファイルで四画面と移行前バックアップを保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);

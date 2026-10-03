@@ -44,6 +44,7 @@ namespace PatchWorkSecure.Tests
             for(int y=1;y<=10;y++){FinishEndlessTestYear(e.state);Assert.IsTrue(e.RecordYear());career.RecordEndless(e);Assert.AreEqual(y>=10,career.HasTitle("guard-10"));if(y<10)Assert.IsTrue(e.AdvanceYear());}
             // 強い入力で条件だけを検査。人間の上手なプレイで10年へ届くという証拠にはしない。
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next12RecordsUI_未獲得と獲得の記録画面を既存部品で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.OpenRecords();yield return new WaitForSecondsRealtime(1);Capture("next12-records-empty");

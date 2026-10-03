@@ -56,6 +56,7 @@ namespace PatchWorkSecure.Tests
                 Assert.AreEqual(expected.loss,state.Latest.loss);Assert.AreEqual(expected.downtime,state.Latest.downtime);Assert.AreEqual(expected.cost,state.Latest.cost);
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11EdrUI_本編の即時隔離ボタンと使用済みと五十点を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);

@@ -22,6 +22,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsFalse(career.HeardMaxim("maxim_segment_v2",true));Assert.IsTrue(career.Valid());
             CollectionAssert.AreEqual(new[]{"maxim_segment"},career.heardMaxims);CollectionAssert.AreEqual(new[]{"maxim_segment"},OpsMaxims.Candidates(updated.id));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next15FactUI_旧IDの呼び出しでも新しい字幕だけを使う()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=true;

@@ -14,6 +14,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator 補足を詳細へ移して通知と決定操作を重ねない()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

@@ -92,6 +92,7 @@ namespace PatchWorkSecure.Tests
         private static void Next17Shots(string name)
         {foreach(var size in new[]{new Vector2Int(1280,800),new Vector2Int(1920,1080)})Next15Shot(name,size.x,size.y,"Next17");}
 
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next17Menus_仮想ゲームパッドで設定と日記と計画を選ぶ()
         {
             using(var input=new PadFixture())

@@ -64,6 +64,7 @@ namespace PatchWorkSecure.Tests
             finally { Object.DestroyImmediate(bank); Object.DestroyImmediate(clip); }
         }
 
+        [Category("Capture")]
         [UnityTest] public IEnumerator 反応ボイスは未投入を明示し字幕と個別消音を保つ()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

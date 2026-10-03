@@ -13,6 +13,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9Isolation_動的な作業フォントはアセットに書き戻さない()
         {
             string root=System.IO.Path.Combine(Application.dataPath,"Fonts/CompanyYear");var before=System.IO.File.ReadAllBytes(root+"/BodyDynamic.asset");var beforeHeading=System.IO.File.ReadAllBytes(root+"/HeadingDynamic.asset");
@@ -24,6 +25,7 @@ namespace PatchWorkSecure.Tests
             try{PlayerPrefs.SetFloat("pws_ops_music",.123f);}finally{prefs.Restore();}
             Assert.AreEqual(had,PlayerPrefs.HasKey("pws_ops_music"));Assert.AreEqual(volume,PlayerPrefs.GetFloat("pws_ops_music"));LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9Endings_二つの結末と三年の実記録と因子への導線を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -39,6 +41,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9FactorSelection_明示選択と入替と保存復帰を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.Career.factors.Add("backup");game.StartStory(14);
@@ -59,6 +62,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(candidates.All(c=>c.stars==2));Assert.AreEqual(before,JsonUtility.ToJson(story));
             Assert.IsTrue(career.Claim(story,candidates[0].id));Assert.AreEqual(1,OpsStory.Begin(3,career.factors).state.Level(candidates[0].id));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9Fail_目標差と痛い月と候補と記録なしを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.Career.factors.Add("backup");game.StartStory(14);
@@ -67,6 +71,7 @@ namespace PatchWorkSecure.Tests
             game.StartStory(9);game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual("事件の対応記録なし",Find<TextMeshProUGUI>("WorstMonthValue").text);Assert.IsNotNull(Find<TextMeshProUGUI>("GoodWorkValue"));Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9Renew_全額繰越と設備見直しと年度の道のりを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);
@@ -81,6 +86,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(prior,JsonUtility.ToJson(game.State));CheckPointer("NextStoryYear");Click("NextStoryYear");yield return new WaitForSecondsRealtime(2);
             Assert.AreEqual(2,game.Story.year);Assert.AreEqual(114,game.State.budget);Assert.AreEqual(OpsCatalog.StoryPressure(2,OpsCatalog.StoryThreatVersion),game.State.yearPressure);Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next9Title_承認済み三つのモードと因子札を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);

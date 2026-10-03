@@ -14,6 +14,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next3Title_承認済み一枚絵と縮尺と字幕と低減設定を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.5f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -47,6 +48,7 @@ namespace PatchWorkSecure.Tests
             var legacy=new OpsState(14){bubbleRules=0,bubbleSchedule=null,poppedBubbles=null};Assert.IsTrue(legacy.Valid());Assert.AreEqual(-1,legacy.BubbleKind(0));Assert.IsFalse(legacy.PopBubble(0));
             var invalid=new OpsState(14);invalid.poppedBubbles[11]=1;Assert.IsFalse(invalid.Valid());invalid.poppedBubbles[11]=0;invalid.clueCollected=true;Assert.IsFalse(invalid.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next3Bubbles_出現と弾ける瞬間と手がかりとレアを撮影する()
         {
             int seed=Enumerable.Range(0,10000).First(s=>{var a=new OpsState(s,true).bubbleSchedule.Take(4);return a.Contains(6)&&a.Contains(7);});
@@ -80,12 +82,14 @@ namespace PatchWorkSecure.Tests
                 }
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next3Depth_時間帯と把握ゲージは公開状態に一致する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);
             Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);Assert.AreEqual(game.State.SituationKnowledge+" / 4",Find<TextMeshProUGUI>("KnowledgeValue").text);CheckPointer("KnowledgeCard");Capture("132-depth-incident");CheckText();LogAssert.NoUnexpectedReceived();
             int quietSeed=Enumerable.Range(0,100).First(s=>new OpsState(s,true).IncidentTime>0);game.StartYear(quietSeed);game.BeginIncident();yield return new WaitForSecondsRealtime(1.4f);Assert.Greater(game.State.IncidentTime,0);Assert.AreEqual(game.State.IncidentTimeLabel,Find<TextMeshProUGUI>("IncidentTimeLabel").text);Capture("132-depth-incident-quiet");CheckText();LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next3Polish_月報と計画の八件を同条件で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);game.State.budget=59;game.OpenTab(0);game.StopVoice();game.SpeakSceneLine("growth_01",0);yield return new WaitForSecondsRealtime(1.4f);Capture("130-polish-planning");
@@ -125,6 +129,7 @@ namespace PatchWorkSecure.Tests
             for(int m=0;m<12;m++){var s=new OpsState(1){month=m};Assert.AreEqual("mission_accept_"+(m+1).ToString("00"),OpsGame.MissionVoiceId(s));}
             var random=new OpsState(14,true);SetEvent(random,"vuln-web");Assert.AreEqual("mission_accept_06",OpsGame.MissionVoiceId(random));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator VoiceV2_素材なしでも全文字幕と台本のポーズで進み操作が予約を取り消す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
@@ -153,6 +158,7 @@ namespace PatchWorkSecure.Tests
             }
             finally{game.StopVoice();game.Navigator=original;Object.Destroy(persona);Object.Destroy(bank);Object.Destroy(clip);}
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator VoiceV2_依頼と事件と発動と月報は実際の場面に連動し音声なしで完走する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);yield return new WaitForSecondsRealtime(2);
@@ -177,6 +183,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual("maxim_report_v2",game.LastReactionId);Assert.Contains("maxim_report",game.Career.yearMaxims);
             Click("NextMonth");yield return null;Assert.AreEqual("season_05",game.LastReactionId);Assert.AreEqual(1,game.State.month);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator UIRepair_四件の修正前後を同じ条件で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.4f);var game=Object.FindAnyObjectByType<OpsGame>();Capture("126-ui-title");
@@ -204,6 +211,7 @@ namespace PatchWorkSecure.Tests
             foreach(var m in OpsCatalog.Missions)Assert.AreEqual(m.title,OpsGame.ReportMissionTitle(m.title).Replace("\n",""));
             foreach(var e in OpsEventCatalog.Events)Assert.AreEqual(e.title+"への備え",OpsGame.ReportMissionTitle(e.title+"への備え").Replace("\n",""));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator NextScreens4_ランクの恩恵と行動の粒は実状態に連動し省演出でも動く()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();
@@ -219,6 +227,7 @@ namespace PatchWorkSecure.Tests
             }
             var old=new OpsState(14){culture=100,trust=100,rankBenefitRules=0};Assert.IsFalse(old.CultureEarlySignal);Assert.AreEqual(0,old.ProposalRankBonus);Assert.IsTrue(old.Valid());LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator NextScreens3_部屋から関連改善を導入し段階と社員の支援先が一致する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
@@ -239,6 +248,7 @@ namespace PatchWorkSecure.Tests
             float limit=Time.realtimeSinceStartup+5;while(!UnityEngine.Object.FindObjectsByType<OpsRoomHelperMotion>().Any()&&Time.realtimeSinceStartup<limit)yield return null;
             Assert.AreEqual("server",UnityEngine.Object.FindAnyObjectByType<OpsRoomHelperMotion>().TargetRoom);Capture("124-next-staff-room");yield return WaitForResolution(game);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator NextScreens2_依頼書の二経路と臨時予算は実数で一度だけ働く()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);ChooseDelegatedWork(game,game.State.CurrentMission.actionA);Click("ConsultationDetails");yield return new WaitForSecondsRealtime(.6f);
@@ -267,6 +277,7 @@ namespace PatchWorkSecure.Tests
                 settings.editorInputBehaviorInPlayMode=focus;settings.backgroundBehavior=background;
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator NextScreens1_タイトルと月替わり事件入口はルールを変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1.2f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -284,6 +295,7 @@ namespace PatchWorkSecure.Tests
             yield return null;yield return null;
             Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="PhasePresentation"));CheckPointer("Action_listen");LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator チュートリアルは実操作だけで六段階を完了する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);
@@ -303,6 +315,7 @@ namespace PatchWorkSecure.Tests
             string before=JsonUtility.ToJson(game.State);Assert.IsTrue(game.StartTutorial());yield return null;Click("SkipTutorial");yield return null;
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));Assert.IsFalse(game.TutorialActive);Assert.IsTrue(game.Surface.GetComponentsInChildren<Transform>(true).First(t=>t.name=="PlanningCharacter").gameObject.activeSelf);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 月報は三つの数値と実際の支援をモック配置で表示する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
@@ -324,6 +337,7 @@ namespace PatchWorkSecure.Tests
             var summary=OpsAnnualSummary.From(state);Assert.AreEqual(2,summary.projects.Count);Assert.AreEqual(10,summary.Mvp.loss);Assert.AreEqual(2,summary.Mvp.activations);Assert.AreEqual(1,summary.encountered.Count);Assert.AreEqual(2,summary.staffSupport[1]);Assert.AreEqual(0,summary.staffSupport[2]);
             var legacy=new OpsState(1);legacy.history.Add(new OpsOutcome{month=0});Assert.IsNull(OpsAnnualSummary.From(legacy).Mvp);Assert.AreEqual(-1,OpsAnnualSummary.From(legacy).StaffMvp);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 年間評価は十二か月とMVPを表示し再挑戦できる()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
@@ -341,6 +355,7 @@ namespace PatchWorkSecure.Tests
             CheckPointer("AnnualDetails");CheckPointer("EndingHistory");CheckPointer("BackHome");CheckPointer("ReplayYear");CheckText();Capture("77-annual-report");
             Click("ReplayYear");yield return null;Assert.AreEqual(0,game.State.month);Assert.AreEqual(OpsPhase.Planning,game.State.phase);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 設定はスライダーと表示変更を即時反映し削除前に確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);Click("Menu");yield return new WaitForSecondsRealtime(.6f);

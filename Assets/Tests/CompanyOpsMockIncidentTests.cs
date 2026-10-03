@@ -49,6 +49,7 @@ namespace PatchWorkSecure.Tests
                 saved.Latest.potentialInvestmentEffects=null;Assert.IsTrue(saved.Valid(),"旧記録の未保存項目を許容する");
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 事件モックの配置と公開帯と発動から確定結果を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -87,6 +88,7 @@ namespace PatchWorkSecure.Tests
             Click("SkipResolution");yield return null;Assert.IsFalse(game.ResolutionActive);Assert.AreEqual(second,JsonUtility.ToJson(game.State));
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 十二か月の季節表示は操作と状態を変えず省演出に従う()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -105,6 +107,7 @@ namespace PatchWorkSecure.Tests
             var rain=Find<Image>("SeasonParticle0");yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(0,rain.color.a);
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 動きを減らしても発動内容が残り全事件の文字が切れない()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);

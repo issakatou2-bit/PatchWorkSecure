@@ -19,8 +19,11 @@ namespace PatchWorkSecure.Tests
     public partial class CompanyOpsTests
     {
         // 60か月・約700操作を含むため通常の180秒では余裕がない。各操作の期限は維持する。
+        [Category("Long")]
         [UnityTest,Timeout(300000)] public IEnumerator ゲーマー役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(0);
+        [Category("Long")]
         [UnityTest,Timeout(300000)] public IEnumerator IT初学者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(1);
+        [Category("Long")]
         [UnityTest,Timeout(300000)] public IEnumerator FE取得者役で五年度を画面のボタンから通して再挑戦する() => PlayPersona(2);
         private IEnumerator PlayPersona(int role)
         {

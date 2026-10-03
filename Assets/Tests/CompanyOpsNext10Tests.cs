@@ -12,6 +12,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next10GrowthUI_年度の目標と年別の季節名を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);

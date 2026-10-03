@@ -12,6 +12,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next17Visual_六本の選択表示を二解像度で撮影する()
         {
             using(var input=new PadFixture())

@@ -50,6 +50,7 @@ namespace PatchWorkSecure.Tests
             }
             var prepared=new OpsState(3,true);prepared.levels[OpsCatalog.Index("monitor")]=1;prepared.levels[OpsCatalog.Index("inventory")]=1;prepared.Act("audit","recover",100);Assert.AreEqual(0,prepared.Blindness);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next7LogsUI_開始備え結果委任と行の操作を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -70,6 +71,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next7Detail_帯は語句単位で道具のポーズを保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);
@@ -125,6 +127,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsFalse(g.Place(t.Id,-1,-1));Assert.IsTrue(g.Place(t.Id,t.Solution.Min(c=>c.Row),t.Solution.Min(c=>c.Column)));Assert.IsTrue(g.Lift(t.Id));Assert.IsNull(t.Placed);
             g.Tick(float.NaN);Assert.AreEqual(90,g.Remaining);g.Tick(100);Assert.AreEqual(OpsMinigamePhase.Result,g.Phase);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next7BlocksUI_配置回転ドラッグ自動化結果委任を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

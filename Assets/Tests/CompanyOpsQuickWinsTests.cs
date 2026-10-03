@@ -15,6 +15,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins8_前月末の実数と比較し疲労減少を緑で示す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
@@ -36,6 +37,7 @@ namespace PatchWorkSecure.Tests
             first.metricsAfter=null;game.OpenTab(0);yield return null;StringAssert.Contains("未記録",Find<TextMeshProUGUI>("GrowthTrendHeading").text);Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name=="GrowthTrend4"));
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins7_実際に働いた社員だけ顔マークが跳ねる()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -53,6 +55,7 @@ namespace PatchWorkSecure.Tests
             while(game.ResolutionActive){Assert.IsFalse(Object.FindObjectsByType<OpsStaffBounce>().Any());Assert.IsFalse(Object.FindObjectsByType<RectTransform>().Any(t=>t.name.StartsWith("StaffFace_")));yield return null;}
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins6_行動と方針カードはマウスとキーボードで四ピクセル浮く()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -71,6 +74,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins5_無効ボタンは理由だけ示し操作や資源を変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -92,6 +96,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins4_危険域の最初と悪化だけ心音を鳴らし点滅は動かない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -114,6 +119,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins3_工数を使い切った月だけ一度光り省演出で動かない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -131,6 +137,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins2_実際の昇格で文字を切り替え降格と省演出は回さない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -149,6 +156,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins1_増収だけにコインが出て省演出では動かない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -166,6 +174,7 @@ namespace PatchWorkSecure.Tests
             }
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins1_四半期報酬を含む実増収を既存ルールのまま演出する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
@@ -187,6 +196,7 @@ namespace PatchWorkSecure.Tests
             Assert.Greater(game.State.budget,before);Assert.IsNotNull(Find<OpsBudgetGain>("BudgetGainEffect"));Capture("119-quickwins1-quarter-reward");
             yield return new WaitForSecondsRealtime(.7f);Assert.IsFalse(Object.FindObjectsByType<OpsBudgetGain>().Any());LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator QuickWins0_全事件の説明札はひなたと重ならず読める()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);

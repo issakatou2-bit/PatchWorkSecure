@@ -19,6 +19,7 @@ namespace PatchWorkSecure.Tests
             foreach(var t in UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>().Where(t=>t.name.StartsWith("Endless")||t.name=="EndingTitle"))
             {t.ForceMeshUpdate();Assert.IsFalse(t.isTextOverflowing,t.name+" / "+t.text);if(t.name=="EndingTitle")StringAssert.DoesNotContain("、",t.text);}
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next12Screens_続けると引退確認と年数と再開を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -30,6 +31,7 @@ namespace PatchWorkSecure.Tests
             var saved=game.ExportProgress();Assert.IsTrue(saved.Valid());Assert.IsTrue(game.RestoreProgress(saved));yield return new WaitForSecondsRealtime(1);Assert.IsNotNull(Find<Button>("EndlessBackHome"));Assert.IsNull(UnityEngine.Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="ConfirmFactor"));
             Find<Button>("EndlessAnnualReview").onClick.Invoke();yield return new WaitForSecondsRealtime(2);Assert.IsNotNull(Find<Button>("EndlessAnnualReturn"));Assert.IsNull(UnityEngine.Object.FindObjectsByType<Button>().FirstOrDefault(b=>b.name=="ReplayYear"));Find<Button>("EndlessAnnualReturn").onClick.Invoke();yield return null;Assert.IsNotNull(Find<Button>("EndlessBackHome"));Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next12Screens_運営終了の半分と四年目の月報が日記を上書きしない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

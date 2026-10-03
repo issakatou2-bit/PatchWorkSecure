@@ -70,6 +70,7 @@ namespace PatchWorkSecure.Tests
             var junior=AlliesStory(3).state;Assert.IsFalse(junior.SelectSupportMember(4));Assert.IsFalse(junior.SelectSupportMember(-2));
             junior.supportMemberChoice=5;Assert.IsFalse(junior.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11AlliesUI_調査と四人チームと後輩の支援を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);

@@ -13,6 +13,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next8StoryUI_モードと三年の進行と復帰と終わりを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -94,6 +95,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(switched.career.endlessUnlocked);CollectionAssert.AreEqual(oneYear.career.factors,switched.career.factors);Assert.AreEqual(JsonUtility.ToJson(single),JsonUtility.ToJson(switched.single));
             File.WriteAllText(path,"{broken");Assert.IsNull(OpsSaveStore.ReadProgress(path,out warning));Assert.IsNotEmpty(warning);Assert.AreEqual("{broken",File.ReadAllText(path));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next8Detail_題名の粒と数字の間隔とログの字を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);

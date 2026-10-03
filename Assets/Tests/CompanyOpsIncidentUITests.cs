@@ -35,6 +35,7 @@ namespace PatchWorkSecure.Tests
             Assert.Throws<ArgumentException>(() => s.Estimate("unknown"));
         }
 
+        [Category("Capture")]
         [UnityTest] public IEnumerator 対応比較は三案の数値とクリックと詳細復帰を保つ()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

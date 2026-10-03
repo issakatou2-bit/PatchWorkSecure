@@ -14,6 +14,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Speed_設定と演出時間だけを変え制限時間と状態を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -42,6 +43,7 @@ namespace PatchWorkSecure.Tests
             Click("MinigameDelegate");Click("MinigameContinue");yield return WaitForResolution(game);var expected=JsonUtility.FromJson<OpsState>(initial);expected.Resolve("scope");Assert.AreEqual(JsonUtility.ToJson(expected),JsonUtility.ToJson(game.State));
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Speed_再挑戦のガイドを省略し開幕のスキップを大きくする()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -56,6 +58,7 @@ namespace PatchWorkSecure.Tests
             var skip=Find<Button>("OpeningSkip");Assert.AreEqual(200,((RectTransform)skip.transform).rect.width);CheckPointer("OpeningSkip");Capture("next13-speed-repeat-opening");Click("OpeningSkip");yield return null;Assert.AreEqual(4,game.YearOpeningStage);
             Assert.IsTrue(game.Career.Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Speed_月報を即座に最終値へ止めて日記に進む()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

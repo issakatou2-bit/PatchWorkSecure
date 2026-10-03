@@ -44,6 +44,7 @@ namespace PatchWorkSecure.Tests
             state.history.Add(new OpsOutcome{month=11,peakGoalRecorded=true,peakGoalMet=true});Assert.AreEqual("peak_clear_final",OpsGame.PeakResultVoiceId(state));
             state.history.Last().peakGoalMet=false;Assert.AreEqual("peak_miss_02",OpsGame.PeakResultVoiceId(state));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next4UI_山場の予測と達成未達と五段の評価を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);

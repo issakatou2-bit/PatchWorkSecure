@@ -55,6 +55,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual("かのん",game.CurrentSpeaker);Assert.AreEqual(state,JsonUtility.ToJson(game.State));
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next16ReferencesUI_注意書きと四チケットの参考を五解像度で確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);

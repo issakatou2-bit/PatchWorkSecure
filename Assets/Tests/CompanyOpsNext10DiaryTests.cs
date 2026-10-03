@@ -18,6 +18,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(s.BeginIncident());
             string response=CompanyOpsPersonaPolicy.Responses.OrderBy(r=>s.Estimate(r).lossMax*7+s.Estimate(r).stopMax*4+s.Estimate(r).cost).First();Assert.IsTrue(s.Resolve(response));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next10DiaryUI_四つの見開きと字幕なし音声なしと再読を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

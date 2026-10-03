@@ -105,6 +105,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreNotEqual(s.Current.staff, s.StaffVoice); StringAssert.Contains("いつもの連絡先", s.StaffVoice);
             s.culture = 64; Assert.AreEqual(s.Current.staff, s.StaffVoice);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 成長計画から購入比較と連携結果を実画面で試遊する()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

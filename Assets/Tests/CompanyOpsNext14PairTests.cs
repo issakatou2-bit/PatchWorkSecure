@@ -23,6 +23,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(caption,Find<TextMeshProUGUI>(name+"Caption").text);
             Assert.AreEqual(new Vector2(12,-12),photo.rectTransform.anchoredPosition);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next14PairsUI_指定の日記二頁と会議だけに横長写真を表示する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

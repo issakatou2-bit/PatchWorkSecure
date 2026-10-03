@@ -44,6 +44,7 @@ namespace PatchWorkSecure.Tests
             while(mfa.Current.Legitimate){mfa.Answer(true);mfa.Tick(1);}
             int who=mfa.Current.Who;mfa.Answer(true);Assert.AreEqual("（パスワードの変更とセッションの失効が必要）",mfa.People[who].Activity);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13FactUI_格言は新しい字幕を表示し古い音声を再生しない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

@@ -149,6 +149,7 @@ namespace PatchWorkSecure.Tests
         }
 
         [UnityTest]
+        [Category("Capture")]
         public IEnumerator 実画面の描画とフォントと中断復帰を検証する()
         {
             SceneManager.LoadScene("SampleScene");
@@ -206,6 +207,7 @@ namespace PatchWorkSecure.Tests
             Object.FindObjectsByType<T>(FindObjectsInactive.Include).First(t => t.name == name);
 
         [UnityTest]
+        [Category("Capture")]
         public IEnumerator ゲージと透過立ち絵と購入前の説明を確認する()
         {
             SceneManager.LoadScene("SampleScene");

@@ -25,6 +25,7 @@ namespace PatchWorkSecure.Tests
             foreach(int year in new[]{2,3}){Assert.AreEqual("かのん",OpsCatalog.CompanyYear(year).allyNames[2]);Assert.AreEqual("りりぃ",OpsCatalog.CompanyYear(year).allyNames[0]);}
             StringAssert.Contains("試験は一回で受かったけど、会議は三回すっぽかした",OpsDiaryCatalog.Entries[9].body);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next12NamesUI_日記と開幕と因子の表示を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartStory(14);

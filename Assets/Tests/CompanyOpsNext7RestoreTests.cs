@@ -60,6 +60,7 @@ namespace PatchWorkSecure.Tests
                 if(score==50)Assert.AreEqual(JsonUtility.ToJson(normal),JsonUtility.ToJson(state));Assert.IsTrue(state.Valid());
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next7RestoreUI_開始手順書結果委任正常を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

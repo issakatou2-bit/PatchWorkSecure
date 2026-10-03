@@ -15,6 +15,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator 事件の設備名と一覧と横並びの単位は公開見積もりに一致する()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -68,6 +69,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(15,body.fontSizeMax,.01f);
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 発動の最後の未導入設備は仮定と分かり設定ボタンが出ない()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
@@ -90,6 +92,7 @@ namespace PatchWorkSecure.Tests
             yield return WaitForResolution(game);Assert.AreEqual(saved,JsonUtility.ToJson(game.State));CheckPointer("Menu");
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 六月の雨筋と地面の波紋は見えて省演出で止まり操作を遮らない()
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);

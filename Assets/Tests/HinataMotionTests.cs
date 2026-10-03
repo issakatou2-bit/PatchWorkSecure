@@ -14,6 +14,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator 基本ポーズは閉眼と閉口を別範囲で同時表示し原画を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);
@@ -33,6 +34,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(-width/2+width*frame.MouthRegion.x-(500-width)/2,mask.anchoredPosition.x,.01f,"横長の枠でも目口を原画と同じ位置へ寄せる");Capture("104-hinata-wide-frame-alignment");portrait.rectTransform.sizeDelta=originalSize;
             Assert.AreEqual(state,JsonUtility.ToJson(game.State));Assert.AreEqual(random,UnityEngine.Random.state);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 省演出は呼吸と移動を止めてもまばたきを残す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(.6f);
@@ -42,6 +44,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(2,animator.EyePhase);Assert.AreEqual(Vector3.one,portrait.transform.localScale);Assert.AreEqual(motion.LayoutPosition,portrait.rectTransform.anchoredPosition);Assert.AreEqual(Quaternion.identity,portrait.transform.localRotation);
             Capture("101-hinata-reduced-blink");yield return new WaitForSecondsRealtime(.3f);Assert.AreEqual(motion.LayoutPosition,portrait.rectTransform.anchoredPosition);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator ポーズ交換は足元を保ち差分がない絵へ安全に戻る()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(2);
@@ -60,6 +63,7 @@ namespace PatchWorkSecure.Tests
             game.StopVoice();yield return new WaitForSecondsRealtime(.35f);
             var music=game.GetComponents<AudioSource>().First(s=>s.clip==game.Sounds.planningMusic&&s.isPlaying);float volume=music.volume;game.DuckMusic(.3f);yield return new WaitForSecondsRealtime(.12f);Assert.Less(music.volume,volume*.8f);yield return new WaitForSecondsRealtime(.6f);Assert.AreEqual(volume,music.volume,.01f);Assert.AreEqual(scale,Time.timeScale);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 残像ゲージとあと一つ表示は実際の支出と達成条件だけから出す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.6f);var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return new WaitForSecondsRealtime(.6f);

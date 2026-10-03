@@ -77,6 +77,7 @@ namespace PatchWorkSecure.Tests
             var e=OpsEndless.Begin(14,null);for(int y=1;y<4;y++){FinishEndlessTestYear(e.state);e.AdvanceYear();}
             var before=e.state.Preview("scope");e.state.BeginIncident();e.state.Resolve("scope",50,true);Assert.AreEqual(before.loss,e.state.Latest.loss);Assert.AreEqual(before.downtime,e.state.Latest.downtime);Assert.IsTrue(e.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next12EndlessUI_解放と年替わりと短い開幕と途中保存を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=UnityEngine.Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;Assert.IsFalse(game.StartEndless(14));

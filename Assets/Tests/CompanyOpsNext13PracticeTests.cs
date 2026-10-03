@@ -64,6 +64,7 @@ namespace PatchWorkSecure.Tests
             finally{Directory.Delete(dir,true);}
             restored.practiceRecords.Add(restored.practiceRecords[0]);Assert.IsFalse(restored.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13PracticeUI_初回タイトルから六本を練習して記録と称号を残す()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

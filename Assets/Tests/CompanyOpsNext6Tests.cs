@@ -24,6 +24,7 @@ namespace PatchWorkSecure.Tests
             for(int i=0;i<100;i++){Assert.IsTrue(director.TryChoose(bank,OpsReaction.Think,i*10,out var line,true));Assert.IsTrue(OpsReactionBank.IsGeneralReaction(line));}
             Object.DestroyImmediate(bank);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next6CommonUI_音声なし消音字幕設定格言と研修の進行を守る()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -110,6 +111,7 @@ namespace PatchWorkSecure.Tests
             }
             var legacy=LegacyMfaFixture(true);var before=JsonUtility.ToJson(legacy);var delegated=legacy.CreateMfa();delegated.Delegate();var normalLegacy=JsonUtility.FromJson<OpsState>(before);normalLegacy.Resolve("scope");legacy.Resolve("scope",delegated.Score,delegated.Delegated);Assert.AreEqual(JsonUtility.ToJson(normalLegacy),JsonUtility.ToJson(legacy));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next6MfaUI_社員番号一致結果委任正常と演出を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -190,6 +192,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(training.CompleteMailTraining(practice));Assert.AreEqual(xp+2,training.staffExperience[0]);Assert.AreEqual(capacity-1,training.capacity);
             before=JsonUtility.ToJson(training);Assert.IsFalse(training.CompleteMailTraining(practice));Assert.IsNull(training.CreateMailPractice());Assert.AreEqual(before,JsonUtility.ToJson(training));Assert.IsTrue(training.Valid());
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next6MailUI_開始本編結果委任正常と手がかりを撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.7f);var game=Object.FindAnyObjectByType<PatchWorkSecure.CompanyOps.OpsGame>();game.UseLocalTestVoices=false;

@@ -18,6 +18,7 @@ namespace PatchWorkSecure.Tests
     public partial class CompanyOpsTests
     {
         private static readonly Vector2Int[] Next15Sizes={new Vector2Int(1280,720),new Vector2Int(1280,800),new Vector2Int(1920,1080),new Vector2Int(2560,1440),new Vector2Int(3440,1440)};
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next15Display_画面設定を保存し年度と既存設定を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();
@@ -40,6 +41,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(state,JsonUtility.ToJson(game.State));Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
 
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next15DisplayUI_十三画面を五つの実寸で撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(3);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

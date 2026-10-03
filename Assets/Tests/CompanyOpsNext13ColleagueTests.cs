@@ -21,6 +21,7 @@ namespace PatchWorkSecure.Tests
             var entry=OpsDiaryCatalog.Entries[6];Assert.AreEqual("diary_y1_10_v3",entry.voiceId);StringAssert.StartsWith("開発部のセキュリティエンジニア、りりぃさんが情シスを手伝いに来て、初めて一緒に仕事をした。",entry.body);StringAssert.Contains("弟子はいらない。一緒にやればいい",entry.body);
             var bank=OpsReactionBank.ScriptV2();Assert.IsFalse(bank.Any(l=>l.id=="diary_y1_10"));Assert.AreEqual(entry.intro,bank.Single(l=>l.id==entry.voiceId).caption);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13ColleagueUI_開幕と日記の新しい文を表示する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

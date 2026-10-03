@@ -33,6 +33,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(OpsSaveStore.WriteProgress(path,restored,out warning),warning);CollectionAssert.AreEqual(original,File.ReadAllBytes(path+".bak"));
             CollectionAssert.AreEqual(new[]{"eng_investigate","eng_react_hmm","eng_found","eng_react_ok"},OpsGame.CompanionSceneLines("investigate"));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next14NamesUI_顔札と日記字幕と旧保存の画面を確かめる()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();

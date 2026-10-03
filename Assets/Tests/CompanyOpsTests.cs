@@ -150,6 +150,7 @@ namespace PatchWorkSecure.Tests
             olderSave.Act("audit"); olderSave.Act("map"); olderSave.BeginIncident();
             Assert.AreEqual(1, olderSave.MissionCount);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 実画面の操作から年間評価まで進める()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.8f);
@@ -207,6 +208,7 @@ namespace PatchWorkSecure.Tests
             Assert.IsEmpty(glyphWarnings, string.Join("\n", glyphWarnings));
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 社内依頼の進捗と結果を画面で確認できる()
         {
             SceneManager.LoadScene("CompanyYear"); yield return null; yield return new WaitForSeconds(.5f);

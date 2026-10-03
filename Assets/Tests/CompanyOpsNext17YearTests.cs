@@ -20,6 +20,7 @@ namespace PatchWorkSecure.Tests
             yield return PadClick(game,input,"MinigameDelegate");yield return null;
             yield return PadClick(game,input,"MinigameContinue");yield return null;
         }
+        [Category("Long")]
         [UnityTest] public IEnumerator Next17Year_タイトルから四月三月と年間評価までゲームパッドで進む()
         {
             using(var input=new PadFixture())

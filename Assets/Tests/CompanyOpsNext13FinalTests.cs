@@ -52,6 +52,7 @@ namespace PatchWorkSecure.Tests
             var invalid=JsonUtility.FromJson<OpsState>(original);
             Assert.IsFalse(invalid.ResolveFinal("scope",50,true,101,false));Assert.IsFalse(invalid.ResolveFinal("scope",50,true,49,true));Assert.AreEqual(original,JsonUtility.ToJson(invalid));
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13FinalUI_総決算だけ二本立てで字幕と再暗号化と委任を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

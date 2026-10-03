@@ -12,6 +12,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Long")]
         [UnityTest] public IEnumerator Next17Minigames_六本をゲームパッドだけで最高ランクまで遊ぶ()
         {
             using(var input=new PadFixture())

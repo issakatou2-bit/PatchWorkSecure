@@ -67,6 +67,7 @@ namespace PatchWorkSecure.Tests
                 Assert.AreEqual(0,session.EdrRoomAlerts(-1));Assert.AreEqual(0,session.EdrRoomAlerts(OpsCatalog.ContainmentRooms));
             }
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11EquipmentAlertUI_三年目の実際の事件で通知と五十点を確認する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);
@@ -91,6 +92,7 @@ namespace PatchWorkSecure.Tests
             Assert.AreEqual(expected.loss,state.Latest.loss);Assert.AreEqual(expected.downtime,state.Latest.downtime);Assert.IsTrue(game.ExportProgress().Valid());
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next11EquipmentUI_年別設備と四画面の十五設備の参照を撮影する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);

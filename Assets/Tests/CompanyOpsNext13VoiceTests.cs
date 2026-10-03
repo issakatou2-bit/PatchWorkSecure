@@ -30,6 +30,7 @@ namespace PatchWorkSecure.Tests
             }
             Assert.AreEqual("今日から、情シス。……席、どこ？",bank.Find("eng_opening").caption);
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Voices_24本を同じ音源で再生しひなたと重ならず状態を変えない()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);
@@ -70,6 +71,7 @@ namespace PatchWorkSecure.Tests
             }
             finally{Object.Destroy(bank);}
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Voices_開幕の自動遷移で会話を保ち会議と調査と山場の予算から呼ぶ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
@@ -84,6 +86,7 @@ namespace PatchWorkSecure.Tests
             var caption=Find<TextMeshProUGUI>("NavigatorSpeech");caption.ForceMeshUpdate();Assert.IsTrue(caption.enabled);Assert.GreaterOrEqual(caption.maxVisibleCharacters,caption.textInfo.characterCount);Assert.IsNotEmpty(caption.text);Capture("next13-peak-budget-voice");
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator Next13Voices_年度結果と強敵と会議と因子と特別結末に接続する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;

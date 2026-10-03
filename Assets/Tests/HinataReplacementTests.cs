@@ -24,6 +24,7 @@ namespace PatchWorkSecure.Tests
             foreach(var line in p.Reactions.lines){Assert.IsTrue(p.Poses.Any(s=>s.Id==line.poseId),line.id);Assert.IsTrue(p.Faces.Any(s=>s.Id==line.faceId),line.id);}
             LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 実装済み全画面の新ひなたとロゴを撮影し操作と数値を保つ()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(1);
@@ -43,6 +44,7 @@ namespace PatchWorkSecure.Tests
             game.Next();yield return new WaitForSecondsRealtime(1.6f);Assert.AreEqual(OpsPhase.Ended,game.State.phase);
             CheckNewPortraits();CheckText();Assert.IsNotNull(Find<Image>("AnnualLogoWordmark").sprite);Capture("96-v2-annual");LogAssert.NoUnexpectedReceived();
         }
+        [Category("Capture")]
         [UnityTest] public IEnumerator 旧版のタイトルと通常プレイにも新ひなただけを使う()
         {
             SceneManager.LoadScene("SampleScene");yield return new WaitForSecondsRealtime(.8f);

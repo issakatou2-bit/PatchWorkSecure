@@ -13,6 +13,7 @@ namespace PatchWorkSecure.Tests
 {
     public partial class CompanyOpsTests
     {
+        [Category("Capture")]
         [UnityTest] public IEnumerator 共通ウィンドウと四種のボタンは承認キットで動作する()
         {
             SceneManager.LoadScene("CompanyYear"); yield return new WaitForSecondsRealtime(.6f);

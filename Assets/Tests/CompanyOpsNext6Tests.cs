@@ -32,7 +32,7 @@ namespace PatchWorkSecure.Tests
             game.OpenMailTraining();yield return new WaitForSecondsRealtime(.3f);Capture("next6-c-training-start");Click("MinigameStart");yield return new WaitForSecondsRealtime(.1f);var mail=(OpsMailMinigame)game.Minigame;
             while(mail.Phase==OpsMinigamePhase.Playing)
             {
-                if(mail.CanAnswer){bool bad=mail.Current.Suspicious;Click(bad?"MailReport":"MailSafe");if(bad){Assert.AreEqual("mg_mail_catch",game.LastReactionId);Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("NavigatorSpeech").text);}game.TickMinigame(.5f);}
+                if(mail.CanAnswer){bool bad=mail.Current.Suspicious;Click(bad?"MailReport":"MailSafe");if(bad){Assert.AreEqual("combo_"+Mathf.Min(mail.Streak,7),game.LastReactionId);Assert.AreEqual(OpsGame.SpeechLines(game.LastReactionCaption),Find<TextMeshProUGUI>("NavigatorSpeech").text);}game.TickMinigame(.5f);}
                 yield return null;
             }
             yield return new WaitForSecondsRealtime(3.2f);Assert.IsFalse(game.MinigameCounting);StringAssert.StartsWith("maxim_",game.LastReactionId);Assert.IsFalse(game.PortraitVoicePlaying);Assert.IsFalse(game.ActiveVoiceBank.HasAudio);

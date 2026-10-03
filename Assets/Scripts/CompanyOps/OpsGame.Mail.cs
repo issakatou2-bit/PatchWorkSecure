@@ -152,13 +152,13 @@ namespace PatchWorkSecure.CompanyOps
             {
                 MinigameTone(560*Mathf.Pow(1.1f,Mathf.Min(game.Streak,8)));MinigamePop(new Vector2(440,430),(report?"見破った！":"OK！")+(game.Streak>=2?" ×"+game.Streak:""),report?Hex("e0405f"):PlanMint);
                 // 次のメールが入る間も粒の上端が題名へ届かない、本文下側の空間で光らせる。
-                if(report){MinigameCutBurst(new Vector2(440,430));SpeakSceneLine("mg_mail_catch",0);}
-                else if(game.Streak==4)SpeakSceneLine("mg_combo_01",0);
+                if(report)MinigameCutBurst(new Vector2(440,430));
+                PresentMinigameSuccess();
             }
             else
             {
                 MinigameTone(result==OpsMailAnswer.Miss?170:260,result==OpsMailAnswer.Miss?"saw":"square");MinigameVisual(minigameCanvas,"shake",.35f);
-                SpeakSceneLine(result==OpsMailAnswer.Miss?"mg_mail_miss":"mg_miss_01",0);
+                ResetMinigameSuccess();SpeakSceneLine(result==OpsMailAnswer.Miss?"mg_mail_miss":"mg_miss_01",0);
             }
             RefreshMailPresentation();
         }

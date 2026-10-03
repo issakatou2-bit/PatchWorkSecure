@@ -125,7 +125,13 @@ namespace PatchWorkSecure.CompanyOps
                 if(label==toastSpeech&&toast!=null)toast.gameObject.SetActive(false);
                 UpdateSpeakerBadge(label);
                 if(CaptionsEnabled&&label.gameObject.activeInHierarchy)RecordPresentedMaxim(LastReactionId);
-                if(CurrentSpeaker=="")PortraitSpeech(label);
+                if(CurrentSpeaker==""&&LastReactionId.StartsWith("combo_"))
+                {
+                    // 短い連鎖は全字を即時表示。速い差替で先頭だけを見せ続けない。
+                    label.maxVisibleCharacters=int.MaxValue;
+                    foreach(var animator in screen.GetComponentsInChildren<OpsPortraitAnimator>())animator.Speak(label,true);
+                }
+                else if(CurrentSpeaker=="")PortraitSpeech(label);
             }
         }
         private void TickVoice()

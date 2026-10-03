@@ -117,7 +117,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsContainmentMinigame;if(game==null||game.StopRoom()==0)return;
             MinigameTone(160,"saw");MinigameBanner(OpsCatalog.ContainmentRoomNames[game.SelectedRoom]+"を止めた",PlanBlue);
-            SpeakSceneLine("mg_miss_0"+(1+minigameMissVoice++%2),0);RefreshMinigameBoard();
+            ResetMinigameSuccess();SpeakSceneLine("mg_miss_0"+(1+minigameMissVoice++%2),0);RefreshMinigameBoard();
         }
         private void CutMinigamePC(int index)
         {
@@ -140,13 +140,12 @@ namespace PatchWorkSecure.CompanyOps
                 MinigameVisual((RectTransform)containmentPCs[index].transform,"hit",.09f);MinigameCutBurst(center);
                 MinigameTone(520*Mathf.Pow(1.12f,Mathf.Min(game.Streak,8)));
                 MinigamePop(center,game.Streak>=2?"ナイス遮断 ×"+game.Streak:"ナイス遮断！",Hex("2bb673"));
-                if(game.Streak==3)SpeakSceneLine("mg_combo_0"+(1+minigameComboVoice++%2),0);
-                else if(LastReactionId!="mg_contain_cut"&&game.Streak==1)SpeakSceneLine("mg_contain_cut",0);
+                PresentMinigameSuccess();
             }
             else
             {
                 MinigameTone(200,"square");MinigamePop(center,"正常な端末…",Hex("9aa6bd"));MinigameVisual(minigameCanvas,"shake",.35f);
-                int miss=minigameMissVoice++;SpeakSceneLine(miss%2==0?"mg_contain_false":"mg_miss_0"+(1+(miss/2)%2),0);
+                ResetMinigameSuccess();int miss=minigameMissVoice++;SpeakSceneLine(miss%2==0?"mg_contain_false":"mg_miss_0"+(1+(miss/2)%2),0);
             }
             RefreshMinigameBoard();
         }

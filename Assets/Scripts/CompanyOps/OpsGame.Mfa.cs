@@ -91,13 +91,13 @@ namespace PatchWorkSecure.CompanyOps
             {
                 MinigameTone((allow?620:760)*Mathf.Pow(1.05946f,Mathf.Min(game.Streak-1,8)));
                 MinigamePop(new Vector2(640,300),(allow?"通した！":"弾いた！")+(game.Streak>=2?" ×"+game.Streak:""),Hex(allow?"2bb673":"6c63ff"));
-                if(!allow){MinigameCutBurst(new Vector2(640,300));MinigameVisual(mfaRequest,"hit",OpsCatalog.ContainmentHitStop);SpeakSceneLine("mg_mfa_block",0);}
-                else if(game.Streak==6)SpeakSceneLine("mg_combo_02",0);
+                if(!allow){MinigameCutBurst(new Vector2(640,300));MinigameVisual(mfaRequest,"hit",OpsCatalog.ContainmentHitStop);}
+                PresentMinigameSuccess();
             }
             else
             {
                 MinigameTone(result==OpsMfaAnswer.Breach?160:260,result==OpsMfaAnswer.Breach?"saw":"square");MinigameVisual(minigameCanvas,"shake",.35f);
-                SpeakSceneLine(result==OpsMfaAnswer.Breach?"mg_mfa_breach":"mg_miss_02",0);
+                ResetMinigameSuccess();SpeakSceneLine(result==OpsMfaAnswer.Breach?"mg_mfa_breach":"mg_miss_02",0);
             }
             RefreshMfaPresentation();
         }

@@ -35,7 +35,7 @@ namespace PatchWorkSecure.Tests
         {
             var macro=OpsMailMinigame.Catalog.Single(q=>q.Id=="macro");Assert.AreEqual("取引先 西村様",macro.Sender);Assert.AreEqual("nishimura@partner-trade.co.jp",macro.Address);
             Assert.AreEqual("アドレスの最後が hr-update.net。最後の部分が本当のドメイン（住所）。表示の名前や途中の文字は偽れる",OpsMailMinigame.Catalog.Single(q=>q.Id=="salary").Clue);
-            var bank=OpsReactionBank.ScriptV2();Assert.AreEqual(191,bank.Length);Assert.IsFalse(bank.Any(l=>l.id=="maxim_hurry"||l.id=="maxim_link"));
+            var bank=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,bank.Length);Assert.IsFalse(bank.Any(l=>l.id=="maxim_hurry"||l.id=="maxim_link"));
             StringAssert.Contains("よくある合図",bank.Single(l=>l.id=="maxim_hurry_v2").caption);StringAssert.Contains("似た名前",bank.Single(l=>l.id=="maxim_link_v2").caption);
             Assert.AreEqual("暗号化と持ち出しは別々に調べる。戻す前に、安全を確かめる。",OpsEventCatalog.Event("y3-final").hint);
             var places=(string[])typeof(OpsMfaMinigame).GetField("ForeignPlaces",BindingFlags.Static|BindingFlags.NonPublic).GetValue(null);

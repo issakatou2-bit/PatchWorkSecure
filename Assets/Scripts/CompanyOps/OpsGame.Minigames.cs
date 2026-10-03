@@ -13,7 +13,14 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform minigameCanvas,minigameModal;
         private Action<OpsMinigame> minigameDone;
         private string minigameResponse;
-        private int minigameStartVoice,minigameComboVoice,minigameMissVoice;
+        private int minigameStartVoice,minigameSuccessChain,minigameMissVoice;
+        // 演出だけの連続成功数。採点・制限時間・結果の係数とは独立。
+        private void PresentMinigameSuccess()
+        {
+            minigameSuccessChain++;
+            SpeakSceneLine("combo_"+Mathf.Min(7,minigameSuccessChain),0);
+        }
+        private void ResetMinigameSuccess()=>minigameSuccessChain=0;
         private float minigameResultAt;
         private bool minigameResultDrawn;
         private string minigameMaxim="";
@@ -42,7 +49,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             bool practice=session is OpsMailMinigame mail&&mail.Practice || session is OpsLogMinigame||session is OpsBlockMinigame;
             if(session==null||session.Phase!=OpsMinigamePhase.Brief||(!DailyPracticeActive&&(State==null||(practice?State.phase!=OpsPhase.Planning:State.phase!=OpsPhase.Incident)))||MinigameActive||ResolutionActive)return false;
-            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
+            Minigame=session;minigameResponse=response;minigameDone=complete;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;ResetMinigameSuccess();
             StopVoice();homeVisible=false;NewScreen();
             var shared=screen.Find("SharedBackground");if(shared!=null)shared.gameObject.SetActive(false);
             KitGradient(screen.GetComponent<Image>(),Hex("2a1830"),Hex("1d2a44"));

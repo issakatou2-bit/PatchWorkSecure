@@ -28,7 +28,7 @@ namespace PatchWorkSecure.CompanyOps
         public bool HasAudio => lines != null && lines.Any(l => l != null && l.clip != null);
         public OpsReactionLine Find(string id) => lines?.FirstOrDefault(l => l!=null && l.id==id);
         public static OpsReactionLine[] Defaults() => ScriptV2().Where(IsGeneralReaction).ToArray();
-        public static bool IsGeneralReaction(OpsReactionLine line)=>line!=null&&!line.fullSpeech&&!line.extra&&!(line.id??"").StartsWith("mg_")&&!(line.id??"").StartsWith("maxim_");
+        public static bool IsGeneralReaction(OpsReactionLine line)=>line!=null&&!line.fullSpeech&&!line.extra&&!(line.id??"").StartsWith("mg_")&&!(line.id??"").StartsWith("combo_")&&!(line.id??"").StartsWith("maxim_");
         // 台本v2の字幕・表情・ポーズ。音声が無い取得直後の環境でも同じ内容を使う。
         public static OpsReactionLine[] ScriptV2() => new[] {
             new OpsReactionLine { id="think_01", caption="う〜ん……", scene="考える", reaction=OpsReaction.Think, faceId="face_normal", poseId="pose_think", fullSpeech=false, extra=false },
@@ -150,6 +150,13 @@ namespace PatchWorkSecure.CompanyOps
             new OpsReactionLine { id="annual_s", caption="運用ランクS！　胸を張っていい一年だったね！", scene="年間評価S", faceId="face_proud", poseId="pose_jump", fullSpeech=true },
             new OpsReactionLine { id="mg_start_01", caption="よーし、いくよっ！", scene="ミニゲームの始まり", faceId="face_determined", poseId="pose_fists" },
             new OpsReactionLine { id="mg_start_02", caption="さあ、腕の見せどころ！", scene="ミニゲームの始まり", faceId="face_doya", poseId="pose_point" },
+            new OpsReactionLine { id="combo_1", caption="いいね！", scene="ミニゲームで1回続けて成功", faceId="face_sparkle", poseId="pose_fists" },
+            new OpsReactionLine { id="combo_2", caption="その調子！", scene="ミニゲームで2回続けて成功", faceId="face_sparkle", poseId="pose_fists" },
+            new OpsReactionLine { id="combo_3", caption="すごい！", scene="ミニゲームで3回続けて成功", faceId="face_sparkle", poseId="pose_fists" },
+            new OpsReactionLine { id="combo_4", caption="やるぅ！", scene="ミニゲームで4回続けて成功", faceId="face_sparkle", poseId="pose_fists" },
+            new OpsReactionLine { id="combo_5", caption="てんさいっ！", scene="ミニゲームで5回続けて成功", faceId="face_sparkle", poseId="pose_jump" },
+            new OpsReactionLine { id="combo_6", caption="さいきょー！", scene="ミニゲームで6回続けて成功", faceId="face_sparkle", poseId="pose_jump" },
+            new OpsReactionLine { id="combo_7", caption="パーフェクト！", scene="ミニゲームで7回以上続けて成功", faceId="face_sparkle", poseId="pose_jump" },
             new OpsReactionLine { id="mg_combo_01", caption="その調子！", scene="ミニゲームで連続成功", faceId="face_sparkle", poseId="pose_fists" },
             new OpsReactionLine { id="mg_combo_02", caption="すごいすごい、止まらないね！", scene="ミニゲームで連続成功", faceId="face_sparkle", poseId="pose_jump" },
             new OpsReactionLine { id="mg_miss_01", caption="あっ、今のは惜しい！", scene="ミニゲームで失敗", faceId="face_worried", poseId="pose_startled" },

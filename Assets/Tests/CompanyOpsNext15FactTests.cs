@@ -15,7 +15,7 @@ namespace PatchWorkSecure.Tests
     {
         [Test] public void Next15Fact_分離は保証せず旧格言の既読と数値を保つ()
         {
-            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(191,lines.Length);Assert.AreEqual(191,lines.Select(l=>l.id).Distinct().Count());
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());
             Assert.IsFalse(lines.Any(l=>l.id=="maxim_segment"));var updated=lines.Single(l=>l.id=="maxim_segment_v2");
             Assert.AreEqual("区切っておけば、広がりを抑えられる！",updated.caption);Assert.IsNull(updated.clip);
             var career=new OpsCareer();career.PrepareMaximYear(14,1);Assert.IsTrue(career.HeardMaxim("maxim_segment",true));

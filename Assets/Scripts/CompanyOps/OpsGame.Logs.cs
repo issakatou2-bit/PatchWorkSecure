@@ -76,8 +76,8 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsLogMinigame;if(game==null)return;
             var row=game.Visible.FirstOrDefault(r=>r.Id==id);if(row==null||!game.Hit(id))return;
-            if(row.Suspicious){MinigameTone(600*Mathf.Pow(1.1f,game.Found));MinigamePop(new Vector2(540,180),"発見！",Hex("e0405f"));if(game.Found==3)SpeakSceneLine("mg_combo_01",0);}
-            else{MinigameTone(220,"square");MinigameVisual(logRows,"shake",.35f);SpeakSceneLine("mg_miss_01",0);}
+            if(row.Suspicious){MinigameTone(600*Mathf.Pow(1.1f,game.Found));MinigamePop(new Vector2(540,180),"発見！",Hex("e0405f"));PresentMinigameSuccess();}
+            else{MinigameTone(220,"square");MinigameVisual(logRows,"shake",.35f);ResetMinigameSuccess();SpeakSceneLine("mg_miss_01",0);}
             RefreshLogPresentation();
         }
         private void LogText(Transform row,string name,string value,float x,float width,Color color)

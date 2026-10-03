@@ -141,9 +141,9 @@ namespace PatchWorkSecure.CompanyOps
             {
                 MinigameTone(640);MinigamePop(new Vector2(240,350),"ぴったり！",Hex("6c63ff"));
                 foreach(int day in game.NewlyFull){MinigameCutBurst(new Vector2(92+day*(blockCell+6)+blockCell/2,350));MinigamePop(new Vector2(92+day*(blockCell+6),210),blockDays[day]+"曜、すき間なし！",Hex("ffc02e"));StartCoroutine(MinigameChord());}
-                if(game.NewlyFull.Count>0)SpeakSceneLine("mg_combo_0"+(1+minigameComboVoice++%2),0);
+                if(!game.Tasks.First(t=>t.Id==selected).Violates)PresentMinigameSuccess();else ResetMinigameSuccess();
             }
-            else{MinigameTone(200,"square");MinigameVisual(blockBoard,"shake",.35f);SpeakSceneLine("mg_miss_01",0);}
+            else{MinigameTone(200,"square");MinigameVisual(blockBoard,"shake",.35f);ResetMinigameSuccess();SpeakSceneLine("mg_miss_01",0);}
             RefreshBlockPresentation();
             if(placed)
             {

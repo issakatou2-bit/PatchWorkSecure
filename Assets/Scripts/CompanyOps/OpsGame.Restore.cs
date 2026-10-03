@@ -10,14 +10,14 @@ namespace PatchWorkSecure.CompanyOps
         private RectTransform restoreMap,restoreSide,restoreLogs;
         private readonly Dictionary<string,Button> restoreButtons=new Dictionary<string,Button>();
         private readonly Dictionary<string,OpsMinigameGraphic> restoreWires=new Dictionary<string,OpsMinigameGraphic>();
-        private readonly HashSet<string> restoreCompleted=new HashSet<string>();private int restoreRevision=-1;
+        private readonly HashSet<string> restoreCompleted=new HashSet<string>();private int restoreRevision=-1,restoreVoiceFailures;
         private static Vector2 RestorePosition(string id)
         {
             switch(id){case "check":return new Vector2(150,90);case "net":return new Vector2(450,90);case "dns":return new Vector2(230,230);case "auth":return new Vector2(670,230);case "fs":return new Vector2(120,400);case "db":return new Vector2(450,380);case "mail":return new Vector2(780,400);case "order":return new Vector2(330,560);default:return new Vector2(620,560);}
         }
         private void DrawRestorePresentation()
         {
-            var game=(OpsRestoreMinigame)Minigame;restoreButtons.Clear();restoreWires.Clear();restoreCompleted.Clear();restoreRevision=-1;
+            var game=(OpsRestoreMinigame)Minigame;restoreButtons.Clear();restoreWires.Clear();restoreCompleted.Clear();restoreRevision=-1;restoreVoiceFailures=0;
             KitGradient(screen.GetComponent<Image>(),Hex("1d2a44"),Hex("24394f"));KitGradient(minigameCanvas.GetComponent<Image>(),Hex("1d2a44"),Hex("24394f"));
             var top=PCard(minigameCanvas,"MinigameTop",0,0,1280,72,Color.white,22);DecisionPanel(top);
             var badge=PCard(top,"MinigameAlert",20,12,176,46,Hex("2bb673"),16,false);KitGradient(badge.GetComponent<Image>(),Hex("5fd39b"),Hex("2bb673"));
@@ -76,6 +76,7 @@ namespace PatchWorkSecure.CompanyOps
             var game=Minigame as OpsRestoreMinigame;if(game==null)return;
             FindMinigameText("MinigameTime").text="停止 "+RestoreClock(game.Hour);FindMinigameText("RestoreLoss").text="業務の損失 <color=#e0405f>"+System.Math.Round(game.Loss)+"</color> 万円";
             if(restoreRevision==game.Revision)return;restoreRevision=game.Revision;
+            if(game.Failures>restoreVoiceFailures)ResetMinigameSuccess();restoreVoiceFailures=game.Failures;
             foreach(var node in game.Nodes)
             {
                 var button=restoreButtons[node.Id];Color down=node.Encrypted?Hex("4a2438"):Hex("2b3a55");KitGradient(button.GetComponent<Image>(),node.Up?Hex("5fd39b"):node.Busy?Hex("34507a"):down,node.Up?Hex("2bb673"):node.Busy?Hex("34507a"):down);
@@ -95,7 +96,7 @@ namespace PatchWorkSecure.CompanyOps
                 if(node.Up&&restoreCompleted.Add(node.Id))
                 {
                     var p=RestorePosition(node.Id);MinigameCutBurst(new Vector2(p.x,p.y+92));MinigameVisual((RectTransform)button.transform,"hit",.09f);MinigameTone(660);StartCoroutine(DelayedMinigameTone(990,.08f));MinigamePop(new Vector2(p.x,p.y+92),node.Rto>=0?(node.Finished>node.Rto?"目標を超過…":"目標内に復旧！"):"復旧！",PlanMint);
-                    if(node.Rto>=0&&node.Finished<=node.Rto)SpeakSceneLine("mg_combo_0"+(1+minigameComboVoice++%2),0);
+                    if(node.Finished>=0){if(node.Rto<0||node.Finished<=node.Rto)PresentMinigameSuccess();else ResetMinigameSuccess();}
                 }
             }
             foreach(var wire in restoreWires)
@@ -122,7 +123,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             var game=Minigame as OpsRestoreMinigame;if(game==null)return;
             var status=game.Boot(id);if(status==OpsRestoreBoot.Started)MinigameTone(520);
-            else if(status==OpsRestoreBoot.Failed){MinigameTone(180,"saw");MinigameVisual((RectTransform)restoreButtons[id].transform,"shake",.4f);SpeakSceneLine("mg_miss_01",0);}
+            else if(status==OpsRestoreBoot.Failed){MinigameTone(180,"saw");MinigameVisual((RectTransform)restoreButtons[id].transform,"shake",.4f);ResetMinigameSuccess();SpeakSceneLine("mg_miss_01",0);}
             RefreshRestorePresentation();
         }
         private void DrawRestoreResults(RectTransform card)

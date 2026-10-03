@@ -1923,3 +1923,73 @@ MonoBehaviour:
     scene: "\u65E5\u8A18 3\u5E74\u76EE3\u6708\uFF08\u7D50\u672B\uFF09"
     fullSpeech: 1
     extra: 0
+  - id: combo_1
+    caption: "\u3044\u3044\u306D\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_fists
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30671\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_2
+    caption: "\u305D\u306E\u8ABF\u5B50\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_fists
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30672\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_3
+    caption: "\u3059\u3054\u3044\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_fists
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30673\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_4
+    caption: "\u3084\u308B\u3045\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_fists
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30674\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_5
+    caption: "\u3066\u3093\u3055\u3044\u3063\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30675\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_6
+    caption: "\u3055\u3044\u304D\u3087\u30FC\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30676\u56DE\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0
+  - id: combo_7
+    caption: "\u30D1\u30FC\u30D5\u30A7\u30AF\u30C8\uFF01"
+    speaker: 
+    reaction: 0
+    clip: {fileID: 0}
+    faceId: face_sparkle
+    poseId: pose_jump
+    scene: "\u30DF\u30CB\u30B2\u30FC\u30E0\u30677\u56DE\u4EE5\u4E0A\u7D9A\u3051\u3066\u6210\u529F"
+    fullSpeech: 0
+    extra: 0

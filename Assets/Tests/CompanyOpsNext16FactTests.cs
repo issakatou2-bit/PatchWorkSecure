@@ -18,7 +18,7 @@ namespace PatchWorkSecure.Tests
     {
         [Test] public void Next16Fact_二つの新IDと二十格言と旧既読保存を維持する()
         {
-            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(191,lines.Length);Assert.AreEqual(191,lines.Select(l=>l.id).Distinct().Count());
+            var lines=OpsReactionBank.ScriptV2();Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Length);Assert.AreEqual(OpsCatalog.VoiceScriptLineCount,lines.Select(l=>l.id).Distinct().Count());
             Assert.IsFalse(lines.Any(l=>l.id=="maxim_report"||l.id=="diary_y3_07"));
             var report=lines.Single(l=>l.id=="maxim_report_v2");Assert.AreEqual("迷ったら相談！　早い報告ほど、打てる手が増えるよ！",report.caption);Assert.IsNull(report.clip);
             var july=OpsDiaryCatalog.Entries.Single(e=>e.year==3&&e.month==3);Assert.AreEqual("diary_y3_07_v2",july.voiceId);Assert.AreEqual("支援士の科目B、長い……夜が足りない",july.intro);StringAssert.Contains("科目Bの問題は",july.body);

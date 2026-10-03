@@ -33,4 +33,8 @@
 - 続く実行も、撮影で見つけたスライダーの選択の分かりづらさを修正するため中断。中断時はテスト全体の最後の復帰処理が走らなかったため、開始時の記録から15設定を存在/型/値ごと復帰した。中断分は全件成功に数えない。
 - 全件内では、前の画面の実デバイスを参照するUIアクションのキャッシュがInputTestFixtureの別入力システムへ持ち込まれ、Next17以降にIndexOutOfRangeExceptionが連鎖したため中断した。テスト用の切替前後で既存UIを無効化/破棄し、関連するInputActionMapの実行状態をDisposeしてから入力システムを切り替える。ゲーム本体の挙動・入力定義アセットは変更しない。実入力の画面から仮想入力への移行を含む関連5/5、同じPlayMode内の実入力→仮想入力→実入力の往復1/1、3アセンブリ（追加警告なし）を確認。
 - その後の全件では入力5件は成功したが、泡の撮影でNavigatorSpeechのフォント警告1件が出たため中断。入力テストの後片付けで、検証専用フォントを解放する前に描画先Canvasも破棄するよう修正した。六本の撮影直後に通常の泡/吹き出しを描く回帰を同じPlayModeテストに加え、関連5/5（六本S・一年通し・通常描画の回帰を含む）が成功。警告を無視/抑制する変更はしていない。
-- 修正後の全PlayMode2回は未完了。設定/フォントの最終復帰とWindows私的試遊版の更新は、この全件確認後に行う。
+- 修正後の全PlayModeは294/294を2回連続成功（`Artifacts/next-17-all-1-clean-tests.json` / `Artifacts/next-17-all-2-tests.json`）。両回とも設定15キーの存在/型/値・8フォントのSHA256は開始時と一致し、一時シーン0（`preservation-all-1.json` / `preservation-all-2.json`）。テスト後のフォントの追加復帰は不要だった。
+- 最終撮影から比較を再生成。1280×800/1920×1080で選択中のつまみ・端末・配置先の青枠を確認。Bの感染警告色と選択色が共存し、文字/配置を覆わないことを比較画像で確認。`Compare-Final.ps1`の出力を`Artifacts/Next17/`に保存。
+- Windows私的試遊版0.16.0を更新。EditorのConsoleで今回のビルド成功を確認（`build-messages.json`）。呼び出しの5秒応答は時間切れになったが、ビルドは32秒で継続・成功したので重複起動していない。ビルドで変化した8フォントを直前のUnity保存から復帰し、ビルド前後/開始時とのSHA256・設定15キーの存在/型/値・一時シーン0を確認（`build-font-preservation.json` / `preservation-after-build.json`）。
+- 別起動のWindows版で画面切替/版、SE15用途、ひなたの事件音声、BGM2曲、12か月の5項目がPASSED、終了コード0（`player-smoke.log` / `player-smoke-result.json`）。既知の終了時ComputeBuffer診断は残る。Editorは編集状態でCompanyYearを開き直してあり、通常背景false・resizable true・FullScreenWindowを維持。
+- 実機パッドでの確認は未実施。Windows版を含めひなたの無料プラン音声は私的試遊限定で、配布/公開/動画投稿は禁止。Next-17の完了報告後は、追加の指示Next-18の宣伝素材撮影だけを進める。

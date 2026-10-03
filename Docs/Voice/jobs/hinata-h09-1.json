@@ -1,0 +1,201 @@
+{
+ "title": "ひなたの声 その15　H09で各パターン",
+ "out": "v15",
+ "note": "H09（その9の「おはようございます」を見本に固定）で、台本の各種類（掛け声・全文・格言・日記）と連鎖の声の案を作った。見本への寄せ方5。元はElevenLabsの今の声。",
+ "seed": 20261301,
+ "takes": 2,
+ "talk": "情シスの後輩が、職場の先輩に話しかけている。読み上げではなく、目の前の相手との会話。",
+ "voices": {
+  "H09": {
+   "name": "H09",
+   "model": "large",
+   "caption": "社会人2年目の、明るく元気な女性。人懐っこく、ほがらかで、やわらかく甘さのある高めの声。近いマイクで録った、こもりのないクリアな音質。",
+   "refs": [
+    "Artifacts/VoiceAudition/v9/audio/H09-greet.wav"
+   ],
+   "extra": [
+    "--cfg-scale-speaker",
+    "5",
+    "--cfg-scale-caption",
+    "4"
+   ]
+  }
+ },
+ "lines": [
+  {
+   "id": "think_01",
+   "text": "う〜ん……",
+   "read": "う〜ん……",
+   "direction": "考える。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/think_01.mp3"
+  },
+  {
+   "id": "growth_05",
+   "text": "ね、言ったでしょ！",
+   "read": "ね、言ったでしょ！",
+   "direction": "成長・ランクアップ。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/growth_05.mp3"
+  },
+  {
+   "id": "recover_03",
+   "text": "大丈夫、まかせて！",
+   "read": "大丈夫、まかせて！",
+   "direction": "被害から立て直す。得意げに言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/recover_03.mp3"
+  },
+  {
+   "id": "failure_01",
+   "text": "うぅ……くやしい！",
+   "read": "うぅ……くやしい！",
+   "direction": "結果が悪かった。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/failure_01.mp3"
+  },
+  {
+   "id": "extra_determined",
+   "text": "よし、やるよっ！",
+   "read": "よし、やるよっ！",
+   "direction": "山場の月の始まり。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/extra_determined.mp3"
+  },
+  {
+   "id": "mg_mfa_breach",
+   "text": "その人、今ログインしてないよ〜！",
+   "read": "その人、今ログインしてないよ〜！",
+   "direction": "多要素認証で許可してしまう。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/mg_mfa_breach.mp3"
+  },
+  {
+   "id": "tutorial_1",
+   "text": "ようこそ、情シスへ！　上の数字が予算とこうすう、左が会社の力だよ！",
+   "read": "ようこそ、情シスへ！　上の数字が予算とこうすう、左が会社の力だよ！",
+   "direction": "チュートリアル1。明るく言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/tutorial_1.mp3"
+  },
+  {
+   "id": "mission_accept_08",
+   "text": "どこまで共有していいか、判断の目安を作ろ！",
+   "read": "どこまで共有していいか、判断の目安を作ろ！",
+   "direction": "依頼を引き受ける。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/mission_accept_08.mp3"
+  },
+  {
+   "id": "annual_b",
+   "text": "運用ランクB！　しっかり守れた一年だったね！",
+   "read": "運用ランクB！　しっかり守れた一年だったね！",
+   "direction": "年間評価B。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/annual_b.mp3"
+  },
+  {
+   "id": "season_03",
+   "text": "一年の集大成だよ！　最後まで、一緒に守りきろ！",
+   "read": "一年の集大成だよ！　最後まで、一緒に守りきろ！",
+   "direction": "3月。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/season_03.mp3"
+  },
+  {
+   "id": "maxim_backup",
+   "text": "バックアップは、戻せてこそバックアップ、だよ！",
+   "read": "バックアップは、戻せてこそバックアップ、だよ！",
+   "direction": "戻せることを確かめる。得意げに言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/maxim_backup.mp3"
+  },
+  {
+   "id": "maxim_least",
+   "text": "権限は、必要な人に、必要な分だけ！",
+   "read": "権限は、必要な人に、必要な分だけ！",
+   "direction": "最小権限。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/maxim_least.mp3"
+  },
+  {
+   "id": "maxim_priority",
+   "text": "更新は、危ないものから順番に！",
+   "read": "更新は、危ないものから順番に！",
+   "direction": "優先順位。元気いっぱいに言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/maxim_priority.mp3"
+  },
+  {
+   "id": "maxim_usb",
+   "text": "知らないUSBは、挿さない！",
+   "read": "知らないUSBは、挿さない！",
+   "direction": "基本。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/maxim_usb.mp3"
+  },
+  {
+   "id": "diary_y1_04",
+   "text": "こっそり復元を試したら、本番に上書きしかけた……",
+   "read": "こっそり復元を試したら、本番に上書きしかけた……",
+   "direction": "日記 1年目4月。照れ笑いまじりに言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/diary_y1_04.mp3"
+  },
+  {
+   "id": "diary_y2_04",
+   "text": "受かってたーっ！……拠点のルーター、パスワードが初期のままだった",
+   "read": "受かってたーっ！……拠点のルーター、パスワードが初期のままだった",
+   "direction": "日記 2年目4月。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/diary_y2_04.mp3"
+  },
+  {
+   "id": "diary_y3_04",
+   "text": "後輩ちゃんが来たよ。わたし、先輩になっちゃった",
+   "read": "後輩ちゃんが来たよ。わたし、先輩になっちゃった",
+   "direction": "日記 3年目4月。自然に言う。",
+   "orig": "Assets/Audio/CompanyYear/VoiceTest/Hinata/diary_y3_04.mp3"
+  },
+  {
+   "id": "diary_y3_03_clear",
+   "text": "3年間、守り抜いたよ。次は、何を目指そうかな",
+   "read": "3年間、守り抜いたよ。次は、何を目指そうかな",
+   "direction": "日記 3年目3月（結末）。自然に言う。",
+   "orig": ""
+  },
+  {
+   "id": "combo_1",
+   "text": "いいね！",
+   "read": "いいね！😆",
+   "direction": "ミニゲームで1回続けて成功。うれしくて声をかける。",
+   "orig": ""
+  },
+  {
+   "id": "combo_2",
+   "text": "その調子！",
+   "read": "その調子！😆",
+   "direction": "ミニゲームで2回続けて成功。うれしくて声をかける。",
+   "orig": ""
+  },
+  {
+   "id": "combo_3",
+   "text": "すごい！",
+   "read": "すごい！😆",
+   "direction": "ミニゲームで3回続けて成功。うれしくて声をかける。",
+   "orig": ""
+  },
+  {
+   "id": "combo_4",
+   "text": "やるぅ！",
+   "read": "やるぅ！💥",
+   "direction": "ミニゲームで4回続けて成功。だんだん興奮して、かわいく叫ぶ。",
+   "orig": ""
+  },
+  {
+   "id": "combo_5",
+   "text": "てんさいっ！",
+   "read": "てんさいっ！💥",
+   "direction": "ミニゲームで5回続けて成功。だんだん興奮して、かわいく叫ぶ。",
+   "orig": ""
+  },
+  {
+   "id": "combo_6",
+   "text": "さいきょー！",
+   "read": "さいきょー！💥",
+   "direction": "ミニゲームで6回続けて成功。だんだん興奮して、かわいく叫ぶ。",
+   "orig": ""
+  },
+  {
+   "id": "combo_7",
+   "text": "パーフェクト！",
+   "read": "パーフェクト！💥",
+   "direction": "ミニゲームで7回続けて成功。だんだん興奮して、かわいく叫ぶ。",
+   "orig": ""
+  }
+ ]
+}

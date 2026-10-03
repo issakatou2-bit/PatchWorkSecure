@@ -139,3 +139,5 @@ CLAUDE.md／AGENTS.mdは毎回自動で読み込まれ使用量に直結する�
 - UI・UXの再調査（Codex）：`Docs/UI-UX-Research-2026-09-28.md`
 - UI・UX・演出・音の評価（Claude）：`Docs/UI-UX-Review-2026-09-28.md`
 - 旧記載の`balance_sim.js`／`verify_csharp_logic.py`は存在しない。代わりに`Tools/Verify-*.ps1`を使う。
+
+**補足追記：IPA公式資料の限定的な確認結果（2026-10-03 JST）**：本編の冊子p.29・31を再確認し、入退社・異動・契約終了の学習論点の根拠を共有。過去の取得時間切れの履歴は保持。その他の箇所とゲーム全体の照合・個別実例は未確認。詳細は[点検記録の補足追記](Fact-Check-2026-10-02.md)。既存方針・source割当の変更や新作業の指示ではありません。

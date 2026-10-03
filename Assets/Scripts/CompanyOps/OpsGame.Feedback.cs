@@ -197,6 +197,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void OnDestroy()
         {
+            ReleaseGamepadUI();
             ReleaseTestFonts();
             foreach (var clip in generatedSounds.Values) if (clip != null) Destroy(clip);
             foreach (var clip in minigameTones.Values) if (clip != null) Destroy(clip);

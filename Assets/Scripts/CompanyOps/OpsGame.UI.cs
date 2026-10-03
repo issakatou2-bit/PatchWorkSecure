@@ -192,6 +192,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Update()
         {
+            TickGamepad();
             TickMusic();
             TickVoice();
             if(YearOpeningActive){TickYearOpening(Time.unscaledDeltaTime);return;}

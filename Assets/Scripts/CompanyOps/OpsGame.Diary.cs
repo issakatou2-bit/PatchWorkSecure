@@ -113,6 +113,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void DiarySpread(OpsDiaryRecord r,Action close,bool collapsed,bool archive=false)
         {
+            padDiaryPage=r;padDiaryClose=close;padDiaryArchive=archive;
             if(r==null)return;var e=OpsDiaryCatalog.Entries[r.content];var book=DiaryPaper();bool annual=r.yearEnd;
             if(annual)DiaryTape(book,230,-12,170,false,-3);
             else if(r.mood==2)DiaryTape(book,230,-12,150,true,3);

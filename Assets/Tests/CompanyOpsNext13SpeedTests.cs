@@ -32,7 +32,13 @@ namespace PatchWorkSecure.Tests
             finally{OpsGame.TestMode=true;}
             var fixture=DecisionFixture("bec",false);game.StartYear(fixture.seed);SetEvent(game.State,fixture.CurrentEvent.id);game.BeginIncident();while(game.PhasePresentationRunning)yield return null;
             string initial=JsonUtility.ToJson(game.State);game.ChooseResponse("scope");Assert.IsInstanceOf<OpsMailMinigame>(game.Minigame);
-            Assert.LessOrEqual(Find<TextMeshProUGUI>("MinigameInstructions").text.Split('\n').Length,2);Assert.AreEqual(OpsCatalog.MailSeconds,game.Minigame.Duration);Capture("next13-speed-mail-brief");
+            var instructions=Find<TextMeshProUGUI>("MinigameInstructions").text.Split('\n');
+            // 短縮した遊び方は従来の2行のまま。Next-17の操作説明1行を別に確認する。
+            Assert.AreEqual(3,instructions.Length);
+            Assert.AreEqual("怪しいメールは報告（→）。本物は仕事を進める（←）。",instructions[0]);
+            Assert.AreEqual("リンクの行き先はカーソル／長押しで確認。40秒で10通。",instructions[1]);
+            Assert.AreEqual("パッド：十字キーで選ぶ／Aで決定／リンクを選ぶと行き先を確認",instructions[2]);
+            Assert.AreEqual(OpsCatalog.MailSeconds,game.Minigame.Duration);Capture("next13-speed-mail-brief");
             Click("MinigameDelegate");Click("MinigameContinue");yield return WaitForResolution(game);var expected=JsonUtility.FromJson<OpsState>(initial);expected.Resolve("scope");Assert.AreEqual(JsonUtility.ToJson(expected),JsonUtility.ToJson(game.State));
             Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }

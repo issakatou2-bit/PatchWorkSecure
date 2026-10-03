@@ -35,7 +35,9 @@ namespace PatchWorkSecure.Tests
                         }
                         else if(session is OpsMfaMinigame d)
                         {
-                            if(d.CanAnswer)yield return PadClick(game,input,d.Current.Legitimate?"MfaAllow":"MfaDeny");else yield return null;
+                            // 残り時間が選択中に尽きたら、結果画面のボタンを回答として探さない。
+                            // 制限時間を延ばさず、終了後のS判定も従来どおり検査する。
+                            if(d.CanAnswer)yield return PadClick(game,input,d.Current.Legitimate?"MfaAllow":"MfaDeny",()=>d.Phase==OpsMinigamePhase.Playing);else yield return null;
                         }
                         else if(session is OpsLogMinigame e)
                         {
@@ -62,6 +64,12 @@ namespace PatchWorkSecure.Tests
                         }
                     }
                     Assert.AreEqual(OpsMinigamePhase.Result,session.Phase,id);Assert.AreEqual("S",session.Grade,id+" / "+session.Score);
+                    if(session is OpsMfaMinigame)
+                    {
+                        // 期限直後の古い回答要求を再現。消えた回答ボタンも次画面も押さない。
+                        yield return PadClick(game,input,"MfaDeny",()=>session.Phase==OpsMinigamePhase.Playing);
+                        Assert.AreSame(session,game.Minigame);Assert.IsTrue(game.MinigameActive);
+                    }
                     yield return new WaitForSecondsRealtime(1.3f);
                     while(game.MinigameCounting)yield return null;
                     yield return new WaitForSecondsRealtime(.3f);Next17Shots(id+"-result");

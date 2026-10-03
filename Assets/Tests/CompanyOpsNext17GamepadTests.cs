@@ -51,10 +51,11 @@ namespace PatchWorkSecure.Tests
         }
         private static readonly Vector2[] PadDirections={Vector2.up,Vector2.down,Vector2.left,Vector2.right};
         // 経路は実際のボタン位置から求める。選択を書き換えず十字キーだけを入力する。
-        private static IEnumerator PadTo(OpsGame game,PadFixture input,string name)
+        private static IEnumerator PadTo(OpsGame game,PadFixture input,string name,Func<bool> stillApplicable=null)
         {
             for(int retry=0;retry<90;retry++)
             {
+                if(stillApplicable!=null&&!stillApplicable())yield break;
                 var choices=(Selectable[])typeof(OpsGame).GetMethod("GamepadChoices",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(game,null);
                 var target=choices.FirstOrDefault(s=>s.name==name);Assert.IsNotNull(target,"操作可能な対象がない: "+name);
                 var selected=EventSystem.current.currentSelectedGameObject;
@@ -80,10 +81,13 @@ namespace PatchWorkSecure.Tests
             Assert.Fail("選択に時間がかかりすぎた: "+name);
         }
         private static Vector2 PadCenter(Selectable s)=>((RectTransform)s.transform).TransformPoint(((RectTransform)s.transform).rect.center);
-        private static IEnumerator PadClick(OpsGame game,PadFixture input,string name)
+        private static IEnumerator PadClick(OpsGame game,PadFixture input,string name,Func<bool> stillApplicable=null)
         {
-            while(game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))yield return null;
-            yield return PadTo(game,input,name);yield return input.Tap(input.Pad.buttonSouth);
+            while(game.PhasePresentationRunning||Time.unscaledTime<(float)typeof(OpsGame).GetField("presentationInputGuardUntil",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game))
+            {if(stillApplicable!=null&&!stillApplicable())yield break;yield return null;}
+            yield return PadTo(game,input,name,stillApplicable);
+            if(stillApplicable!=null&&!stillApplicable())yield break;
+            yield return input.Tap(input.Pad.buttonSouth);
         }
         private static void Next17Shots(string name)
         {foreach(var size in new[]{new Vector2Int(1280,800),new Vector2Int(1920,1080)})Next15Shot(name,size.x,size.y,"Next17");}

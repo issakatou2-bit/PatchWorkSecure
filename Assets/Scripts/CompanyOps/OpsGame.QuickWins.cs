@@ -135,11 +135,11 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsWorkComplete : MonoBehaviour
     {
         public OpsGame Owner;public Image[] Tokens;public OpsPortraitMotion Portrait;
-        private Color[] colors;private float started;private bool reacted;
+        private Color[] colors;private float started;private bool reacted;private OpsPresentationWait timing;
         private void Start(){started=Time.realtimeSinceStartup;colors=Tokens.Select(t=>t.color).ToArray();}
         private void Update()
         {
-            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.5f);
+            if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.WorkComplete,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);float t=Mathf.Clamp01(timing.Elapsed/OpsPresentationTiming.WorkComplete);
             if(!reacted&&t>=.28f){reacted=true;Portrait?.SmallCelebrate();}
             for(int i=0;i<Tokens.Length;i++)
             {
@@ -152,11 +152,11 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsRankChange : MonoBehaviour
     {
         public OpsGame Owner;public string Before,After;public bool Up;public Image Badge;
-        private TextMeshProUGUI label;private Color original;private float started;
+        private TextMeshProUGUI label;private Color original;private float started;private OpsPresentationWait timing;
         private void Start(){started=Time.realtimeSinceStartup;label=GetComponent<TextMeshProUGUI>();original=Badge.color;label.text=Up?Before:After;}
         private void Update()
         {
-            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.4f);label.text=Up&&t<.5f?Before:After;
+            if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.RankFlip,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);float t=Mathf.Clamp01(timing.Elapsed/OpsPresentationTiming.RankFlip);label.text=Up&&t<.5f?Before:After;
             label.transform.localScale=new Vector3(Up&&!Owner.ReducedMotion?Mathf.Abs(1-2*t):1,1,1);
             label.alpha=Owner.ReducedMotion?Mathf.Abs(1-2*t)*.65f+.35f:1;
             Badge.color=Owner.ReducedMotion?original:Color.Lerp(original,Up?Color.white:Color.gray,Mathf.Sin(t*Mathf.PI)*.6f);
@@ -167,11 +167,11 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsBudgetGain : MonoBehaviour
     {
         public OpsGame Owner;public RectTransform Target;public RectTransform[] Coins;
-        private float started;private Vector2 end;
+        private float started;private Vector2 end;private OpsPresentationWait timing;
         private void Start(){started=Time.realtimeSinceStartup;end=((RectTransform)transform).InverseTransformPoint(Target.TransformPoint(new Vector3(37,-32,0)));}
         private void LateUpdate()
         {
-            float t=Mathf.Clamp01((Time.realtimeSinceStartup-started)/.6f);
+            if(timing==null)timing=Owner.BeginFeedback(name,OpsPresentationTiming.BudgetCoins,transform);timing.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);float t=Mathf.Clamp01(timing.Elapsed/OpsPresentationTiming.BudgetCoins);
             for(int i=0;i<Coins.Length;i++)
             {
                 var start=new Vector2(1000,-148);float a=(i-2)*.6f;

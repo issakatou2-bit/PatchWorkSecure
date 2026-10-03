@@ -21,7 +21,6 @@ namespace PatchWorkSecure.CompanyOps
             SpeakSceneLine("combo_"+Mathf.Min(7,minigameSuccessChain),0);
         }
         private void ResetMinigameSuccess()=>minigameSuccessChain=0;
-        private float minigameResultAt;
         private bool minigameResultDrawn;
         private string minigameMaxim="";
         private bool minigameMaximSpoken;
@@ -191,6 +190,7 @@ namespace PatchWorkSecure.CompanyOps
         public void StartMinigame()
         {
             if(Minigame==null||!Minigame.Start())return;
+            presentationInputGuardUntil=0;
             minigameModal.gameObject.SetActive(false);Destroy(minigameModal.gameObject);minigameModal=null;
             SpeakSceneLine("mg_start_0"+(1+minigameStartVoice++%2),0);
             if(Minigame is OpsLogMinigame)minigameCanvas.GetComponentInChildren<OpsPortraitAnimator>().ChangePose("pose_magnifier");
@@ -212,9 +212,10 @@ namespace PatchWorkSecure.CompanyOps
                 var fill=minigameCanvas.Find("MinigameTop/MinigameTimer/MinigameTimerFill") as RectTransform;
                 if(fill!=null)fill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,(Minigame is OpsMailMinigame?696:Minigame is OpsMfaMinigame?670:Minigame is OpsBlockMinigame?550:Minigame is OpsLogMinigame?722:310)*Minigame.Remaining/Minigame.Duration);
                 RefreshCurrentMinigame();
-                if(Minigame.Phase==OpsMinigamePhase.Result){minigameResultAt=Time.unscaledTime+1.1f/PresentationRate;ShowMinigameFinish();}
+                if(Minigame.Phase==OpsMinigamePhase.Result)ShowMinigameFinish();
             }
-            if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn&&Time.unscaledTime>=minigameResultAt)MinigameResult();
+            if(Minigame.Phase==OpsMinigamePhase.Result&&!minigameResultDrawn)
+            {finishTiming?.Advance(Time.unscaledDeltaTime,FastPresentation);if(finishTiming==null||finishTiming.Done)MinigameResult();}
             // 終了の掛け声と数え上げを遮らない。続ける操作はいつでも可能。
             if(minigameResultDrawn&&!MinigameCounting&&!minigameMaximSpoken&&minigameMaxim!=""&&!VoicePending&&!PortraitVoicePlaying&&Time.unscaledTime>=voiceBusyUntil)
             {minigameMaximSpoken=true;var line=FindVoiceLine(minigameMaxim);if(line!=null){StopVoice();BeginVoice(line,0,5,"MinigameMaxim",true);}}
@@ -228,6 +229,7 @@ namespace PatchWorkSecure.CompanyOps
         public void TickMinigameInput(){TickDecisionKeys();TickBlockKeys();}
         private void ShowMinigameFinish()
         {
+            finishTiming=BeginPresentation("minigame_finish_"+Minigame.GetType().Name,OpsPresentationTiming.Finish);
             var containment=Minigame as OpsContainmentMinigame;
             string title=containment!=null&&containment.TotalInfected==0?"確認完了":containment!=null&&containment.Uncontained>0?"広がってしまった…":"封じ込め成功！";
             if(Minigame is OpsMailMinigame)title="仕分け完了！";
@@ -274,6 +276,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void CancelMinigame()
         {
+            foreach(var wait in presentationWaits.Where(w=>w.Kind.StartsWith("minigame_")||w.Kind=="result_stamp"))wait.Finish();finishTiming=null;
             Minigame=null;minigameDone=null;minigameResultDrawn=false;MinigameCounting=false;minigameMaxim="";minigameMaximSpoken=false;
             if(minigameAudio!=null)minigameAudio.Stop();
         }
@@ -311,15 +314,22 @@ namespace PatchWorkSecure.CompanyOps
         private System.Collections.IEnumerator CountMinigameResult(RectTransform stamp,int score)
         {
             var session=Minigame;var label=FindMinigameText("MinigameScore");stamp.gameObject.SetActive(false);MinigameCounting=true;
-            int value=0,step=Mathf.Max(1,Mathf.RoundToInt(score/25f));label.text="0点";
-            if(!ReducedMotion)while(value<score&&Minigame==session)
+            int value=0,step=Mathf.Max(1,Mathf.RoundToInt(score/25f));
+            var wait=BeginPresentation("minigame_count_"+Minigame.GetType().Name,OpsPresentationTiming.ScoreStep*((score+step-1)/step)+OpsPresentationTiming.ResultStamp,finishTiming?.CanSkip,minigameCanvas);
+            wait.ManualCompletion=true;
+            if(finishTiming?.Skipped==true)wait.Skip();
+            label.text="0点";
+            if(!ReducedMotion)while(value<score&&Minigame==session&&!wait.Skipped)
             {
                 value=Mathf.Min(score,value+step);label.text=value+"点";MinigameTone(700+value*6,"triangle");
-                yield return new WaitForSecondsRealtime(.035f/PresentationRate);
+                float elapsed=0;
+                while(!wait.Skipped&&elapsed<OpsPresentationTiming.ScoreStep){elapsed+=Time.unscaledDeltaTime*PresentationRate;wait.Advance(Time.unscaledDeltaTime,FastPresentation);yield return null;}
             }
             if(Minigame!=session||stamp==null)yield break;
             label.text=score+"点";MinigameCounting=false;stamp.gameObject.SetActive(true);
-            MinigameVisual(stamp,"stamp",.5f);MinigameTone(180,"square");StartCoroutine(MinigameChord(.12f));
+            if(!wait.Skipped)MinigameVisual(stamp,"stamp",OpsPresentationTiming.ResultStamp);else stamp.localEulerAngles=new Vector3(0,0,ReducedMotion?0:-4);MinigameTone(180,"square");StartCoroutine(MinigameChord(.12f));
+            for(float elapsed=0;!wait.Skipped&&elapsed<OpsPresentationTiming.ResultStamp;elapsed+=Time.unscaledDeltaTime*PresentationRate){wait.Advance(Time.unscaledDeltaTime,FastPresentation);yield return null;}
+            wait.Finish();
         }
     }
 }

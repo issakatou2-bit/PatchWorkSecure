@@ -130,8 +130,7 @@ namespace PatchWorkSecure.CompanyOps
                 var task=GamepadChoices().FirstOrDefault(s=>s.name=="BlockTask_"+id);
                 if(task!=null)SelectGamepad(task);return;
             }
-            if(FactorRevealActive){SkipFactorReveal();return;}
-            if(YearOpeningActive){SkipYearOpening();return;}
+            if(FactorRevealActive||YearOpeningActive){TrySkipPresentation();return;}
             if(DiaryActive){var close=GamepadChoices().FirstOrDefault(s=>s.name=="DiaryClose") as Button;close?.onClick.Invoke();return;}
             if(MinigameActive)return;
             if(tab!=0&&!homeVisible){OpenTab(0);return;}
@@ -155,13 +154,12 @@ namespace PatchWorkSecure.CompanyOps
             if(!padInUse&&!active)return;
             if(pad.startButton.wasPressedThisFrame){StopVoice();if(modal!=null&&modal.Find("SettingsWindow")!=null)CloseDialog();else Menu();return;}
             if(pad.buttonEast.wasPressedThisFrame){GamepadBack();return;}
+            if(pad.buttonSouth.wasPressedThisFrame&&(PresentationInputConsumed||TrySkipPresentation()))return;
             if(YearOpeningActive&&modal==null)
             {if(pad.buttonSouth.wasPressedThisFrame)AdvanceYearOpening();return;}
             if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&CanSkipResolution){SkipResolution();return;}
             if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&(PhasePresentationRunning||Time.unscaledTime<presentationInputGuardUntil))
             {SkipPhasePresentation();return;}
-            if(modal==null&&pad.buttonSouth.wasPressedThisFrame&&AnnualPresentationCanSkip&&!AnnualPresentationSkipped)
-            {FinishReportCounts();SkipAnnualPresentation();return;}
             if(DiaryActive){if(pad.leftShoulder.wasPressedThisFrame)GamepadDiaryTurn(-1);if(pad.rightShoulder.wasPressedThisFrame)GamepadDiaryTurn(1);}
             EnsureGamepadSelection();
             if(modal==null&&Minigame is OpsBlockMinigame block&&block.Phase==OpsMinigamePhase.Playing&&pad.buttonWest.wasPressedThisFrame&&block.Selected>=0)

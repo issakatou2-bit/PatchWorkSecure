@@ -28,7 +28,7 @@ namespace PatchWorkSecure.CompanyOps
             int height=FullscreenEnabled?Display.main.systemHeight:1080;
             Screen.SetResolution(width>0?width:1920,height>0?height:1080,FullscreenEnabled?FullScreenMode.FullScreenWindow:FullScreenMode.Windowed);
         }
-        public float PresentationRate=>FastPresentation?2f:1f;
+        public float PresentationRate=>FastPresentation?OpsPresentationTiming.FastRate:1f;
         public bool RepeatedChallenge=>Career.startedStoryAttempts>1||Career.finishedAttempts>0;
         public void SetPresentationSpeed(bool fast){FastPresentation=fast;StoreDisplaySettings();}
         public float TextScale => TextSize==0?.9f:TextSize==2?1.12f:1;

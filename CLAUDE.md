@@ -63,7 +63,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-21時点で310件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-23時点で317件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -79,7 +79,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 | `Assets/Editor/` | `PatchWorkSecure.Editor` | Editor限定 |
 | `Assets/Tests/` | `PatchWorkSecure.Tests` | `includePlatforms`は**空**にする（`["Editor"]`だとPlayModeテストが0件のまま成功扱いになる） |
 
-Next-19の分類規則（Next-21時点）：普段は印なし175件、`Capture`は撮影130件、`Long`は3役×5年度とゲームパッド通しの5件。合計310件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
+Next-19の分類規則（Next-23時点）：普段は印なし182件、`Capture`は撮影130件、`Long`は3役×5年度とゲームパッド通しの5件。合計317件。Longは撮影してもCaptureを重ねない。Explicit撮影7件は別枠。既存310件の名前と分類は維持し、Next-23の関係7件だけ普段へ追加。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
 起動済みEditorでは`./Tools/Run-TestGroup.ps1 -Group RegularCapture`（普段＋撮影）、`-Group Normal`（普段）、`-Group Long`、`-Group All`を使う。`-Group Inspect`で一覧確認。失敗/関係分は`-Only`に完全名の配列を渡す。実行ごとのJSON/XMLは`Artifacts/TestGroups/`へ保存し、0件や中断を成功扱いにしない。
 
 ## 5. 使用量を抑える作業ルール（品質は落とさない）
@@ -93,11 +93,13 @@ Next-19の分類規則（Next-21時点）：普段は印なし175件、`Capture`
 - 中断実行は成功回数に数えず、フォントの作業用データとPlayerPrefsの存在/型/値の復帰を毎回確認する。撮影が時間切れならClaudeのIrodori生成とのGPU競合をまず確認し、同じテストだけ再実行する（`Docs/Voice/Irodori-Direction-Rules.md`2e）。
 - **加藤さんへの返答は常に日本語**。英語に切り替えない。
 
-## 6. 現状（2026-10-03）— 詳細は`Docs/Dev-Status.md`
+## 6. 現状（2026-10-04）— 詳細は`Docs/Dev-Status.md`
+
+- **Next-23完了**：既存の入場・数え上げ・判子・切替・発動等の待ちを`OpsPresentationTiming`へ集約。初回は全表示、同種の再訪はクリック/決定/南ボタンで終端、速いは2倍。声を止め入力を次の行動へ渡さず、遊び中は入力を奪わない。生成前の時間加算と上書きポーズの待ち残りも修正。全317件は310成功/7失敗から関係分だけ再確認し未解決0、追加の普段182件も180成功/2失敗から当該2件を成功。7画面の前後比較、CSVのSHA256不変、設定15キー/8フォント一致・一時シーン0。Windows私的試遊版0.16.0は更新・12か月/音/画面確認成功。Depths+27ptは既知未達のまま。詳細は`Docs/Next-23-Implementation-2026-10-03.md`、比較は`Artifacts/Next23/`。
 
 - **Next-22完了（棚卸しのみ）**：画面ごとの動き・音・待ち・速さ設定を`Docs/Presentation-Audit-2026-10-03.md`へ記録。Next-18の土台で54短編・4,215コマ（1920×1080/30fps）と3コマ一覧9枚を`Artifacts/Next22/`へ保存。Explicit3/3＋補足1/1成功（補足の撮影用待ちの時間切れは修正して当該1件だけ再実行）。普段175/Capture130/Long5の310件と完全名・分類は不変、Explicitだけ2→6。コンパイル成功、設定15キー/8フォント一致・一時シーン0。ゲーム本体/見た目/数値は不変、全件・Verify・Windows再ビルドなし。WindowsはNext-21のまま。
 
-- CompanyYearが試遊対象。**Next-21完了、Windows私的試遊版0.16.0へ更新済み**。旧版は回帰確認のみ。承認済み画面・UIキット・Polish-4・Quick-Wins-2を維持。B/C/D/E/F2/Gは同じOpsMinigame土台。3年目3月の総決算だけB→G（ランサム）、正常Gは練習で遊べる。
+- CompanyYearが試遊対象。**Next-23完了、Windows私的試遊版0.16.0へ更新済み**。旧版は回帰確認のみ。承認済み画面・UIキット・Polish-4・Quick-Wins-2を維持。B/C/D/E/F2/Gは同じOpsMinigame土台。3年目3月の総決算だけB→G（ランサム）、正常Gは練習で遊べる。
 - **50点は従来結果のまま**。総決算はB・G両方50点で全状態が従来と一致。その他は係数適用後、被害/停止それぞれ[min(従来結果,公開見積もり下限),max(従来結果,公開見積もり上限)]内。Gは停止だけ。元から幅外の結果をさらに広げず、未確認の真相を表示に漏らさない。
 - 3年本編は目標B→A→A、途中保存、因子Lv1・最大3枠、承認済み6画面。**予算は76万円＋前年の残額全額**。設備Lv2→Lv1の見直し、社員経験/相談文化を維持、信頼は45との平均。1年モードに因子は適用しない。
 - Next-10/11：年別の暦・重複なし抽選、日記36話＋結末3つ・Klee One、因子演出、2・3年目の開幕、新設備4つ、月1工数0調査、かのんの山場予算、後輩4人目、強敵/図鑑。EDRは監視の即時表示を維持し、感染部屋の強調と最初の感染端末1台の時間消費なし隔離。旧11設備保存の4画面と元バイトのバックアップを回帰確認。
@@ -122,8 +124,8 @@ Next-19の分類規則（Next-21時点）：普段は印なし175件、`Capture`
 
 ## 7. 次にやること（優先順）
 
-1. **Next-22完了。追加指示が来るまで新しい作業を始めない**。棚卸しと一覧を元にClaudeがモックを作り、加藤さんの承認後に別指示で演出を改善する。現状の待ち・速さの不統一や静止部分は記録だけで直していない。詳細は`Docs/Presentation-Audit-2026-10-03.md`、撮影は`Artifacts/Next22/`。連鎖字幕/公開音声の行別優先とWindows版はNext-21を維持。10大脅威は資料データだけで、画面/絵/声/強敵への接続は未着手。
-2. **Next-21のWindows版を私的試遊**。連鎖字幕、実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
+1. **Next-23完了。追加指示が来るまで新しい作業を始めない**。既存部品のまま待ちと飛ばし方を統一。見た目・採点・制限時間・出現ペース・CSVは不変。全件/普段は失敗分だけの再確認まで完了、Windows版も更新済み。詳細は`Docs/Next-23-Implementation-2026-10-03.md`、比較は`Artifacts/Next23/`。棚卸しの不足演出を新たに作るのは承認後の別指示。10大脅威の画面/絵/声/強敵への接続はこの作業では行っていない。
+2. **Next-23のWindows版を私的試遊**。初回の全表示・再訪スキップ・速い設定と、スキップ後の声/入力を確認する。連鎖字幕、実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
 3. ひなたの公開音声はIrodori H09。同じIDのWAVを`Voice/Hinata/`へ置けば自動接続、現行29行は字幕先行。VoiceTestをAssets外へ保全し公開版から除く（残っていればビルドを停止）。音源/絵の制作は追加指示後。規則は`Docs/Voice/README.md`、設定は`Docs/Character-Profiles-2026-10-01.md`。
 4. 計画行動の支援拡張・施策カード・追加キャラは未実装。既存の承認済み画面を繰り返し作り直さず比較を残す。臨時予算1万円と基準を勝手に変えない。
 5. Steam向けの会社名/アイコン・公開音声・ブランチ整理は未決定。0.16.0と画面設定は完了。旧版を自動置換しない。

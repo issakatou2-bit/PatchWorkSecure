@@ -18,6 +18,7 @@ namespace PatchWorkSecure.CompanyOps
         private Color color;
         private float started;
         private bool initialized;
+        private OpsPresentationWait stampTiming;
         private void Start()
         {rect=(RectTransform)transform;origin=rect.anchoredPosition;originalScale=rect.localScale;originalRotation=rect.localRotation;graphic=GetComponent<Graphic>();if(graphic!=null)color=graphic.color;started=Time.unscaledTime;initialized=true;}
         public void Stop()
@@ -25,6 +26,7 @@ namespace PatchWorkSecure.CompanyOps
         private void Update()
         {
             float age=Time.unscaledTime-started,p=Mathf.Clamp01(age/Duration);bool reduced=Owner!=null&&Owner.ReducedMotion;
+            if(Kind=="stamp"&&Owner!=null){if(stampTiming==null)stampTiming=Owner.BeginResultStamp(Duration,transform);stampTiming.Advance(Time.unscaledDeltaTime,Owner.FastPresentation);p=Mathf.Clamp01(stampTiming.Elapsed/Duration);}
             if(Kind=="grid")
             {
                 var grid=GetComponent<OpsMinigameGraphic>();grid.Progress=reduced?0:Mathf.Repeat(age/Duration,1)*48;grid.SetVerticesDirty();return;

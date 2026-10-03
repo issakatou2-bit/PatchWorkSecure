@@ -96,6 +96,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void NewScreen()
         {
+            ClearPresentationWaits();
             FinishReportCounts();
             recordsActive=false;
             YearOpeningActive=false;
@@ -192,6 +193,7 @@ namespace PatchWorkSecure.CompanyOps
         }
         private void Update()
         {
+            TickPresentationInput();
             TickGamepad();
             TickMusic();
             TickVoice();
@@ -201,7 +203,7 @@ namespace PatchWorkSecure.CompanyOps
             if (!MinigameActive && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 StopVoice();
-                if(FactorRevealActive){SkipFactorReveal();return;}
+                if(FactorRevealActive){TrySkipPresentation();return;}
                 if (modal != null) CloseDialog(); else Menu();
             }
             if (toast != null)

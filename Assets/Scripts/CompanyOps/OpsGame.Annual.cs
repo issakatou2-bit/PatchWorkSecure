@@ -10,6 +10,7 @@ namespace PatchWorkSecure.CompanyOps
         private void AnnualScreen()
         {
             AnnualPresentationCanSkip=presentationVisits.ContainsKey("annual_entry");AnnualPresentationSkipped=false;RepeatDuration("annual_entry",1,1);
+            annualTiming=BeginPresentation("annual",State.history.Count*OpsPresentationTiming.AnnualStep+OpsPresentationTiming.Reveal*2,AnnualPresentationCanSkip);
             ReportBackground(true);var summary=OpsAnnualSummary.From(State);
             if(State.IsClear)
             {

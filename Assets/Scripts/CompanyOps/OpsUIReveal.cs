@@ -6,17 +6,19 @@ namespace PatchWorkSecure.CompanyOps
     public sealed class OpsUIReveal : MonoBehaviour
     {
         public OpsGame Owner;
-        public float Duration = .45f, Delay;
+        public float Duration = OpsPresentationTiming.Reveal, Delay;
         public bool Stamp;
         private CanvasGroup group;
         private float elapsed;
         private Quaternion rotation;
         private bool impact;
+        private OpsPresentationWait timing;
         private void Awake() { group = gameObject.AddComponent<CanvasGroup>(); group.alpha = 0; rotation = transform.localRotation; }
         private void Update()
         {
-            if(Owner!=null&&Owner.AnnualPresentationCanSkip&&(Owner.AnnualPresentationSkipped||UnityEngine.InputSystem.Mouse.current?.leftButton.wasPressedThisFrame==true))elapsed=Delay+Duration;
-            elapsed += Owner!=null?Owner.PresentationDeltaTime:Time.unscaledDeltaTime;
+            if(timing==null&&Owner!=null)timing=Owner.BeginReveal(name,Delay+Duration,transform);
+            if(timing!=null){timing.Advance(Owner.PresentationDeltaTime,Owner.FastPresentation);elapsed=timing.Elapsed;}
+            else elapsed+=Time.unscaledDeltaTime;
             float t = Mathf.Clamp01((elapsed - Delay) / Duration);
             group.alpha = t;
             if(Stamp&&!impact&&t>=.38f){impact=true;Owner?.StampImpact();}

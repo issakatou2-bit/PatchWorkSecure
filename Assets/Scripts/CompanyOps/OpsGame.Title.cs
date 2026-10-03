@@ -11,7 +11,7 @@ namespace PatchWorkSecure.CompanyOps
             var kv=PImage(screen,"TitleKeyVisual",PlanningArt.titleKeyVisual,80,0,1600,900);
             IncidentShape(screen,"TitleVeil","story-title-veil",0,0,1600,900,Color.white);
             var brand=Rect(screen,"TitleBrand",0,0,700,250);
-            var logo=PImage(brand,"TitleLogoWordmark",PlanningArt.logoWordmark,50,0,640,246);Reveal(logo);if(Application.isPlaying)logo.GetComponent<OpsUIReveal>().Duration=.9f;
+            var logo=PImage(brand,"TitleLogoWordmark",PlanningArt.logoWordmark,50,0,640,246);Reveal(logo);if(Application.isPlaying)logo.GetComponent<OpsUIReveal>().Duration=OpsPresentationTiming.TitleLogo;
             var icon=PImage(brand,"TitleLogoIcon",PlanningArt.logoIcon,-24,118,132,132);icon.pivot=new Vector2(.5f,.5f);icon.anchoredPosition+=new Vector2(66,-66);icon.localEulerAngles=new Vector3(0,0,8);
             StoryModeButton("NewYear","3年の本編","年度ごとの目標を越えて、3年間会社を守り抜く",292,92,30,true,()=>ConfirmNewYear(true));
             StoryModeButton("SingleYear","1年だけ遊ぶ","いつもの「情シスの一年」。練習にも",398,74,23,false,()=>ConfirmNewYear(false));

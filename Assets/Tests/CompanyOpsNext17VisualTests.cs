@@ -38,6 +38,8 @@ namespace PatchWorkSecure.Tests
                 }
                 Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
             }
+            // 撮影用の仮想入力を終了後も、通常の泡と吹き出しを描画できる。
+            yield return Next3Bubbles_出現と弾ける瞬間と手がかりとレアを撮影する();
         }
     }
 }

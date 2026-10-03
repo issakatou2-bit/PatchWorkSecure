@@ -36,6 +36,9 @@ namespace PatchWorkSecure.Tests
                 {
                     foreach(string field in new[]{"padOriginalActions","padUiActions"})
                     {var asset=(InputActionAsset)typeof(OpsGame).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game);if(asset!=null)assets.Add(asset);}
+                    // 専用フォントを解放する前に、それを描くCanvasも閉じる。
+                    var canvas=game.Surface!=null?game.Surface.GetComponentInParent<Canvas>():null;
+                    if(canvas!=null)Object.DestroyImmediate(canvas.gameObject);
                     Object.DestroyImmediate(game.gameObject);
                 }
                 foreach(var asset in assets)if(asset!=null)foreach(var map in asset.actionMaps)map.Dispose();

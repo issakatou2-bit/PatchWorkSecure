@@ -299,7 +299,7 @@ namespace PatchWorkSecure.CompanyOps
             if(!Application.isPlaying||muted||soundVolume<=0)return;
             PlayCue(cue);if(eventAudio==null||eventAudio.clip==null)return;
             if(minigameAudio==null)minigameAudio=NewAudioSource();minigameAudio.Stop();minigameAudio.clip=eventAudio.clip;
-            minigameAudio.pitch=pitch;minigameAudio.volume=soundVolume*.65f;minigameAudio.Play();eventAudio.Stop();
+            minigameAudio.pitch=pitch;minigameAudio.volume=soundVolume*.65f;minigameAudio.Play();ObservePromoAudio(minigameAudio,minigameAudio.clip,"sfx",cue.ToString());eventAudio.Stop();
         }
         private System.Collections.IEnumerator CountMinigameResult(RectTransform stamp,int score)
         {

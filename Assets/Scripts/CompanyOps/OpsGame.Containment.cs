@@ -212,7 +212,7 @@ namespace PatchWorkSecure.CompanyOps
                 }
                 clip=AudioClip.Create("封じ込めSE_"+key,data.Length,1,rate,false);clip.SetData(data,0);minigameTones.Add(key,clip);
             }
-            if(minigameAudio==null)minigameAudio=NewAudioSource();minigameAudio.pitch=1;minigameAudio.volume=soundVolume*.65f;minigameAudio.PlayOneShot(clip);
+            if(minigameAudio==null)minigameAudio=NewAudioSource();minigameAudio.pitch=1;minigameAudio.volume=soundVolume*.65f;minigameAudio.PlayOneShot(clip);ObservePromoAudio(minigameAudio,clip,"sfx-generated",key);
         }
         private IEnumerator DelayedMinigameTone(float frequency,float delay)
         {var session=Minigame;yield return new WaitForSecondsRealtime(delay);if(Minigame==session)MinigameTone(frequency);}

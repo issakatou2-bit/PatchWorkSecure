@@ -50,7 +50,7 @@ namespace PatchWorkSecure.CompanyOps
         {
             if(muted||soundVolume<=0||Sounds?.damage==null)yield break;
             if(rejectAudio==null)rejectAudio=NewAudioSource();
-            for(int i=0;i<2;i++){if(muted||soundVolume<=0)yield break;rejectAudio.clip=Sounds.damage;rejectAudio.volume=soundVolume*.25f;rejectAudio.pitch=.8f;rejectAudio.Play();yield return new WaitForSecondsRealtime(.07f);rejectAudio.Stop();if(i==0)yield return new WaitForSecondsRealtime(.05f);}
+            for(int i=0;i<2;i++){if(muted||soundVolume<=0)yield break;rejectAudio.clip=Sounds.damage;rejectAudio.volume=soundVolume*.25f;rejectAudio.pitch=.8f;rejectAudio.Play();ObservePromoAudio(rejectAudio,rejectAudio.clip,"sfx","Reject");yield return new WaitForSecondsRealtime(.07f);rejectAudio.Stop();if(i==0)yield return new WaitForSecondsRealtime(.05f);}
         }
         private void CheckDangerSignal()
         {
@@ -69,7 +69,7 @@ namespace PatchWorkSecure.CompanyOps
             for(int i=0;i<2;i++)
             {
                 if(muted||soundVolume<=0)yield break;
-                dangerAudio.clip=Sounds.damage;dangerAudio.pitch=.65f;dangerAudio.volume=soundVolume*(i==0?.12f:.08f);dangerAudio.Play();
+                dangerAudio.clip=Sounds.damage;dangerAudio.pitch=.65f;dangerAudio.volume=soundVolume*(i==0?.12f:.08f);dangerAudio.Play();ObservePromoAudio(dangerAudio,dangerAudio.clip,"sfx","Heartbeat");
                 yield return new WaitForSecondsRealtime(.09f);dangerAudio.Stop();
                 if(i==0)yield return new WaitForSecondsRealtime(.1f);
             }

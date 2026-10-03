@@ -208,7 +208,7 @@ namespace PatchWorkSecure.CompanyOps
         private void BubbleSound(bool rare,float pitch)
         {
             if(!Application.isPlaying||muted||soundVolume<=0)return;
-            if(bubbleAudio==null)bubbleAudio=NewAudioSource();PlayCue(OpsCue.Click);bubbleAudio.clip=buttonAudio.clip;bubbleAudio.pitch=pitch;bubbleAudio.volume=soundVolume*.65f;bubbleAudio.Play();buttonAudio.Stop();
+            if(bubbleAudio==null)bubbleAudio=NewAudioSource();PlayCue(OpsCue.Click);bubbleAudio.clip=buttonAudio.clip;bubbleAudio.pitch=pitch;bubbleAudio.volume=soundVolume*.65f;bubbleAudio.Play();ObservePromoAudio(bubbleAudio,bubbleAudio.clip,"sfx","Bubble");buttonAudio.Stop();
             if(rare)StartCoroutine(BubbleChime(pitch));
         }
         private System.Collections.IEnumerator FinishBubbleThanks(RectTransform thanks,Transform clue)

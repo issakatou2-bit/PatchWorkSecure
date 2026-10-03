@@ -64,7 +64,7 @@ namespace PatchWorkSecure.CompanyOps
             var source = cue == OpsCue.Click ? buttonAudio : eventAudio;
             // 連打で同じ音が積み重ならない。操作と結果だけを別々に再生する。
             source.Stop(); source.clip = clip; source.volume = soundVolume * (cue == OpsCue.Click ? .65f : 1);
-            source.pitch=VariedPitch();source.Play();
+            source.pitch=VariedPitch();source.Play();ObservePromoAudio(source,clip,"sfx",cue.ToString());
         }
         private void PlayPresentationCue(OpsCue cue)
         {
@@ -79,7 +79,7 @@ namespace PatchWorkSecure.CompanyOps
             if(cue==OpsCue.Count){lastCount=Time.unscaledTime;if(countAudio==null)countAudio=NewAudioSource();source=countAudio;}
             else if(cue==OpsCue.Stamp){lastStamp=Time.unscaledTime;if(stampAudio==null)stampAudio=NewAudioSource();source=stampAudio;}
             else {if(transitionAudio==null)transitionAudio=NewAudioSource();source=transitionAudio;}
-            source.Stop();source.clip=clip;source.volume=soundVolume*.65f;source.pitch=VariedPitch();source.Play();
+            source.Stop();source.clip=clip;source.volume=soundVolume*.65f;source.pitch=VariedPitch();source.Play();ObservePromoAudio(source,clip,"sfx",cue.ToString());
         }
         private void SetPresentationVolume(float volume)
         {
@@ -102,7 +102,7 @@ namespace PatchWorkSecure.CompanyOps
             var old = musicB; musicB = musicA; musicA = old;
             musicBlend = 0; previousMusicVolume = musicB.volume;
             musicA.Stop(); musicA.clip = clip; musicA.volume = 0;
-            if (clip != null) musicA.Play();
+            if (clip != null){musicA.Play();ObservePromoAudio(musicA,clip,"bgm",clip.name);}
         }
         private void TickMusic()
         {

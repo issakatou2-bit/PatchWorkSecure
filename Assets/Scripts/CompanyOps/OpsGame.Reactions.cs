@@ -135,7 +135,7 @@ namespace PatchWorkSecure.CompanyOps
                 var line=pendingVoice;pendingVoice=null;
                 if(VoiceEnabled&&!muted&&voiceVolume>0&&line.clip!=null)
                 {
-                    if(voiceAudio==null)voiceAudio=NewAudioSource();voiceAudio.Stop();voiceAudio.clip=line.clip;voiceAudio.volume=voiceVolume;voiceAudio.Play();
+                    if(voiceAudio==null)voiceAudio=NewAudioSource();voiceAudio.Stop();voiceAudio.clip=line.clip;voiceAudio.volume=voiceVolume;voiceAudio.Play();ObservePromoAudio(voiceAudio,line.clip,CurrentSpeaker==""?"hinata-voice":"companion-voice",line.id);
                     RecordPresentedMaxim(line.id);
                 }
             }

@@ -112,6 +112,7 @@ namespace PatchWorkSecure.Tests
         {
             SceneManager.LoadScene("CompanyYear");yield return null;yield return new WaitForSeconds(.5f);
             var game=Object.FindAnyObjectByType<OpsGame>();game.StartYear(14);yield return null;
+            while(game.PresentationWaiting||game.PhasePresentationRunning)yield return null;
             foreach(OpsCue cue in Enum.GetValues(typeof(OpsCue)))
             {
                 var clip=game.Sounds.Clip(cue);Assert.IsNotNull(clip,cue.ToString());Assert.Greater(clip.samples,1000);Assert.AreEqual(48000,clip.frequency);

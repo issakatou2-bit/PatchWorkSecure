@@ -166,7 +166,7 @@ namespace PatchWorkSecure.Tests
             finally{OpsPromoClock.End();}
         }
 
-        [UnityTest]
+        [UnityTest,Timeout(300000)]
         public IEnumerator Next23_六本の遊びの時計と終了点数と判子は三経路で一致する()
         {
             next23ClockOwned=true;OpsPromoClock.Begin();

@@ -44,20 +44,26 @@ def synth(model, text, caption, out, seed, refs=None, extra=()):
 
 
 def muffled(path):
-    # 0.5秒ごとに、4kHzより上の音の割合を調べる。声のある区間で0.001未満が1つでもあれば「こもり」（通話のような音）
+    # 0.5秒ごとに、4kHzより上の音の割合を調べる（通話のような音＝こもりを見つける）。
+    # 10/3：小さい声・息・語尾で誤って印が付くことがあった（加藤さん「こもり？と出ていても、こもっていない時がある」）。
+    # そこで、声のはっきりした区間（その音声の中央値の半分より大きい区間）だけを数え、4kHzより上がほぼ無い（0.03%未満）区間が2つ以上続いたときだけ「こもり」とする。
     import numpy as np, soundfile as sf
     d, sr = sf.read(str(path))
     d = d.mean(1) if d.ndim > 1 else d
-    w, bad, n = int(sr * .5), 0, 0
-    for s in range(0, max(len(d) - w, 1), w):
-        x = d[s:s + w]
-        if float((x ** 2).mean()) < 1e-4:
+    w = int(sr * .5)
+    segs = [d[s:s + w] for s in range(0, max(len(d) - w, 1), w)]
+    rms = [float((x ** 2).mean()) for x in segs]
+    loud = max(1e-4, (sorted(rms)[len(rms) // 2] if rms else 0) * .5)
+    run = best = n = 0
+    for x, r in zip(segs, rms):
+        if r < loud:
             continue
         sp = np.abs(np.fft.rfft(x)) ** 2
         f = np.fft.rfftfreq(len(x), 1 / sr)
         n += 1
-        bad += float(sp[f > 4000].sum() / sp.sum()) < 0.001
-    return bad, n
+        run = run + 1 if float(sp[f > 4000].sum() / sp.sum()) < 0.0003 else 0
+        best = max(best, run)
+    return (best if best >= 2 else 0), n
 
 
 def whisper():

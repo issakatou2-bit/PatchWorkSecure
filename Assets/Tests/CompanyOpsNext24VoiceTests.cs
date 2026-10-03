@@ -56,7 +56,17 @@ namespace PatchWorkSecure.Tests
             ComboCall(game,"ResetMinigameSuccess");
             for(int n=1;n<=9;n++){ComboCall(game,"PresentMinigameSuccess");yield return null;yield return null;
                 string id="combo_"+Math.Min(n,7);Assert.AreEqual(id,game.LastReactionId);Assert.IsTrue(game.VoicePlaying);
-                Assert.AreSame(bank.Find(id).clip,game.GetComponents<AudioSource>().Single(s=>s.isPlaying&&bank.lines.Any(l=>l.clip==s.clip)).clip);}
+                Assert.AreSame(bank.Find(id).clip,game.GetComponents<AudioSource>().Single(s=>s.isPlaying&&bank.lines.Any(l=>l.clip!=null&&l.clip==s.clip)).clip);}
+            // Windows版の検証と同じ、実際の回答操作でも九回続けて接続を確認する。
+            ComboCall(game,"ResetMinigameSuccess");var mail=game.Minigame as OpsMailMinigame;Assert.IsNotNull(mail);
+            for(int n=1;n<=9;n++)
+            {
+                float limit=Time.realtimeSinceStartup+5;
+                while(!mail.CanAnswer&&mail.Phase==OpsMinigamePhase.Playing&&Time.realtimeSinceStartup<limit)yield return null;
+                Assert.IsTrue(mail.CanAnswer);game.AnswerMail(mail.Current.Suspicious);yield return new WaitForSecondsRealtime(.1f);
+                string id="combo_"+Math.Min(n,7);Assert.AreEqual(id,game.LastReactionId);Assert.AreEqual(n,mail.Correct);
+                Assert.AreSame(bank.Find(id).clip,game.GetComponents<AudioSource>().Single(s=>s.isPlaying&&bank.lines.Any(l=>l.clip!=null&&l.clip==s.clip)).clip);
+            }
             Assert.AreEqual(before,JsonUtility.ToJson(game.State));game.StopVoice();LogAssert.NoUnexpectedReceived();
         }
     }

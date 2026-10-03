@@ -106,7 +106,7 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     var clip=bank.Find(id)?.clip;if(clip==null){failed=true;continue;}
                     game.SpeakSceneLine(id,0);yield return new WaitForSecondsRealtime(.2f);
-                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip==s.clip)).ToArray();
+                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip!=null&&l.clip==s.clip)).ToArray();
                     if(playing.Length!=1||playing[0].clip!=clip||playing[0].timeSamples<=0||game.LastReactionId!=id)failed=true;
                     game.StopVoice();
                 }
@@ -116,11 +116,14 @@ namespace PatchWorkSecure.CompanyOps
                 {
                     float limit=Time.realtimeSinceStartup+5;
                     while(mail!=null&&!mail.CanAnswer&&mail.Phase==OpsMinigamePhase.Playing&&Time.realtimeSinceStartup<limit)yield return null;
-                    if(mail==null||!mail.CanAnswer){failed=true;break;}
+                    if(mail==null||!mail.CanAnswer){failed=true;Debug.Log("[CompanyOps Player] H09連鎖の確認条件: メールなしまたは回答不可 / "+game.State.MailTrainingBlock);break;}
                     game.AnswerMail(mail.Current.Suspicious);yield return new WaitForSecondsRealtime(.1f);
                     string id="combo_"+Math.Min(n,7);var clip=bank.Find(id)?.clip;
-                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip==s.clip)).ToArray();
-                    if(game.LastReactionId!=id||clip==null||playing.Length!=1||playing[0].clip!=clip||playing[0].timeSamples<=0)failed=true;
+                    // PlayOneShotの効果音はsource.clipが空。欠番の空参照を声と数えない。
+                    var playing=game.GetComponents<AudioSource>().Where(s=>s.isPlaying&&bank.lines.Any(l=>l.clip!=null&&l.clip==s.clip)).ToArray();
+                    bool correct=game.LastReactionId==id&&clip!=null&&playing.Length==1&&playing[0].clip==clip&&playing[0].timeSamples>0;
+                    if(!correct)failed=true;
+                    Debug.Log("[CompanyOps Player] H09連鎖 "+n+" / 期待="+id+" 実際="+game.LastReactionId+" 再生="+string.Join(",",playing.Select(s=>s.clip.name+":"+s.timeSamples))+" / "+(correct?"PASSED":"FAILED"));
                 }
                 Debug.Log("[CompanyOps Player] H09ミニゲーム連鎖七段階と七以上の重ならない再生確認 "+(failed?"FAILED":"PASSED"));
             }

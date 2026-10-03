@@ -63,7 +63,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-20時点で304件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-21時点で310件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -79,7 +79,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 | `Assets/Editor/` | `PatchWorkSecure.Editor` | Editor限定 |
 | `Assets/Tests/` | `PatchWorkSecure.Tests` | `includePlatforms`は**空**にする（`["Editor"]`だとPlayModeテストが0件のまま成功扱いになる） |
 
-Next-19の分類規則（Next-20時点）：普段は印なし170件、`Capture`は撮影129件、`Long`は3役×5年度とゲームパッド通しの5件。合計304件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
+Next-19の分類規則（Next-21時点）：普段は印なし175件、`Capture`は撮影130件、`Long`は3役×5年度とゲームパッド通しの5件。合計310件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
 起動済みEditorでは`./Tools/Run-TestGroup.ps1 -Group RegularCapture`（普段＋撮影）、`-Group Normal`（普段）、`-Group Long`、`-Group All`を使う。`-Group Inspect`で一覧確認。失敗/関係分は`-Only`に完全名の配列を渡す。実行ごとのJSON/XMLは`Artifacts/TestGroups/`へ保存し、0件や中断を成功扱いにしない。
 
 ## 5. 使用量を抑える作業ルール（品質は落とさない）
@@ -95,7 +95,7 @@ Next-19の分類規則（Next-20時点）：普段は印なし170件、`Capture`
 
 ## 6. 現状（2026-10-03）— 詳細は`Docs/Dev-Status.md`
 
-- CompanyYearが試遊対象。**Next-17完了、Windows私的試遊版0.16.0へ更新済み**。旧版は回帰確認のみ。承認済み画面・UIキット・Polish-4・Quick-Wins-2を維持。B/C/D/E/F2/Gは同じOpsMinigame土台。3年目3月の総決算だけB→G（ランサム）、正常Gは練習で遊べる。
+- CompanyYearが試遊対象。**Next-21完了、Windows私的試遊版0.16.0へ更新済み**。旧版は回帰確認のみ。承認済み画面・UIキット・Polish-4・Quick-Wins-2を維持。B/C/D/E/F2/Gは同じOpsMinigame土台。3年目3月の総決算だけB→G（ランサム）、正常Gは練習で遊べる。
 - **50点は従来結果のまま**。総決算はB・G両方50点で全状態が従来と一致。その他は係数適用後、被害/停止それぞれ[min(従来結果,公開見積もり下限),max(従来結果,公開見積もり上限)]内。Gは停止だけ。元から幅外の結果をさらに広げず、未確認の真相を表示に漏らさない。
 - 3年本編は目標B→A→A、途中保存、因子Lv1・最大3枠、承認済み6画面。**予算は76万円＋前年の残額全額**。設備Lv2→Lv1の見直し、社員経験/相談文化を維持、信頼は45との平均。1年モードに因子は適用しない。
 - Next-10/11：年別の暦・重複なし抽選、日記36話＋結末3つ・Klee One、因子演出、2・3年目の開幕、新設備4つ、月1工数0調査、かのんの山場予算、後輩4人目、強敵/図鑑。EDRは監視の即時表示を維持し、感染部屋の強調と最初の感染端末1台の時間消費なし隔離。旧11設備保存の4画面と元バイトのバックアップを回帰確認。
@@ -107,7 +107,7 @@ Next-19の分類規則（Next-20時点）：普段は印なし170件、`Capture`
 - Next-17最終確認：**全294/294を2回連続成功**。全件後・ビルド後の8フォントとPlayerPrefs15キーの存在/型/値が一致、一時シーン0。Windows版の画面切替・12か月・BGM2曲・SE15用途・事件音声はPASSED、終了コード0、既知の終了時ComputeBuffer診断は残る。Core/CompanyOps/Personas/ThreeYears/EndlessYearsは成功、各CSV・採点・制限時間は不変。詳細/比較は`Docs/Next-17-Implementation-2026-10-03.md`/`Artifacts/Next17/`。旧版・Next-15/16の撮影は維持。仮想入力切替前後のUI実行キャッシュとCanvasをテスト側で破棄し、通常描画への復帰も回帰検証。
 - 情報点検の要相談5件は加藤さんの決定どおり反映。`maxim_report_v2`/`diary_y3_07_v2`は字幕先行で旧声を鳴らさず、格言20種/旧既読キーを維持。かのんの開幕字幕を同期、りりぃの因子台詞は維持。科目B・架空の想定・IdP資料の参考表示を反映し、数値/抽選/採点/source/URLは不変。IPA本編PDF・個別実例の裏付けは未確認のまま（`Docs/Fact-Check-2026-10-02.md`）。
 - **Depthsの最適化完走率58%→85%（+27pt）は既知の未達**。±5pt基準を緩めず成功扱いにしない。限定50.25%、非優越候補平均1.980、SS10.22%。
-- ひなたの新絵・目口差分/1枚絵フォールバックは両版。SEはB-bright、BGMはGemini/Lyria生成2曲。ひなたはElevenLabs V9-2（台本191行、現行IDの音源169本・字幕先行22行を実バンクで確認）。音源なし/消音でも進む。ひなたを含む版は私的試遊限定、**配布・公開・動画投稿禁止**。仲間24音声は配布可、条件は`Docs/Reference-Asset-Provenance.md`。
+- ひなたの新絵・目口差分/1枚絵フォールバックは両版。SEはB-bright、BGMはGemini/Lyria生成2曲。Next-21から同じIDの`Voice/Hinata/<id>.wav`（Irodori H09）を優先し、無ければ私的ElevenLabs V9-2、両方無ければ字幕。台本198行・現行私的音源169本・字幕先行29行、公開音源は未配置。音源なし/消音でも進む。現Windows版は私的試遊限定、**配布・公開・動画投稿禁止**。公開ビルドはVoiceTestのResources/依存が残ると停止。仲間24音声は配布可、条件は`Docs/Reference-Asset-Provenance.md`。
 - TestModeはTMP・フォールバック・画像・Materialを専用コピーにし、PlayerPrefs15キーを存在・型付き値ごと復帰。一時シーンは所有/非使用を確認し退避後に回収する。無関係の設定・素材metaはコミットしない。
 
 - **Next-18完了**：宣伝9場面の1920×1080/30fps連番1,380枚・46秒、各sounds.jsonと確認一覧は`Artifacts/Promo/`。カード選択→ランクアップを採用、月報の追加撮影なし。撮影だけExplicit/30Hz時計、通常のテスト/Playerには影響させない。期限後の古いパッド回答をテスト側で取り消し、全294/294を2回連続成功。各CSV不変、設定15キー/8フォント一致・一時シーン0。Windows再ビルドなし。ひなたの声は動画禁止、BGMは利用条件確認待ち。詳細は`Docs/Next-18-Implementation-2026-10-03.md`。
@@ -116,11 +116,13 @@ Next-19の分類規則（Next-20時点）：普段は印なし170件、`Capture`
 
 - **Next-20完了**：Unity非依存の`OpsThreatCatalog`に6糸口/10脅威/33技を追加。名前は仮、糸口・設備の対応はゲーム用の整理、画面/既存7強敵/ルールには未接続。説明の要相談なし。普段のテスト10件追加、関係10/10・最後の普段170＋Capture129は299/299を1回成功。既存294件の名前/組/本文は維持。Verifyは既知Depths未達以外成功、1年CSV/3年試算出力/エンドレスCSVのSHA256一致、設定15キー/8フォント一致、一時シーン0。Windows据え置き。詳細は`Docs/Next-20-Implementation-2026-10-03.md`。
 
+- **Next-21完了**：B〜Gの連続成功は`combo_1`〜`combo_7`（7以上はパーフェクト）、失敗/次ゲームでリセット。採点と別の反応専用カウンタ、既存字幕を全文即時表示し声は即時差替。①②は別コミット。Long込み310件を1回で309成功/旧期待値1件失敗、テスト修正後に関係3/3と普段175/175を成功、全件再実行なし。Verifyは既知Depths以外成功、各CSVのSHA256不変、設定15キー/8フォント一致・一時シーン0。Windows版の画面切替/12か月/BGM2/SE15/事件音声PASSED・終了0。詳細は`Docs/Next-21-Implementation-2026-10-03.md`、比較は`Artifacts/Next21/`。
+
 ## 7. 次にやること（優先順）
 
-1. **Next-20完了。追加指示が来るまで新しい作業を始めない**。10大脅威は資料データとテストだけ。仮名の確定・画面/絵/声・強敵への接続は未着手。普段＋Capture299/299を1回成功、Long5件は今回除外（登録総数304）。数値/見た目不変。実行回数は4・5章、詳細は`Docs/Next-20-Implementation-2026-10-03.md`。Windows版はNext-17のまま。
-2. **Next-17のWindows版を私的試遊**。実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
-3. 将来の候補：公開可能なひなたの声・ミックス。現行22行は字幕先行、音源を作れば同じ新IDで接続。VoiceTestのResourcesは公開版から除く。新しい音源/絵の制作・組込みは指示後。設定は`Docs/Character-Profiles-2026-10-01.md`。
+1. **Next-21完了。追加指示が来るまで新しい作業を始めない**。連鎖7行は字幕先行、公開音源の行別優先を準備済み。全310件の失敗分まで再確認し普段175件を追加1回、Windows版はNext-21へ更新。実行回数は4・5章、詳細は`Docs/Next-21-Implementation-2026-10-03.md`。10大脅威は資料データだけで、画面/絵/声/強敵への接続は未着手。
+2. **Next-21のWindows版を私的試遊**。連鎖字幕、実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
+3. ひなたの公開音声はIrodori H09。同じIDのWAVを`Voice/Hinata/`へ置けば自動接続、現行29行は字幕先行。VoiceTestをAssets外へ保全し公開版から除く（残っていればビルドを停止）。音源/絵の制作は追加指示後。規則は`Docs/Voice/README.md`、設定は`Docs/Character-Profiles-2026-10-01.md`。
 4. 計画行動の支援拡張・施策カード・追加キャラは未実装。既存の承認済み画面を繰り返し作り直さず比較を残す。臨時予算1万円と基準を勝手に変えない。
 5. Steam向けの会社名/アイコン・公開音声・ブランチ整理は未決定。0.16.0と画面設定は完了。旧版を自動置換しない。
 - やり込みの設計は `Docs/Endless-Years-Design-2026-09-29.md`（試作 `proto-a-cards.html`）。現行への適用はNext-12を優先。

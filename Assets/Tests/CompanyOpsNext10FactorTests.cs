@@ -34,7 +34,9 @@ namespace PatchWorkSecure.Tests
             Assert.IsTrue(game.Story.rewardClaimed);Assert.AreEqual(1,game.Career.factors.Count);
             // 自然終了・軽減設定も実際の入口から。ここではテスト用のClick補助を使わない。
             game.StartStory(9);game.State.stability=0;game.State.phase=OpsPhase.Ended;game.OpenTab(0);yield return new WaitForSecondsRealtime(1);
-            typeof(OpsGame).GetProperty("ReducedMotion").SetValue(game,true);Find<Button>("BackHome").onClick.Invoke();game.FactorRevealPaused=true;game.TickFactorReveal(.8f);yield return null;
+            typeof(OpsGame).GetProperty("ReducedMotion").SetValue(game,true);Find<Button>("BackHome").onClick.Invoke();game.FactorRevealPaused=true;
+            // 作られたフレームの時間を数えない共通時計に合わせ、次のフレームから進める。
+            yield return null;game.TickFactorReveal(.8f);yield return null;
             Assert.IsTrue(game.FactorRevealActive);Assert.IsTrue(Object.FindObjectsByType<OpsFactorBurstGraphic>().Length==0);game.TickFactorReveal(3);yield return new WaitForSecondsRealtime(.8f);Assert.IsFalse(game.FactorRevealActive);CheckPointer("ConfirmFactor");
             Assert.IsTrue(game.ExportProgress().Valid());Assert.IsEmpty(glyphWarnings);LogAssert.NoUnexpectedReceived();
         }

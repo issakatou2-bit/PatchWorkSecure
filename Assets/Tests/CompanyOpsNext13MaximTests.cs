@@ -39,6 +39,7 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next13MaximUI_月報と年間評価でも同じ年度の記録を使う()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;game.StartYear(14);
+            WithoutPublishedVoices(game);
             DiaryTestMonth(game.State);game.OpenTab(0);yield return new WaitForSecondsRealtime(4);
             Assert.Contains("maxim_report",game.Career.yearMaxims);game.SpeakSceneLine("maxim_report");Assert.AreEqual("think_01",game.LastReactionId);
             while(game.State.phase!=OpsPhase.Ended){if(game.State.phase==OpsPhase.Review)game.State.NextMonth();else if(game.State.phase==OpsPhase.Planning)game.State.BeginIncident();else game.State.Resolve("scope");}

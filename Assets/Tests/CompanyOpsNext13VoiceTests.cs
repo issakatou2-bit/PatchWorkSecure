@@ -90,6 +90,8 @@ namespace PatchWorkSecure.Tests
         [UnityTest] public IEnumerator Next13Voices_年度結果と強敵と会議と因子と特別結末に接続する()
         {
             SceneManager.LoadScene("CompanyYear");yield return new WaitForSecondsRealtime(.8f);var game=Object.FindAnyObjectByType<OpsGame>();game.UseLocalTestVoices=false;
+            // ひなたの未配置条件を保ち、ここではかのん・りりぃの実音声の接続を確かめる。
+            WithoutPublishedVoices(game);
             var story=AlliesStory(3);DiaryTestMonth(story.state);story.state.NextMonth();Assert.IsTrue(game.RestoreProgress(new OpsProgress{story=story}));
             yield return new WaitForSecondsRealtime(4.4f);Assert.AreEqual("kanon_meeting",game.LastReactionId);Capture("next13-meeting-voice");
             DiaryTestMonth(story.state);story.state.NextMonth();game.OpenTab(0);game.BeginIncident();yield return new WaitForSecondsRealtime(6.5f);

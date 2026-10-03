@@ -63,7 +63,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-19時点で294件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-20時点で304件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -79,7 +79,7 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 | `Assets/Editor/` | `PatchWorkSecure.Editor` | Editor限定 |
 | `Assets/Tests/` | `PatchWorkSecure.Tests` | `includePlatforms`は**空**にする（`["Editor"]`だとPlayModeテストが0件のまま成功扱いになる） |
 
-Next-19の組：普段は印なし160件、`Capture`は撮影129件、`Long`は3役×5年度とゲームパッド通しの5件。合計294件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
+Next-19の分類規則（Next-20時点）：普段は印なし170件、`Capture`は撮影129件、`Long`は3役×5年度とゲームパッド通しの5件。合計304件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
 起動済みEditorでは`./Tools/Run-TestGroup.ps1 -Group RegularCapture`（普段＋撮影）、`-Group Normal`（普段）、`-Group Long`、`-Group All`を使う。`-Group Inspect`で一覧確認。失敗/関係分は`-Only`に完全名の配列を渡す。実行ごとのJSON/XMLは`Artifacts/TestGroups/`へ保存し、0件や中断を成功扱いにしない。
 
 ## 5. 使用量を抑える作業ルール（品質は落とさない）
@@ -114,9 +114,11 @@ Next-19の組：普段は印なし160件、`Capture`は撮影129件、`Long`は3
 
 - **Next-19完了**：テスト本文/完全名を維持して普段160/Capture129/Long5へ分類、各1回ですべて成功。実行手順は4・5章へ反映。1年CSVのSHA256、設定15キー/8フォント一致、一時シーン0。Windows再ビルドなし。詳細は`Docs/Next-19-Implementation-2026-10-03.md`。
 
+- **Next-20完了**：Unity非依存の`OpsThreatCatalog`に6糸口/10脅威/33技を追加。名前は仮、糸口・設備の対応はゲーム用の整理、画面/既存7強敵/ルールには未接続。説明の要相談なし。普段のテスト10件追加、関係10/10・最後の普段170＋Capture129は299/299を1回成功。既存294件の名前/組/本文は維持。Verifyは既知Depths未達以外成功、1年CSV/3年試算出力/エンドレスCSVのSHA256一致、設定15キー/8フォント一致、一時シーン0。Windows据え置き。詳細は`Docs/Next-20-Implementation-2026-10-03.md`。
+
 ## 7. 次にやること（優先順）
 
-1. **Next-19完了。追加指示が来るまで新しい作業を始めない**。普段160/Capture129/Long5を各1回、計294/294成功。本文/名前/数値/見た目不変。実行回数は4・5章、組ごとの時間は`Docs/Dev-Status.md`。Windows版はNext-17のまま。
+1. **Next-20完了。追加指示が来るまで新しい作業を始めない**。10大脅威は資料データとテストだけ。仮名の確定・画面/絵/声・強敵への接続は未着手。普段＋Capture299/299を1回成功、Long5件は今回除外（登録総数304）。数値/見た目不変。実行回数は4・5章、詳細は`Docs/Next-20-Implementation-2026-10-03.md`。Windows版はNext-17のまま。
 2. **Next-17のWindows版を私的試遊**。実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
 3. 将来の候補：公開可能なひなたの声・ミックス。現行22行は字幕先行、音源を作れば同じ新IDで接続。VoiceTestのResourcesは公開版から除く。新しい音源/絵の制作・組込みは指示後。設定は`Docs/Character-Profiles-2026-10-01.md`。
 4. 計画行動の支援拡張・施策カード・追加キャラは未実装。既存の承認済み画面を繰り返し作り直さず比較を残す。臨時予算1万円と基準を勝手に変えない。

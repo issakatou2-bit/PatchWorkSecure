@@ -1,0 +1,86 @@
+{
+ "title": "クリプタの声 その14c　こもりの無い1本を見本に固定",
+ "out": "v14c",
+ "note": "絵文字を外しても（その14b）24本中14本がこもった。原因は絵文字ではなく、見本なし（文字の説明だけ）で作っていたこと。ひなたと同じく、各方向のこもりの無い1本を見本にして声を固定した（寄せ方5）。",
+ "seed": 20261221,
+ "takes": 2,
+ "talk": "近いマイクで録った、こもりのないクリアな音質。",
+ "voices": {
+  "K1": {
+   "name": "K1 甲高い",
+   "model": "large",
+   "caption": "とても元気で、声が高く、キンキン響く小さな女の子。いばっていて生意気な、子どもの女王。自信満々で、やかましく、勢いよく話す。",
+   "extra": [
+    "--cfg-scale-speaker",
+    "5",
+    "--cfg-scale-caption",
+    "4"
+   ],
+   "refs": [
+    "Artifacts/VoiceAudition/v14/audio/K1-taunt-2.wav"
+   ]
+  },
+  "K2": {
+   "name": "K2 高飛車",
+   "model": "large",
+   "caption": "幼い女の子の女王。高飛車で生意気、相手を見下してからかう。声は高く明るく、甲高い笑い声まじりで、にぎやかに話す。",
+   "extra": [
+    "--cfg-scale-speaker",
+    "5",
+    "--cfg-scale-caption",
+    "4"
+   ],
+   "refs": [
+    "Artifacts/VoiceAudition/v14/audio/K2-intro-1.wav"
+   ]
+  },
+  "K3": {
+   "name": "K3 わんぱく",
+   "model": "large",
+   "caption": "わんぱくで騒がしい小さな女の子。声は高くて元気いっぱい、少し舌足らずで、えらそうに胸を張って話す。",
+   "extra": [
+    "--cfg-scale-speaker",
+    "5",
+    "--cfg-scale-caption",
+    "4"
+   ],
+   "refs": [
+    "Artifacts/VoiceAudition/v14/audio/K3-intro-1.wav"
+   ]
+  },
+  "K4": {
+   "name": "K4 小悪魔",
+   "model": "large",
+   "caption": "いたずら好きの小悪魔のような幼い女の子。高く甘い声で、くすくす笑いながら、生意気に、楽しそうにまくしたてる。",
+   "extra": [
+    "--cfg-scale-speaker",
+    "5",
+    "--cfg-scale-caption",
+    "4"
+   ],
+   "refs": [
+    "Artifacts/VoiceAudition/v14/audio/K4-taunt-1.wav"
+   ]
+  }
+ },
+ "lines": [
+  {
+   "id": "intro",
+   "text": "あたしはクリプタ。暗号のクリプタ！　あなたたちの情報、ぜーんぶ鍵をかけて、いただいちゃうんだから！",
+   "read": "あたしはクリプタ！💥　暗号のクリプタ！😎　あなたたちの情報、ぜーんぶ鍵をかけて、いただいちゃうんだから！😏",
+   "direction": "胸を張って高らかに名乗り、最後は生意気にからかう。"
+  },
+  {
+   "id": "taunt",
+   "text": "鍵がほしい？　だーめ！　ほしいなら、取りに来てごらん？",
+   "read": "鍵がほしい？😏　だーめ！🤭　ほしいなら、取りに来てごらん？",
+   "direction": "相手を見下してくすくす笑いながら、挑発する。"
+  },
+  {
+   "id": "defeat",
+   "text": "うそっ、バックアップから戻したの！？　ずるーい！　覚えてなさいよー！",
+   "read": "うそっ😲、バックアップから戻したの！？　ずるーい！😠　覚えてなさいよー！",
+   "direction": "負けて本気で悔しがり、地団駄を踏んで捨て台詞を言う。"
+  }
+ ]
+}

@@ -63,7 +63,7 @@ Unity Editorが起動中だとバッチモードは失敗する。
 **バッチ実行後は`Library/LastSceneManagerSetup.txt`が空になり、無題のシーンが開いて「何も変わっていない」ように見える。実行後は`CompanyYear`（または`SampleScene`）を開き直すよう、必ず伝えること。**
 
 ```powershell
-# PlayModeテスト（画面を撮影するので -nographics は付けない）。9/29時点で174件
+# PlayModeテスト（画面を撮影するので -nographics は付けない）。Next-19時点で294件
 & "C:\Program Files\Unity\Hub\Editor\6000.5.6f1\Editor\Unity.exe" -batchmode -runTests -testPlatform PlayMode `
   -projectPath "C:\Projects\PatchWorkSecure" -testResults "<出力先>\test_results.xml" -logFile "<出力先>\batch_log.txt"
 # コンパイル確認だけなら -batchmode -quit。メニューの処理は -executeMethod PatchWorkSecure.EditorTools.SceneBuilder.BuildScene
@@ -79,6 +79,9 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 | `Assets/Editor/` | `PatchWorkSecure.Editor` | Editor限定 |
 | `Assets/Tests/` | `PatchWorkSecure.Tests` | `includePlatforms`は**空**にする（`["Editor"]`だとPlayModeテストが0件のまま成功扱いになる） |
 
+Next-19の組：普段は印なし160件、`Capture`は撮影129件、`Long`は3役×5年度とゲームパッド通しの5件。合計294件。Longは撮影してもCaptureを重ねない。変更前/宣伝連番のExplicit撮影2件は別枠。元々294件に含まれるストア画面の回帰撮影はCaptureで維持する。
+起動済みEditorでは`./Tools/Run-TestGroup.ps1 -Group RegularCapture`（普段＋撮影）、`-Group Normal`（普段）、`-Group Long`、`-Group All`を使う。`-Group Inspect`で一覧確認。失敗/関係分は`-Only`に完全名の配列を渡す。実行ごとのJSON/XMLは`Artifacts/TestGroups/`へ保存し、0件や中断を成功扱いにしない。
+
 ## 5. 使用量を抑える作業ルール（品質は落とさない）
 
 - 大きいファイル（`SceneBuilder.cs` 82KB、`GameManager.cs` 61KB、`OpsGame.cs` 40KB）は全文を読まない。Grepで位置を特定し、必要な範囲だけを読む。
@@ -86,7 +89,8 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 - 画面の確認には、テストが`Artifacts/CompanyOps/`・`Artifacts/OfficeReview/`に保存したスクリーンショットを使い、必要な枚数だけを見る。
 - 経緯・計測値・調査結果は`Docs/`に書く。このファイルに足すのは「次の作業者が毎回知るべき規則と現状」だけ。
 - 同じ検証の重複実行や、不要なサブエージェントの起動はしない。報告は結論から短く書く。
-- **テストは「途中は関係分、最後に全件」**：指示に複数の項目があるときは、各項目のコミット前に関係するテストとコンパイル確認だけを流し、指示のまとまりの最後に1回、PlayMode全件とVerify系を流す。Windows版の作り直しは頼まれたときだけ。全件を毎項目で流すと、確認に時間と使用量の大半を使ってしまう（9/29に加藤さんから指摘）。
+- **Next-19の実行回数を守る**：各項目のコミット前は関係分＋コンパイル。指示の最後は普段＋Captureを1回。失敗は直して失敗分と関係分だけ再実行し、全件を最初から流し直さない。Windows私的試遊版はLong込み全件1回＋普段をもう1回（Longは1回）。公開/Steam版だけLong込み全件を2回連続。Windows再ビルドは依頼時だけ。数値を変えたらVerify系と1年CSVのSHA256照合も行う。
+- 中断実行は成功回数に数えず、フォントの作業用データとPlayerPrefsの存在/型/値の復帰を毎回確認する。撮影が時間切れならClaudeのIrodori生成とのGPU競合をまず確認し、同じテストだけ再実行する（`Docs/Voice/Irodori-Direction-Rules.md`2e）。
 - **加藤さんへの返答は常に日本語**。英語に切り替えない。
 
 ## 6. 現状（2026-10-03）— 詳細は`Docs/Dev-Status.md`
@@ -108,9 +112,11 @@ Unity不要（Editorの起動中でも可）。**数値を変えたら必ず流�
 
 - **Next-18完了**：宣伝9場面の1920×1080/30fps連番1,380枚・46秒、各sounds.jsonと確認一覧は`Artifacts/Promo/`。カード選択→ランクアップを採用、月報の追加撮影なし。撮影だけExplicit/30Hz時計、通常のテスト/Playerには影響させない。期限後の古いパッド回答をテスト側で取り消し、全294/294を2回連続成功。各CSV不変、設定15キー/8フォント一致・一時シーン0。Windows再ビルドなし。ひなたの声は動画禁止、BGMは利用条件確認待ち。詳細は`Docs/Next-18-Implementation-2026-10-03.md`。
 
+- **Next-19完了**：テスト本文/完全名を維持して普段160/Capture129/Long5へ分類、各1回ですべて成功。実行手順は4・5章へ反映。1年CSVのSHA256、設定15キー/8フォント一致、一時シーン0。Windows再ビルドなし。詳細は`Docs/Next-19-Implementation-2026-10-03.md`。
+
 ## 7. 次にやること（優先順）
 
-1. **Next-18完了報告後、追加指示Next-19へ**。`Docs/Mockups/Next-19.md`のテスト組分けと実行回数の最適化。中身/合計件数は減らさず、普段/Capture/Longを各1回確認し時間を記録。数値/見た目不変、Windows再ビルド不要。終了後は新しい作業を始めない。
+1. **Next-19完了。追加指示が来るまで新しい作業を始めない**。普段160/Capture129/Long5を各1回、計294/294成功。本文/名前/数値/見た目不変。実行回数は4・5章、組ごとの時間は`Docs/Dev-Status.md`。Windows版はNext-17のまま。
 2. **Next-17のWindows版を私的試遊**。実機Xbox/PS/Steam Deckの持ち替えと六本の操作、画面切替・音/声を評価。仮想入力の自動検証と実機・人間の初見を区別する。旧字幕/資料・二人絵・総決算・仲間・速度・格言の確認も維持し、重複改修をしない。
 3. 将来の候補：公開可能なひなたの声・ミックス。現行22行は字幕先行、音源を作れば同じ新IDで接続。VoiceTestのResourcesは公開版から除く。新しい音源/絵の制作・組込みは指示後。設定は`Docs/Character-Profiles-2026-10-01.md`。
 4. 計画行動の支援拡張・施策カード・追加キャラは未実装。既存の承認済み画面を繰り返し作り直さず比較を残す。臨時予算1万円と基準を勝手に変えない。

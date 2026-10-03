@@ -7,6 +7,7 @@
 $ErrorActionPreference='Stop'
 $projectDirectory=Split-Path -Parent $PSScriptRoot
 Set-Location $projectDirectory
+if($PSBoundParameters.ContainsKey('Only') -and (-not $Only -or @($Only|Where-Object{[string]::IsNullOrWhiteSpace($_)}).Count -gt 0)){throw '再実行する完全名を1件以上指定してください。空の指定で全件は流しません'}
 if(-not $Output){$Output='Artifacts/TestGroups/'+$Group+'-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'.json'}
 $outputPath=[IO.Path]::GetFullPath((Join-Path $projectDirectory $Output))
 if(-not $outputPath.StartsWith($projectDirectory+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw '出力先はプロジェクト内にしてください'}
@@ -26,7 +27,7 @@ do{
     Start-Sleep -Seconds 5
     if((Get-Date) -gt $deadline){throw '実行待ちの期限です。Editorを自動中断しません。実行記録を確認してください'}
     if(-not (Test-Path -LiteralPath $outputPath)){continue}
-    try{$record=Get-Content -LiteralPath $outputPath -Raw|ConvertFrom-Json}catch{continue}
+    try{$record=Get-Content -LiteralPath $outputPath -Raw -Encoding UTF8|ConvertFrom-Json}catch{continue}
     if($Group -eq 'Inspect'){
         $record|Select-Object total,normal,capture,longer,explicitCount|ConvertTo-Json -Compress
         if($record.total -eq 0){throw '対象0件は成功扱いにしません'}
